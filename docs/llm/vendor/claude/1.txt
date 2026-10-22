@@ -302,7 +302,7 @@ Claude finished the response
 27
 
 Please continue 
-and yes please update the `export.sh` ton only include files that you need 
+and yes please update the `export.sh` to only include files that you need 
 any binary files or vector art files that you don't need 
 you should SILENTLY not include from the `dump.txt`
 you still want to include ALL files that are in git 
