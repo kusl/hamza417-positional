@@ -1,12 +1,11 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-22T19:18:05-04:00
+Generated: 2026-10-22T19:33:13-04:00
 Branch:    master
-Commit:    0526186b 2026-10-22 19:17:59 -0400 add export script
-Remote:    https://github.com/Hamza417/Positional.git
+Commit:    6a818b15 2026-10-22 19:32:27 -0400 add instructions
+Remote:    git@github.com:kusl/hamza417-positional.git
 Excluded:  ^(docs/llm/|gradlew$|gradlew\.bat$|gradle/wrapper/)
 
 ## STATUS
-?? docs/
 
 ## FILES (1230)
 app/build.gradle

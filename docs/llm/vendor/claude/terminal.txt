@@ -1,9 +1,4 @@
 ################################################################################
-# FILE: app/src/main/res/mipmap-xhdpi/ic_launcher_two.png (8483 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
 # FILE: app/src/main/res/mipmap-xhdpi/ic_launcher_two_round.png (11812 bytes)
 ################################################################################
 [binary omitted]
@@ -9952,4 +9947,9 @@ rootProject.name = "Positional"
 real	0m4.961s
 user	0m2.058s
 sys	0m2.925s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m4.579s
+user	0m2.041s
+sys	0m2.692s
 kushal@fedora:~/src/kotlin/positional$ 
