@@ -26,3 +26,1027 @@ Docs updated alongside code changes
 Low verbosity, no code comments
 I can't emphasize this 
 NO CODE COMMENTS 
+
+Claude
+/
+ok it feels like the app has stabilized 
+we have the latest gradle stuff 
+now to actually modernize the app 
+start upgrading as much as possible 
+remove references in the app 
+for the upstream repository and the telegram group 
+we don't want anyone to bother them 
+if we introduce any defects 
+that would not be good 
+
+and yes please plan and upgrade to kotlin compose and all that fun stuff 
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this 
+NO CODE COMMENTS
+
+Ran 47 commands, read memory, and 2 more tools
+I ran out of tool budget before I could package a tar.gz, so this is Phase 1 delivered as full files. It is a partial step: not built or run, with some upstream references still in place (listed at the end). I couldn’t compile it because this sandbox can’t reach Google’s Maven, so CI is the first real build. Everything below is limited to the parts I’m confident will compile.
+
+Plan
+The app is about 26k lines of View/Fragment code with 116 XML layouts. That XML is also most of what bloats dump.txt (1.7 MB). Rewriting everything to Compose in one turn would be too risky to land without a build, so I’m doing it screen by screen inside the existing fragments:
+
+This delivery: Compose toolchain, a shared theme and preference components, Settings in Compose, and Telegram, Inure and upstream links removed from Settings.
+Rewrite the legal HTML pages to drop upstream contacts, strip leftover strings from all locales, and change issue-template assignees.
+Move dialogs and bottom sheets to Compose (Theme, Units, Locales, Icons, Corners, CoordinatesFormat, LocationProvider), then the list screens (Trails, Measures, Directions, Locations, TimeZones), deleting adapters and RecyclerView layouts as I go.
+Move the sensor panels (Level, Compass, Clock, Direction) to Compose Canvas, with sensors gated on lifecycle to save battery.
+Move the map panels (GPS, Trail, Measure) using AndroidView, a single-activity host, and Navigation Compose, then drop AppCompat themes, the legacy-support library and LocalBroadcastManager.
+Move the widgets to Glance.
+Delete
+sh
+git rm app/src/main/res/layout/fragment_settings.xml app/src/main/res/layout/pref_about.xml app/src/main/res/layout/pref_appearance.xml app/src/main/res/layout/pref_configuration.xml app/src/main/res/layout/pref_contribute.xml app/src/main/res/layout/pref_other_apps.xml app/src/main/res/layout/popup_legal_notes.xml app/src/main/res/drawable-nodpi/inure.png app/src/main/java/app/simple/positional/popups/settings/LegalNotesPopupMenu.kt app/src/main/java/app/simple/positional/callbacks/CoordinatesCallback.kt app/src/main/assets/html/found_issue.html app/src/main/assets/html/translators.html app/src/main/assets/html/local_changelogs.html app/src/main/assets/css/translation_decoration.css app/src/main/assets/css/changelogs.css app/src/main/assets/css/local_changelogs.css app/src/main/assets/css/error.css
+build.gradle
+groovy
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.2.1'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21'
+        classpath 'org.jetbrains.kotlin:compose-compiler-gradle-plugin:2.4.21'
+    }
+}
+
+plugins {
+    id 'com.google.devtools.ksp' version '2.3.12' apply false
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+app/build.gradle
+groovy
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
+def env = { String key -> System.getenv(key) ?: localProperties.getProperty(key) }
+def mapsApiKey = env('MAPS_API_KEY') ?: ''
+def keystorePath = env('KEYSTORE_FILE')
+def hasReleaseKey = keystorePath && file(keystorePath).exists()
+
+android {
+    namespace 'app.simple.positional'
+    compileSdk = 37
+
+    defaultConfig {
+        applicationId 'app.simple.positional'
+        minSdk = 24
+        targetSdk = 37
+        versionCode = (env('VERSION_CODE') ?: '20260512') as int
+        versionName = env('VERSION_NAME') ?: 'v2026.05.12'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        vectorDrawables.useSupportLibrary = true
+        manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
+        resValue 'string', 'versionName', versionName
+
+        ksp {
+            arg('room.schemaLocation', "$projectDir/databases/schemas")
+        }
+    }
+
+    signingConfigs {
+        if (hasReleaseKey) {
+            release {
+                storeFile file(keystorePath)
+                storePassword env('STORE_PASSWORD')
+                keyAlias env('KEY_ALIAS')
+                keyPassword env('KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseKey) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '_debug'
+        }
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = 'JVM_21'
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+        compose true
+        resValues true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+
+    implementation 'androidx.appcompat:appcompat:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+    implementation 'androidx.core:core-ktx:1.19.1'
+    implementation 'androidx.fragment:fragment-ktx:1.9.1'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.1.0'
+    implementation 'androidx.webkit:webkit:1.16.0'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
+
+    implementation platform('androidx.compose:compose-bom:2026.09.00')
+    implementation 'androidx.compose.foundation:foundation'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.ui:ui'
+
+    implementation 'com.google.android.gms:play-services-location:21.4.0'
+    implementation 'com.google.android.gms:play-services-maps:20.1.0'
+    implementation 'com.google.android.material:material:1.14.0'
+
+    implementation 'org.shredzone.commons:commons-suncalc:3.11'
+    implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
+    implementation 'com.github.vipulasri:timelineview:1.2.2'
+
+    implementation 'androidx.room:room-ktx:2.8.5'
+    ksp 'androidx.room:room-compiler:2.8.5'
+
+    testImplementation 'junit:junit:4.13.2'
+}
+app/src/main/java/app/simple/positional/ui/compose/PositionalTheme.kt
+kotlin
+package app.simple.positional.ui.compose
+
+import android.content.Context
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.core.content.res.use
+import app.simple.positional.R
+
+object PositionalFonts {
+    val regular = FontFamily(Font(R.font.regular))
+    val medium = FontFamily(Font(R.font.medium, FontWeight.Medium))
+    val heading = FontFamily(Font(R.font.heading, FontWeight.Bold))
+}
+
+private val typography = Typography(
+    headlineMedium = TextStyle(fontFamily = PositionalFonts.heading, fontWeight = FontWeight.Bold, fontSize = 31.sp),
+    titleLarge = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 22.sp),
+    titleMedium = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 16.sp),
+    bodyMedium = TextStyle(fontFamily = PositionalFonts.regular, fontSize = 14.sp),
+    labelLarge = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 14.sp),
+)
+
+fun Context.appAccentColor(): Int =
+    obtainStyledAttributes(intArrayOf(R.attr.colorAppAccent)).use { it.getColor(0, getColor(R.color.positional)) }
+
+@Composable
+fun PositionalTheme(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val accent = remember(context) { Color(context.appAccentColor()) }
+    val background = colorResource(R.color.mainBackground)
+    val primaryText = colorResource(R.color.textPrimary)
+    val tertiaryText = colorResource(R.color.textTertiary)
+    val divider = colorResource(R.color.dividerColor)
+    val switchOff = colorResource(R.color.switch_off)
+    val base = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+    val colors = base.copy(
+        primary = accent,
+        onPrimary = Color.White,
+        secondary = accent,
+        background = background,
+        surface = background,
+        surfaceContainer = background,
+        onBackground = primaryText,
+        onSurface = primaryText,
+        onSurfaceVariant = tertiaryText,
+        outline = divider,
+        outlineVariant = divider,
+        surfaceContainerHighest = switchOff,
+    )
+    MaterialTheme(colorScheme = colors, typography = typography, content = content)
+}
+app/src/main/java/app/simple/positional/ui/compose/Preferences.kt
+kotlin
+package app.simple.positional.ui.compose
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+
+private val itemShape = RoundedCornerShape(16.dp)
+
+@Composable
+fun PreferenceCategory(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = colorResource(R.color.textSecondary),
+            modifier = Modifier.padding(15.dp),
+        )
+        HorizontalDivider(Modifier.padding(horizontal = 15.dp), thickness = Dp.Hairline, color = MaterialTheme.colorScheme.outline)
+        content()
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PreferenceItem(
+    title: String,
+    summary: String? = null,
+    onLongClick: (() -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(itemShape)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .padding(15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            if (!summary.isNullOrEmpty()) {
+                Text(text = summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (trailing != null) {
+            Spacer(Modifier.width(16.dp))
+            trailing()
+        }
+    }
+}
+
+@Composable
+fun SwitchPreference(
+    title: String,
+    summary: String,
+    checked: Boolean,
+    onLongClick: (() -> Unit)? = null,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    PreferenceItem(
+        title = title,
+        summary = summary,
+        onLongClick = onLongClick,
+        trailing = { Switch(checked = checked, onCheckedChange = null) },
+        onClick = { onCheckedChange(!checked) },
+    )
+}
+app/src/main/java/app/simple/positional/ui/compose/SettingsScreen.kt
+kotlin
+package app.simple.positional.ui.compose
+
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import app.simple.positional.util.LocaleHelper
+
+@Immutable
+data class SettingsState(
+    val hasLocationPermission: Boolean = true,
+    val themeMode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+    val isMetric: Boolean = true,
+    val coordinatesFormat: Int = 0,
+    val locationProvider: String = SettingsLabels.PROVIDER_ANDROID,
+    val language: String = SettingsLabels.LANGUAGE_DEFAULT,
+    val isCustomLocation: Boolean = false,
+    val keepScreenOn: Boolean = false,
+    val skipSplashScreen: Boolean = false,
+    val versionName: String = "",
+)
+
+interface SettingsActions {
+    fun requestPermission()
+    fun openTheme()
+    fun openAccent()
+    fun openIcons()
+    fun openCorners()
+    fun setSkipSplashScreen(enabled: Boolean)
+    fun openArts()
+    fun openUnits()
+    fun openCoordinatesFormat()
+    fun openLocationProvider()
+    fun openCustomLocations()
+    fun setCustomLocation(enabled: Boolean)
+    fun setKeepScreenOn(enabled: Boolean)
+    fun openLanguages()
+    fun openLegal(@StringRes page: Int)
+    fun openReleases()
+    fun openRepository()
+    fun openIssues()
+}
+
+object SettingsLabels {
+    const val THEME_AUTO = 4
+    const val PROVIDER_ANDROID = "android"
+    const val PROVIDER_FUSED = "fused"
+    const val LANGUAGE_DEFAULT = "default"
+
+    val legalPages = listOf(
+        R.string.disclaimer,
+        R.string.privacy_policy,
+        R.string.terms_of_use,
+        R.string.permissions,
+        R.string.credits,
+        R.string.internet_uses,
+    )
+
+    @StringRes
+    fun theme(mode: Int): Int? = when (mode) {
+        AppCompatDelegate.MODE_NIGHT_NO -> R.string.theme_day
+        AppCompatDelegate.MODE_NIGHT_YES -> R.string.theme_night
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> R.string.theme_follow_system
+        THEME_AUTO -> R.string.theme_auto
+        else -> null
+    }
+
+    @StringRes
+    fun unit(isMetric: Boolean): Int = if (isMetric) R.string.unit_metric else R.string.unit_imperial
+
+    @StringRes
+    fun coordinatesFormat(format: Int): Int? = when (format) {
+        0 -> R.string.dd_dddddd
+        1 -> R.string.dd_mm_mmm
+        2 -> R.string.dd_mm_ss_sss
+        else -> null
+    }
+
+    fun locationProvider(provider: String): String = when (provider) {
+        PROVIDER_ANDROID -> "Android Location Provider"
+        PROVIDER_FUSED -> "Fused Location Provider"
+        else -> ""
+    }
+
+    fun languageName(code: String): String? =
+        if (code == LANGUAGE_DEFAULT) null else LocaleHelper.localeList.firstOrNull { it.localeCode == code }?.language
+}
+
+@Composable
+fun SettingsScreen(state: SettingsState, actions: SettingsActions, topInset: Int) {
+    val top = with(LocalDensity.current) { topInset.toDp() }
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(top = top, bottom = dimensionResource(R.dimen.bottom_nav_height)),
+        ) {
+            Text(
+                text = stringResource(R.string.settings),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(horizontal = 26.dp, vertical = 16.dp),
+            )
+            if (!state.hasLocationPermission) PermissionBanner(actions::requestPermission)
+            AppearanceSection(state, actions)
+            ConfigurationSection(state, actions)
+            AboutSection(state, actions)
+        }
+    }
+}
+
+@Composable
+private fun PermissionBanner(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFFF4444))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.no_location_permission_alert),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.width(16.dp))
+        Icon(painterResource(R.drawable.ic_bad_location), contentDescription = null, tint = Color.White)
+    }
+}
+
+@Composable
+private fun AppearanceSection(state: SettingsState, actions: SettingsActions) {
+    PreferenceCategory(stringResource(R.string.appearance)) {
+        PreferenceItem(
+            title = stringResource(R.string.theme),
+            summary = SettingsLabels.theme(state.themeMode)?.let { stringResource(it) },
+            onClick = actions::openTheme,
+        )
+        PreferenceItem(title = stringResource(R.string.icon), onClick = actions::openIcons)
+        PreferenceItem(
+            title = stringResource(R.string.accent_colors),
+            trailing = {
+                Box(
+                    Modifier
+                        .size(dimensionResource(R.dimen.app_button_size))
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+            },
+            onClick = actions::openAccent,
+        )
+        PreferenceItem(title = stringResource(R.string.corner_radius), onClick = actions::openCorners)
+        SwitchPreference(
+            title = stringResource(R.string.skip_splash_screen),
+            summary = stringResource(R.string.desc_skip_splash_Screen),
+            checked = state.skipSplashScreen,
+            onLongClick = actions::openArts,
+            onCheckedChange = actions::setSkipSplashScreen,
+        )
+    }
+}
+
+@Composable
+private fun ConfigurationSection(state: SettingsState, actions: SettingsActions) {
+    PreferenceCategory(stringResource(R.string.configuration)) {
+        PreferenceItem(
+            title = stringResource(R.string.units),
+            summary = stringResource(SettingsLabels.unit(state.isMetric)),
+            onClick = actions::openUnits,
+        )
+        PreferenceItem(
+            title = stringResource(R.string.app_coordinates_format),
+            summary = SettingsLabels.coordinatesFormat(state.coordinatesFormat)?.let { stringResource(it) },
+            onClick = actions::openCoordinatesFormat,
+        )
+        PreferenceItem(
+            title = stringResource(R.string.location_provider),
+            summary = SettingsLabels.locationProvider(state.locationProvider),
+            onClick = actions::openLocationProvider,
+        )
+        PreferenceItem(
+            title = stringResource(R.string.specified_location),
+            summary = stringResource(R.string.desc_specified_location),
+            trailing = { Switch(checked = state.isCustomLocation, onCheckedChange = actions::setCustomLocation) },
+            onClick = actions::openCustomLocations,
+        )
+        SwitchPreference(
+            title = stringResource(R.string.keep_screen_on),
+            summary = stringResource(R.string.desc_screen_on),
+            checked = state.keepScreenOn,
+            onCheckedChange = actions::setKeepScreenOn,
+        )
+        PreferenceItem(
+            title = stringResource(R.string.language),
+            summary = SettingsLabels.languageName(state.language) ?: stringResource(R.string.auto_system_default_language),
+            onClick = actions::openLanguages,
+        )
+    }
+}
+
+@Composable
+private fun AboutSection(state: SettingsState, actions: SettingsActions) {
+    var legalExpanded by remember { mutableStateOf(false) }
+    PreferenceCategory(stringResource(R.string.about)) {
+        Box {
+            PreferenceItem(
+                title = stringResource(R.string.legal_notes),
+                summary = stringResource(R.string.desc_legal),
+                onClick = { legalExpanded = true },
+            )
+            DropdownMenu(expanded = legalExpanded, onDismissRequest = { legalExpanded = false }) {
+                SettingsLabels.legalPages.forEach { page ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(page), style = MaterialTheme.typography.titleMedium) },
+                        onClick = {
+                            legalExpanded = false
+                            actions.openLegal(page)
+                        },
+                    )
+                }
+            }
+        }
+        PreferenceItem(title = stringResource(R.string.app_version), summary = state.versionName, onClick = actions::openReleases)
+        PreferenceItem(title = "GitHub", summary = stringResource(R.string.desc_git), onClick = actions::openRepository)
+        PreferenceItem(title = stringResource(R.string.found_an_issue), onClick = actions::openIssues)
+    }
+}
+app/src/main/java/app/simple/positional/ui/panels/Settings.kt
+kotlin
+package app.simple.positional.ui.panels
+
+import android.Manifest
+import android.content.Intent
+import android.content.SharedPreferences
+import android.net.Uri
+import android.os.Bundle
+import android.provider.Settings as AndroidSettings
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.core.net.toUri
+import app.simple.positional.BuildConfig
+import app.simple.positional.activities.subactivity.AccentColorsActivity
+import app.simple.positional.activities.subactivity.ArtsActivity
+import app.simple.positional.activities.subactivity.CustomLocationsActivity
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.dialogs.settings.CoordinatesFormat
+import app.simple.positional.dialogs.settings.Icons
+import app.simple.positional.dialogs.settings.Locales
+import app.simple.positional.dialogs.settings.LocationProvider
+import app.simple.positional.dialogs.settings.RoundedCorners
+import app.simple.positional.dialogs.settings.Theme
+import app.simple.positional.dialogs.settings.Units
+import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.ui.compose.PositionalTheme
+import app.simple.positional.ui.compose.SettingsActions
+import app.simple.positional.ui.compose.SettingsLabels
+import app.simple.positional.ui.compose.SettingsScreen
+import app.simple.positional.ui.compose.SettingsState
+import app.simple.positional.util.PermissionUtils
+import app.simple.positional.util.StatusBarHeight
+
+class Settings : ScopedFragment(), SettingsActions {
+    private var state by mutableStateOf(SettingsState())
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private var appSettingsOpened = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.values.any { !it } && !appSettingsOpened) {
+                appSettingsOpened = true
+                startActivity(Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", requireContext().packageName, null)
+                })
+            }
+            refresh()
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val topInset = StatusBarHeight.getStatusBarHeight(resources)
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                PositionalTheme {
+                    SettingsScreen(state, this@Settings, topInset)
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appSettingsOpened = false
+        refresh()
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == MainPreferences.accentColor) {
+            requireActivity().recreate()
+        } else {
+            refresh()
+        }
+    }
+
+    private fun refresh() {
+        state = SettingsState(
+            hasLocationPermission = PermissionUtils.checkPermission(requireContext()),
+            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else AppCompatDelegate.getDefaultNightMode(),
+            isMetric = MainPreferences.isMetric(),
+            coordinatesFormat = MainPreferences.getCoordinatesFormat(),
+            locationProvider = MainPreferences.getLocationProvider(),
+            language = MainPreferences.getAppLanguage() ?: SettingsLabels.LANGUAGE_DEFAULT,
+            isCustomLocation = MainPreferences.isCustomCoordinate(),
+            keepScreenOn = MainPreferences.isScreenOn(),
+            skipSplashScreen = MainPreferences.getSkipSplashScreen(),
+            versionName = BuildConfig.VERSION_NAME,
+        )
+    }
+
+    override fun requestPermission() {
+        permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+    }
+
+    override fun openTheme() = Theme().show(parentFragmentManager, "theme")
+
+    override fun openAccent() = startActivity(Intent(requireContext(), AccentColorsActivity::class.java))
+
+    override fun openIcons() = Icons.newInstance().show(childFragmentManager, "app_icons")
+
+    override fun openCorners() = RoundedCorners.newInstance().show(parentFragmentManager, "rounded_corners")
+
+    override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
+
+    override fun openArts() = startActivity(Intent(requireContext(), ArtsActivity::class.java))
+
+    override fun openUnits() = Units().show(parentFragmentManager, "units")
+
+    override fun openCoordinatesFormat() = CoordinatesFormat.newInstance().show(childFragmentManager, "coordinates_format")
+
+    override fun openLocationProvider() = LocationProvider.newInstance().show(childFragmentManager, "location_provider")
+
+    override fun openCustomLocations() = startActivity(Intent(requireContext(), CustomLocationsActivity::class.java))
+
+    override fun setCustomLocation(enabled: Boolean) {
+        if (enabled) openCustomLocations() else MainPreferences.setCustomCoordinates(false)
+    }
+
+    override fun setKeepScreenOn(enabled: Boolean) {
+        MainPreferences.setScreenOn(enabled)
+        if (enabled) {
+            requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    override fun openLanguages() = Locales().newInstance().show(childFragmentManager, "locales")
+
+    override fun openLegal(page: Int) {
+        startActivity(Intent(requireContext(), WebPageViewerActivity::class.java).putExtra("source", getString(page)))
+    }
+
+    override fun openReleases() = openUrl("$REPOSITORY_URL/releases")
+
+    override fun openRepository() = openUrl(REPOSITORY_URL)
+
+    override fun openIssues() = openUrl("$REPOSITORY_URL/issues")
+
+    private fun openUrl(url: String) {
+        runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+    }
+
+    companion object {
+        private const val REPOSITORY_URL = "https://github.com/kusl/hamza417-positional"
+
+        fun newInstance() = Settings()
+    }
+}
+app/src/main/java/app/simple/positional/ui/subpanels/HtmlViewer.kt
+kotlin
+package app.simple.positional.ui.subpanels
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import app.simple.positional.R
+import app.simple.positional.decorations.fastscroll.FastScrollWebView
+import app.simple.positional.decorations.fastscroll.FastScrollerBuilder
+import app.simple.positional.extensions.fragment.ScopedFragment
+
+class HtmlViewer : ScopedFragment() {
+
+    private lateinit var webView: FastScrollWebView
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_webpage, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        webView = view.findViewById(R.id.web_view)
+        FastScrollerBuilder(webView).useMd2Style().build()
+
+        if (savedInstanceState != null) {
+            webView.restoreState(savedInstanceState)
+            return
+        }
+
+        pageFor(arguments?.getString("source"))?.let {
+            webView.loadUrl("file:///android_asset/html/$it.html")
+        }
+    }
+
+    private fun pageFor(source: String?): String? = when (source) {
+        getString(R.string.privacy_policy) -> "privacy_policy"
+        getString(R.string.disclaimer) -> "disclaimer"
+        getString(R.string.terms_of_use) -> "terms_and_conditions"
+        getString(R.string.permissions) -> "required_permissions"
+        getString(R.string.credits) -> "credits"
+        getString(R.string.internet_uses) -> "internet_uses"
+        getString(R.string.physical_properties) -> "physical_properties"
+        "Custom Coordinates Help" -> "custom_coordinates_help"
+        "Media Keys" -> "media_keys"
+        "trail_help" -> "trail_help"
+        "null" -> "null"
+        else -> null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        webView.saveState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    companion object {
+        fun newInstance(string: String): HtmlViewer {
+            val fragment = HtmlViewer()
+            fragment.arguments = Bundle().apply { putString("source", string) }
+            return fragment
+        }
+    }
+}
+app/src/test/java/app/simple/positional/ui/compose/SettingsLabelsTest.kt
+kotlin
+package app.simple.positional.ui.compose
+
+import androidx.appcompat.app.AppCompatDelegate
+import app.simple.positional.R
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class SettingsLabelsTest {
+    @Test
+    fun themeLabels() {
+        assertEquals(R.string.theme_day, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_NO))
+        assertEquals(R.string.theme_night, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_YES))
+        assertEquals(R.string.theme_follow_system, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+        assertEquals(R.string.theme_auto, SettingsLabels.theme(SettingsLabels.THEME_AUTO))
+        assertNull(SettingsLabels.theme(99))
+    }
+
+    @Test
+    fun unitLabels() {
+        assertEquals(R.string.unit_metric, SettingsLabels.unit(true))
+        assertEquals(R.string.unit_imperial, SettingsLabels.unit(false))
+    }
+
+    @Test
+    fun coordinatesFormatLabels() {
+        assertEquals(R.string.dd_dddddd, SettingsLabels.coordinatesFormat(0))
+        assertEquals(R.string.dd_mm_mmm, SettingsLabels.coordinatesFormat(1))
+        assertEquals(R.string.dd_mm_ss_sss, SettingsLabels.coordinatesFormat(2))
+        assertNull(SettingsLabels.coordinatesFormat(3))
+    }
+
+    @Test
+    fun locationProviderLabels() {
+        assertEquals("Android Location Provider", SettingsLabels.locationProvider(SettingsLabels.PROVIDER_ANDROID))
+        assertEquals("Fused Location Provider", SettingsLabels.locationProvider(SettingsLabels.PROVIDER_FUSED))
+        assertEquals("", SettingsLabels.locationProvider("other"))
+    }
+
+    @Test
+    fun languageNames() {
+        assertNull(SettingsLabels.languageName(SettingsLabels.LANGUAGE_DEFAULT))
+        assertEquals("Français", SettingsLabels.languageName("fr"))
+        assertNull(SettingsLabels.languageName("xx"))
+    }
+
+    @Test
+    fun legalPagesAreDistinct() {
+        assertEquals(6, SettingsLabels.legalPages.toSet().size)
+    }
+}
+README.md
+markdown
+# Positional
+
+![banner](screenshots/banner.png)
+
+A location, compass, clock, level, trail and measurement toolkit for Android. Community fork distributed only through GitHub Releases; not published on Google Play.
+
+[![Build](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml/badge.svg)](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/kusl/hamza417-positional)](https://github.com/kusl/hamza417-positional/releases/latest)
+![API](https://img.shields.io/badge/API-24%2B-138D75?logo=android)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
+## Features
+
+- **GPS**: coordinates (DD, DM, DMS, UTM), altitude, speed, accuracy, address, map with custom pins.
+- **Compass**: magnetic azimuth, skins, calibration help.
+- **Clock**: local and time zone time, sun and moon position, rise, set and twilight times.
+- **Level**: bubble level from the accelerometer.
+- **Trail**: record and review paths with markers.
+- **Measure** and **Direction**: distances between points and bearings to targets.
+- Home screen widgets for clock, sun time, moon phase and twilight.
+
+## Install
+
+1. Download the latest APK from [Releases](https://github.com/kusl/hamza417-positional/releases/latest), or
+2. Add `https://github.com/kusl/hamza417-positional` to [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
+
+Android 7.0 (API 24) or newer. Silent background updates through Obtainium need Android 12 or newer.
+
+Releases are signed with this fork's own key and cannot be installed over the Play Store build; uninstall that first.
+
+## Support
+
+Report bugs and requests in this repository's [issues](https://github.com/kusl/hamza417-positional/issues). Do not contact the original author about this fork.
+
+## Differences from upstream
+
+- No Google Play licensing, update or rating prompts.
+- No links to upstream chat groups, developer profiles or other apps.
+- UI is being migrated to Jetpack Compose (see below).
+- Release builds come from CI on every push to `master`.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities and UI state mapping.
+
+The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
+
+## Compose migration
+
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments through `ComposeView`. Shared theme and components live in `ui/compose/`.
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Compose toolchain, theme, preference components, Settings | Done |
+| 2 | Legal pages and leftover strings cleanup | Next |
+| 3 | Settings dialogs and bottom sheets | Planned |
+| 4 | List screens (trails, measures, directions, locations, time zones) | Planned |
+| 5 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
+| 6 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 7 | Widgets on Glance | Planned |
+
+## Building
+
+Requirements: JDK 21, Android SDK (compile and target SDK 37), Android Gradle Plugin 9.2+, Kotlin 2.4 with the Compose compiler plugin.
+
+```sh
+./gradlew testDebugUnitTest assembleDebug
+```
+
+Optional `local.properties` keys (environment variables of the same name take precedence):
+
+| Key | Purpose |
+|---|---|
+| `MAPS_API_KEY` | Google Maps API key |
+| `KEYSTORE_FILE` | Path to the release keystore |
+| `STORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` | Release signing |
+| `VERSION_CODE`, `VERSION_NAME` | Override the app version |
+
+`./gradlew assembleRelease` produces an unsigned APK when no keystore is configured.
+
+## CI and releases
+
+`.github/workflows/build.yml` runs on every push and pull request:
+
+1. Unit tests and a debug build.
+2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
+
+Required secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
+
+```sh
+base64 -w0 release.keystore
+```
+
+Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper and GitHub Actions. If a PR fails at `checkDebugAarMetadata`, raise `compileSdk` first.
+
+## Project layout
+
+```
+app/src/main/java/app/simple/positional/
+  activities/   entry points and sub screens
+  ui/compose/   Compose theme, shared components and screens
+  ui/           panel fragments
+  decorations/  legacy custom views, map wrappers, fast scroller
+  database/     Room entities, DAOs and databases
+  services/     location and clock widget services
+  widgets/      app widget providers
+  math/         vectors, quaternions, angles, unit conversion
+  util/         formatting and Android helpers
+app/src/test/   JVM unit tests
+docs/llm/       LLM context files (tracked, excluded from the dump)
+```
+
+`export.sh` writes `docs/llm/dump.txt` for LLM context: every tracked file except `docs/llm/`, with contents of source, build and config files only.
+
+## Credits and license
+
+Based on Positional by Hamza Rizwan. Licensed under the [GNU GPL v3](LICENSE). See [PRIVACY.md](PRIVACY.md).
+Still to do (next turn)
+Upstream contacts still in the app: privacy_policy.html, terms_and_conditions.html and disclaimer.html still name the upstream author and his email. I’ll rewrite them, and PRIVACY.md, for the fork.
+Leftover strings: Telegram, Inure, translate, licensing and rating strings remain in all 14 strings.xml files. They are unused, so the build is unaffected; I’ll remove them with full files.
+Possibly unused layout: popup_fragments.xml looks unused, but I couldn’t confirm none of its view IDs are referenced in code, so I left it in place.
+Other cleanup: change assignees: Hamza417 to kusl in the issue templates, and fix the folder misnesting in export.sh’s tree output.
+Claude reached its tool-use limit for this turn.
+
+
+
+
+Claude is AI and can make mistakes. Please double-check cited sources.
+
+
+Claude finished the response
+
+47
+31
