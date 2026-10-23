@@ -269,14 +269,13 @@
     <string name="starting_point">Ponto de partida</string>
     <string name="enter_marker_name">Digite o nome da trilha</string>
     <string name="delete">Apagar</string>
-    <string name="show_on_map">Mostrar no mapa</string>
     <string name="copy">Copiar</string>
     <string name="trail_data_accuracy">Dentro de %1$s %2$s da localização</string>
     <string name="target">Destino</string>
     <string name="eta_seconds">%1$s segundos</string>
     <string name="eta_minutes">%1$s minutos</string>
     <string name="eta_hours">%1$s horas %2$s minutos</string>
-    <string name="eta_days">%s dias, %s horas, %s minutos</string>
+    <string name="eta_days">%1$s dias, %2$s horas, %3$s minutos</string>
     <string name="eta">Tempo Estimado:</string>
     <string name="gps_displacement_from_origin">Deslocamento da Origem:</string>
     <string name="gps_displacement_from_dest">Deslocamento do destino:</string>

@@ -65,7 +65,7 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 Requirements: JDK 21, Android SDK (compile and target SDK 37), Android Gradle Plugin 9.2+, Kotlin 2.4 with the Compose compiler plugin.
 
 ```sh
-./gradlew testDebugUnitTest assembleDebug
+./gradlew testDebugUnitTest lintVitalRelease assembleDebug
 ```
 
 Optional `local.properties` keys (environment variables of the same name take precedence):
@@ -83,7 +83,7 @@ Optional `local.properties` keys (environment variables of the same name take pr
 
 `.github/workflows/build.yml` runs on every push and pull request:
 
-1. Unit tests and a debug build.
+1. Unit tests, release lint checks (the same fatal checks that gate `assembleRelease`) and a debug build.
 2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
 
 Required secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.

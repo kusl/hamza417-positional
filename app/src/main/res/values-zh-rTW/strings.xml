@@ -262,7 +262,6 @@
     <string name="starting_point">起點</string>
     <string name="enter_marker_name">輸入標記名稱</string>
     <string name="delete">刪除</string>
-    <string name="show_on_map">在地圖上顯示</string>
     <string name="copy">複製</string>
     <string name="trail_data_accuracy">在 %1$s %2$s 位置內</string>
     <string name="target">目標</string>

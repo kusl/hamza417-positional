@@ -262,7 +262,6 @@
     <string name="starting_point">ആരംഭ സ്ഥാനം</string>
     <string name="enter_marker_name">മാർക്കർ നാമം</string>
     <string name="delete">ഡിലീറ്റ്</string>
-    <string name="show_on_map">മാപ്പിൽ കാണുക</string>
     <string name="copy">കോപ്പി</string>
     <string name="trail_data_accuracy">%1$s %2$s എന്ന ലൊക്കേഷനിൽ</string>
     <string name="target">ലക്ഷ്യം</string>

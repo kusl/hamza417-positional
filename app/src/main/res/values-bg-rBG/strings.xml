@@ -262,7 +262,6 @@
     <string name="starting_point">Начална точка</string>
     <string name="enter_marker_name">Въведете име на маркер</string>
     <string name="delete">Изтриване</string>
-    <string name="show_on_map">Покажи на картата</string>
     <string name="copy">Копирай</string>
     <string name="trail_data_accuracy">В рамките на %1$s %2$s от местоположението</string>
     <string name="target">Цел</string>

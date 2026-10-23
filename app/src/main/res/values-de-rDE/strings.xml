@@ -262,7 +262,6 @@
     <string name="starting_point">Ausgangspunkt</string>
     <string name="enter_marker_name">Marker-Name eingeben</string>
     <string name="delete">Löschen</string>
-    <string name="show_on_map">Auf Karte anzeigen</string>
     <string name="copy">Kopieren</string>
     <string name="trail_data_accuracy">Innerhalb von %1$s %2$s des Standorts</string>
     <string name="target">Ziel</string>

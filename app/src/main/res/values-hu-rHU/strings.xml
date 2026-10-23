@@ -262,7 +262,6 @@
     <string name="starting_point">Kiindulási pont</string>
     <string name="enter_marker_name">Jelölő nevének a megadása</string>
     <string name="delete">Törlés</string>
-    <string name="show_on_map">Mutatás a térképen</string>
     <string name="copy">Másolás</string>
     <string name="trail_data_accuracy">A helytől %1$s %2$s távolságon belül</string>
     <string name="target">Cél</string>

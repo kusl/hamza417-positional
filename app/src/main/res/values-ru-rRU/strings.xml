@@ -262,7 +262,6 @@
     <string name="starting_point">Начальная точка</string>
     <string name="enter_marker_name">Введите название маркера</string>
     <string name="delete">Удалить</string>
-    <string name="show_on_map">Показать на карте</string>
     <string name="copy">Копировать</string>
     <string name="trail_data_accuracy">В пределах %1$s %2$s местоположения</string>
     <string name="target">Цель</string>
