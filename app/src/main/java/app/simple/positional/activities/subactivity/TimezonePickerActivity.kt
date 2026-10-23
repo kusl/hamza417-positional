@@ -1,21 +1,22 @@
 package app.simple.positional.activities.subactivity
 
 import android.os.Bundle
-import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.TimeZones
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.ui.compose.TimeZoneScreen
+import app.simple.positional.ui.compose.setPositionalContent
+import app.simple.positional.util.LocaleHelper
 
 class TimezonePickerActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
-
-        if (savedInstanceState.isNull()) {
-            supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.dialog_in, R.anim.dialog_out)
-                    .replace(R.id.sub_container, TimeZones.newInstance(), "timezone")
-                    .commit()
+        val selected = ClockPreferences.getTimeZone()
+        val twelveHour = ClockPreferences.getDefaultClockTimeFormat()
+        setPositionalContent { topInset ->
+            TimeZoneScreen(selected, twelveHour, LocaleHelper.getAppLocale(), topInset) {
+                ClockPreferences.setTimeZone(it)
+                finish()
+            }
         }
     }
 }

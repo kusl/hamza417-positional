@@ -9,18 +9,18 @@ import app.simple.positional.model.TrailEntry
 
 @Database(entities = [TrailEntry::class], exportSchema = false, version = 1)
 abstract class TrailDatabase : RoomDatabase() {
-    abstract fun trailDao(): TrailDao?
+    abstract fun trailDao(): TrailDao
 
     companion object {
+        const val NAME = "%%_trails"
+
+        @Volatile
         private var instance: TrailDatabase? = null
 
-        @Synchronized
-        fun getInstance(context: Context?, DB_NAME: String?): TrailDatabase? {
-            if (instance == null) {
-                instance = Room.databaseBuilder(context!!, TrailDatabase::class.java, DB_NAME!!)
-                    .build()
-            }
-            return instance
+        fun getInstance(context: Context): TrailDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, TrailDatabase::class.java, "$NAME.db")
+                .build()
+                .also { instance = it }
         }
     }
 }

@@ -12,26 +12,17 @@ import app.simple.positional.model.Measure
 @Database(entities = [Measure::class], exportSchema = true, version = 1)
 @TypeConverters(MeasurePointConverter::class)
 abstract class MeasureDatabase : RoomDatabase() {
-    abstract fun measureDao(): MeasureDao?
+    abstract fun measureDao(): MeasureDao
 
     companion object {
+        @Volatile
         private var instance: MeasureDatabase? = null
-        private const val DB_NAME = "measure_db"
 
-        @Synchronized
-        fun getInstance(context: Context, databaseName: String = this.DB_NAME): MeasureDatabase? {
-            if (instance == null) {
-                instance = Room.databaseBuilder(context, MeasureDatabase::class.java, databaseName)
-                    .fallbackToDestructiveMigration()
-                    .build()
-            }
-
-            return instance
-        }
-
-        fun destroyInstance() {
-            instance?.close()
-            instance = null
+        fun getInstance(context: Context): MeasureDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, MeasureDatabase::class.java, "measure_db")
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+                .also { instance = it }
         }
     }
 }

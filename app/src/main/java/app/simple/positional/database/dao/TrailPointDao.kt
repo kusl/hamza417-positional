@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import app.simple.positional.model.TrailPoint
 
 @Dao
@@ -22,12 +21,6 @@ interface TrailPointDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrailData(trailData: List<TrailPoint>)
 
-    @Update
-    suspend fun updateTrailData(trailPoint: TrailPoint)
-
     @Delete
     suspend fun deleteTrailData(trailPoint: TrailPoint)
-
-    @Query("DELETE FROM trail_data")
-    fun nukeTable()
 }

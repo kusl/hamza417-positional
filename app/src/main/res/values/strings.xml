@@ -270,7 +270,6 @@
     <string name="starting_point">Starting Point</string>
     <string name="enter_marker_name">Enter Marker Name</string>
     <string name="delete">Delete</string>
-    <string name="show_on_map">Show on Map</string>
     <string name="copy">Copy</string>
     <string name="trail_data_accuracy">Within %1$s %2$s of the location</string>
     <string name="target">Target</string>

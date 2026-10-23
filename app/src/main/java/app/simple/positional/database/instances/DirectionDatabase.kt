@@ -9,25 +9,17 @@ import app.simple.positional.model.DirectionModel
 
 @Database(entities = [DirectionModel::class], exportSchema = true, version = 1)
 abstract class DirectionDatabase : RoomDatabase() {
-    abstract fun directionDao(): DirectionDao?
+    abstract fun directionDao(): DirectionDao
 
     companion object {
+        @Volatile
         private var instance: DirectionDatabase? = null
 
-        @Synchronized
-        fun getInstance(context: Context?, DB_NAME: String? = "directions"): DirectionDatabase? {
-            if (instance == null || !instance!!.isOpen) {
-                instance = Room.databaseBuilder(context!!, DirectionDatabase::class.java, DB_NAME!!)
-                        .fallbackToDestructiveMigration()
-                        .build()
-            }
-
-            return instance
-        }
-
-        fun close() {
-            instance?.close()
-            instance = null
+        fun getInstance(context: Context): DirectionDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, DirectionDatabase::class.java, "directions")
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+                .also { instance = it }
         }
     }
 }

@@ -19,9 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -126,20 +123,10 @@ fun CustomLocationScreen(form: CustomLocationForm, locations: List<Locations>?, 
         }
     }
     if (confirmDelete) {
-        AlertDialog(
-            onDismissRequest = { confirmDelete = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDelete = false
-                    actions.deleteAll()
-                }) { Text(stringResource(R.string.sure)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(android.R.string.cancel)) }
-            },
-            title = { Text(stringResource(R.string.delete_all), style = MaterialTheme.typography.titleLarge) },
-            containerColor = MaterialTheme.colorScheme.background,
-        )
+        ConfirmDialog(stringResource(R.string.delete_all), onDismiss = { confirmDelete = false }) {
+            confirmDelete = false
+            actions.deleteAll()
+        }
     }
 }
 
@@ -185,11 +172,6 @@ private fun Header(form: CustomLocationForm, actions: CustomLocationActions, onD
 }
 
 @Composable
-private fun MenuEntry(label: Int, onClick: () -> Unit) {
-    DropdownMenuItem(text = { Text(stringResource(label), style = MaterialTheme.typography.titleMedium) }, onClick = onClick)
-}
-
-@Composable
 internal fun CoordinateField(value: String, label: Int, modifier: Modifier, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
@@ -222,8 +204,6 @@ private fun LocationCard(location: Locations, actions: CustomLocationActions) {
             Text(latitude, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(longitude, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        IconButton(onClick = { actions.delete(location) }) {
-            Icon(painterResource(R.drawable.ic_clear), contentDescription = stringResource(R.string.delete), tint = colorResource(R.color.iconColor))
-        }
+        IconAction(R.drawable.ic_clear, stringResource(R.string.delete)) { actions.delete(location) }
     }
 }

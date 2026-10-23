@@ -7,11 +7,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import app.simple.positional.model.Measure
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MeasureDao {
-    @Query("SELECT * FROM measures ORDER BY date_added COLLATE nocase DESC")
-    fun getAllMeasures(): MutableList<Measure>
+    @Query("SELECT * FROM measures ORDER BY date_added DESC")
+    fun observeAll(): Flow<List<Measure>>
 
     @Query("SELECT * FROM measures WHERE date_added = :date")
     fun getMeasureById(date: Long): Measure?
@@ -24,7 +25,4 @@ interface MeasureDao {
 
     @Update
     suspend fun updateMeasure(measure: Measure)
-
-    @Query("DELETE FROM measures")
-    fun nukeTable()
 }

@@ -11,14 +11,18 @@ import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MeasurePreferences
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MeasureViewModel(application: Application) : WrappedViewModel(application) {
-    private val measureEntries: MutableLiveData<ArrayList<Measure>> by lazy {
-        MutableLiveData<ArrayList<Measure>>().also {
-            loadMeasureEntries()
-        }
-    }
+    private val dao = MeasureDatabase.getInstance(application).measureDao()
+
+    val measures: StateFlow<List<Measure>?> = dao.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
     private val measure: MutableLiveData<Measure> by lazy {
         MutableLiveData<Measure>().also {
@@ -26,79 +30,54 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         }
     }
 
-    fun getMeasureEntries(): LiveData<ArrayList<Measure>> {
-        return measureEntries
-    }
-
     fun getMeasure(): LiveData<Measure> {
         return measure
     }
 
-    private fun loadMeasureEntries() {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val entries = measureDatabase.measureDao()?.getAllMeasures()
-            measureEntries.postValue(entries as ArrayList<Measure>)
-        }
-    }
-
     private fun loadMeasure(id: Long) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val measure = measureDatabase.measureDao()?.getMeasureById(id)
-            this@MeasureViewModel.measure.postValue(measure)
+        viewModelScope.launch(Dispatchers.IO) {
+            measure.postValue(dao.getMeasureById(id))
         }
     }
 
     fun addMeasure(name: String, note: String) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val measure = Measure(name, note)
-            measureDatabase.measureDao()?.insertMeasure(measure)
-            MeasurePreferences.setLastSelectedMeasure(measure.dateCreated)
-            loadMeasure(measure.dateCreated)
+        viewModelScope.launch(Dispatchers.IO) {
+            val created = Measure(name, note)
+            withContext(NonCancellable) {
+                dao.insertMeasure(created)
+                MeasurePreferences.setLastSelectedMeasure(created.dateCreated)
+            }
+            loadMeasure(created.dateCreated)
         }
     }
 
     fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val measure = measure.value
-            measure?.let {
-                measure.measurePoints?.add(measurePoint)
-                measureDatabase.measureDao()?.updateMeasure(measure)
-                onAdded(measure)
+        viewModelScope.launch(Dispatchers.IO) {
+            measure.value?.let {
+                it.measurePoints?.add(measurePoint)
+                dao.updateMeasure(it)
+                onAdded(it)
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        MeasureDatabase.destroyInstance()
     }
 
     fun removeMeasurePoint(measurePoint: MeasurePoint?, onRemoved: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            measurePoint?.let {
-                val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-                val measure = measure.value
-                measure?.let {
-                    measurePoint.let {
-                        measure.measurePoints?.remove(it)
-                        measureDatabase.measureDao()?.updateMeasure(measure)
-                        onRemoved(measure)
-                    }
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            val current = measure.value
+            if (measurePoint != null && current != null) {
+                current.measurePoints?.remove(measurePoint)
+                dao.updateMeasure(current)
+                onRemoved(current)
             }
         }
     }
 
-    fun deleteMeasure(measure: Measure, onDeleted: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            measureDatabase.measureDao()?.deleteMeasure(measure)
-            MeasurePreferences.setLastSelectedMeasure(-1)
-            onDeleted(measure)
+    fun deleteMeasure(measure: Measure) {
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(NonCancellable) {
+                dao.deleteMeasure(measure)
+                if (MeasurePreferences.getLastSelectedMeasure() == measure.dateCreated) MeasurePreferences.setLastSelectedMeasure(-1)
+            }
         }
     }
 
@@ -111,7 +90,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         }
     }
 
-    companion object {
-        private const val TAG = "MeasureViewModel"
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
     }
 }

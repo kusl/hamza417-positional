@@ -8,15 +8,17 @@ import android.view.WindowManager
 import android.widget.EditText
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.decorations.ripple.DynamicRippleButton
 import app.simple.positional.decorations.views.CustomDialogFragment
 import app.simple.positional.model.TrailEntry
 import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.ConditionUtils.isZero
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
+import app.simple.positional.util.TrailNames
+import app.simple.positional.util.ViewUtils.setVisibility
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 class AddTrail : CustomDialogFragment() {
     private lateinit var nameInputEditText: EditText
@@ -25,7 +27,7 @@ class AddTrail : CustomDialogFragment() {
     private lateinit var cancel: DynamicRippleButton
 
     private val trailsViewModel: TrailsViewModel by viewModels()
-    private var list = arrayListOf<TrailEntry>()
+    private var existing: List<String> = emptyList()
 
     var onNewTrailAddedSuccessfully: (trailEntry: TrailEntry) -> Unit = {}
 
@@ -40,7 +42,7 @@ class AddTrail : CustomDialogFragment() {
         nameInputEditText.setText(TrailPreferences.getLastTrailName())
         noteInputEditText.setText(TrailPreferences.getLastTrailNote())
 
-        kotlin.runCatching {
+        runCatching {
             nameInputEditText.requestFocus()
             dialog!!.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         }.getOrElse {
@@ -53,30 +55,17 @@ class AddTrail : CustomDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        trailsViewModel.trails.observe(viewLifecycleOwner, {
-            list.addAll(it)
-        })
+        updateSave()
 
-        if (TrailPreferences.getLastTrailName().isNotBlank()) {
-            saveButtonState(TrailPreferences.getLastTrailName())
+        viewLifecycleOwner.lifecycleScope.launch {
+            trailsViewModel.trails.filterNotNull().collect { trails ->
+                existing = trails.map { it.trailName }
+                updateSave()
+            }
         }
 
         nameInputEditText.doOnTextChanged { text, _, _, _ ->
-            kotlin.runCatching {
-                if (list.isEmpty()) {
-                    saveButtonState(text!!.toString())
-                } else {
-                    for (i in list) {
-                        if (i.trailName.lowercase() == text.toString().lowercase() || text.toString().lowercase() == "%%_trails" || text?.length!!.isZero()) {
-                            save.gone()
-                            break
-                        } else {
-                            save.visible(true)
-                        }
-                    }
-                }
-            }
-
+            updateSave()
             TrailPreferences.setLastTrailName(text.toString())
         }
 
@@ -85,14 +74,10 @@ class AddTrail : CustomDialogFragment() {
         }
 
         save.setOnClickListener {
-            val trails = TrailEntry(
+            val trail = TrailEntry(
                 System.currentTimeMillis(),
-                nameInputEditText.text.toString(),
-                if (noteInputEditText.text.toString().isNotEmpty()) {
-                    noteInputEditText.text.toString()
-                } else {
-                    getString(R.string.not_available)
-                }
+                nameInputEditText.text.toString().trim(),
+                noteInputEditText.text.toString().trim(),
             )
 
             TrailPreferences.setLastTrailNote("")
@@ -100,7 +85,7 @@ class AddTrail : CustomDialogFragment() {
 
             dismiss()
 
-            onNewTrailAddedSuccessfully.invoke(trails)
+            onNewTrailAddedSuccessfully.invoke(trail)
         }
 
         cancel.setOnClickListener {
@@ -108,12 +93,8 @@ class AddTrail : CustomDialogFragment() {
         }
     }
 
-    private fun saveButtonState(text: String) {
-        if (text.lowercase() == "%%_trails" || text.length.isZero()) {
-            save.gone()
-        } else {
-            save.visible(true)
-        }
+    private fun updateSave() {
+        save.setVisibility(TrailNames.isValid(nameInputEditText.text.toString(), existing))
     }
 
     companion object {
