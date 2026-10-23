@@ -1,14 +1,11 @@
 package app.simple.positional.model;
 
 import androidx.annotation.NonNull;
-import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
-
-public class MeasurePoint {
-    private double latitude;
-    private double longitude;
-    private int order;
+public final class MeasurePoint {
+    private final double latitude;
+    private final double longitude;
+    private final int order;
 
     public MeasurePoint(double latitude, double longitude, int order) {
         this.latitude = latitude;
@@ -20,50 +17,16 @@ public class MeasurePoint {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
     public double getLongitude() {
         return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
     }
 
     public int getOrder() {
         return order;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public LatLng getLatLng() {
-        return new LatLng(latitude, longitude);
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "MeasurePoint{" + "latitude=" + latitude + ", longitude=" + longitude + ", order=" + order + '}';
-    }
-
     public String convertForDatabase() {
         return latitude + "," + longitude + "," + order;
-    }
-
-    public ArrayList<MeasurePoint> convertForDatabase(ArrayList<MeasurePoint> measurePoints) {
-        return new ArrayList<>(measurePoints);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Double.hashCode(getLatitude());
-        result = 31 * result + Double.hashCode(getLongitude());
-        result = 31 * result + getOrder();
-        return result;
     }
 
     public static MeasurePoint convertFromDatabase(String data) {
@@ -72,5 +35,29 @@ public class MeasurePoint {
                 Double.parseDouble(parts[0]),
                 Double.parseDouble(parts[1]),
                 Integer.parseInt(parts[2]));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MeasurePoint)) return false;
+        MeasurePoint that = (MeasurePoint) o;
+        return Double.compare(latitude, that.latitude) == 0
+                && Double.compare(longitude, that.longitude) == 0
+                && order == that.order;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Double.hashCode(latitude);
+        result = 31 * result + Double.hashCode(longitude);
+        result = 31 * result + order;
+        return result;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "MeasurePoint{" + "latitude=" + latitude + ", longitude=" + longitude + ", order=" + order + '}';
     }
 }
