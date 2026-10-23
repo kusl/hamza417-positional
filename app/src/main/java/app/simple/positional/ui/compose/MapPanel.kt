@@ -1,6 +1,7 @@
 package app.simple.positional.ui.compose
 
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -72,7 +73,7 @@ fun MapPanelScaffold(
         if (landscape && side != null) {
             Row(Modifier.fillMaxSize()) {
                 Box(Modifier.weight(1f).fillMaxHeight()) {
-                    AndroidView(factory = { map }, modifier = Modifier.fillMaxSize())
+                    AndroidView(factory = { map.detached() }, modifier = Modifier.fillMaxSize())
                     overlay()
                     MapToolsSurface(true, Modifier.align(Alignment.BottomCenter).padding(margin)) { tools(true) }
                 }
@@ -90,7 +91,7 @@ fun MapPanelScaffold(
             }
         } else {
             Box(Modifier.fillMaxSize()) {
-                AndroidView(factory = { map }, modifier = Modifier.fillMaxSize())
+                AndroidView(factory = { map.detached() }, modifier = Modifier.fillMaxSize())
                 overlay()
                 AnimatedVisibility(
                     !fullScreen,
@@ -223,3 +224,5 @@ fun SheetHandle(onClick: () -> Unit) {
 fun cornerRadius(): Dp = with(LocalDensity.current) { MainPreferences.getCornerRadius().toDp() }
 
 private const val BLINK = 500L
+
+private fun View.detached(): View = apply { (parent as? ViewGroup)?.removeView(this) }

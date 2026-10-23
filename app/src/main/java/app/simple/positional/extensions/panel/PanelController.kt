@@ -9,12 +9,16 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import app.simple.positional.constants.HtmlPage
+import app.simple.positional.ui.navigation.AppNavigator
+import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheet
@@ -23,6 +27,7 @@ import app.simple.positional.ui.compose.MenuSheetState
 abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
     private val registry = LifecycleRegistry(this)
     private val launchers = mutableListOf<ActivityResultLauncher<*>>()
+    private var destroyed = false
     private val parentObserver = LifecycleEventObserver { _, event ->
         if (event == Lifecycle.Event.ON_DESTROY) return@LifecycleEventObserver
         registry.handleLifecycleEvent(event)
@@ -38,6 +43,10 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected val dialogs = DialogHost()
     protected val menuSheet = MenuSheetState()
     protected val isLandscapeOrientation: Boolean = activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    init {
+        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+    }
 
     @Composable
     abstract fun Content(topInset: Dp)
@@ -56,16 +65,33 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
 
     protected fun startActivity(intent: Intent) = activity.startActivity(intent)
 
+    protected fun navigate(route: String) {
+        (activity as? AppNavigator)?.navigate(route)
+    }
+
+    protected fun openPage(page: HtmlPage) = navigate(Routes.web(page))
+
+    protected fun search(onResult: (SearchResult) -> Unit) {
+        (activity as? AppNavigator)?.search(onResult)
+    }
+
     protected fun <I, O> register(contract: ActivityResultContract<I, O>, callback: (O) -> Unit): ActivityResultLauncher<I> =
         activity.activityResultRegistry.register("${javaClass.name}#${launchers.size}", contract, callback).also { launchers += it }
 
-    fun attach() {
-        activity.lifecycle.addObserver(parentObserver)
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+    private fun follow(parent: LifecycleOwner) {
+        if (!destroyed) parent.lifecycle.addObserver(parentObserver)
     }
 
-    fun detach() {
-        activity.lifecycle.removeObserver(parentObserver)
+    private fun unfollow(parent: LifecycleOwner) {
+        parent.lifecycle.removeObserver(parentObserver)
+        if (destroyed) return
+        if (registry.currentState.isAtLeast(Lifecycle.State.RESUMED)) onPause()
+        if (registry.currentState.isAtLeast(Lifecycle.State.STARTED)) registry.currentState = Lifecycle.State.CREATED
+    }
+
+    fun destroy() {
+        if (destroyed) return
+        destroyed = true
         getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
         launchers.forEach { it.unregister() }
         if (registry.currentState.isAtLeast(Lifecycle.State.CREATED)) registry.currentState = Lifecycle.State.DESTROYED
@@ -74,15 +100,13 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
 
     @Composable
     fun Host(topInset: Dp) {
-        DisposableEffect(this) {
-            attach()
-            onDispose { detach() }
+        val parent = LocalLifecycleOwner.current
+        DisposableEffect(this, parent) {
+            follow(parent)
+            onDispose { unfollow(parent) }
         }
         Content(topInset)
         MenuSheet(menuSheet)
         dialogs.content?.invoke()
     }
 }
-
-@Composable
-fun <T : PanelController> rememberPanel(activity: ComponentActivity, factory: (ComponentActivity) -> T): T = remember { factory(activity) }

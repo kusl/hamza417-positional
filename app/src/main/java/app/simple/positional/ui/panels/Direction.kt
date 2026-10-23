@@ -3,12 +3,11 @@ package app.simple.positional.ui.panels
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
-import app.simple.positional.activities.subactivity.DirectionsActivity
+import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.preferences.GPSPreferences
@@ -47,7 +46,7 @@ class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSen
         )
     }
 
-    private fun openTargets() = startActivity(Intent(activity, DirectionsActivity::class.java))
+    private fun openTargets() = navigate(Routes.DIRECTIONS)
 
     init {
         if (!sensor.isAvailable) showSensorError()

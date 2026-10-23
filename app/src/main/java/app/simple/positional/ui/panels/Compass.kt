@@ -11,7 +11,6 @@ import android.os.SystemClock
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.PhysicalPropertiesDialog
@@ -48,7 +47,7 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
                 dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
             },
             onPhysicalProperties = {
-                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(activity, HtmlPage.PHYSICAL_PROPERTIES) } }
+                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { openPage(HtmlPage.PHYSICAL_PROPERTIES) } }
             },
         )
     }

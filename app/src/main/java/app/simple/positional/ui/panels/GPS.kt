@@ -3,14 +3,11 @@ package app.simple.positional.ui.panels
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
 import android.view.MotionEvent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -48,9 +45,7 @@ import app.simple.positional.ui.compose.CoordinateDetailsDialog
 import app.simple.positional.ui.compose.LocationDetailsDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.util.LocationShare
-import app.simple.positional.activities.subactivity.MapSearchActivity
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
 import app.simple.positional.util.DMSConverter
@@ -73,16 +68,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private val search = register(ActivityResultContracts.StartActivityForResult()) { result ->
-        val data = result.data
-        if (result.resultCode == Activity.RESULT_OK && data != null) {
-            targetForm.fill(
-                data.getStringExtra("address").orEmpty(),
-                CoordinateInput.format(data.getDoubleExtra("latitude", 0.0)),
-                CoordinateInput.format(data.getDoubleExtra("longitude", 0.0)),
-            )
-        }
-    }
     private lateinit var maps: Maps
     private lateinit var viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
@@ -264,7 +249,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun menu() = menuSheet.show {
         PanelMenus.gps(onPin = ::pinCustomization) {
-            WebPageViewerActivity.open(activity, HtmlPage.MEDIA_KEYS)
+            openPage(HtmlPage.MEDIA_KEYS)
         }
     }
 
@@ -304,7 +289,11 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         dialogs.show {
             TargetCoordinatesDialog(
                 targetForm,
-                onSearch = { search.launch(Intent(activity, MapSearchActivity::class.java)) },
+                onSearch = {
+                    search { result ->
+                        targetForm.fill(result.address, CoordinateInput.format(result.latitude), CoordinateInput.format(result.longitude))
+                    }
+                },
                 onDismiss = dialogs::dismiss,
             ) { latitude, longitude ->
                 GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())

@@ -3,7 +3,7 @@ package app.simple.positional.decorations.utils;
 import android.animation.ValueAnimator;
 import android.location.Location;
 import android.view.animation.DecelerateInterpolator;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+import android.view.animation.PathInterpolator;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -58,7 +58,7 @@ public class MarkerUtils {
             LatLngInterpolator latLngInterpolator = new LatLngInterpolator.LinearFixed();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
             valueAnimator.setDuration(1000);
-            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+            valueAnimator.setInterpolator(new PathInterpolator(0f, 0f, 0.2f, 1f));
             valueAnimator.addUpdateListener(animation -> {
                 try {
                     float v = animation.getAnimatedFraction();

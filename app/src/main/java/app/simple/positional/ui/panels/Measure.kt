@@ -3,12 +3,11 @@ package app.simple.positional.ui.panels
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
-import app.simple.positional.activities.subactivity.MeasuresActivity
+import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.decorations.measure.MeasureMaps
 import app.simple.positional.extensions.panel.PanelController
@@ -147,7 +146,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         }
     }
 
-    override fun measures() = startActivity(Intent(activity, MeasuresActivity::class.java))
+    override fun measures() = navigate(Routes.MEASURES)
 
     override fun menu() = menuSheet.show { PanelMenus.measure() }
 

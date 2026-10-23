@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
 import android.widget.Toast
@@ -21,7 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.R
-import app.simple.positional.activities.subactivity.TrailsViewerActivity
+import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.trails.TrailMaps
@@ -42,7 +41,6 @@ import app.simple.positional.ui.compose.TrailState
 import app.simple.positional.ui.compose.MarkerIconRow
 import app.simple.positional.ui.compose.NameNoteDialog
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
@@ -170,7 +168,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     override fun onLineDeleted(trailPoint: TrailPoint?) = trailData.delete(trailPoint)
 
-    override fun trails() = startActivity(Intent(activity, TrailsViewerActivity::class.java))
+    override fun trails() = navigate(Routes.TRAILS)
 
     override fun addTrail() {
         val title = getString(R.string.enter_trail_name)
@@ -194,7 +192,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         }
     }
 
-    override fun menu() = menuSheet.show { PanelMenus.trail { WebPageViewerActivity.open(activity, HtmlPage.TRAIL_HELP) } }
+    override fun menu() = menuSheet.show { PanelMenus.trail { openPage(HtmlPage.TRAIL_HELP) } }
 
     override fun locate(close: Boolean) {
         if (!getLocationStatus(activity)) {

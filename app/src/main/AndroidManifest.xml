@@ -295,61 +295,12 @@
             tools:targetApi="o" />
 
         <activity
-            android:name=".activities.subactivity.TimezonePickerActivity"
-            android:colorMode="wideColorGamut"
-            android:exported="false"
-            tools:targetApi="o" />
-
-        <activity
-            android:name=".activities.subactivity.CustomLocationsActivity"
-            android:colorMode="wideColorGamut"
-            android:exported="false"
-            tools:targetApi="o" />
-
-        <activity
-            android:name=".activities.subactivity.WebPageViewerActivity"
-            android:colorMode="wideColorGamut"
-            android:exported="false"
-            tools:targetApi="o" />
-
-        <activity
-            android:name=".activities.subactivity.TrailsViewerActivity"
-            android:colorMode="wideColorGamut"
-            android:exported="false"
-            tools:targetApi="o" />
-
-        <activity
-            android:name=".activities.subactivity.AccentColorsActivity"
-            android:colorMode="wideColorGamut"
-            android:exported="true"
-            tools:targetApi="o" />
-
-        <activity
-            android:name=".activities.subactivity.ArtsActivity"
-            android:colorMode="wideColorGamut"
-            android:exported="false"
-            tools:targetApi="o" />
-
-        <activity
-            android:name=".activities.subactivity.MapSearchActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".activities.subactivity.MeasuresActivity"
-            android:exported="true" />
-
-        <activity
             android:name=".activities.service.ClockWidgetActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".activities.subactivity.DirectionsActivity"
-            android:exported="true" />
 
         <service
             android:name=".services.LocationService"

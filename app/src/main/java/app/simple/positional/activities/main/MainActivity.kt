@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -24,6 +23,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.R
+import androidx.compose.runtime.DisposableEffect
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import app.simple.positional.ui.navigation.AccentRoute
+import app.simple.positional.ui.navigation.AppNavigator
+import app.simple.positional.ui.navigation.ArtsRoute
+import app.simple.positional.ui.navigation.CustomLocationsRoute
+import app.simple.positional.ui.navigation.DirectionsRoute
+import app.simple.positional.ui.navigation.MapSearchRoute
+import app.simple.positional.ui.navigation.MeasuresRoute
+import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.ui.navigation.SearchResult
+import app.simple.positional.ui.navigation.TimeZoneRoute
+import app.simple.positional.ui.navigation.TrailsRoute
+import app.simple.positional.ui.navigation.WebRoute
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
@@ -46,9 +64,11 @@ import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt.displayLocationSettingsRequest
 import com.google.android.gms.maps.MapsInitializer
 
-class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPreferenceChangeListener {
+class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferences.OnSharedPreferenceChangeListener {
     private var panel by mutableStateOf(PanelCatalog.LOCATION)
     private var barVisible by mutableStateOf(true)
+    private var navController: NavHostController? = null
+    private var searchResult: ((SearchResult) -> Unit)? = null
 
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.any { it }) {
@@ -63,12 +83,7 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
         super.onCreate(savedInstanceState)
         MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { }
         panel = PanelCatalog.resolve(FragmentPreferences.getCurrentTag())
-        setPositionalContent { topInset ->
-            Box(Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
-                key(panel) { Panel(panel, this@MainActivity, topInset) }
-                PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
-            }
-        }
+        setPositionalContent { topInset -> AppNavHost(topInset) }
         checkLocationPermission()
         MainPreferences.setLaunchCount(MainPreferences.getLaunchCount() + 1)
     }
@@ -89,6 +104,51 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
         panel = tag
         barVisible = true
         FragmentPreferences.setCurrentTag(tag)
+    }
+
+    @Composable
+    private fun AppNavHost(topInset: Dp) {
+        val nav = rememberNavController()
+        navController = nav
+        val controller = remember(panel) { createPanel(panel, this) }
+        DisposableEffect(controller) { onDispose { controller.destroy() } }
+        NavHost(nav, startDestination = Routes.PANELS, modifier = Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
+            composable(Routes.PANELS) {
+                Box(Modifier.fillMaxSize()) {
+                    controller.Host(topInset)
+                    PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
+                }
+            }
+            composable(Routes.ACCENT) { AccentRoute(this@MainActivity, topInset) }
+            composable(Routes.ARTS) { ArtsRoute() }
+            composable(Routes.TIMEZONE) { TimeZoneRoute(this@MainActivity, topInset) }
+            composable(Routes.MEASURES) { MeasuresRoute(this@MainActivity, topInset) }
+            composable(Routes.TRAILS) { TrailsRoute(this@MainActivity, topInset) }
+            composable(Routes.DIRECTIONS) { DirectionsRoute(this@MainActivity, topInset) }
+            composable(Routes.CUSTOM_LOCATIONS) { CustomLocationsRoute(this@MainActivity, topInset) }
+            composable(Routes.MAP_SEARCH) { MapSearchRoute(this@MainActivity) }
+            composable(Routes.WEB, arguments = listOf(navArgument(Routes.PAGE_ARGUMENT) { type = NavType.StringType })) { entry ->
+                WebRoute(entry.arguments?.getString(Routes.PAGE_ARGUMENT), this@MainActivity)
+            }
+        }
+    }
+
+    override fun navigate(route: String) {
+        navController?.navigate(route) { launchSingleTop = true }
+    }
+
+    override fun back() {
+        navController?.popBackStack()
+    }
+
+    override fun search(onResult: (SearchResult) -> Unit) {
+        searchResult = onResult
+        navigate(Routes.MAP_SEARCH)
+    }
+
+    override fun deliver(result: SearchResult) {
+        searchResult?.invoke(result)
+        searchResult = null
     }
 
     override fun showBottomBar(visible: Boolean) {
@@ -136,12 +196,6 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
         const val ANDROID = "android"
         val locationPermissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
-}
-
-@Composable
-private fun Panel(tag: String, activity: ComponentActivity, topInset: Dp) {
-    val panel = remember(tag) { createPanel(tag, activity) }
-    panel.Host(topInset)
 }
 
 private fun createPanel(tag: String, activity: ComponentActivity): PanelController = when (tag) {

@@ -15,10 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import app.simple.positional.BuildConfig
-import app.simple.positional.activities.subactivity.AccentColorsActivity
-import app.simple.positional.activities.subactivity.ArtsActivity
-import app.simple.positional.activities.subactivity.CustomLocationsActivity
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.preferences.MainPreferences
@@ -87,7 +84,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
         activity.recreate()
     }
 
-    override fun openAccent() = startActivity(Intent(activity, AccentColorsActivity::class.java))
+    override fun openAccent() = navigate(Routes.ACCENT)
 
     override fun setIcon(index: Int) {
         AppIcons.select(activity, index)
@@ -102,7 +99,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
 
     override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
 
-    override fun openArts() = startActivity(Intent(activity, ArtsActivity::class.java))
+    override fun openArts() = navigate(Routes.ARTS)
 
     override fun setMetric(metric: Boolean) = MainPreferences.setUnit(metric)
 
@@ -110,7 +107,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
 
     override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
 
-    override fun openCustomLocations() = startActivity(Intent(activity, CustomLocationsActivity::class.java))
+    override fun openCustomLocations() = navigate(Routes.CUSTOM_LOCATIONS)
 
     override fun setCustomLocation(enabled: Boolean) {
         if (enabled) openCustomLocations() else MainPreferences.setCustomCoordinates(false)
@@ -132,7 +129,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     }
 
     override fun openLegal(page: Int) {
-        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(activity, it) }
+        HtmlPage.forTitle(page)?.let(::openPage)
     }
 
     override fun openReleases() = openUrl("$REPOSITORY_URL/releases")

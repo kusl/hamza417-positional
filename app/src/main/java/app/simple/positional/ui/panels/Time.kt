@@ -3,7 +3,6 @@ package app.simple.positional.ui.panels
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.SystemClock
 import androidx.lifecycle.Lifecycle
@@ -11,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.R
-import app.simple.positional.activities.subactivity.TimezonePickerActivity
+import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.panel.PanelController
@@ -51,7 +50,7 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
         ClockScreen(
             state,
             topInset,
-            onTimezone = { startActivity(Intent(activity, TimezonePickerActivity::class.java)) },
+            onTimezone = { navigate(Routes.TIMEZONE) },
             onMenu = ::showMenu,
             onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
         )

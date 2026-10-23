@@ -4,7 +4,7 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.location.Location;
 import android.view.animation.DecelerateInterpolator;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+import android.view.animation.PathInterpolator;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
@@ -23,7 +23,7 @@ public class CircleUtils {
             LatLngInterpolator latLngInterpolator = new LatLngInterpolator.LinearFixed();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
             valueAnimator.setDuration(duration);
-            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+            valueAnimator.setInterpolator(new PathInterpolator(0f, 0f, 0.2f, 1f));
             valueAnimator.addUpdateListener(animation -> {
                 try {
                     float v = animation.getAnimatedFraction();
