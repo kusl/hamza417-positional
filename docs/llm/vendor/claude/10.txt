@@ -1,0 +1,7 @@
+64
+61
+
+Good news is the build passes, the apk publishes, I am able to install it, and the app works. 
+however, I see a visual regression in the time screen 
+in the twilight where the golden hour text overlaps an icon on the right 
+please fix all regressions and defects and continue with the next phase 
