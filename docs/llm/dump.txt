@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T10:08:24-04:00
+Generated: 2026-10-23T15:39:07-04:00
 Branch:    master
-Commit:    4c80182f 2026-10-23 10:08:21 -0400 add claude response
+Commit:    e18b8688 2026-10-23 15:38:56 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (895 files)
+## TREE (881 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -115,17 +115,11 @@ app/
                   Maps.kt
                 measure/
                   MeasureMaps.kt
-                padding/
-                  PaddingAwareLinearLayout.java
-                ripple/
-                  DynamicRippleButton.java
-                  Utils.java
                 trails/
                   TrailMaps.kt
                 utils/
                   CircleUtils.java
                   MarkerUtils.java
-                  Utils.java
                 views/
                   CustomWebView.kt
               extensions/
@@ -215,11 +209,10 @@ app/
                   SettingsScreen.kt
                   SkinDialogs.kt
                   Speedometer.kt
+                  SplashScreen.kt
                   SunPositionDiagram.kt
                   TimeZoneScreen.kt
                   TrailScreen.kt
-                launcher/
-                  SplashScreen.kt
                 panels/
                   ClockReport.kt
                   Compass.kt
@@ -250,13 +243,13 @@ app/
                 MoonAngle.kt
                 MoonTimeFormatter.kt
                 NetworkCheck.kt
+                NightMode.kt
                 Ordinal.kt
                 ParcelUtils.kt
                 PermissionUtils.kt
                 ReverseGeocoder.kt
                 StatusBarHeight.java
                 TextViewUtils.kt
-                ThemeSetter.kt
                 TimeFormatter.kt
                 TrailNames.kt
                 UTMConverter.kt
@@ -278,11 +271,6 @@ app/
                 SunTimeWidgetArt.kt
                 TwilightWidget.kt
       res/
-        anim/
-          dialog_in.xml
-          dialog_out.xml
-          image_in.xml
-          launcher_icon.xml
         drawable-night/
           compass_dial.xml
         drawable/
@@ -426,7 +414,6 @@ app/
           ic_surfing.xml
           ic_swim.xml
           ic_timezone.xml
-          ic_touch_indicator.xml
           ic_trail_line.xml
           ic_trail_start.xml
           ic_train.xml
@@ -583,14 +570,9 @@ app/
           logo.ttf
           medium.ttf
           regular.ttf
-        layout-land/
-          fragment_launcher.xml
         layout-v26/
           widget_suntime.xml
         layout/
-          activity_clock_widget.xml
-          activity_launcher.xml
-          fragment_launcher.xml
           widget_clock.xml
           widget_clock_2x2.xml
           widget_clock_3x3.xml
@@ -889,8 +871,6 @@ app/
           strings.xml
         values-ml-rIN/
           strings.xml
-        values-night-v27/
-          styles.xml
         values-night/
           colors.xml
           styles.xml
@@ -906,8 +886,6 @@ app/
           dimens.xml
         values-ur-rIN/
           strings.xml
-        values-v27/
-          styles.xml
         values-v31/
           themes_accent.xml
         values-xhdpi/
@@ -986,6 +964,7 @@ app/
                 DirectionTest.kt
                 DistanceTextTest.kt
                 LocationShareTest.kt
+                NightModeTest.kt
                 TrailNamesTest.kt
 build.gradle
 export.sh
@@ -1285,7 +1264,7 @@ The map panels use the Google Maps SDK and Google Play services location. Withou
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in activities through `setPositionalContent`. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1304,7 +1283,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in act
 | 8f | Location summary, location details (Compose `Canvas` sparklines) and coordinate formats dialogs in Compose; coordinate formats computed only while the dialog is open instead of on every fix; sparkline, fast scroller and recycler view decorations removed | Done |
 | 8g | `MainActivity` in Compose: panels hosted with `AndroidFragment`, floating panel switcher (tap for a grid, swipe to step) replaces the view pager bottom bar and panel dialog; permission request through the Activity Result API; all dialog fragments and bottom sheet styles removed | Done |
 | 8h | Panels as plain `PanelController` classes with their own child lifecycle; panel fragments, `ScopedFragment` and the fragment Compose host removed | Done |
-| 8i | Sub screens and splash in a single activity with Navigation Compose, drop fragments and AppCompat themes | Next |
+| 8i | AppCompat, Material Components, fragments, ConstraintLayout and legacy support libraries removed: activities extend `ComponentActivity` with `enableEdgeToEdge`, day/night is applied through a configuration override (`NightMode`), splash and clock widget setup are Compose screens | Done |
+| 8j | Sub screens in a single activity with Navigation Compose | Next |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -1469,13 +1449,12 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
-    implementation 'androidx.appcompat:appcompat:1.8.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+    implementation 'androidx.activity:activity-ktx:1.10.1'
     implementation 'androidx.core:core-ktx:1.19.1'
-    implementation 'androidx.fragment:fragment-ktx:1.9.1'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.10.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
     implementation platform('androidx.compose:compose-bom:2026.09.00')
@@ -1485,7 +1464,6 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-location:21.4.0'
     implementation 'com.google.android.gms:play-services-maps:20.1.0'
-    implementation 'com.google.android.material:material:1.14.0'
 
     implementation 'org.shredzone.commons:commons-suncalc:3.11'
     implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
@@ -2111,31 +2089,28 @@ package app.simple.positional.activities.main
 
 import android.content.Intent
 import android.os.Bundle
-import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PanelCatalog
-import app.simple.positional.ui.launcher.SplashScreen
+import app.simple.positional.ui.compose.SplashScreen
+import app.simple.positional.ui.compose.setPositionalContent
 
 class LauncherActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setShortcutScreen()
-        setContentView(R.layout.activity_launcher)
-
         if (MainPreferences.getSkipSplashScreen()) {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            intent.action = this.intent.action
-            startActivity(intent)
-            finish()
-        } else if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(R.anim.dialog_in, R.anim.dialog_out)
-                .replace(R.id.launcher_act, SplashScreen.newInstance(), "launcher")
-                .commit()
+            openMain()
+        } else {
+            setPositionalContent { SplashScreen(::openMain) }
         }
+    }
+
+    private fun openMain() {
+        if (isFinishing || isDestroyed) return
+        startActivity(Intent(this, MainActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).setAction(intent.action))
+        finish()
     }
 
     private fun setShortcutScreen() {
@@ -2321,62 +2296,59 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleButton
 import app.simple.positional.extensions.activity.BaseActivity
+import app.simple.positional.ui.compose.setPositionalContent
 import app.simple.positional.util.PermissionUtils.hasNotificationPermission
 import app.simple.positional.util.PermissionUtils.isIgnoringBatteryOptimizations
 
 class ClockWidgetActivity : BaseActivity() {
-    private lateinit var grantBattery: DynamicRippleButton
-    private lateinit var grantNotification: DynamicRippleButton
+    private var appWidgetCode = AppWidgetManager.INVALID_APPWIDGET_ID
+    private var batteryGranted by mutableStateOf(false)
+    private var notificationGranted by mutableStateOf(false)
 
-    private var appWidgetCode = 0
-
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            setNotificationButton()
-        } else {
-            Toast.makeText(baseContext, R.string.notification_permission_desc, Toast.LENGTH_LONG).show()
-        }
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) refresh() else Toast.makeText(this, R.string.notification_permission_desc, Toast.LENGTH_LONG).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_clock_widget)
-
-        grantBattery = findViewById(R.id.grant_battery_optimization)
-        grantNotification = findViewById(R.id.grant_notification_access)
-
         appWidgetCode = intent.extras?.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-                ?: AppWidgetManager.INVALID_APPWIDGET_ID
-
-        if (isIgnoringBatteryOptimizations() && hasNotificationPermission()) {
-            close()
-        }
-
-        grantBattery.setOnClickListener {
-            if (isIgnoringBatteryOptimizations()) {
-                if (hasNotificationPermission()) {
-                    close()
-                } else {
-                    Toast.makeText(baseContext, R.string.notification_permission_desc, Toast.LENGTH_LONG).show()
-                }
-            } else {
-                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            }
-        }
-
-        grantNotification.setOnClickListener {
-            if (hasNotificationPermission()) {
-                if (isIgnoringBatteryOptimizations()) {
-                    close()
-                } else {
-                    Toast.makeText(baseContext, R.string.battery_optimization_desc, Toast.LENGTH_LONG).show()
-                }
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            ?: AppWidgetManager.INVALID_APPWIDGET_ID
+        refresh()
+        if (batteryGranted && notificationGranted) close()
+        setPositionalContent {
+            Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                Column(
+                    Modifier.systemBarsPadding().padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                ) {
+                    Image(painterResource(R.drawable.clock_face), contentDescription = null, modifier = Modifier.size(160.dp))
+                    Text(stringResource(R.string.battery_optimization_desc), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
+                    Button(onClick = ::onBattery) { Text(stringResource(if (batteryGranted) R.string.button_close else R.string.button_grant)) }
+                    Text(stringResource(R.string.notification_permission_desc), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
+                    Button(onClick = ::onNotification) { Text(stringResource(if (notificationGranted) R.string.button_close else R.string.button_grant)) }
                 }
             }
         }
@@ -2384,29 +2356,34 @@ class ClockWidgetActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        setBatteryOptimizationButton()
-        setNotificationButton()
+        refresh()
     }
 
-    private fun setBatteryOptimizationButton() {
-        if (isIgnoringBatteryOptimizations()) {
-            grantBattery.setText(R.string.button_close)
-        } else {
-            grantBattery.setText(R.string.button_grant)
+    private fun refresh() {
+        batteryGranted = isIgnoringBatteryOptimizations()
+        notificationGranted = hasNotificationPermission()
+    }
+
+    private fun onBattery() {
+        when {
+            !batteryGranted -> startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            notificationGranted -> close()
+            else -> Toast.makeText(this, R.string.notification_permission_desc, Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun setNotificationButton() {
-        if (hasNotificationPermission()) {
-            grantNotification.setText(R.string.button_close)
-        } else {
-            grantNotification.setText(R.string.button_grant)
+    private fun onNotification() {
+        when {
+            !notificationGranted -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+            batteryGranted -> close()
+            else -> Toast.makeText(this, R.string.battery_optimization_desc, Toast.LENGTH_LONG).show()
         }
     }
 
     private fun close() {
-        val resultValue = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetCode)
-        setResult(Activity.RESULT_OK, resultValue)
+        setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetCode))
         finish()
     }
 }
@@ -5140,146 +5117,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareLinearLayout.java
-################################################################################
-package app.simple.positional.decorations.padding;
-
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.LinearLayout;
-import androidx.annotation.Nullable;
-
-import app.simple.positional.util.StatusBarHeight;
-
-public class PaddingAwareLinearLayout extends LinearLayout {
-    public PaddingAwareLinearLayout(Context context) {
-        super(context);
-        init();
-    }
-
-    public PaddingAwareLinearLayout(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    private void init() {
-        setPadding(getPaddingLeft(),
-                StatusBarHeight.getStatusBarHeight(getResources()) + getPaddingTop(),
-                getPaddingRight(),
-                getPaddingBottom());
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleButton.java
-################################################################################
-package app.simple.positional.decorations.ripple;
-
-import android.content.Context;
-import android.graphics.Color;
-import android.util.AttributeSet;
-import androidx.core.content.res.ResourcesCompat;
-
-import app.simple.positional.R;
-import app.simple.positional.util.ColorUtils;
-
-public class DynamicRippleButton extends androidx.appcompat.widget.AppCompatButton {
-    public DynamicRippleButton(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        setBackgroundColor(Color.TRANSPARENT);
-        setAllCaps(false);
-        setTypeface(ResourcesCompat.getFont(context, R.font.bold));
-        setTextColor(ColorUtils.INSTANCE.resolveAttrColor(getContext(), R.attr.colorAppAccent));
-
-        if (!isInEditMode()) {
-            setBackground(Utils.getRippleDrawable(getContext(), getBackground(), 2F));
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/ripple/Utils.java
-################################################################################
-package app.simple.positional.decorations.ripple;
-
-import android.animation.ValueAnimator;
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RippleDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RoundRectShape;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import com.google.android.material.animation.ArgbEvaluatorCompat;
-
-import java.util.Arrays;
-import app.simple.positional.R;
-import app.simple.positional.preferences.MainPreferences;
-import app.simple.positional.util.ColorUtils;
-
-public class Utils {
-    public static final int alpha = 100;
-
-    static void animateBackground(int endColor, View view) {
-        view.clearAnimation();
-        ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
-                view.getBackgroundTintList().getDefaultColor(),
-                endColor);
-        valueAnimator.setDuration(300L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.addUpdateListener(animation -> view.setBackgroundTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
-        valueAnimator.start();
-    }
-
-    public static void animateBackground(int endColor, ViewGroup view) {
-        view.clearAnimation();
-        ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
-                view.getBackgroundTintList().getDefaultColor(),
-                endColor);
-        valueAnimator.setDuration(300L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.addUpdateListener(animation -> view.setBackgroundTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
-        valueAnimator.start();
-    }
-
-    static RippleDrawable getRippleDrawable(Context context, Drawable backgroundDrawable) {
-        float[] outerRadii = new float[8];
-        float[] innerRadii = new float[8];
-        Arrays.fill(outerRadii, MainPreferences.INSTANCE.getCornerRadius());
-        Arrays.fill(innerRadii, MainPreferences.INSTANCE.getCornerRadius());
-
-        RoundRectShape shape = new RoundRectShape(outerRadii, null, innerRadii);
-        ShapeDrawable mask = new ShapeDrawable(shape);
-
-        ColorStateList stateList = ColorStateList.valueOf(ColorUtils.INSTANCE.resolveAttrColor(context, R.attr.colorAppAccent));
-
-        RippleDrawable rippleDrawable = new RippleDrawable(stateList, backgroundDrawable, mask);
-        rippleDrawable.setAlpha(alpha);
-
-        return rippleDrawable;
-    }
-
-    public static RippleDrawable getRippleDrawable(Context context, Drawable backgroundDrawable, float divisiveFactor) {
-        float[] outerRadii = new float[8];
-        float[] innerRadii = new float[8];
-        Arrays.fill(outerRadii, MainPreferences.INSTANCE.getCornerRadius() / divisiveFactor);
-        Arrays.fill(innerRadii, MainPreferences.INSTANCE.getCornerRadius() / divisiveFactor);
-
-        RoundRectShape shape = new RoundRectShape(outerRadii, null, innerRadii);
-        ShapeDrawable mask = new ShapeDrawable(shape);
-
-        ColorStateList stateList = ColorStateList.valueOf(ColorUtils.INSTANCE.resolveAttrColor(context, R.attr.colorAppAccent));
-
-        RippleDrawable rippleDrawable = new RippleDrawable(stateList, backgroundDrawable, mask);
-        rippleDrawable.setAlpha(alpha);
-
-        return rippleDrawable;
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt
 ################################################################################
 package app.simple.positional.decorations.trails
@@ -6025,63 +5862,6 @@ public class MarkerUtils {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/utils/Utils.java
-################################################################################
-package app.simple.positional.decorations.utils;
-
-import android.animation.ValueAnimator;
-import android.content.res.ColorStateList;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.RadioButton;
-import com.google.android.material.animation.ArgbEvaluatorCompat;
-
-public class Utils {
-    public static void animateBackground(int endColor, View view) {
-        view.clearAnimation();
-        ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
-                view.getBackgroundTintList().getDefaultColor(),
-                endColor);
-        valueAnimator.setDuration(300L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.addUpdateListener(animation -> view.setBackgroundTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
-        valueAnimator.start();
-    }
-
-    public static void animateBackground(int endColor, ViewGroup view) {
-        view.clearAnimation();
-        ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
-                view.getBackgroundTintList().getDefaultColor(),
-                endColor);
-        valueAnimator.setDuration(300L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.addUpdateListener(animation -> view.setBackgroundTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
-        valueAnimator.start();
-    }
-
-    public static void animateTint(int endColor, RadioButton view) {
-        view.clearAnimation();
-        ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
-                view.getButtonTintList().getDefaultColor(),
-                endColor);
-        valueAnimator.setDuration(300L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.addUpdateListener(animation -> view.setButtonTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
-        valueAnimator.start();
-    }
-
-    public static void animateElevation(Float elevation, RadioButton button) {
-        button.clearAnimation();
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(button.getElevation(), elevation);
-        valueAnimator.setDuration(300L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.addUpdateListener(animation -> button.setElevation((Float) animation.getAnimatedValue()));
-        valueAnimator.start();
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/views/CustomWebView.kt
 ################################################################################
 @file:Suppress("LeakingThis")
@@ -6116,186 +5896,96 @@ package app.simple.positional.extensions.activity
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.format.DateFormat
+import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat
+import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.core.os.ConfigurationCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
 import app.simple.positional.util.ContextUtils
 import app.simple.positional.util.LocaleHelper
-import app.simple.positional.util.ThemeSetter
 
-open class BaseActivity : AppCompatActivity() {
-    private val handler = Handler(Looper.getMainLooper())
-
-    override fun attachBaseContext(newBaseContext: Context) {
-        SharedPreferences.init(newBaseContext)
-        super.attachBaseContext(ContextUtils.updateLocale(newBaseContext, MainPreferences.getAppLanguage()!!))
+open class BaseActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        SharedPreferences.init(newBase)
+        super.attachBaseContext(ContextUtils.wrap(newBase, ContextUtils.language()))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(accentTheme())
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        if (MainPreferences.isDayNightOn()) {
-            ThemeSetter.setAppTheme(4)
-        } else {
-            val value = MainPreferences.getTheme()
-
-            if (value != AppCompatDelegate.getDefaultNightMode()) {
-                AppCompatDelegate.setDefaultNightMode(value)
-            }
+        if (MainPreferences.getLaunchCount() == 0 && DateFormat.is24HourFormat(this)) {
+            ClockPreferences.setDefaultClockTime(false)
         }
-
-        if (MainPreferences.getLaunchCount() == 0) {
-            if (DateFormat.is24HourFormat(this)) {
-                ClockPreferences.setDefaultClockTime(false)
-            }
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             window.colorMode = ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT
         }
-
         window.setFormat(PixelFormat.RGBA_8888)
-
         if (MainPreferences.isScreenOn()) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
-
-        makeAppFullScreen()
-        fixNavigationBarOverlap()
-
-        LocaleHelper.setAppLocale(ConfigurationCompat.getLocales(resources.configuration)[0]!!)
-
-        setTheme()
+        keepContentAboveNavigationBar()
+        ConfigurationCompat.getLocales(resources.configuration)[0]?.let(LocaleHelper::setAppLocale)
     }
 
-    private fun setTheme() {
-        if (MainPreferences.isMaterialYouAccentColor()) {
-            setTheme(R.style.MaterialYou)
-        } else {
-            when (MainPreferences.getAccentColor()) {
-                ContextCompat.getColor(baseContext, R.color.positional) -> {
-                    setTheme(R.style.Positional)
-                }
-                ContextCompat.getColor(baseContext, R.color.blue) -> {
-                    setTheme(R.style.Blue)
-                }
-                ContextCompat.getColor(baseContext, R.color.blueGrey) -> {
-                    setTheme(R.style.BlueGrey)
-                }
-                ContextCompat.getColor(baseContext, R.color.darkBlue) -> {
-                    setTheme(R.style.DarkBlue)
-                }
-                ContextCompat.getColor(baseContext, R.color.red) -> {
-                    setTheme(R.style.Red)
-                }
-                ContextCompat.getColor(baseContext, R.color.green) -> {
-                    setTheme(R.style.Green)
-                }
-                ContextCompat.getColor(baseContext, R.color.orange) -> {
-                    setTheme(R.style.Orange)
-                }
-                ContextCompat.getColor(baseContext, R.color.purple) -> {
-                    setTheme(R.style.Purple)
-                }
-                ContextCompat.getColor(baseContext, R.color.yellow) -> {
-                    setTheme(R.style.Yellow)
-                }
-                ContextCompat.getColor(baseContext, R.color.caribbeanGreen) -> {
-                    setTheme(R.style.CaribbeanGreen)
-                }
-                ContextCompat.getColor(baseContext, R.color.persianGreen) -> {
-                    setTheme(R.style.PersianGreen)
-                }
-                ContextCompat.getColor(baseContext, R.color.amaranth) -> {
-                    setTheme(R.style.Amaranth)
-                }
-                ContextCompat.getColor(baseContext, R.color.indian_red) -> {
-                    setTheme(R.style.IndianRed)
-                }
-                ContextCompat.getColor(baseContext, R.color.light_coral) -> {
-                    setTheme(R.style.LightCoral)
-                }
-                ContextCompat.getColor(baseContext, R.color.pink_flare) -> {
-                    setTheme(R.style.PinkFlare)
-                }
-                ContextCompat.getColor(baseContext, R.color.makeup_tan) -> {
-                    setTheme(R.style.MakeupTan)
-                }
-                ContextCompat.getColor(baseContext, R.color.egg_yellow) -> {
-                    setTheme(R.style.EggYellow)
-                }
-                ContextCompat.getColor(baseContext, R.color.medium_green) -> {
-                    setTheme(R.style.MediumGreen)
-                }
-                ContextCompat.getColor(baseContext, R.color.olive) -> {
-                    setTheme(R.style.Olive)
-                }
-                ContextCompat.getColor(baseContext, R.color.copperfield) -> {
-                    setTheme(R.style.Copperfield)
-                }
-                ContextCompat.getColor(baseContext, R.color.mineral_green) -> {
-                    setTheme(R.style.MineralGreen)
-                }
-                ContextCompat.getColor(baseContext, R.color.lochinvar) -> {
-                    setTheme(R.style.Lochinvar)
-                }
-                ContextCompat.getColor(baseContext, R.color.beach_grey) -> {
-                    setTheme(R.style.BeachGrey)
-                }
-                else -> {
-                    setTheme(R.style.Positional)
-                    MainPreferences.setAccentColor(ContextCompat.getColor(baseContext, R.color.positional))
-                }
-            }
+    private fun accentTheme(): Int {
+        if (MainPreferences.isMaterialYouAccentColor() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return R.style.MaterialYou
+        val accent = MainPreferences.getAccentColor()
+        return accentThemes.firstOrNull { getColor(it.first) == accent }?.second ?: R.style.Positional.also {
+            MainPreferences.setAccentColor(getColor(R.color.positional))
         }
     }
 
-    private fun makeAppFullScreen() {
-        window.statusBarColor = Color.TRANSPARENT
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-    }
-
-    private fun fixNavigationBarOverlap() {
-        val root = findViewById<FrameLayout>(android.R.id.content)
-
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
+    private fun keepContentAboveNavigationBar() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            view.layoutParams = (view.layoutParams as LinearLayout.LayoutParams).apply {
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left
                 bottomMargin = insets.bottom
                 rightMargin = insets.right
             }
-
             WindowInsetsCompat.CONSUMED
         }
     }
 
-    protected fun postDelayed(delay: Long, action: () -> Unit) {
-        handler.postDelayed(action, delay)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
+    private companion object {
+        val accentThemes = listOf(
+            R.color.positional to R.style.Positional,
+            R.color.blue to R.style.Blue,
+            R.color.blueGrey to R.style.BlueGrey,
+            R.color.darkBlue to R.style.DarkBlue,
+            R.color.red to R.style.Red,
+            R.color.green to R.style.Green,
+            R.color.orange to R.style.Orange,
+            R.color.purple to R.style.Purple,
+            R.color.yellow to R.style.Yellow,
+            R.color.caribbeanGreen to R.style.CaribbeanGreen,
+            R.color.persianGreen to R.style.PersianGreen,
+            R.color.amaranth to R.style.Amaranth,
+            R.color.indian_red to R.style.IndianRed,
+            R.color.light_coral to R.style.LightCoral,
+            R.color.pink_flare to R.style.PinkFlare,
+            R.color.makeup_tan to R.style.MakeupTan,
+            R.color.egg_yellow to R.style.EggYellow,
+            R.color.medium_green to R.style.MediumGreen,
+            R.color.olive to R.style.Olive,
+            R.color.copperfield to R.style.Copperfield,
+            R.color.mineral_green to R.style.MineralGreen,
+            R.color.lochinvar to R.style.Lochinvar,
+            R.color.beach_grey to R.style.BeachGrey,
+        )
     }
 }
 
@@ -6764,7 +6454,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.AndroidViewModel
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ContextUtils
 
 open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
@@ -6773,7 +6462,7 @@ open class WrappedViewModel(application: Application) : AndroidViewModel(applica
     }
 
     open fun getContext(): Context {
-        return ContextUtils.updateLocale(getApplication<Application>().applicationContext, MainPreferences.getAppLanguage()!!)
+        return ContextUtils.wrap(getApplication<Application>().applicationContext, ContextUtils.language(), applyNightMode = false)
     }
 
     open fun getString(resourceID: Int): String {
@@ -8272,7 +7961,7 @@ package app.simple.positional.preferences
 
 import android.annotation.SuppressLint
 import androidx.annotation.IntRange
-import androidx.appcompat.app.AppCompatDelegate
+import app.simple.positional.util.NightMode
 import app.simple.positional.BuildConfig
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
@@ -8321,7 +8010,7 @@ object MainPreferences {
     }
 
     fun getTheme(): Int {
-        return getSharedPreferences().getInt(theme, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        return getSharedPreferences().getInt(theme, NightMode.FOLLOW_SYSTEM)
     }
 
     fun setDayNight(value: Boolean) {
@@ -8928,7 +8617,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.Display
 import androidx.annotation.RequiresApi
-import androidx.appcompat.view.ContextThemeWrapper
+import android.view.ContextThemeWrapper
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
@@ -13114,7 +12803,6 @@ private const val ICON_BITMAP_SIZE = 192
 package app.simple.positional.ui.compose
 
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -13153,12 +12841,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
+import app.simple.positional.util.NightMode
 import app.simple.positional.util.LocaleHelper
 
 @Immutable
 data class SettingsState(
     val hasLocationPermission: Boolean = true,
-    val themeMode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+    val themeMode: Int = NightMode.FOLLOW_SYSTEM,
     val isMetric: Boolean = true,
     val coordinatesFormat: Int = 0,
     val locationProvider: String = SettingsLabels.PROVIDER_ANDROID,
@@ -13213,9 +12902,9 @@ object SettingsLabels {
     )
 
     val themeModes = listOf(
-        AppCompatDelegate.MODE_NIGHT_NO,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        NightMode.NO,
+        NightMode.YES,
+        NightMode.FOLLOW_SYSTEM,
         THEME_AUTO,
     )
 
@@ -13225,9 +12914,9 @@ object SettingsLabels {
 
     @StringRes
     fun theme(mode: Int): Int? = when (mode) {
-        AppCompatDelegate.MODE_NIGHT_NO -> R.string.theme_day
-        AppCompatDelegate.MODE_NIGHT_YES -> R.string.theme_night
-        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> R.string.theme_follow_system
+        NightMode.NO -> R.string.theme_day
+        NightMode.YES -> R.string.theme_night
+        NightMode.FOLLOW_SYSTEM -> R.string.theme_follow_system
         THEME_AUTO -> R.string.theme_auto
         else -> null
     }
@@ -13684,6 +13373,142 @@ fun Speedometer(speed: Float, modifier: Modifier = Modifier) {
         )
     }
 }
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/SplashScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import android.content.res.Configuration
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import app.simple.positional.BuildConfig
+import app.simple.positional.R
+import app.simple.positional.constants.LauncherBackground
+import app.simple.positional.constants.LocationPins
+import kotlinx.coroutines.delay
+
+@Composable
+fun SplashScreen(onFinished: () -> Unit) {
+    val night = LocalConfiguration.current.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    val (background, colors) = remember(night) {
+        if (night) {
+            val index = LauncherBackground.vectorBackgroundNight.indices.random()
+            LauncherBackground.vectorBackgroundNight[index] to LauncherBackground.vectorNightColors[index]
+        } else {
+            val index = LauncherBackground.vectorBackground.indices.random()
+            LauncherBackground.vectorBackground[index] to LauncherBackground.vectorColors[index]
+        }
+    }
+    val gradient = listOf(Color(colors[0]), Color(colors[1]))
+    var touches by remember { mutableIntStateOf(0) }
+    var touch by remember { mutableStateOf<Offset?>(null) }
+    var last by remember { mutableStateOf(Offset.Zero) }
+    val indicator by animateFloatAsState(if (touch != null) 1f else 0f, label = "indicator")
+    val entrance = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { entrance.animateTo(1f) }
+    LaunchedEffect(touches, touch == null) {
+        if (touch != null) return@LaunchedEffect
+        delay(if (touches == 0) START_DELAY else RELEASE_DELAY)
+        onFinished()
+    }
+    Box(
+        Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    touch = down.position
+                    last = down.position
+                    do {
+                        val event = awaitPointerEvent()
+                        event.changes.firstOrNull()?.let {
+                            touch = it.position
+                            last = it.position
+                        }
+                    } while (event.changes.any { it.pressed })
+                    touch = null
+                    touches++
+                }
+            },
+    ) {
+        Image(painterResource(background), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Image(
+                painterResource(LocationPins.getLocationPin()),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(dimensionResource(R.dimen.launcher_app_icon_dimen))
+                    .scale(entrance.value)
+                    .gradientTint(gradient),
+            )
+            Text(
+                if (BuildConfig.DEBUG) "Positional (Debug)" else stringResource(R.string.app_name),
+                fontFamily = FontFamily(Font(R.font.logo)),
+                fontSize = textSize(R.dimen.launcher_app_title),
+                color = Color.White,
+                modifier = Modifier.graphicsLayer { alpha = entrance.value },
+            )
+        }
+        if (indicator > 0f) {
+            val radius = INDICATOR.dp
+            Canvas(Modifier.fillMaxSize()) {
+                val center = last
+                val r = radius.toPx() * indicator
+                if (r > 0f) drawCircle(Brush.radialGradient(listOf(gradient[1], Color.Transparent), center, r), r, center, alpha = indicator)
+            }
+        }
+    }
+}
+
+private fun Modifier.gradientTint(colors: List<Color>): Modifier = graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithCache {
+        val brush = Brush.linearGradient(colors)
+        onDrawWithContent {
+            drawContent()
+            drawRect(brush, blendMode = BlendMode.SrcIn)
+        }
+    }
+
+private const val START_DELAY = 2000L
+private const val RELEASE_DELAY = 1000L
+private const val INDICATOR = 60
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/SunPositionDiagram.kt
@@ -14161,178 +13986,6 @@ fun MarkerIconRow(selected: Int, onSelect: (Int) -> Unit) {
 }
 
 private const val MARKER_COLUMNS = 3
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/launcher/SplashScreen.kt
-################################################################################
-package app.simple.positional.ui.launcher
-
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Color
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
-import android.view.animation.AnimationUtils
-import android.view.animation.DecelerateInterpolator
-import android.widget.ImageView
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.Fragment
-import app.simple.positional.BuildConfig
-import app.simple.positional.R
-import app.simple.positional.activities.main.MainActivity
-import app.simple.positional.constants.LauncherBackground
-import app.simple.positional.constants.LocationPins
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.util.BitmapHelper.addLinearGradient
-import app.simple.positional.util.BitmapHelper.addRadialGradient
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
-
-@SuppressLint("CustomSplashScreen")
-class SplashScreen : Fragment() {
-    private lateinit var launcherBackground: ImageView
-    private lateinit var touchIndicator: ImageView
-    private lateinit var icon: ImageView
-    private lateinit var text: AppCompatTextView
-    private lateinit var launcherContainer: ConstraintLayout
-
-    private var randomDayValue: Int = 0
-    private var randomNightValue: Int = 0
-    private var colorOne: Int = 0x000000
-    private var colorTwo: Int = 0x000000
-    private val handler = Handler(Looper.getMainLooper())
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_launcher, container, false)
-
-        launcherBackground = view.findViewById(R.id.launcher_background)
-        touchIndicator = view.findViewById(R.id.touch_indicator)
-        icon = view.findViewById(R.id.launcher_icon)
-        text = view.findViewById(R.id.launcher_text)
-        launcherContainer = view.findViewById(R.id.launcher_act)
-
-        return view
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        if (BuildConfig.DEBUG) {
-            @Suppress("SetTextI18n")
-            text.text = "Positional (Debug)"
-        }
-
-        randomDayValue = LauncherBackground.vectorBackground.indices.random()
-        randomNightValue = LauncherBackground.vectorBackgroundNight.indices.random()
-
-        when (this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> {
-                colorOne = LauncherBackground.vectorNightColors[randomNightValue][0]
-                colorTwo = LauncherBackground.vectorNightColors[randomNightValue][1]
-                launcherBackground.setImageResource(LauncherBackground.vectorBackgroundNight[randomNightValue])
-
-                val window: Window = requireActivity().window
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                window.statusBarColor = Color.TRANSPARENT
-            }
-            Configuration.UI_MODE_NIGHT_NO -> {
-                colorOne = LauncherBackground.vectorColors[randomDayValue][0]
-                colorTwo = LauncherBackground.vectorColors[randomDayValue][1]
-                launcherBackground.setImageResource(LauncherBackground.vectorBackground[randomDayValue])
-            }
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> {
-                colorOne = LauncherBackground.vectorColors[randomDayValue][0]
-                colorTwo = LauncherBackground.vectorColors[randomDayValue][1]
-                launcherBackground.setImageResource(LauncherBackground.vectorBackground[randomDayValue])
-            }
-        }
-
-        touchIndicator.setImageBitmap(R.drawable.ic_touch_indicator
-                .toBitmapKeepingSize(context = requireContext(), 6, 255).let {
-                    addRadialGradient(it, colorTwo)
-                })
-
-        icon.setImageBitmap(LocationPins.locationsPins[GPSPreferences.getPinSkin()]
-                .toBitmapKeepingSize(context = requireContext(), 6, 255)
-                .addLinearGradient(intArrayOf(colorOne, colorTwo)))
-
-        icon.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.launcher_icon))
-        text.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.image_in))
-
-        launcherContainer.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    handler.removeCallbacksAndMessages(null)
-                    touchIndicator.x = event.x - touchIndicator.width / 2
-                    touchIndicator.y = event.y - touchIndicator.height / 2
-                    touchIndicator.animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setInterpolator(DecelerateInterpolator()).start()
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    touchIndicator.x = event.x - touchIndicator.width / 2f
-                    touchIndicator.y = event.y - touchIndicator.height / 2f
-                }
-                MotionEvent.ACTION_UP -> {
-                    touchIndicator.animate().scaleX(0.5f).scaleY(0.5f).alpha(0f).start()
-                    runPostDelayed(1000)
-                }
-            }
-
-            true
-        }
-    }
-
-    private fun runPostDelayed(delay: Long) {
-        handler.postDelayed({
-            if (requireActivity().isActivityFinishing()) return@postDelayed
-            runIntent()
-        }, delay)
-    }
-
-    private fun runIntent() {
-        val intent = Intent(requireActivity(), MainActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        intent.action = requireActivity().intent.action
-        startActivity(intent)
-        requireActivity().finish()
-    }
-
-    private fun Activity.isActivityFinishing(): Boolean {
-        return this.isFinishing || this.isDestroyed
-    }
-
-    override fun onPause() {
-        icon.clearAnimation()
-        text.clearAnimation()
-        handler.removeCallbacksAndMessages(null)
-        super.onPause()
-    }
-
-    override fun onResume() {
-        runPostDelayed(2000)
-        super.onResume()
-    }
-
-    override fun onDestroy() {
-        handler.removeCallbacksAndMessages(null)
-        super.onDestroy()
-    }
-
-    companion object {
-        fun newInstance(): SplashScreen {
-            return SplashScreen()
-        }
-    }
-}
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/panels/ClockReport.kt
@@ -15405,7 +15058,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15424,7 +15076,6 @@ import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.compose.SettingsState
 import app.simple.positional.util.AppIcons
 import app.simple.positional.util.PermissionUtils
-import app.simple.positional.util.ThemeSetter
 
 class Settings(activity: ComponentActivity) : PanelController(activity), SettingsActions {
     private var state by mutableStateOf(SettingsState())
@@ -15460,7 +15111,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     private fun refresh() {
         state = SettingsState(
             hasLocationPermission = PermissionUtils.checkPermission(activity),
-            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else AppCompatDelegate.getDefaultNightMode(),
+            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else MainPreferences.getTheme(),
             isMetric = MainPreferences.isMetric(),
             coordinatesFormat = MainPreferences.getCoordinatesFormat(),
             locationProvider = MainPreferences.getLocationProvider(),
@@ -15481,8 +15132,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     override fun setThemeMode(mode: Int) {
         MainPreferences.setDayNight(mode == SettingsLabels.THEME_AUTO)
         if (mode != SettingsLabels.THEME_AUTO) MainPreferences.setTheme(mode)
-        ThemeSetter.setAppTheme(mode)
-        refresh()
+        activity.recreate()
     }
 
     override fun openAccent() = startActivity(Intent(activity, AccentColorsActivity::class.java))
@@ -16268,58 +15918,22 @@ object BitmapHelper {
 ################################################################################
 package app.simple.positional.util
 
-import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.ColorStateList
-import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
-import androidx.appcompat.widget.AppCompatButton
-import com.google.android.material.animation.ArgbEvaluatorCompat
 
-@Suppress("unused")
 object ColorUtils {
-    fun ViewGroup.animateColorChange(endColor: Int) {
-        val colorAnim = ValueAnimator.ofObject(ArgbEvaluatorCompat(), this.backgroundTintList?.defaultColor, endColor)
-        colorAnim.duration = 1000
-        colorAnim.interpolator = DecelerateInterpolator(1.5F)
-        colorAnim.addUpdateListener { animation -> this.backgroundTintList = ColorStateList.valueOf(animation.animatedValue as Int) }
-        colorAnim.start()
-    }
-
-    fun TextView.animateColorChange(endColor: Int) {
-        val colorAnim = ValueAnimator.ofObject(ArgbEvaluatorCompat(), this.currentTextColor, endColor)
-        colorAnim.duration = 1000L
-        colorAnim.interpolator = DecelerateInterpolator(1.5F)
-        colorAnim.addUpdateListener { animation -> this.setTextColor(animation.animatedValue as Int) }
-        colorAnim.start()
-    }
-
-    fun AppCompatButton.animateColorChange(endColor: Int) {
-        val colorAnim = ValueAnimator.ofObject(ArgbEvaluatorCompat(), this.backgroundTintList!!.defaultColor, endColor)
-        colorAnim.duration = 500L
-        colorAnim.interpolator = DecelerateInterpolator(1.5F)
-        colorAnim.addUpdateListener { animation -> this.backgroundTintList = ColorStateList.valueOf(animation.animatedValue as Int) }
-        colorAnim.start()
-    }
-
     @ColorInt
     fun Context.resolveAttrColor(@AttrRes attr: Int): Int {
         val a = theme.obtainStyledAttributes(intArrayOf(attr))
-        val color: Int
-        try {
-            color = a.getColor(0, 0)
+        return try {
+            a.getColor(0, 0)
         } finally {
             a.recycle()
         }
-        return color
     }
 
-    fun Int.toHex(): String {
-        return String.format("#%06x", this and 0xffffff)
-    }
+    fun Int.toHex(): String = String.format("#%06x", this and 0xffffff)
 }
 
 ################################################################################
@@ -16351,50 +15965,31 @@ object ConditionUtils {
 ################################################################################
 package app.simple.positional.util
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.res.Configuration
-import android.content.res.Resources
-import android.os.Build
 import android.os.LocaleList
-import java.util.*
+import app.simple.positional.preferences.MainPreferences
+import java.util.Locale
 
-open class ContextUtils(context: Context) : ContextWrapper(context) {
-    companion object {
-        @SuppressLint("ObsoleteSdkInt")
-        fun updateLocale(baseContext: Context, languageCode: String): ContextWrapper {
-            val localeToSwitchTo = if (languageCode == "default") {
-                if (LocaleHelper.isOneOfTraditionalChinese()) {
-                    Locale.forLanguageTag("zh-TW")
-                } else {
-                    Locale.forLanguageTag(LocaleHelper.getSystemLanguageCode())
-                }
-            } else {
-                Locale.forLanguageTag(languageCode)
-            }
-
-            var context = baseContext
-            val resources: Resources = context.resources
-            val configuration: Configuration = resources.configuration
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val localeList = LocaleList(localeToSwitchTo)
-                LocaleList.setDefault(localeList)
-                configuration.setLocales(localeList)
-            } else {
-                @Suppress("deprecation")
-                configuration.locale = localeToSwitchTo
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                context = context.createConfigurationContext(configuration)
-            } else {
-                @Suppress("deprecation")
-                resources.updateConfiguration(configuration, resources.displayMetrics)
-            }
-
-            return ContextUtils(context)
+object ContextUtils {
+    fun wrap(base: Context, languageCode: String, applyNightMode: Boolean = true): Context {
+        val locale = when {
+            languageCode != "default" -> Locale.forLanguageTag(languageCode)
+            LocaleHelper.isOneOfTraditionalChinese() -> Locale.forLanguageTag("zh-TW")
+            else -> Locale.forLanguageTag(LocaleHelper.getSystemLanguageCode())
         }
+        val configuration = Configuration(base.resources.configuration)
+        val locales = LocaleList(locale)
+        LocaleList.setDefault(locales)
+        configuration.setLocales(locales)
+        if (applyNightMode) {
+            val night = if (NightMode.isNight(base)) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+            configuration.uiMode = (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or night
+        }
+        return base.createConfigurationContext(configuration)
     }
+
+    fun language(): String = MainPreferences.getAppLanguage() ?: "default"
 }
 
 ################################################################################
@@ -17134,6 +16729,44 @@ object NetworkCheck {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/NightMode.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import android.content.res.Configuration
+import android.os.PowerManager
+import androidx.core.content.getSystemService
+import app.simple.positional.preferences.MainPreferences
+import java.util.Calendar
+
+object NightMode {
+    const val FOLLOW_SYSTEM = -1
+    const val NO = 1
+    const val YES = 2
+    const val AUTO_BATTERY = 3
+    const val AUTO_TIME = 4
+    private const val DAY_START = 6
+    private const val DAY_END = 18
+
+    fun resolve(mode: Int, byTime: Boolean, systemNight: Boolean, powerSave: Boolean, hour: Int): Boolean = when {
+        byTime || mode == AUTO_TIME -> hour !in DAY_START until DAY_END
+        mode == YES -> true
+        mode == NO -> false
+        mode == AUTO_BATTERY -> powerSave || systemNight
+        else -> systemNight
+    }
+
+    fun isNight(context: Context): Boolean = resolve(
+        MainPreferences.getTheme(),
+        MainPreferences.isDayNightOn(),
+        context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES,
+        context.getSystemService<PowerManager>()?.isPowerSaveMode == true,
+        Calendar.getInstance()[Calendar.HOUR_OF_DAY],
+    )
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/Ordinal.kt
 ################################################################################
 package app.simple.positional.util
@@ -17367,48 +17000,6 @@ object TextViewUtils {
         return lowercase(LocaleHelper.getAppLocale()).split(" ").joinToString(" ") { word ->
             if (word.length <= 1) word else word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocaleHelper.getAppLocale()) else it.toString() }
         }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/util/ThemeSetter.kt
-################################################################################
-package app.simple.positional.util
-
-import androidx.annotation.IntRange
-import androidx.appcompat.app.AppCompatDelegate
-import java.util.*
-
-object ThemeSetter {
-    fun setAppTheme(@IntRange(from = -1, to = 4) value: Int) {
-        when (value) {
-            AppCompatDelegate.MODE_NIGHT_NO -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-            AppCompatDelegate.MODE_NIGHT_YES -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            }
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            }
-            AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
-            }
-            4 -> {
-                if (isDayOrNight()) {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                } else {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                }
-            }
-        }
-    }
-
-    fun isDayOrNight(): Boolean {
-        val cal = Calendar.getInstance()
-        cal.timeInMillis = System.currentTimeMillis()
-        val hour = cal[Calendar.HOUR_OF_DAY]
-        return hour >= 6 && hour < 18
     }
 }
 
@@ -18897,165 +18488,6 @@ class TwilightWidget : AppWidgetProvider() {
 }
 
 ################################################################################
-# FILE: app/src/main/res/anim/dialog_in.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/overshoot"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale=".9"
-        android:fromYScale=".9"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/dialog_out.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/decelerate_cubic"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale="1"
-        android:fromYScale="1"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale=".9"
-        android:toYScale=".9" />
-
-    <alpha
-        android:fromAlpha="1"
-        android:toAlpha="0" />
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/image_in.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:fillAfter="true"
-    android:interpolator="@android:interpolator/decelerate_cubic"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale=".5"
-        android:fromYScale=".5"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/launcher_icon.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="1000"
-    android:fillAfter="true"
-    android:interpolator="@android:interpolator/overshoot"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale=".5"
-        android:fromYScale=".5"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-
-    <translate
-        android:fromXDelta="0"
-        android:fromYDelta="-200"
-        android:toXDelta="0"
-        android:toYDelta="0" />
-
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-
-</set>
-
-################################################################################
-# FILE: app/src/main/res/layout-land/fragment_launcher.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/launcher_act"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/launcher_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="@font/logo"
-        android:gravity="center"
-        android:text="@string/app_name"
-        android:textColor="@color/textSecondary"
-        android:textSize="@dimen/launcher_app_title"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/launcher_icon"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/launcher_icon"
-        android:layout_width="@dimen/launcher_app_icon_dimen"
-        android:layout_height="@dimen/launcher_app_icon_dimen"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_pin_01"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/launcher_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/launcher_background"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="ContentDescription"
-        tools:layout_editor_absoluteX="0dp" />
-
-    <ImageView
-        android:id="@+id/touch_indicator"
-        android:layout_width="@dimen/touch_indicator_size"
-        android:layout_height="@dimen/touch_indicator_size"
-        android:src="@drawable/ic_touch_indicator"
-        android:scaleX="0"
-        android:scaleY="0"
-        tools:ignore="ContentDescription,MissingConstraints" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout-v26/widget_suntime.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -19230,221 +18662,6 @@ class TwilightWidget : AppWidgetProvider() {
     </LinearLayout>
 
 </LinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/activity_clock_widget.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.padding.PaddingAwareLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/toolbar_padding">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:layout_weight="1">
-
-        <ImageView
-            android:layout_width="@dimen/clock_image_shadow_size"
-            android:layout_height="@dimen/clock_image_shadow_size"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_clock_shadow"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/sweep_seconds"
-            android:layout_width="@dimen/clock_image_dimensions"
-            android:layout_height="@dimen/clock_image_dimensions"
-            android:layout_gravity="center"
-            android:padding="5dp"
-            android:rotation="30"
-            android:src="@drawable/clock_trail"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/clock_face"
-            android:layout_width="@dimen/clock_image_dimensions"
-            android:layout_height="@dimen/clock_image_dimensions"
-            android:layout_gravity="center"
-            android:src="@drawable/clock_face"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/day_night_indicator"
-            android:layout_width="@dimen/clock_day_night_indicator"
-            android:layout_height="@dimen/clock_day_night_indicator"
-            android:layout_gravity="center"
-            android:layout_marginBottom="60dp"
-            android:src="@drawable/ic_night"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/hour"
-            android:layout_width="@dimen/clock_needle_dimensions"
-            android:layout_height="@dimen/clock_needle_dimensions"
-            android:layout_gravity="center"
-            android:rotation="70"
-            android:src="@drawable/clock_needle_minimal_hour"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/minutes"
-            android:layout_width="@dimen/clock_needle_dimensions"
-            android:layout_height="@dimen/clock_needle_dimensions"
-            android:layout_gravity="center"
-            android:rotation="235"
-            android:src="@drawable/clock_needle_minimal_minute"
-            tools:ignore="ContentDescription" />
-
-        <ImageView
-            android:id="@+id/seconds"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/clock_needle_dimensions"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:rotation="120"
-            android:src="@drawable/clock_needle_minimal_second"
-            tools:ignore="ContentDescription" />
-
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:padding="@dimen/toolbar_padding">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="@font/regular"
-            android:gravity="start"
-            android:text="@string/battery_optimization_desc"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/settings_primary_text_size" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/grant_battery_optimization"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/medium"
-            android:text="@string/button_grant"
-            android:textAllCaps="false" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="32dp"
-            android:fontFamily="@font/regular"
-            android:gravity="start"
-            android:text="@string/notification_permission_desc"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/settings_primary_text_size" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/grant_notification_access"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="16dp"
-            android:fontFamily="@font/medium"
-            android:text="@string/button_grant"
-            android:textAllCaps="false" />
-
-    </LinearLayout>
-
-</app.simple.positional.decorations.padding.PaddingAwareLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/activity_launcher.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/launcher_act"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/mainBackground"
-    tools:ignore="MergeRootFrame" />
-
-################################################################################
-# FILE: app/src/main/res/layout/fragment_launcher.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/launcher_act"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.19"
-        tools:ignore="UseCompoundDrawables">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/launcher_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_marginBottom="20dp"
-            android:fontFamily="@font/logo"
-            android:text="@string/app_name"
-            android:textColor="@color/textSecondary"
-            android:textSize="@dimen/launcher_app_title" />
-
-        <ImageView
-            android:id="@+id/launcher_icon"
-            android:layout_width="@dimen/launcher_app_icon_dimen"
-            android:layout_height="@dimen/launcher_app_icon_dimen"
-            android:layout_gravity="center"
-            android:layout_margin="20dp"
-            android:src="@drawable/ic_pin_01"
-            tools:ignore="ContentDescription" />
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/launcher_background"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="ContentDescription"
-        tools:layout_editor_absoluteX="0dp" />
-
-    <ImageView
-        android:id="@+id/touch_indicator"
-        android:layout_width="@dimen/touch_indicator_size"
-        android:layout_height="@dimen/touch_indicator_size"
-        android:src="@drawable/ic_touch_indicator"
-        android:scaleX="0"
-        android:scaleY="0"
-        tools:ignore="ContentDescription,MissingConstraints" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/widget_clock.xml
@@ -20137,33 +19354,13 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">20dp</dimen>
     <dimen name="level_text_size">16sp</dimen>
 
-    <dimen name="settings_primary_text_size">13sp</dimen>
     <dimen name="settings_secondary_text_size">11sp</dimen>
 
     <dimen name="bottom_nav_height">50dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">22sp</dimen>
     <dimen name="launcher_app_icon_dimen">100dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 
-</resources>
-
-################################################################################
-# FILE: app/src/main/res/values-night-v27/styles.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Positional" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimaryDark">@android:color/transparent</item>
-        <item name="colorAppAccent">@color/positional</item>
-        <item name="colorAppAccentLight">@color/positional_light</item>
-
-        <item name="android:navigationBarColor">@color/toolbarBackground</item>
-        <item name="rippleColor">@color/rippleColor</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
-        <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
-    </style>
 </resources>
 
 ################################################################################
@@ -20180,7 +19377,6 @@ class TwilightWidget : AppWidgetProvider() {
     <color name="textPrimary">#FFFFFF</color>
     <color name="dividerColor">#BDBDBD</color>
     <color name="toolbarBackground">#191919</color>
-    <color name="rippleColor">#515151</color>
 
     <color name="iconRegular">#808080</color>
     <color name="indicator">#3A3A3A</color>
@@ -20202,13 +19398,11 @@ class TwilightWidget : AppWidgetProvider() {
 # FILE: app/src/main/res/values-night/styles.xml
 ################################################################################
 <resources>
-    <style name="Positional" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimaryDark">@android:color/transparent</item>
+    <style name="Positional" parent="android:Theme.Material.NoActionBar">
         <item name="colorAppAccent">@color/positional</item>
         <item name="colorAppAccentLight">@color/positional_light</item>
-
-        <item name="android:statusBarColor">@color/toolbarBackground</item>
-        <item name="rippleColor">@color/rippleColor</item>
+        <item name="android:windowBackground">@color/mainBackground</item>
+        <item name="android:colorAccent">?attr/colorAppAccent</item>
         <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
     </style>
 </resources>
@@ -20243,14 +19437,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">14sp</dimen>
 
     <dimen name="bottom_nav_height">70dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 
 
     <dimen name="trail_tools_padding">5dp</dimen>
@@ -20289,38 +19481,18 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">14sp</dimen>
 
     <dimen name="bottom_nav_height">70dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
     <dimen name="toolbar_padding">16dp</dimen>
-</resources>
-
-################################################################################
-# FILE: app/src/main/res/values-v27/styles.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Positional" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimaryDark">@android:color/transparent</item>
-        <item name="colorAppAccent">@color/positional</item>
-        <item name="colorAppAccentLight">@color/positional_light</item>
-
-        <item name="rippleColor">@color/rippleColor</item>
-        <item name="android:navigationBarColor">@color/toolbarBackground</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
-    </style>
 </resources>
 
 ################################################################################
@@ -20367,14 +19539,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">20dp</dimen>
     <dimen name="level_text_size">18sp</dimen>
 
-    <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">13sp</dimen>
 
     <dimen name="bottom_nav_height">50dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">27sp</dimen>
     <dimen name="launcher_app_icon_dimen">160dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 
 </resources>
 
@@ -20408,14 +19578,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">14sp</dimen>
 
     <dimen name="bottom_nav_height">60dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">175dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 </resources>
 
 ################################################################################
@@ -20442,7 +19610,6 @@ class TwilightWidget : AppWidgetProvider() {
     <color name="textTertiary">#686868</color>
     <color name="dividerColor">#BDBDBD</color>
     <color name="toolbarBackground">#FFFFFF</color>
-    <color name="rippleColor">#9FDADADA</color>
 
     <color name="iconRegular">#9A9A9A</color>
     <color name="indicator">#F3F3F3</color>
@@ -20563,14 +19730,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">14sp</dimen>
 
     <dimen name="bottom_nav_height">60dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 
 
     <dimen name="trail_tools_padding">5dp</dimen>
@@ -20952,13 +20117,11 @@ class TwilightWidget : AppWidgetProvider() {
 # FILE: app/src/main/res/values/styles.xml
 ################################################################################
 <resources>
-    <style name="Positional" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimaryDark">@android:color/transparent</item>
+    <style name="Positional" parent="android:Theme.Material.Light.NoActionBar">
         <item name="colorAppAccent">@color/positional</item>
         <item name="colorAppAccentLight">@color/positional_light</item>
-
-        <item name="rippleColor">@color/rippleColor</item>
-        <item name="android:navigationBarColor">@color/toolbarBackground</item>
+        <item name="android:windowBackground">@color/mainBackground</item>
+        <item name="android:colorAccent">?attr/colorAppAccent</item>
         <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
     </style>
 </resources>
@@ -21999,7 +21162,7 @@ class PhysicsValueTest {
 ################################################################################
 package app.simple.positional.ui.compose
 
-import androidx.appcompat.app.AppCompatDelegate
+import app.simple.positional.util.NightMode
 import app.simple.positional.R
 import app.simple.positional.util.LocaleHelper
 import org.junit.Assert.assertEquals
@@ -22010,9 +21173,9 @@ import org.junit.Test
 class SettingsLabelsTest {
     @Test
     fun themeLabels() {
-        assertEquals(R.string.theme_day, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_NO))
-        assertEquals(R.string.theme_night, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_YES))
-        assertEquals(R.string.theme_follow_system, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+        assertEquals(R.string.theme_day, SettingsLabels.theme(NightMode.NO))
+        assertEquals(R.string.theme_night, SettingsLabels.theme(NightMode.YES))
+        assertEquals(R.string.theme_follow_system, SettingsLabels.theme(NightMode.FOLLOW_SYSTEM))
         assertEquals(R.string.theme_auto, SettingsLabels.theme(SettingsLabels.THEME_AUTO))
         assertNull(SettingsLabels.theme(99))
     }
@@ -22311,6 +21474,43 @@ class LocationShareTest {
     fun coordinateTextJoinsSections() {
         val text = CoordinateFormats.text(listOf("A" to listOf(InfoRow("x:", "1")), "B" to listOf(InfoRow("y"))))
         assertEquals("A\nx: 1\n\nB\ny", text)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/util/NightModeTest.kt
+################################################################################
+package app.simple.positional.util
+
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class NightModeTest {
+    @Test
+    fun explicitModesIgnoreSystem() {
+        assertTrue(NightMode.resolve(NightMode.YES, false, systemNight = false, powerSave = false, hour = 12))
+        assertFalse(NightMode.resolve(NightMode.NO, false, systemNight = true, powerSave = true, hour = 23))
+    }
+
+    @Test
+    fun followSystem() {
+        assertTrue(NightMode.resolve(NightMode.FOLLOW_SYSTEM, false, systemNight = true, powerSave = false, hour = 12))
+        assertFalse(NightMode.resolve(NightMode.FOLLOW_SYSTEM, false, systemNight = false, powerSave = true, hour = 23))
+    }
+
+    @Test
+    fun batterySaverTurnsNightOn() {
+        assertTrue(NightMode.resolve(NightMode.AUTO_BATTERY, false, systemNight = false, powerSave = true, hour = 12))
+        assertFalse(NightMode.resolve(NightMode.AUTO_BATTERY, false, systemNight = false, powerSave = false, hour = 12))
+    }
+
+    @Test
+    fun byTimeUsesSixToEighteenAsDay() {
+        assertFalse(NightMode.resolve(NightMode.NO, true, systemNight = true, powerSave = false, hour = 6))
+        assertFalse(NightMode.resolve(NightMode.AUTO_TIME, false, systemNight = true, powerSave = false, hour = 17))
+        assertTrue(NightMode.resolve(NightMode.YES, true, systemNight = false, powerSave = false, hour = 18))
+        assertTrue(NightMode.resolve(NightMode.AUTO_TIME, false, systemNight = false, powerSave = false, hour = 5))
     }
 }
 
