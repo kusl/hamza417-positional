@@ -1,3 +1,6 @@
+32
+29
+
 ok it feels like the app has stabilized 
 we have the latest gradle stuff 
 now to actually modernize the app 
