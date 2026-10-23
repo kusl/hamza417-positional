@@ -100,4 +100,19 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.376s
 user	0m0.625s
 sys	0m0.785s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/adapters/settings/AccentColorAdapter.kt app/src/main/java/app/simple/positional/adapters/settings/LocationsAdapter.kt app/src/main/java/app/simple/positional/ui/subpanels/AccentColor.kt app/src/main/java/app/simple/positional/ui/subpanels/CustomLocation.kt app/src/main/java/app/simple/positional/popups/settings/CustomLocationPopupMenu.kt app/src/main/java/app/simple/positional/decorations/popup/PopupMenuCallback.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerAccentColor.java app/src/main/res/layout/fragment_color_accent.xml app/src/main/res/layout/adapter_accent_color_header.xml app/src/main/res/layout/adapter_accent_colors.xml app/src/main/res/layout/adapter_locations.xml app/src/main/res/layout/fragment_custom_location.xml app/src/main/res/layout-land/fragment_custom_location.xml app/src/main/res/layout/popup_custom_coordinates.xml
+rm 'app/src/main/java/app/simple/positional/adapters/settings/AccentColorAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/settings/LocationsAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerAccentColor.java'
+rm 'app/src/main/java/app/simple/positional/decorations/popup/PopupMenuCallback.java'
+rm 'app/src/main/java/app/simple/positional/popups/settings/CustomLocationPopupMenu.kt'
+rm 'app/src/main/java/app/simple/positional/ui/subpanels/AccentColor.kt'
+rm 'app/src/main/java/app/simple/positional/ui/subpanels/CustomLocation.kt'
+rm 'app/src/main/res/layout-land/fragment_custom_location.xml'
+rm 'app/src/main/res/layout/adapter_accent_color_header.xml'
+rm 'app/src/main/res/layout/adapter_accent_colors.xml'
+rm 'app/src/main/res/layout/adapter_locations.xml'
+rm 'app/src/main/res/layout/fragment_color_accent.xml'
+rm 'app/src/main/res/layout/fragment_custom_location.xml'
+rm 'app/src/main/res/layout/popup_custom_coordinates.xml'
 kushal@fedora:~/src/kotlin/positional$ 
