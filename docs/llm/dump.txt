@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T17:37:31-04:00
+Generated: 2026-10-23T19:28:44-04:00
 Branch:    master
-Commit:    8f039cb3 2026-10-23 17:37:21 -0400 add prompt
+Commit:    61692ada 2026-10-23 19:28:29 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (874 files)
+## TREE (881 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -72,8 +72,6 @@ app/
                 main/
                   LauncherActivity.kt
                   MainActivity.kt
-                service/
-                  ClockWidgetActivity.kt
               callbacks/
                 BottomBarHost.kt
               constants/
@@ -102,7 +100,15 @@ app/
                 interpolators/
                   LatLngInterpolator.java
                 maps/
+                  GpsMap.kt
                   Maps.kt
+                  OsmGpsMap.kt
+                  OsmMapView.kt
+                  OsmMeasureMap.kt
+                  OsmStyle.kt
+                  OsmTrailMap.kt
+                  PickerMap.kt
+                  TrackMaps.kt
                 measure/
                   MeasureMaps.kt
                 trails/
@@ -138,7 +144,6 @@ app/
                 UnitConverter.kt
                 Vector3.kt
               model/
-                ClockModel.java
                 DirectionModel.kt
                 Locales.kt
                 Locations.kt
@@ -160,10 +165,6 @@ app/
                 OrientationSensors.kt
                 SensorAccuracy.kt
               services/
-                ClockWidgetService.kt
-                ClockWidgetService2x2.kt
-                ClockWidgetService3x3.kt
-                ClockWidgetService4x4.kt
                 FusedLocationService.kt
                 LocationBus.kt
                 LocationService.kt
@@ -219,6 +220,7 @@ app/
                   Time.kt
                   Trail.kt
               util/
+                AccentThemes.kt
                 AppIcons.kt
                 ArrayHelper.kt
                 BitmapHelper.kt
@@ -235,6 +237,7 @@ app/
                 LocationPrompt.kt
                 LocationShare.kt
                 MapIntents.kt
+                MapSource.kt
                 MoonAngle.kt
                 MoonTimeFormatter.kt
                 NetworkCheck.kt
@@ -258,9 +261,7 @@ app/
                   TrailDataViewModel.kt
                   TrailsViewModel.kt
               widgets/
-                ClockWidget2x2.java
-                ClockWidget3x3.java
-                ClockWidget4x4.java
+                ClockWidgets.kt
                 MoonPhaseWidget.kt
                 SunTimeWidget.kt
                 SunTimeWidgetArt.kt
@@ -388,7 +389,6 @@ app/
           ic_pin_unreliable.xml
           ic_place_custom.xml
           ic_place_historical.xml
-          ic_place_notification.xml
           ic_reset.xml
           ic_route_changed.xml
           ic_rowing.xml
@@ -876,6 +876,7 @@ app/
         values-ur-rIN/
           strings.xml
         values-v31/
+          bools.xml
           themes_accent.xml
         values-xhdpi/
           dimens.xml
@@ -885,6 +886,7 @@ app/
           strings.xml
         values/
           attr.xml
+          bools.xml
           colors.xml
           colors_accent.xml
           dimens.xml
@@ -920,6 +922,10 @@ app/
               database/
                 converters/
                   MeasurePointConverterTest.kt
+              decorations/
+                maps/
+                  OsmStyleTest.kt
+                  TrackPinTest.kt
               math/
                 AngleTest.kt
                 ClockMotionTest.kt
@@ -958,9 +964,12 @@ app/
                 DirectionTest.kt
                 DistanceTextTest.kt
                 LocationShareTest.kt
+                MapSourceTest.kt
                 NightModeTest.kt
                 TrailNamesTest.kt
                 TwilightTest.kt
+              widgets/
+                DayNightTest.kt
 build.gradle
 export.sh
 gradle.properties
@@ -1195,7 +1204,7 @@ Location, trails, measurements, saved places and settings are stored only on you
 
 ## Third party services
 
-The map panels use the Google Maps SDK, and the location panels can use Google Play services and the Android Geocoder. These services may receive your location, IP address and device information under Google's privacy policy. All other features work offline.
+The map panels use the Google Maps SDK, and the location panels can use Google Play services and the Android Geocoder. These services may receive your location, IP address and device information under Google's privacy policy. When OpenStreetMap is the map source, map tiles are downloaded from the OpenStreetMap Foundation's tile servers, which receive your IP address, the app name and version, and the tiles around the area you view, under the [OSMF privacy policy](https://osmfoundation.org/wiki/Privacy_Policy). All other features work offline.
 
 ## Children
 
@@ -1231,14 +1240,14 @@ A location, compass, clock, level, trail and measurement toolkit for Android. Co
 - **Level**: bubble level from the accelerometer.
 - **Trail**: record and review paths with markers.
 - **Measure** and **Direction**: distances between points and bearings to targets.
-- Home screen widgets for clock, sun time, moon phase and twilight (Glance, hourly refresh).
+- Home screen widgets: analog clock (Android 12+, ticked by the launcher with no background service), sun time, moon phase and twilight (Glance, hourly refresh).
 
 ## Install
 
 1. Download the latest APK from [Releases](https://github.com/kusl/hamza417-positional/releases/latest), or
 2. Add `https://github.com/kusl/hamza417-positional` to [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
 
-Android 7.0 (API 24) or newer. Silent background updates through Obtainium need Android 12 or newer.
+Android 7.0 (API 24) or newer. Clock widgets and silent background updates through Obtainium need Android 12 or newer.
 
 Releases are signed with this fork's own key and cannot be installed over the Play Store build; uninstall that first.
 
@@ -1253,9 +1262,9 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, OpenStreetMap style and geometry, tracking pins, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
-The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
+Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings.
 
 ## Compose migration
 
@@ -1282,8 +1291,11 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 8j | Sub screens (accent colours, arts, time zones, saved measures, trails and directions, custom locations, map search, help pages) are Navigation Compose destinations inside `MainActivity`; the panel lifecycle follows its destination so sensors and maps pause while a sub screen is open; nine activities removed | Done |
 | 9a | Moon phase and sun time widgets on Glance (same receivers, so placed widgets keep working); location updates delivered through an in-process `LocationBus` instead of the deprecated `LocalBroadcastManager` | Done |
 | 9b | Twilight and sun time art widgets on Glance with shared widget parts; twilight times computed once in `Twilight` for the clock panel and widget; twilight and sun art widgets refresh hourly; info section graphics no longer overlap text | Done |
-| 9c | Clock widgets without a per-second foreground service | Next |
-| 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
+| 9c | Clock widgets on the platform `AnalogClock` (Android 12+): hands rendered once with the chosen skin and accent on the 12-hour face, ticked by the launcher; the widgets refresh when the app is left so skin and accent changes apply; date from `TextClock`; day and night icon refreshed by a non-waking alarm at 6:00 and 19:00. Foreground service, notification and battery optimization prompts removed. Text without an explicit style no longer inherits a fixed line height, so large wrapped headings do not overlap | Done |
+| 10a | Map source setting (automatic, Google Maps, OpenStreetMap); GPS panel on MapLibre with OpenStreetMap tiles, tile cache, pin, accuracy circle, target line, follow, compass and bearing rotation behind a `GpsMap` interface; pin bitmaps shared by both maps; APK limited to arm64-v8a, armeabi-v7a and x86_64 | Done |
+| 10b | Trail and measure panels on OpenStreetMap through `TrailMap` and `MeasureMap` interfaces on a shared `OsmMapView` base (camera, heading sensor, pin, accuracy circle, lines, trail markers, measure guide line, wrap to fit); trail auto center stops while paused instead of re-posting forever; tracking pins shared with the Google maps; unused measure label overlay removed | Done |
+| 10c | Address search map on OpenStreetMap through a `PickerMap` interface; map views share an `OsmMapView` base and a `MapHost` lifecycle contract; Google Play services prompt only when Google Maps or the fused provider is in use | Done |
+| 11 | Remaining Java (Room models, map callbacks, Google marker animation helpers) to Kotlin with the same Room schema | Next |
 
 ## Building
 
@@ -1323,16 +1335,16 @@ Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper a
 
 ```
 app/src/main/java/app/simple/positional/
-  activities/   launcher, main activity and widget setup
+  activities/   launcher and main activity
   ui/navigation/ routes and sub screen destinations
   constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
   sensors/      lifecycle-aware gravity and heading sensors
   ui/panels/    panel controllers
   extensions/   panel controller base, sensor panel, map lifecycle
-  decorations/  Google Maps view wrappers and marker helpers
+  decorations/  Google Maps and OpenStreetMap views, marker helpers
   database/     Room entities, DAOs and databases
-  services/     location and clock widget services
+  services/     location services
   widgets/      app widget providers
   math/         vectors, angles, rotation physics, distances, unit conversion
   util/         formatting and Android helpers
@@ -1388,6 +1400,11 @@ android {
         vectorDrawables.useSupportLibrary = true
         manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
         resValue 'string', 'versionName', versionName
+        buildConfigField 'boolean', 'HAS_MAPS_KEY', mapsApiKey.isEmpty() ? 'false' : 'true'
+
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+        }
 
         ksp {
             arg('room.schemaLocation', "$projectDir/databases/schemas")
@@ -1466,6 +1483,7 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-location:21.4.0'
     implementation 'com.google.android.gms:play-services-maps:20.1.0'
+    implementation 'org.maplibre.gl:android-sdk-opengl:13.7.1'
 
     implementation 'org.shredzone.commons:commons-suncalc:3.11'
     implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
@@ -1586,9 +1604,6 @@ dependencies {
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -1873,14 +1888,6 @@ dependencies {
             android:exported="false"
             tools:targetApi="o" />
 
-        <activity
-            android:name=".activities.service.ClockWidgetActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".services.LocationService"
             android:enabled="true"
@@ -1904,38 +1911,9 @@ dependencies {
             android:stopWithTask="true"
             tools:ignore="ForegroundServicePermission" />
 
-        <service
-            android:name=".services.ClockWidgetService2x2"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="specialUse"
-            android:icon="@drawable/ic_access_time"
-            android:label="@string/clock"
-            android:stopWithTask="false" />
-
-        <service
-            android:name=".services.ClockWidgetService3x3"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="specialUse"
-            android:icon="@drawable/ic_access_time"
-            android:label="@string/clock"
-            android:stopWithTask="false" />
-
-        <service
-            android:name=".services.ClockWidgetService4x4"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="specialUse"
-            android:icon="@drawable/ic_access_time"
-            android:label="@string/clock"
-            android:stopWithTask="false" />
-
         <receiver
             android:name=".widgets.ClockWidget4x4"
+            android:enabled="@bool/clock_widgets"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
@@ -1950,6 +1928,7 @@ dependencies {
 
         <receiver
             android:name=".widgets.ClockWidget2x2"
+            android:enabled="@bool/clock_widgets"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
@@ -1964,6 +1943,7 @@ dependencies {
 
         <receiver
             android:name=".widgets.ClockWidget3x3"
+            android:enabled="@bool/clock_widgets"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
@@ -2288,111 +2268,6 @@ private fun createPanel(tag: String, activity: ComponentActivity): PanelControll
     PanelCatalog.LEVEL -> Level(activity)
     PanelCatalog.SETTINGS -> Settings(activity)
     else -> GPS(activity)
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt
-################################################################################
-package app.simple.positional.activities.service
-
-import android.app.Activity
-import android.appwidget.AppWidgetManager
-import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import android.provider.Settings
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import app.simple.positional.R
-import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.compose.setPositionalContent
-import app.simple.positional.util.PermissionUtils.hasNotificationPermission
-import app.simple.positional.util.PermissionUtils.isIgnoringBatteryOptimizations
-
-class ClockWidgetActivity : BaseActivity() {
-    private var appWidgetCode = AppWidgetManager.INVALID_APPWIDGET_ID
-    private var batteryGranted by mutableStateOf(false)
-    private var notificationGranted by mutableStateOf(false)
-
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) refresh() else Toast.makeText(this, R.string.notification_permission_desc, Toast.LENGTH_LONG).show()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        appWidgetCode = intent.extras?.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-            ?: AppWidgetManager.INVALID_APPWIDGET_ID
-        refresh()
-        if (batteryGranted && notificationGranted) close()
-        setPositionalContent {
-            Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                Column(
-                    Modifier.systemBarsPadding().padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-                ) {
-                    Image(painterResource(R.drawable.clock_face), contentDescription = null, modifier = Modifier.size(160.dp))
-                    Text(stringResource(R.string.battery_optimization_desc), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-                    Button(onClick = ::onBattery) { Text(stringResource(if (batteryGranted) R.string.button_close else R.string.button_grant)) }
-                    Text(stringResource(R.string.notification_permission_desc), textAlign = TextAlign.Center, style = MaterialTheme.typography.bodyLarge)
-                    Button(onClick = ::onNotification) { Text(stringResource(if (notificationGranted) R.string.button_close else R.string.button_grant)) }
-                }
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refresh()
-    }
-
-    private fun refresh() {
-        batteryGranted = isIgnoringBatteryOptimizations()
-        notificationGranted = hasNotificationPermission()
-    }
-
-    private fun onBattery() {
-        when {
-            !batteryGranted -> startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            notificationGranted -> close()
-            else -> Toast.makeText(this, R.string.notification_permission_desc, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun onNotification() {
-        when {
-            !notificationGranted -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            }
-            batteryGranted -> close()
-            else -> Toast.makeText(this, R.string.battery_optimization_desc, Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun close() {
-        setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetCode))
-        finish()
-    }
 }
 
 ################################################################################
@@ -3159,6 +3034,99 @@ public interface LatLngInterpolator {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/GpsMap.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Point
+import android.location.Location
+import android.view.MotionEvent
+import android.view.View
+import androidx.lifecycle.DefaultLifecycleObserver
+import app.simple.positional.R
+import app.simple.positional.constants.LocationPins
+import app.simple.positional.extensions.maps.MapLifecycle
+import app.simple.positional.extensions.maps.MapsCallbacks
+import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.util.BitmapHelper.addLinearGradient
+import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
+import app.simple.positional.util.MapSource
+import com.google.android.gms.maps.model.LatLng
+
+interface MapHost {
+    val view: View
+    val lifecycleObserver: DefaultLifecycleObserver
+}
+
+interface PanelMap : MapHost {
+    fun setCallbacks(callbacks: MapsCallbacks)
+    fun updateLocation(location: Location)
+    fun resetCamera(zoom: Float)
+}
+
+interface GpsMap : PanelMap {
+    var isMapMovementEnabled: Boolean
+    var onTouch: ((MotionEvent) -> Unit)?
+    fun screenPoint(latLng: LatLng): Point?
+    fun setTargetMarker(latLng: LatLng?)
+    fun moveCameraToTarget()
+    fun zoomIn()
+    fun zoomOut()
+    fun registerWithRunnable()
+    fun unregister()
+
+    companion object {
+        fun create(context: Context): GpsMap = if (MapSource.isOsm()) OsmGpsMap(context) else GoogleGpsMap(Maps(context))
+    }
+}
+
+object GpsPin {
+    private val customGradient = intArrayOf(Color.parseColor("#FF1B50"), Color.parseColor("#e11677"))
+
+    fun bitmap(context: Context, custom: Boolean, moving: Boolean): Bitmap {
+        val icon = if (moving && !custom) R.drawable.ic_bearing_marker else LocationPins.getLocationPin()
+        val bitmap = icon.toBitmapKeepingSize(context, GPSPreferences.getPinSize(), GPSPreferences.getPinOpacity())
+        return if (custom) bitmap.addLinearGradient(customGradient) else bitmap
+    }
+}
+
+class GoogleGpsMap(private val maps: Maps) : GpsMap {
+    init {
+        maps.alpha = 0f
+        maps.onCreate(null)
+    }
+
+    override val view: View get() = maps
+    override val lifecycleObserver = MapLifecycle(maps)
+    override var isMapMovementEnabled by maps::isMapMovementEnabled
+    override var onTouch: ((MotionEvent) -> Unit)? = null
+        set(value) {
+            field = value
+            maps.onTouch = value?.let { touch -> { event: MotionEvent, _: Boolean -> touch(event) } }
+        }
+
+    override fun setCallbacks(callbacks: MapsCallbacks) = maps.setOnMapsCallbackListener(callbacks)
+
+    override fun updateLocation(location: Location) {
+        maps.setFirstLocation(location)
+        maps.location = location
+        maps.addMarker(LatLng(location.latitude, location.longitude))
+    }
+
+    override fun screenPoint(latLng: LatLng): Point? = maps.screenPoint(latLng)
+    override fun resetCamera(zoom: Float) = maps.resetCamera(zoom)
+    override fun setTargetMarker(latLng: LatLng?) = maps.setTargetMarker(latLng)
+    override fun moveCameraToTarget() = maps.moveCameraToTarget()
+    override fun zoomIn() = maps.zoomIn()
+    override fun zoomOut() = maps.zoomOut()
+    override fun registerWithRunnable() = maps.registerWithRunnable()
+    override fun unregister() = maps.unregister()
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/maps/Maps.kt
 ################################################################################
 package app.simple.positional.decorations.maps
@@ -3168,7 +3136,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -3187,9 +3154,7 @@ import app.simple.positional.math.LowPassFilter
 import app.simple.positional.math.Vector3
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.BitmapHelper.addLinearGradient
 import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import app.simple.positional.util.ConditionUtils.invert
 import app.simple.positional.util.ConditionUtils.isNotNull
@@ -3489,33 +3454,10 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
 
             withContext(Dispatchers.Default) {
                 if (isCustomCoordinate) {
-                    markerBitmap = LocationPins.getLocationPin()
-                            .toBitmapKeepingSize(
-                                context,
-                                GPSPreferences.getPinSize(),
-                                GPSPreferences.getPinOpacity()
-                            ).addLinearGradient(
-                                intArrayOf(
-                                    Color.parseColor("#FF1B50"),
-                                    Color.parseColor("#e11677")))
-                } else {
-                    if (location.isNotNull()) {
-                        if (!LocationExtension.getLocationStatus(context)) return@withContext
-
-                        markerBitmap = if (location!!.speed == 0.0F) {
-                            LocationPins.getLocationPin()
-                                    .toBitmapKeepingSize(
-                                        context,
-                                        GPSPreferences.getPinSize(),
-                                        GPSPreferences.getPinOpacity())
-                        } else {
-                            R.drawable.ic_bearing_marker
-                                    .toBitmapKeepingSize(
-                                        context,
-                                        GPSPreferences.getPinSize(),
-                                        GPSPreferences.getPinOpacity())
-                        }
-                    }
+                    markerBitmap = GpsPin.bitmap(context, custom = true, moving = false)
+                } else if (location.isNotNull()) {
+                    if (!LocationExtension.getLocationStatus(context)) return@withContext
+                    markerBitmap = GpsPin.bitmap(context, custom = false, moving = location!!.speed > 0F)
                 }
             }
 
@@ -3949,6 +3891,1034 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/OsmGpsMap.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.graphics.Point
+import android.location.Location
+import android.view.MotionEvent
+import androidx.core.content.ContextCompat
+import app.simple.positional.R
+import app.simple.positional.constants.LocationPins
+import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.preferences.MainPreferences
+import com.google.android.gms.maps.model.LatLng
+import org.maplibre.android.camera.CameraPosition
+
+@SuppressLint("ViewConstructor")
+class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
+    override var isMapMovementEnabled = true
+    override var onTouch: ((MotionEvent) -> Unit)? = null
+    override val compassRotation get() = GPSPreferences.isCompassRotation()
+    private val custom = MainPreferences.isCustomCoordinate()
+    private val customPoint = MainPreferences.getCoordinates().let { it[0].toDouble() to it[1].toDouble() }
+
+    override fun startCamera(): CameraPosition {
+        val start = if (custom) customPoint else MainPreferences.getLastCoordinates().let { it[0].toDouble() to it[1].toDouble() }
+        return camera(start.first, start.second, GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), GPSPreferences.getMapBearing())
+    }
+
+    override fun onCameraIdle(position: CameraPosition) {
+        GPSPreferences.setMapZoom(position.zoom.toFloat())
+        GPSPreferences.setMapTilt(position.tilt.toFloat())
+        GPSPreferences.setMapBearing(position.bearing.toFloat())
+    }
+
+    override fun onGesture() {
+        isMapMovementEnabled = false
+    }
+
+    override fun onStyleReady() {
+        drawPin()
+        drawTarget()
+    }
+
+    override fun onHeadingChanged() {
+        if (!animating) rotate(heading, animate = false)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        onTouch?.invoke(ev)
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun updateLocation(location: Location) {
+        val first = this.location == null
+        this.location = location
+        drawPin()
+        drawTarget()
+        if (first) {
+            moveCamera(camera(location.latitude, location.longitude, GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), bearing()))
+        } else if (isMapMovementEnabled && !animating && !GPSPreferences.isTargetMarkerMode()) {
+            follow(GPSPreferences.getMapZoom())
+        }
+    }
+
+    override fun screenPoint(latLng: LatLng): Point? = screenPointOf(latLng.latitude, latLng.longitude)
+
+    override fun resetCamera(zoom: Float) = follow(zoom)
+
+    override fun setTargetMarker(latLng: LatLng?) {
+        val target = latLng?.let { it.latitude to it.longitude } ?: target() ?: return
+        GPSPreferences.setTargetMarkerLatitude(target.first.toFloat())
+        GPSPreferences.setTargetMarkerLongitude(target.second.toFloat())
+        GPSPreferences.setTargetMarker(true)
+    }
+
+    override fun moveCameraToTarget() {
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        animateTo(camera(target[0].toDouble(), target[1].toDouble(), GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), bearing()))
+    }
+
+    override fun zoomIn() = zoom(zoomIn = true)
+
+    override fun zoomOut() = zoom(zoomIn = false)
+
+    override fun registerWithRunnable() = registerHeadingLater()
+
+    override fun unregister() = unregisterHeading()
+
+    private fun current(): Pair<Double, Double>? = if (custom) customPoint else location?.let { it.latitude to it.longitude }
+
+    private fun bearing(): Float = when {
+        GPSPreferences.isCompassRotation() -> heading
+        GPSPreferences.isBearingRotation() -> location?.bearing ?: 0f
+        else -> 0f
+    }
+
+    private fun follow(zoom: Float) {
+        val point = current() ?: target() ?: return
+        animateTo(camera(point.first, point.second, zoom, GPSPreferences.getMapTilt(), bearing()))
+    }
+
+    private fun drawPin() {
+        val point = current() ?: return
+        val fix = location
+        val moving = !custom && (fix?.speed ?: 0f) > 0f
+        drawPin(moving, point.first, point.second, centered = moving, rotation = if (moving) fix?.bearing ?: 0f else 0f) {
+            GpsPin.bitmap(context, custom, moving)
+        }
+        if (custom || fix == null) return
+        drawAccuracy(
+            point.first,
+            point.second,
+            if (moving) fix.speed.toDouble() else fix.accuracy.toDouble(),
+            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_color) else LocationPins.getCircleFillColor(),
+            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_stroke) else LocationPins.getCircleStrokeColor(),
+        )
+    }
+
+    private fun drawTarget() {
+        val current = current()
+        if (!GPSPreferences.isTargetMarkerSet() || current == null) {
+            source(OsmStyle.LINE, OsmStyle.EMPTY_FEATURES)
+            return
+        }
+        val target = GPSPreferences.getTargetMarkerCoordinates().let { it[0].toDouble() to it[1].toDouble() }
+        val start = GPSPreferences.getTargetMarkerStartCoordinates().let { it[0].toDouble() to it[1].toDouble() }
+        source(OsmStyle.LINE, OsmStyle.line(if (custom) listOf(current, target) else listOf(start, current, target)))
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity -> {
+                invalidatePin()
+                drawPin()
+            }
+            GPSPreferences.compassRotation -> if (GPSPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
+            GPSPreferences.useBearingRotation, GPSPreferences.isNorthOnly -> rotate(bearing(), animate = true)
+            else -> drawTarget()
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/OsmMapView.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Point
+import android.location.Location
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import androidx.annotation.ColorInt
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import app.simple.positional.R
+import app.simple.positional.extensions.maps.MapsCallbacks
+import app.simple.positional.sensors.HeadingSensor
+import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
+import app.simple.positional.util.ColorUtils.resolveAttrColor
+import com.google.android.gms.maps.model.LatLng
+import org.maplibre.android.MapLibre
+import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.camera.CameraUpdateFactory
+import org.maplibre.android.geometry.LatLngBounds
+import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
+import org.maplibre.android.maps.Style
+import org.maplibre.android.offline.OfflineManager
+import org.maplibre.android.style.layers.Property
+import org.maplibre.android.style.layers.PropertyFactory
+import org.maplibre.android.style.layers.PropertyValue
+import org.maplibre.android.style.sources.GeoJsonSource
+import kotlin.math.roundToInt
+import org.maplibre.android.geometry.LatLng as LibreLatLng
+
+@SuppressLint("ViewConstructor")
+abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), MapHost, HeadingSensor.Listener,
+    SharedPreferences.OnSharedPreferenceChangeListener {
+    override val view: View get() = this
+    protected var map: MapLibreMap? = null
+    protected var callbacks: MapsCallbacks? = null
+    protected var location: Location? = null
+    protected var heading = 0f
+    protected var headingAccuracy = -1
+    protected var animating = false
+    protected val mainHandler = Handler(Looper.getMainLooper())
+    private var style: Style? = null
+    private var pinKey: Any? = null
+    private var owner: LifecycleOwner? = null
+    private var sensorOn = false
+    private val headingSensor = HeadingSensor(context, this)
+    private val registerTask = Runnable { registerHeading() }
+    private val accent = context.resolveAttrColor(R.attr.colorAppAccent)
+
+    protected abstract val compassRotation: Boolean
+    protected abstract fun startCamera(): CameraPosition
+    protected abstract fun onCameraIdle(position: CameraPosition)
+    protected open fun onStyleReady() {}
+    protected open fun onClick(latitude: Double, longitude: Double) {
+        callbacks?.onMapClicked()
+    }
+    protected open fun onGesture() {}
+    protected open fun onCameraMoved() {}
+    protected open fun onHeadingChanged() {}
+    protected open fun onResumed() {}
+    protected open fun onPaused() {}
+
+    override val lifecycleObserver = object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) = this@OsmMapView.onStart()
+
+        override fun onResume(owner: LifecycleOwner) {
+            this@OsmMapView.owner = owner
+            this@OsmMapView.onResume()
+            getSharedPreferences().registerOnSharedPreferenceChangeListener(this@OsmMapView)
+            registerHeadingLater()
+            onResumed()
+        }
+
+        override fun onPause(owner: LifecycleOwner) {
+            onPaused()
+            unregisterHeading()
+            getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this@OsmMapView)
+            this@OsmMapView.onPause()
+        }
+
+        override fun onStop(owner: LifecycleOwner) = this@OsmMapView.onStop()
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            mainHandler.removeCallbacksAndMessages(null)
+            this@OsmMapView.owner = null
+            this@OsmMapView.onDestroy()
+        }
+    }
+
+    init {
+        onCreate(null)
+        getMapAsync(::ready)
+    }
+
+    private fun ready(map: MapLibreMap) {
+        this.map = map
+        map.uiSettings.isCompassEnabled = false
+        map.uiSettings.isLogoEnabled = false
+        map.moveCamera(CameraUpdateFactory.newCameraPosition(startCamera()))
+        map.addOnMapClickListener {
+            onClick(it.latitude, it.longitude)
+            true
+        }
+        map.addOnMapLongClickListener {
+            callbacks?.onMapLongClicked(LatLng(it.latitude, it.longitude))
+            true
+        }
+        map.addOnCameraMoveStartedListener { reason ->
+            if (reason == MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE) {
+                animating = false
+                onGesture()
+            }
+        }
+        map.addOnCameraMoveListener { onCameraMoved() }
+        map.addOnCameraIdleListener { onCameraIdle(map.cameraPosition) }
+        val dark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        map.setStyle(Style.Builder().fromJson(OsmStyle.json(dark))) {
+            style = it
+            pinKey = null
+            layer(OsmStyle.LINE, PropertyFactory.lineColor(accent))
+            layer(OsmStyle.GUIDE, PropertyFactory.lineColor(accent))
+            onStyleReady()
+            callbacks?.onMapInitialized()
+        }
+    }
+
+    override fun onHeading(azimuth: Float) {
+        heading = azimuth
+        onHeadingChanged()
+    }
+
+    override fun onAccuracy(type: Int, accuracy: Int) {
+        headingAccuracy = accuracy
+    }
+
+    protected fun registerHeadingLater() {
+        mainHandler.removeCallbacks(registerTask)
+        mainHandler.postDelayed(registerTask, SENSOR_DELAY)
+    }
+
+    protected fun unregisterHeading() {
+        mainHandler.removeCallbacks(registerTask)
+        if (sensorOn) owner?.let(headingSensor::onPause)
+        sensorOn = false
+    }
+
+    private fun registerHeading() {
+        val current = owner ?: return
+        if (sensorOn || !compassRotation || !headingSensor.isAvailable) return
+        headingSensor.onResume(current)
+        sensorOn = true
+    }
+
+    protected fun layer(id: String, vararg properties: PropertyValue<*>) {
+        style?.getLayer(id)?.setProperties(*properties)
+    }
+
+    protected fun source(id: String, json: String) {
+        style?.getSourceAs<GeoJsonSource>(id)?.setGeoJson(json)
+    }
+
+    protected fun image(name: String, bitmap: Bitmap) {
+        style?.addImage(name, bitmap)
+    }
+
+    protected fun hasStyle() = style != null
+
+    protected fun drawPin(key: Any, latitude: Double, longitude: Double, centered: Boolean, rotation: Float, bitmap: () -> Bitmap) {
+        if (style == null) return
+        if (pinKey != key) {
+            image(OsmStyle.PIN, bitmap())
+            pinKey = key
+        }
+        source(OsmStyle.PIN, OsmStyle.point(latitude, longitude))
+        layer(
+            OsmStyle.PIN,
+            PropertyFactory.iconAnchor(if (centered) Property.ICON_ANCHOR_CENTER else Property.ICON_ANCHOR_BOTTOM),
+            PropertyFactory.iconRotate(rotation),
+        )
+    }
+
+    protected fun invalidatePin() {
+        pinKey = null
+    }
+
+    protected fun drawAccuracy(latitude: Double, longitude: Double, radius: Double, @ColorInt fill: Int, @ColorInt stroke: Int) {
+        source(OsmStyle.ACCURACY, OsmStyle.circle(latitude, longitude, radius))
+        layer(OsmStyle.ACCURACY, PropertyFactory.fillColor(fill), PropertyFactory.fillOutlineColor(stroke))
+    }
+
+    protected fun target(): Pair<Double, Double>? = map?.cameraPosition?.target?.let { it.latitude to it.longitude }
+
+    protected fun screenPointOf(latitude: Double, longitude: Double): Point? =
+        map?.projection?.toScreenLocation(LibreLatLng(latitude, longitude))?.let { Point(it.x.roundToInt(), it.y.roundToInt()) }
+
+    protected fun camera(latitude: Double, longitude: Double, zoom: Float, tilt: Float, bearing: Float): CameraPosition = CameraPosition.Builder()
+        .target(LibreLatLng(latitude, longitude))
+        .zoom(zoom.toDouble())
+        .tilt(tilt.toDouble())
+        .bearing(bearing.toDouble())
+        .build()
+
+    protected fun moveCamera(position: CameraPosition) {
+        map?.moveCamera(CameraUpdateFactory.newCameraPosition(position))
+    }
+
+    protected fun animateTo(position: CameraPosition) {
+        val map = map ?: return
+        animating = true
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(position), CAMERA_SPEED, object : MapLibreMap.CancelableCallback {
+            override fun onCancel() {
+                animating = false
+            }
+
+            override fun onFinish() {
+                animating = false
+            }
+        })
+    }
+
+    protected fun fit(points: List<Pair<Double, Double>>, animate: Boolean): Boolean {
+        val map = map ?: return false
+        if (points.size < 2) return false
+        val bounds = LatLngBounds.Builder().includes(points.map { LibreLatLng(it.first, it.second) }).build()
+        val update = CameraUpdateFactory.newLatLngBounds(bounds, (FIT_PADDING * resources.displayMetrics.density).roundToInt())
+        if (animate) map.animateCamera(update) else map.moveCamera(update)
+        return true
+    }
+
+    protected fun zoom(zoomIn: Boolean) {
+        map?.animateCamera(if (zoomIn) CameraUpdateFactory.zoomIn() else CameraUpdateFactory.zoomOut())
+    }
+
+    protected fun rotate(bearing: Float, animate: Boolean) {
+        val update = CameraUpdateFactory.bearingTo(bearing.toDouble())
+        if (animate) map?.animateCamera(update) else map?.moveCamera(update)
+    }
+
+    private companion object {
+        const val CAMERA_SPEED = 1000
+        const val SENSOR_DELAY = 500L
+        const val FIT_PADDING = 64
+    }
+}
+
+@SuppressLint("ViewConstructor")
+abstract class OsmPanelMap(context: Context) : OsmMapView(context), PanelMap {
+    override fun setCallbacks(callbacks: MapsCallbacks) {
+        this.callbacks = callbacks
+    }
+}
+
+object OsmTiles {
+    private const val CACHE_BYTES = 128L * 1024 * 1024
+    private var ready = false
+
+    fun init(context: Context): Context {
+        if (!ready) {
+            MapLibre.getInstance(context.applicationContext)
+            OfflineManager.getInstance(context.applicationContext).setMaximumAmbientCacheSize(CACHE_BYTES, null)
+            ready = true
+        }
+        return context
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/OsmMeasureMap.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.location.Location
+import androidx.core.content.ContextCompat
+import app.simple.positional.R
+import app.simple.positional.model.Measure
+import app.simple.positional.model.MeasurePoint
+import app.simple.positional.preferences.MeasurePreferences
+import com.google.android.gms.maps.model.LatLng
+import org.maplibre.android.camera.CameraPosition
+
+@SuppressLint("ViewConstructor")
+class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
+    override val compassRotation get() = MeasurePreferences.isCompassRotation()
+    private val measurePoints = mutableListOf<MeasurePoint>()
+    override val points: List<MeasurePoint> get() = measurePoints
+    private var restore: CameraPosition? = null
+
+    override fun startCamera(): CameraPosition = camera(
+        MeasurePreferences.getLastLatitude(),
+        MeasurePreferences.getLastLongitude(),
+        MeasurePreferences.getMapZoom(),
+        MeasurePreferences.getMapTilt(),
+        MeasurePreferences.getMapBearing(),
+    )
+
+    override fun onCameraIdle(position: CameraPosition) {
+        MeasurePreferences.setMapZoom(position.zoom.toFloat())
+        MeasurePreferences.setMapTilt(position.tilt.toFloat())
+        MeasurePreferences.setMapBearing(position.bearing.toFloat())
+        position.target?.let {
+            MeasurePreferences.setLastLatitude(it.latitude)
+            MeasurePreferences.setLastLongitude(it.longitude)
+        }
+    }
+
+    override fun onCameraMoved() {
+        drawGuide()
+        reportDistance()
+    }
+
+    override fun onStyleReady() {
+        drawLines()
+        drawPuck()
+        reportDistance()
+        if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun onHeadingChanged() = drawPuck()
+
+    override fun updateLocation(location: Location) {
+        this.location = location
+        drawPuck()
+    }
+
+    override fun resetCamera(zoom: Float) {
+        location?.let { moveTo(it.latitude, it.longitude, zoom) }
+    }
+
+    override fun showMeasure(measure: Measure) {
+        measurePoints.clear()
+        measurePoints.addAll(measure.measurePoints)
+        drawLines()
+        callbacks?.onLineCountChanged(measurePoints.size)
+        if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun addPoint() {
+        val (latitude, longitude) = target() ?: return
+        val point = MeasurePoint(latitude, longitude, measurePoints.size + 1)
+        measurePoints.add(point)
+        drawLines()
+        callbacks?.onLineAdded(point)
+        reportDistance()
+    }
+
+    override fun removeLast() {
+        val last = measurePoints.removeLastOrNull() ?: return
+        drawLines()
+        callbacks?.onLineDeleted(last)
+        callbacks?.onLineCountChanged(measurePoints.size)
+        reportDistance()
+    }
+
+    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) {
+        restore = null
+        MeasurePreferences.setPolylinesWrapped(false)
+        animateTo(camera(latitude, longitude, zoom, MeasurePreferences.getMapTilt(), MeasurePreferences.getMapBearing()))
+    }
+
+    override fun clear() {
+        measurePoints.clear()
+        drawLines()
+    }
+
+    private fun wrap(animate: Boolean) {
+        if (restore == null) restore = map?.cameraPosition
+        fit(measurePoints.map { it.latitude to it.longitude }, animate)
+    }
+
+    private fun drawLines() {
+        source(OsmStyle.LINE, OsmStyle.line(measurePoints.map { it.latitude to it.longitude }))
+        drawGuide()
+    }
+
+    private fun drawGuide() {
+        val last = measurePoints.lastOrNull()
+        val target = target()
+        source(OsmStyle.GUIDE, if (last == null || target == null) OsmStyle.EMPTY_FEATURES else OsmStyle.line(listOf(last.latitude to last.longitude, target)))
+    }
+
+    private fun reportDistance() {
+        target()?.let { callbacks?.onCameraDistance(LatLng(it.first, it.second)) }
+    }
+
+    private fun drawPuck() {
+        val fix = location ?: return
+        val compass = MeasurePreferences.isCompassRotation()
+        val pin = TrackPin.drawable(true, compass, headingAccuracy, fix.speed > 0f)
+        drawPin(pin, fix.latitude, fix.longitude, centered = true, rotation = if (compass) heading else fix.bearing) {
+            TrackPin.bitmap(context, pin)
+        }
+        drawAccuracy(
+            fix.latitude,
+            fix.longitude,
+            fix.accuracy.toDouble(),
+            ContextCompat.getColor(context, R.color.map_circle_color),
+            ContextCompat.getColor(context, R.color.compass_pin_color),
+        )
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            MeasurePreferences.COMPASS_ROTATION -> {
+                if (MeasurePreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
+                drawPuck()
+            }
+            MeasurePreferences.POLYLINES_WRAPPED -> if (MeasurePreferences.arePolylinesWrapped()) {
+                wrap(animate = true)
+            } else {
+                restore?.let(::animateTo)
+                restore = null
+            }
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/OsmStyle.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+
+object OsmStyle {
+    const val PIN = "pin"
+    const val ACCURACY = "accuracy"
+    const val LINE = "line"
+    const val GUIDE = "guide"
+    const val MARKERS = "markers"
+    const val ICON = "icon"
+    const val EMPTY_FEATURES = """{"type":"FeatureCollection","features":[]}"""
+    private const val TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    private const val ATTRIBUTION = "© OpenStreetMap contributors"
+    private const val EARTH_RADIUS = 6_371_008.8
+    private const val CIRCLE_STEPS = 64
+    private const val EMPTY = """{"type":"geojson","data":$EMPTY_FEATURES}"""
+    private const val DARK = ""","paint":{"raster-brightness-min":1,"raster-brightness-max":0,"raster-saturation":-0.5}"""
+    private const val OVERLAP = """"icon-allow-overlap":true,"icon-ignore-placement":true"""
+
+    fun json(dark: Boolean): String {
+        val raster = if (dark) DARK else ""
+        val sources = listOf(ACCURACY, LINE, GUIDE, MARKERS, PIN).joinToString(",") { "\"$it\":$EMPTY" }
+        return """{"version":8,"sources":{"osm":{"type":"raster","tiles":["$TILES"],"tileSize":256,"maxzoom":19,"attribution":"$ATTRIBUTION"},$sources},""" +
+            """"layers":[{"id":"osm","type":"raster","source":"osm"$raster},""" +
+            """{"id":"$ACCURACY","type":"fill","source":"$ACCURACY"},""" +
+            """{"id":"$LINE","type":"line","source":"$LINE","layout":{"line-join":"round","line-cap":"round"},"paint":{"line-width":4}},""" +
+            """{"id":"$GUIDE","type":"line","source":"$GUIDE","paint":{"line-width":2,"line-dasharray":[2,2]}},""" +
+            """{"id":"$MARKERS","type":"symbol","source":"$MARKERS","layout":{"icon-image":["get","$ICON"],"icon-anchor":"bottom",$OVERLAP}},""" +
+            """{"id":"$PIN","type":"symbol","source":"$PIN","layout":{"icon-image":"$PIN","icon-rotation-alignment":"map",$OVERLAP}}]}"""
+    }
+
+    fun point(latitude: Double, longitude: Double) = """{"type":"Point","coordinates":[$longitude,$latitude]}"""
+
+    fun line(points: List<Pair<Double, Double>>) =
+        if (points.size < 2) EMPTY_FEATURES else """{"type":"LineString","coordinates":[${coordinates(points)}]}"""
+
+    fun markers(markers: List<Triple<Double, Double, String>>): String {
+        val features = markers.joinToString(",") { (latitude, longitude, icon) -> marker(latitude, longitude, icon) }
+        return """{"type":"FeatureCollection","features":[$features]}"""
+    }
+
+    private fun marker(latitude: Double, longitude: Double, icon: String) =
+        """{"type":"Feature","geometry":${point(latitude, longitude)},"properties":{"$ICON":"$icon"}}"""
+
+    fun circle(latitude: Double, longitude: Double, radius: Double) =
+        """{"type":"Polygon","coordinates":[[${coordinates(circlePoints(latitude, longitude, radius))}]]}"""
+
+    fun circlePoints(latitude: Double, longitude: Double, radius: Double): List<Pair<Double, Double>> {
+        val lat = Math.toRadians(latitude)
+        val lng = Math.toRadians(longitude)
+        val distance = radius / EARTH_RADIUS
+        return (0..CIRCLE_STEPS).map { step ->
+            val bearing = 2 * Math.PI * step / CIRCLE_STEPS
+            val pointLat = asin(sin(lat) * cos(distance) + cos(lat) * sin(distance) * cos(bearing))
+            val pointLng = lng + atan2(sin(bearing) * sin(distance) * cos(lat), cos(distance) - sin(lat) * sin(pointLat))
+            Math.toDegrees(pointLat) to Math.toDegrees(pointLng)
+        }
+    }
+
+    private fun coordinates(points: List<Pair<Double, Double>>) = points.joinToString(",") { "[${it.second},${it.first}]" }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/OsmTrailMap.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.location.Location
+import androidx.core.content.ContextCompat
+import app.simple.positional.R
+import app.simple.positional.constants.TrailIcons
+import app.simple.positional.model.TrailPoint
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.preferences.TrailPreferences
+import app.simple.positional.util.BitmapHelper.toBitmap
+import org.maplibre.android.camera.CameraPosition
+
+@SuppressLint("ViewConstructor")
+class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
+    override val compassRotation get() = TrailPreferences.isCompassRotation()
+    private var points: List<TrailPoint> = emptyList()
+    private val icons = mutableSetOf<Int>()
+    private var restore: CameraPosition? = null
+    private val autoCenter = Runnable { recenter() }
+
+    override fun startCamera(): CameraPosition {
+        val last = MainPreferences.getLastCoordinates()
+        return camera(last[0].toDouble(), last[1].toDouble(), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing())
+    }
+
+    override fun onCameraIdle(position: CameraPosition) {
+        TrailPreferences.setMapZoom(position.zoom.toFloat())
+        TrailPreferences.setMapTilt(position.tilt.toFloat())
+        TrailPreferences.setMapBearing(position.bearing.toFloat())
+        scheduleAutoCenter()
+    }
+
+    override fun onCameraMoved() {
+        mainHandler.removeCallbacks(autoCenter)
+    }
+
+    override fun onStyleReady() {
+        icons.clear()
+        drawPoints()
+        drawPuck()
+        if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun onHeadingChanged() = drawPuck()
+
+    override fun onResumed() = scheduleAutoCenter()
+
+    override fun onPaused() {
+        mainHandler.removeCallbacks(autoCenter)
+    }
+
+    override fun updateLocation(location: Location) {
+        val first = this.location == null
+        this.location = location
+        drawPuck()
+        if (first && !TrailPreferences.arePolylinesWrapped()) {
+            moveCamera(camera(location.latitude, location.longitude, TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
+        }
+    }
+
+    override fun resetCamera(zoom: Float) {
+        location?.let { moveTo(it.latitude, it.longitude, zoom) }
+    }
+
+    override fun showPoints(points: List<TrailPoint>) {
+        this.points = points
+        drawPoints()
+        callbacks?.onLineCountChanged(points.size)
+        if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun removeLast() {
+        val last = points.lastOrNull() ?: return
+        callbacks?.onLineDeleted(last)
+        val previous = points.getOrNull(points.size - 2)
+        if (TrailPreferences.arePolylinesWrapped() || previous == null) return
+        moveTo(previous.latitude, previous.longitude, TrailPreferences.getMapZoom())
+    }
+
+    override fun toggleWrap() {
+        if (!TrailPreferences.arePolylinesWrapped()) {
+            wrap(animate = true)
+            return
+        }
+        TrailPreferences.setWrapStatus(false)
+        restore?.let(::animateTo)
+    }
+
+    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) {
+        TrailPreferences.setWrapStatus(false)
+        animateTo(camera(latitude, longitude, zoom, TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
+    }
+
+    override fun clear() {
+        points = emptyList()
+        drawPoints()
+    }
+
+    private fun wrap(animate: Boolean) {
+        if (!TrailPreferences.arePolylinesWrapped()) restore = map?.cameraPosition
+        if (fit(points.map { it.latitude to it.longitude }, animate)) TrailPreferences.setWrapStatus(true)
+    }
+
+    private fun scheduleAutoCenter() {
+        mainHandler.removeCallbacks(autoCenter)
+        if (TrailPreferences.getMapAutoCenter()) mainHandler.postDelayed(autoCenter, AUTO_CENTER_DELAY)
+    }
+
+    private fun recenter() {
+        val current = location ?: return
+        if (TrailPreferences.arePolylinesWrapped()) return
+        moveTo(current.latitude, current.longitude, TrailPreferences.getMapZoom())
+    }
+
+    private fun drawPoints() {
+        if (!hasStyle()) return
+        points.map { it.iconPosition }.filter { it !in icons }.toSet().forEach {
+            image(iconName(it), TrailIcons.icons.getOrElse(it) { TrailIcons.icons[0] }.toBitmap(context, ICON_SIZE))
+            icons.add(it)
+        }
+        source(OsmStyle.LINE, OsmStyle.line(points.map { it.latitude to it.longitude }))
+        source(OsmStyle.MARKERS, OsmStyle.markers(points.map { Triple(it.latitude, it.longitude, iconName(it.iconPosition)) }))
+    }
+
+    private fun drawPuck() {
+        val point = location?.let { it.latitude to it.longitude }
+            ?: MainPreferences.getLastCoordinates().let { it[0].toDouble() to it[1].toDouble() }
+        val fix = location
+        val compass = TrailPreferences.isCompassRotation()
+        val pin = TrackPin.drawable(fix != null, compass, headingAccuracy, (fix?.speed ?: 0f) > 0f)
+        drawPin(pin, point.first, point.second, centered = true, rotation = if (compass) heading else fix?.bearing ?: 0f) {
+            TrackPin.bitmap(context, pin)
+        }
+        if (fix == null) return
+        drawAccuracy(
+            point.first,
+            point.second,
+            fix.accuracy.toDouble(),
+            ContextCompat.getColor(context, R.color.map_circle_color),
+            ContextCompat.getColor(context, R.color.compass_pin_color),
+        )
+    }
+
+    private fun iconName(position: Int) = "trail-$position"
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            TrailPreferences.compass -> {
+                if (TrailPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
+                drawPuck()
+            }
+            TrailPreferences.mapAutoCenter -> scheduleAutoCenter()
+        }
+    }
+
+    private companion object {
+        const val AUTO_CENTER_DELAY = 6000L
+        const val ICON_SIZE = 50
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/PickerMap.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.view.View
+import app.simple.positional.R
+import app.simple.positional.extensions.maps.MapLifecycle
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.util.MapSource
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import org.maplibre.android.camera.CameraPosition
+
+interface PickerMap : MapHost {
+    var onIdle: ((Double, Double) -> Unit)?
+    fun moveTo(latitude: Double, longitude: Double, animate: Boolean)
+
+    companion object {
+        const val ZOOM = 15F
+
+        fun create(context: Context): PickerMap = if (MapSource.isOsm()) OsmPickerMap(context) else GooglePickerMap(context)
+    }
+}
+
+class GooglePickerMap(context: Context) : PickerMap {
+    private val mapView = MapView(context).apply { onCreate(null) }
+    private var map: GoogleMap? = null
+    private var pending: Pair<Double, Double>? = null
+    override val view: View get() = mapView
+    override val lifecycleObserver = MapLifecycle(mapView)
+    override var onIdle: ((Double, Double) -> Unit)? = null
+
+    init {
+        mapView.getMapAsync { googleMap ->
+            map = googleMap
+            googleMap.uiSettings.isMapToolbarEnabled = false
+            googleMap.uiSettings.isCompassEnabled = false
+            val night = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+            runCatching {
+                googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, if (night) R.raw.maps_dark_labelled else R.raw.maps_light_labelled))
+            }
+            pending?.let { (latitude, longitude) -> moveTo(latitude, longitude, animate = false) }
+            googleMap.setOnCameraIdleListener { googleMap.cameraPosition.target.let { onIdle?.invoke(it.latitude, it.longitude) } }
+            googleMap.setOnMapClickListener { googleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) }
+        }
+    }
+
+    override fun moveTo(latitude: Double, longitude: Double, animate: Boolean) {
+        val map = map ?: run {
+            pending = latitude to longitude
+            return
+        }
+        val update = CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), PickerMap.ZOOM)
+        if (animate) map.animateCamera(update) else map.moveCamera(update)
+    }
+}
+
+@SuppressLint("ViewConstructor")
+class OsmPickerMap(context: Context) : OsmMapView(context), PickerMap {
+    override val compassRotation = false
+    override var onIdle: ((Double, Double) -> Unit)? = null
+    private var pending: Pair<Double, Double>? = null
+
+    override fun startCamera(): CameraPosition {
+        val (latitude, longitude) = pending ?: MainPreferences.getLastCoordinates().let { it[0].toDouble() to it[1].toDouble() }
+        return camera(latitude, longitude, PickerMap.ZOOM, 0f, 0f)
+    }
+
+    override fun onCameraIdle(position: CameraPosition) {
+        position.target?.let { onIdle?.invoke(it.latitude, it.longitude) }
+    }
+
+    override fun onClick(latitude: Double, longitude: Double) {
+        val zoom = map?.cameraPosition?.zoom?.toFloat() ?: PickerMap.ZOOM
+        animateTo(camera(latitude, longitude, zoom, 0f, 0f))
+    }
+
+    override fun moveTo(latitude: Double, longitude: Double, animate: Boolean) {
+        pending = latitude to longitude
+        val position = camera(latitude, longitude, PickerMap.ZOOM, 0f, 0f)
+        if (animate) animateTo(position) else moveCamera(position)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = Unit
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/TrackMaps.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.hardware.SensorManager
+import android.location.Location
+import android.view.View
+import androidx.annotation.DrawableRes
+import app.simple.positional.R
+import app.simple.positional.decorations.measure.MeasureMaps
+import app.simple.positional.decorations.trails.TrailMaps
+import app.simple.positional.extensions.maps.MapLifecycle
+import app.simple.positional.extensions.maps.MapsCallbacks
+import app.simple.positional.model.Measure
+import app.simple.positional.model.MeasurePoint
+import app.simple.positional.model.TrailPoint
+import app.simple.positional.preferences.MeasurePreferences
+import app.simple.positional.preferences.TrailPreferences
+import app.simple.positional.util.BitmapHelper.toBitmap
+import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
+import app.simple.positional.util.MapSource
+import com.google.android.gms.maps.model.LatLng
+
+interface TrailMap : PanelMap {
+    fun showPoints(points: List<TrailPoint>)
+    fun removeLast()
+    fun toggleWrap()
+    fun moveTo(latitude: Double, longitude: Double, zoom: Float)
+    fun clear()
+
+    companion object {
+        fun create(context: Context): TrailMap = if (MapSource.isOsm()) OsmTrailMap(context) else GoogleTrailMap(TrailMaps(context))
+    }
+}
+
+interface MeasureMap : PanelMap {
+    val points: List<MeasurePoint>
+    fun showMeasure(measure: Measure)
+    fun addPoint()
+    fun removeLast()
+    fun moveTo(latitude: Double, longitude: Double, zoom: Float)
+    fun clear()
+
+    companion object {
+        fun create(context: Context): MeasureMap = if (MapSource.isOsm()) OsmMeasureMap(context) else GoogleMeasureMap(MeasureMaps(context))
+    }
+}
+
+object TrackPin {
+    private const val SCALE = 2
+    private const val HISTORICAL_SIZE = 60
+
+    @DrawableRes
+    fun drawable(hasLocation: Boolean, compass: Boolean, accuracy: Int, moving: Boolean): Int = when {
+        !hasLocation -> R.drawable.ic_place_historical
+        compass -> when (accuracy) {
+            SensorManager.SENSOR_STATUS_ACCURACY_LOW -> R.drawable.ic_pin_low
+            SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> R.drawable.ic_pin_medium
+            SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> R.drawable.ic_pin_high
+            else -> R.drawable.ic_pin_unreliable
+        }
+        moving -> R.drawable.ic_pin_bearing
+        else -> R.drawable.ic_pin_no_speed
+    }
+
+    fun bitmap(context: Context, @DrawableRes drawable: Int): Bitmap =
+        if (drawable == R.drawable.ic_place_historical) drawable.toBitmap(context, HISTORICAL_SIZE) else drawable.toBitmapKeepingSize(context, SCALE)
+}
+
+class GoogleTrailMap(private val maps: TrailMaps) : TrailMap {
+    init {
+        maps.alpha = 0f
+        maps.onCreate(null)
+    }
+
+    override val view: View get() = maps
+    override val lifecycleObserver = MapLifecycle(maps)
+    override fun setCallbacks(callbacks: MapsCallbacks) = maps.setOnMapsCallbackListener(callbacks)
+
+    override fun updateLocation(location: Location) {
+        maps.setFirstLocation(location)
+        maps.location = location
+        maps.addMarker(LatLng(location.latitude, location.longitude))
+    }
+
+    override fun resetCamera(zoom: Float) = maps.resetCamera(zoom)
+    override fun showPoints(points: List<TrailPoint>) = maps.addPolylines(ArrayList(points))
+    override fun removeLast() = maps.removePolyline()
+    override fun toggleWrap() = maps.wrapUnwrap()
+    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) =
+        maps.moveMapCamera(LatLng(latitude, longitude), zoom, TrailPreferences.getMapTilt())
+    override fun clear() = maps.clear()
+}
+
+class GoogleMeasureMap(private val maps: MeasureMaps) : MeasureMap {
+    init {
+        maps.alpha = 0f
+        maps.onCreate(null)
+    }
+
+    override val view: View get() = maps
+    override val lifecycleObserver = MapLifecycle(maps)
+    override val points: List<MeasurePoint> get() = maps.getMeasurePoints()
+    override fun setCallbacks(callbacks: MapsCallbacks) = maps.setOnMapsCallbackListener(callbacks)
+
+    override fun updateLocation(location: Location) {
+        val latLng = LatLng(location.latitude, location.longitude)
+        maps.setFirstLocation(latLng)
+        maps.location = location
+        maps.addMarker(latLng)
+    }
+
+    override fun resetCamera(zoom: Float) = maps.resetCamera(zoom)
+    override fun showMeasure(measure: Measure) = maps.createMeasurePolylines(measure)
+    override fun addPoint() = maps.addPolyline()
+    override fun removeLast() = maps.removeRecentPolyline()
+    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) =
+        maps.moveMapCamera(LatLng(latitude, longitude), zoom, MeasurePreferences.getMapTilt(), MeasurePreferences.getMapBearing())
+    override fun clear() = maps.clear()
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt
 ################################################################################
 package app.simple.positional.decorations.measure
@@ -3957,9 +4927,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -3968,6 +4936,7 @@ import android.util.AttributeSet
 import android.util.Log
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
+import app.simple.positional.decorations.maps.TrackPin
 import app.simple.positional.decorations.utils.CircleUtils
 import app.simple.positional.decorations.utils.MarkerUtils
 import app.simple.positional.extensions.maps.CustomMaps
@@ -3979,7 +4948,6 @@ import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MeasurePreferences
 import app.simple.positional.util.ArrayHelper.secondLastOrNull
 import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.ConditionUtils.isNull
@@ -4034,14 +5002,12 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     private var lastZoom = 20F
     private var lastTilt = 0F
     private var lastBearing = 0F
-    private val incrementFactor = 2
 
     private var polylineOptions: PolylineOptions? = null
     private val currentPolylines = arrayListOf<LatLng>()
     private val polylines = arrayListOf<Polyline>()
     private var lastPolyline: Polyline? = null
     private var cameraTargetPolyline: Polyline? = null
-    private val textPolylines = mutableListOf<TextPolyline>()
     private var measurePoints = arrayListOf<MeasurePoint>()
 
     private val pattern: List<PatternItem> = listOf(
@@ -4135,40 +5101,10 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     fun addMarker(latLng: LatLng) {
         launch {
             withContext(Dispatchers.Main) {
-                if (context.isNotNull() && googleMap.isNotNull())
-                    markerBitmap = if (location.isNotNull()) {
-                        if (MeasurePreferences.isCompassRotation()) {
-                            when (accuracy) {
-                                SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                                    R.drawable.ic_pin_low.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> {
-                                    R.drawable.ic_pin_medium.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
-                                    R.drawable.ic_pin_high.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                else -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-                            }
-                        } else {
-                            if (location!!.speed == 0.0F) {
-                                R.drawable.ic_pin_no_speed.toBitmapKeepingSize(context, incrementFactor)
-                            } else {
-                                R.drawable.ic_pin_bearing.toBitmapKeepingSize(context, incrementFactor)
-                            }
-                        }
-                    } else {
-                        R.drawable.ic_place_historical.toBitmap(context, 60)
-                    }
+                if (context.isNotNull() && googleMap.isNotNull()) {
+                    val pin = TrackPin.drawable(location.isNotNull(), MeasurePreferences.isCompassRotation(), accuracy, (location?.speed ?: 0F) > 0F)
+                    markerBitmap = TrackPin.bitmap(context, pin)
+                }
 
                 withContext(Dispatchers.Main) {
                     runCatching {
@@ -4293,7 +5229,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         polylines.clear()
         currentPolylines.clear()
         polylineOptions?.points?.clear()
-        textPolylines.clear()
 
         polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
         polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
@@ -4451,7 +5386,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         polylines.clear()
         currentPolylines.clear()
         polylineOptions?.points?.clear()
-        textPolylines.clear()
         cameraTargetPolyline?.remove()
         cameraTargetPolyline = null
         invalidate()
@@ -4475,13 +5409,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         polylineAnimator = MarkerUtils.animatePolyline(lastPoint, latLng, polylines.lastOrNull()!!)
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        for (textPolyline in textPolylines) {
-            textPolyline.draw(canvas)
-        }
-    }
-
     fun getMeasurePoints(): ArrayList<MeasurePoint> {
         return measurePoints
     }
@@ -4500,28 +5427,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         cameraTargetPolyline = null
         googleMap?.clear()
         invalidate()
-    }
-
-    inner class TextPolyline(private val polyline: Polyline, private val text: String) {
-        private val paint = Paint().apply {
-            color = Color.BLACK
-            textSize = 40f
-            isAntiAlias = true
-        }
-
-        fun draw(canvas: Canvas) {
-            val points = polyline.points
-            for (i in 0 until points.size - 1) {
-                val start = points[i]
-                val end = points[i + 1]
-                val midPoint = LatLng(
-                    (start.latitude + end.latitude) / 2,
-                    (start.longitude + end.longitude) / 2
-                )
-                val screenPoint = googleMap?.projection?.toScreenLocation(midPoint)!!
-                canvas.drawText(text, screenPoint.x.toFloat(), screenPoint.y.toFloat(), paint)
-            }
-        }
     }
 }
 
@@ -4542,6 +5447,7 @@ import android.location.Location
 import android.util.AttributeSet
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
+import app.simple.positional.decorations.maps.TrackPin
 import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.utils.CircleUtils
 import app.simple.positional.decorations.utils.MarkerUtils
@@ -4552,7 +5458,6 @@ import app.simple.positional.math.Vector3
 import app.simple.positional.model.TrailPoint
 import app.simple.positional.preferences.TrailPreferences
 import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.ConditionUtils.isNull
@@ -4608,7 +5513,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
     private var isCompassRotation = true
     private var lastZoom = 20F
     private var lastTilt = 0F
-    private val incrementFactor = 2
     private var polylineOptions: PolylineOptions? = null
 
     init {
@@ -4695,40 +5599,10 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
     fun addMarker(latLng: LatLng) {
         launch {
             withContext(Dispatchers.Main) {
-                if (context.isNotNull() && googleMap.isNotNull())
-                    markerBitmap = if (location.isNotNull()) {
-                        if (TrailPreferences.isCompassRotation()) {
-                            when (accuracy) {
-                                SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                                    R.drawable.ic_pin_low.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> {
-                                    R.drawable.ic_pin_medium.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
-                                    R.drawable.ic_pin_high.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                else -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-                            }
-                        } else {
-                            if (location!!.speed == 0.0F) {
-                                R.drawable.ic_pin_no_speed.toBitmapKeepingSize(context, incrementFactor)
-                            } else {
-                                R.drawable.ic_pin_bearing.toBitmapKeepingSize(context, incrementFactor)
-                            }
-                        }
-                    } else {
-                        R.drawable.ic_place_historical.toBitmap(context, 60)
-                    }
+                if (context.isNotNull() && googleMap.isNotNull()) {
+                    val pin = TrackPin.drawable(location.isNotNull(), TrailPreferences.isCompassRotation(), accuracy, (location?.speed ?: 0F) > 0F)
+                    markerBitmap = TrackPin.bitmap(context, pin)
+                }
 
                 withContext(Dispatchers.Main) {
                     runCatching {
@@ -5321,8 +6195,10 @@ import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.util.AccentThemes
 import app.simple.positional.util.ContextUtils
 import app.simple.positional.util.LocaleHelper
+import app.simple.positional.widgets.ClockWidgets
 
 open class BaseActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) {
@@ -5349,12 +6225,13 @@ open class BaseActivity : ComponentActivity() {
         ConfigurationCompat.getLocales(resources.configuration)[0]?.let(LocaleHelper::setAppLocale)
     }
 
-    private fun accentTheme(): Int {
-        if (MainPreferences.isMaterialYouAccentColor() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return R.style.MaterialYou
-        val accent = MainPreferences.getAccentColor()
-        return accentThemes.firstOrNull { getColor(it.first) == accent }?.second ?: R.style.Positional.also {
-            MainPreferences.setAccentColor(getColor(R.color.positional))
-        }
+    override fun onStop() {
+        super.onStop()
+        if (!isChangingConfigurations) ClockWidgets.refresh(this)
+    }
+
+    private fun accentTheme(): Int = AccentThemes.of(this) ?: R.style.Positional.also {
+        MainPreferences.setAccentColor(getColor(R.color.positional))
     }
 
     private fun keepContentAboveNavigationBar() {
@@ -5367,34 +6244,6 @@ open class BaseActivity : ComponentActivity() {
             }
             WindowInsetsCompat.CONSUMED
         }
-    }
-
-    private companion object {
-        val accentThemes = listOf(
-            R.color.positional to R.style.Positional,
-            R.color.blue to R.style.Blue,
-            R.color.blueGrey to R.style.BlueGrey,
-            R.color.darkBlue to R.style.DarkBlue,
-            R.color.red to R.style.Red,
-            R.color.green to R.style.Green,
-            R.color.orange to R.style.Orange,
-            R.color.purple to R.style.Purple,
-            R.color.yellow to R.style.Yellow,
-            R.color.caribbeanGreen to R.style.CaribbeanGreen,
-            R.color.persianGreen to R.style.PersianGreen,
-            R.color.amaranth to R.style.Amaranth,
-            R.color.indian_red to R.style.IndianRed,
-            R.color.light_coral to R.style.LightCoral,
-            R.color.pink_flare to R.style.PinkFlare,
-            R.color.makeup_tan to R.style.MakeupTan,
-            R.color.egg_yellow to R.style.EggYellow,
-            R.color.medium_green to R.style.MediumGreen,
-            R.color.olive to R.style.Olive,
-            R.color.copperfield to R.style.Copperfield,
-            R.color.mineral_green to R.style.MineralGreen,
-            R.color.lochinvar to R.style.Lochinvar,
-            R.color.beach_grey to R.style.BeachGrey,
-        )
     }
 }
 
@@ -6466,92 +7315,6 @@ data class Vector3(val x: Float, val y: Float, val z: Float) {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/ClockModel.java
-################################################################################
-package app.simple.positional.model;
-
-import android.graphics.Bitmap;
-
-public class ClockModel {
-    Bitmap hour;
-    Bitmap minute;
-    Bitmap second;
-    Bitmap face;
-    Bitmap trail;
-    Bitmap dayNight;
-    String date;
-
-    public ClockModel() {
-    }
-
-    public ClockModel(Bitmap hour, Bitmap minute, Bitmap second, Bitmap face, Bitmap trail, Bitmap dayNight, String date) {
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second;
-        this.face = face;
-        this.trail = trail;
-        this.dayNight = dayNight;
-        this.date = date;
-    }
-
-    public Bitmap getHour() {
-        return hour;
-    }
-
-    public void setHour(Bitmap hour) {
-        this.hour = hour;
-    }
-
-    public Bitmap getMinute() {
-        return minute;
-    }
-
-    public void setMinute(Bitmap minute) {
-        this.minute = minute;
-    }
-
-    public Bitmap getSecond() {
-        return second;
-    }
-
-    public void setSecond(Bitmap second) {
-        this.second = second;
-    }
-
-    public Bitmap getFace() {
-        return face;
-    }
-
-    public void setFace(Bitmap face) {
-        this.face = face;
-    }
-
-    public Bitmap getTrail() {
-        return trail;
-    }
-
-    public void setTrail(Bitmap trail) {
-        this.trail = trail;
-    }
-
-    public Bitmap getDayNight() {
-        return dayNight;
-    }
-
-    public void setDayNight(Bitmap dayNight) {
-        this.dayNight = dayNight;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/model/DirectionModel.kt
 ################################################################################
 package app.simple.positional.model
@@ -7380,6 +8143,7 @@ package app.simple.positional.preferences
 
 import android.annotation.SuppressLint
 import androidx.annotation.IntRange
+import app.simple.positional.util.MapSource
 import app.simple.positional.util.NightMode
 import app.simple.positional.BuildConfig
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
@@ -7398,6 +8162,7 @@ object MainPreferences {
 
     const val isCustomCoordinate = "is_custom_coordinate_set"
     const val locationProvider = "location_provider"
+    const val mapSource = "map_source"
     const val unit = "all_measurement_unit"
     const val theme = "current_theme"
     const val latitude = "custom_latitude"
@@ -7535,6 +8300,14 @@ object MainPreferences {
 
     fun getLocationProvider(): String {
         return getSharedPreferences().getString(locationProvider, "android")!!
+    }
+
+    fun setMapSource(value: Int) {
+        getSharedPreferences().edit().putInt(mapSource, value).apply()
+    }
+
+    fun getMapSource(): Int {
+        return getSharedPreferences().getInt(mapSource, MapSource.AUTO)
     }
 
     fun setSkipSplashScreen(value: Boolean) {
@@ -8008,485 +8781,6 @@ object SensorAccuracy {
         SensorManager.SENSOR_STATUS_ACCURACY_LOW -> R.string.sensor_accuracy_low
         SensorManager.SENSOR_STATUS_UNRELIABLE -> R.string.sensor_accuracy_unreliable
         else -> R.string.not_available
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/ClockWidgetService.kt
-################################################################################
-package app.simple.positional.services
-
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.content.pm.ServiceInfo
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.hardware.display.DisplayManager
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
-import android.util.Log
-import android.view.Display
-import androidx.annotation.RequiresApi
-import android.view.ContextThemeWrapper
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import app.simple.positional.R
-import app.simple.positional.constants.ClockSkinsConstants
-import app.simple.positional.math.TimeConverter.getHoursInDegrees
-import app.simple.positional.math.TimeConverter.getHoursInDegreesFor24
-import app.simple.positional.math.TimeConverter.getMinutesInDegrees
-import app.simple.positional.math.TimeConverter.getSecondsInDegrees
-import app.simple.positional.model.ClockModel
-import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.util.BitmapHelper.rotateBitmap
-import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
-import app.simple.positional.util.ConditionUtils.isNull
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-
-abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener {
-    private var isScreenOn = true
-    private val imageSize = 500
-    private val serviceChannelId = "widget_channel"
-    private val serviceChannelName = "Widget Channel"
-
-    private var materialYouResCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        android.R.color.system_accent1_500
-    } else {
-        -1
-    }
-
-    internal var contextThemeWrapper: ContextThemeWrapper? = null
-    private var broadcastReceiver: BroadcastReceiver? = null
-    private val handler = Handler(Looper.getMainLooper())
-
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        isScreenOn = (getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
-                .displays[0].state == Display.STATE_ON
-
-        SharedPreferences.init(applicationContext)
-        SharedPreferences.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-        contextThemeWrapper = ContextThemeWrapper(applicationContext, getAccentTheme())
-
-        if (isScreenOn) {
-            postCallbacks()
-            widgetNotification()
-        }
-
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-
-        val filter = IntentFilter()
-        filter.addAction(Intent.ACTION_SCREEN_ON)
-        filter.addAction(Intent.ACTION_SCREEN_OFF)
-
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                try {
-                    when (intent.action) {
-                        Intent.ACTION_SCREEN_ON -> {
-                            isScreenOn = true
-                            postCallbacks()
-                            widgetNotification()
-                            Log.d("ClockWidgetService", "Screen is on")
-                        }
-
-                        Intent.ACTION_SCREEN_OFF -> {
-                            isScreenOn = false
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                                Log.d("ClockWidgetService", "Screen is off, we're on Android 14+")
-                            } else {
-                                stopForeground(STOP_FOREGROUND_REMOVE)
-                            }
-                            removeCallbacks()
-                            Log.d("ClockWidgetService", "Screen is off")
-                        }
-                    }
-                } catch (e: NullPointerException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-        registerReceiver(broadcastReceiver, filter)
-    }
-
-    override fun onDestroy() {
-        removeCallbacks()
-        unregisterReceiver(broadcastReceiver)
-        SharedPreferences.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-        super.onDestroy()
-    }
-
-    private val clockWidgetRunnable = object : Runnable {
-        override fun run() {
-            CoroutineScope(Dispatchers.Default).launch {
-                SharedPreferences.init(applicationContext)
-
-                if (contextThemeWrapper.isNull()) {
-                    contextThemeWrapper = ContextThemeWrapper(applicationContext, getAccentTheme())
-                }
-
-                val zonedDateTime = ZonedDateTime.now()
-                val face = ClockPreferences.isClockFace24Hour()
-                val needleSkins = ClockSkinsConstants.clockNeedleSkins[ClockPreferences.getClockNeedleTheme()]
-
-                val hour = rotateBitmap(needleSkins[0].toBitmap(contextThemeWrapper!!, imageSize),
-                        if (face) {
-                            getHoursInDegreesFor24(zonedDateTime)
-                        } else {
-                            getHoursInDegrees(zonedDateTime)
-                        })
-
-                val minute = rotateBitmap(needleSkins[1].toBitmap(contextThemeWrapper!!, imageSize),
-                        getMinutesInDegrees(zonedDateTime))
-
-                val second = rotateBitmap(needleSkins[2].toBitmap(contextThemeWrapper!!, imageSize),
-                        getSecondsInDegrees(zonedDateTime, false))
-
-                val trail = rotateBitmap(R.drawable.clock_trail.toBitmap(contextThemeWrapper!!, imageSize),
-                        getSecondsInDegrees(zonedDateTime, false))
-
-                val dayNight = contextThemeWrapper!!.getDayNightIndicator()
-
-                val faceBitmap = if (face) {
-                    R.drawable.clock_face_24.toBitmap(contextThemeWrapper!!, imageSize)
-                } else {
-                    R.drawable.clock_face.toBitmap(contextThemeWrapper!!, imageSize)
-                }
-
-                withContext(Dispatchers.Main) {
-                    val clockModel = ClockModel()
-
-                    clockModel.hour = hour
-                    clockModel.minute = minute
-                    clockModel.second = second
-                    clockModel.dayNight = dayNight
-                    clockModel.face = faceBitmap
-                    clockModel.trail = trail
-                    clockModel.date = zonedDateTime.format(DateTimeFormatter.ofPattern("EEE, MMM dd"))
-
-                    onDataGenerated(clockModel)
-
-                    hour.recycle()
-                    minute.recycle()
-                    second.recycle()
-                    faceBitmap.recycle()
-                    dayNight!!.recycle()
-                    trail.recycle()
-                }
-            }
-
-            handler.postDelayed(this, 1000L)
-        }
-    }
-
-    private fun Context.getDayNightIndicator(): Bitmap? {
-        return when {
-            ZonedDateTime.now().hour < 7 || ZonedDateTime.now().hour > 18 -> {
-                R.drawable.ic_night.toBitmapKeepingSize(this, 2)
-            }
-
-            ZonedDateTime.now().hour < 18 || ZonedDateTime.now().hour > 6 -> {
-                R.drawable.ic_day.toBitmapKeepingSize(this, 2)
-            }
-
-            else -> {
-                null
-            }
-        }
-    }
-
-    private fun widgetNotification() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationBuilder = NotificationCompat.Builder(applicationContext, createNotificationChannel())
-            val notification = notificationBuilder.setOngoing(true)
-                    .setSmallIcon(R.drawable.ic_place_notification)
-                    .setPriority(NotificationCompat.PRIORITY_MIN)
-                    .setCategory(Notification.CATEGORY_SERVICE)
-                    .setSubText(getString(R.string.clock_widget_notification))
-                    .setContentText(getString(R.string.notification_desc))
-                    .build()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    startForeground(101, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-                } else {
-                    startForeground(101, notification)
-                }
-            } else {
-                startForeground(101, notification)
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel(): String {
-        val channel = NotificationChannel(serviceChannelId, serviceChannelName, NotificationManager.IMPORTANCE_NONE)
-        channel.lightColor = Color.BLUE
-        channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        service.createNotificationChannel(channel)
-        return serviceChannelId
-    }
-
-    private fun removeCallbacks() {
-        handler.removeCallbacks(clockWidgetRunnable)
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    private fun getAccentTheme(): Int {
-        if (MainPreferences.isMaterialYouAccentColor()) {
-            return R.style.MaterialYou
-        }
-
-        return when (MainPreferences.getAccentColor()) {
-            ContextCompat.getColor(baseContext, R.color.positional) -> {
-                R.style.Positional
-            }
-
-            ContextCompat.getColor(baseContext, R.color.blue) -> {
-                R.style.Blue
-            }
-
-            ContextCompat.getColor(baseContext, R.color.blueGrey) -> {
-                R.style.BlueGrey
-            }
-
-            ContextCompat.getColor(baseContext, R.color.darkBlue) -> {
-                R.style.DarkBlue
-            }
-
-            ContextCompat.getColor(baseContext, R.color.red) -> {
-                R.style.Red
-            }
-
-            ContextCompat.getColor(baseContext, R.color.green) -> {
-                R.style.Green
-            }
-
-            ContextCompat.getColor(baseContext, R.color.orange) -> {
-                R.style.Orange
-            }
-
-            ContextCompat.getColor(baseContext, R.color.purple) -> {
-                R.style.Purple
-            }
-
-            ContextCompat.getColor(baseContext, R.color.yellow) -> {
-                R.style.Yellow
-            }
-
-            ContextCompat.getColor(baseContext, R.color.caribbeanGreen) -> {
-                R.style.CaribbeanGreen
-            }
-
-            ContextCompat.getColor(baseContext, R.color.persianGreen) -> {
-                R.style.PersianGreen
-            }
-
-            ContextCompat.getColor(baseContext, R.color.amaranth) -> {
-                R.style.Amaranth
-            }
-
-            ContextCompat.getColor(baseContext, R.color.indian_red) -> {
-                R.style.IndianRed
-            }
-
-            ContextCompat.getColor(baseContext, R.color.light_coral) -> {
-                R.style.LightCoral
-            }
-
-            ContextCompat.getColor(baseContext, R.color.pink_flare) -> {
-                R.style.PinkFlare
-            }
-
-            ContextCompat.getColor(baseContext, R.color.makeup_tan) -> {
-                R.style.MakeupTan
-            }
-
-            ContextCompat.getColor(baseContext, R.color.egg_yellow) -> {
-                R.style.EggYellow
-            }
-
-            ContextCompat.getColor(baseContext, R.color.medium_green) -> {
-                R.style.MediumGreen
-            }
-
-            ContextCompat.getColor(baseContext, R.color.olive) -> {
-                R.style.Olive
-            }
-
-            ContextCompat.getColor(baseContext, R.color.copperfield) -> {
-                R.style.Copperfield
-            }
-
-            ContextCompat.getColor(baseContext, R.color.mineral_green) -> {
-                R.style.MineralGreen
-            }
-
-            ContextCompat.getColor(baseContext, R.color.lochinvar) -> {
-                R.style.Lochinvar
-            }
-
-            ContextCompat.getColor(baseContext, R.color.beach_grey) -> {
-                R.style.BeachGrey
-            }
-
-            ContextCompat.getColor(baseContext, materialYouResCode) -> {
-                R.style.MaterialYou
-            }
-
-            else -> {
-                R.style.Positional
-            }
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: android.content.SharedPreferences?, key: String?) {
-        when (key) {
-            MainPreferences.accentColor -> {
-                contextThemeWrapper = ContextThemeWrapper(applicationContext, getAccentTheme())
-            }
-        }
-    }
-
-    private fun postCallbacks() {
-        removeCallbacks()
-        handler.post(clockWidgetRunnable)
-    }
-
-    abstract fun onDataGenerated(clockModel: ClockModel)
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt
-################################################################################
-package app.simple.positional.services
-
-import android.appwidget.AppWidgetManager
-import android.content.*
-import android.os.IBinder
-import android.widget.RemoteViews
-import app.simple.positional.R
-import app.simple.positional.model.ClockModel
-import app.simple.positional.widgets.ClockWidget2x2
-
-class ClockWidgetService2x2 : ClockWidgetService() {
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onDataGenerated(clockModel: ClockModel) {
-        val views = RemoteViews(contextThemeWrapper?.packageName, R.layout.widget_clock_2x2)
-
-        views.setImageViewBitmap(R.id.widget_hour, clockModel.hour)
-        views.setImageViewBitmap(R.id.widget_minutes, clockModel.minute)
-        views.setImageViewBitmap(R.id.widget_seconds, clockModel.second)
-        views.setImageViewBitmap(R.id.widget_sweep_seconds, clockModel.trail)
-        views.setImageViewBitmap(R.id.widget_day_night_indicator, clockModel.dayNight)
-        views.setImageViewBitmap(R.id.widget_clock_face, clockModel.face)
-
-        views.setTextViewText(R.id.widget_date, clockModel.date)
-
-        val componentName = ComponentName(contextThemeWrapper!!, ClockWidget2x2::class.java)
-        val manager = AppWidgetManager.getInstance(contextThemeWrapper)
-        manager.updateAppWidget(componentName, views)
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt
-################################################################################
-package app.simple.positional.services
-
-import android.appwidget.AppWidgetManager
-import android.content.*
-import android.os.IBinder
-import android.widget.RemoteViews
-import app.simple.positional.R
-import app.simple.positional.model.ClockModel
-import app.simple.positional.widgets.ClockWidget3x3
-
-class ClockWidgetService3x3 : ClockWidgetService() {
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onDataGenerated(clockModel: ClockModel) {
-        val views = RemoteViews(contextThemeWrapper?.packageName, R.layout.widget_clock_3x3)
-
-        views.setImageViewBitmap(R.id.widget_hour, clockModel.hour)
-        views.setImageViewBitmap(R.id.widget_minutes, clockModel.minute)
-        views.setImageViewBitmap(R.id.widget_seconds, clockModel.second)
-        views.setImageViewBitmap(R.id.widget_sweep_seconds, clockModel.trail)
-        views.setImageViewBitmap(R.id.widget_day_night_indicator, clockModel.dayNight)
-        views.setImageViewBitmap(R.id.widget_clock_face, clockModel.face)
-
-        views.setTextViewText(R.id.widget_date, clockModel.date)
-
-        val componentName = ComponentName(contextThemeWrapper!!, ClockWidget3x3::class.java)
-        val manager = AppWidgetManager.getInstance(contextThemeWrapper)
-        manager.updateAppWidget(componentName, views)
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt
-################################################################################
-package app.simple.positional.services
-
-import android.appwidget.AppWidgetManager
-import android.content.*
-import android.os.IBinder
-import android.widget.RemoteViews
-import app.simple.positional.R
-import app.simple.positional.model.ClockModel
-import app.simple.positional.widgets.ClockWidget4x4
-
-class ClockWidgetService4x4 : ClockWidgetService() {
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onDataGenerated(clockModel: ClockModel) {
-        val views = RemoteViews(contextThemeWrapper?.packageName, R.layout.widget_clock)
-
-        views.setImageViewBitmap(R.id.widget_hour, clockModel.hour)
-        views.setImageViewBitmap(R.id.widget_minutes, clockModel.minute)
-        views.setImageViewBitmap(R.id.widget_seconds, clockModel.second)
-        views.setImageViewBitmap(R.id.widget_sweep_seconds, clockModel.trail)
-        views.setImageViewBitmap(R.id.widget_day_night_indicator, clockModel.dayNight)
-        views.setImageViewBitmap(R.id.widget_clock_face, clockModel.face)
-
-        views.setTextViewText(R.id.widget_date, clockModel.date)
-
-        val componentName = ComponentName(contextThemeWrapper!!, ClockWidget4x4::class.java)
-        val manager = AppWidgetManager.getInstance(contextThemeWrapper)
-        manager.updateAppWidget(componentName, views)
     }
 }
 
@@ -9185,6 +9479,7 @@ import app.simple.positional.math.TimeConverter.getHoursInDegrees
 import app.simple.positional.math.TimeConverter.getHoursInDegreesFor24
 import app.simple.positional.math.TimeConverter.getMinutesInDegrees
 import app.simple.positional.math.TimeConverter.getSecondsInDegrees
+import app.simple.positional.widgets.DayNight
 import kotlinx.coroutines.delay
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -9228,7 +9523,7 @@ class ClockState {
         val seconds = getSecondsInDegrees(now, motion.fractional)
         second.update(seconds, motion.animated)
         sweep.update(seconds - 90f, motion.animated)
-        daytime = now.hour in 6..18
+        daytime = DayNight.isDay(now.hour)
     }
 }
 
@@ -10879,34 +11174,38 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.google.android.gms.maps.MapView
+import app.simple.positional.decorations.maps.PickerMap
 
 @Composable
-fun rememberMapView(): MapView {
+fun rememberPickerMap(): PickerMap {
     val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val mapView = remember { MapView(context).apply { onCreate(null) } }
-    DisposableEffect(lifecycle, mapView) {
-        var state = Lifecycle.State.CREATED
-        val observer = LifecycleEventObserver { _, event ->
+    val owner = LocalLifecycleOwner.current
+    val map = remember { PickerMap.create(context) }
+    DisposableEffect(owner, map) {
+        val delegate = map.lifecycleObserver
+        var state = Lifecycle.State.INITIALIZED
+        val observer = LifecycleEventObserver { source, event ->
             when (event) {
-                Lifecycle.Event.ON_START -> mapView.onStart()
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                Lifecycle.Event.ON_STOP -> mapView.onStop()
+                Lifecycle.Event.ON_START -> delegate.onStart(source)
+                Lifecycle.Event.ON_RESUME -> delegate.onResume(source)
+                Lifecycle.Event.ON_PAUSE -> delegate.onPause(source)
+                Lifecycle.Event.ON_STOP -> delegate.onStop(source)
+                Lifecycle.Event.ON_DESTROY -> delegate.onDestroy(source)
                 else -> Unit
             }
-            if (event != Lifecycle.Event.ON_DESTROY) state = event.targetState
+            state = event.targetState
         }
-        lifecycle.addObserver(observer)
+        owner.lifecycle.addObserver(observer)
         onDispose {
-            lifecycle.removeObserver(observer)
-            if (state.isAtLeast(Lifecycle.State.RESUMED)) mapView.onPause()
-            if (state.isAtLeast(Lifecycle.State.STARTED)) mapView.onStop()
-            mapView.onDestroy()
+            owner.lifecycle.removeObserver(observer)
+            if (state != Lifecycle.State.DESTROYED) {
+                if (state.isAtLeast(Lifecycle.State.RESUMED)) delegate.onPause(owner)
+                if (state.isAtLeast(Lifecycle.State.STARTED)) delegate.onStop(owner)
+                delegate.onDestroy(owner)
+            }
         }
     }
-    return mapView
+    return map
 }
 
 ################################################################################
@@ -11609,6 +11908,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
 import app.simple.positional.R
@@ -11623,6 +11923,7 @@ object PositionalFonts {
 }
 
 private val typography = Typography(
+    bodyLarge = Typography().bodyLarge.copy(lineHeight = TextUnit.Unspecified),
     headlineMedium = TextStyle(fontFamily = PositionalFonts.heading, fontWeight = FontWeight.Bold, fontSize = 31.sp),
     titleLarge = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 22.sp),
     titleMedium = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 16.sp),
@@ -12124,6 +12425,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import app.simple.positional.R
 import app.simple.positional.util.AppIcons
+import app.simple.positional.util.MapSource
 import kotlin.math.roundToInt
 
 @Composable
@@ -12177,6 +12479,16 @@ internal fun SettingsDialogHost(dialog: SettingsDialog, state: SettingsState, ac
             note = stringResource(R.string.desc_location_provider_note),
             onDismiss = onDismiss,
             onSelect = select(actions::setLocationProvider),
+        )
+        SettingsDialog.MAP_SOURCE -> ChoiceDialog(
+            title = stringResource(R.string.map_source),
+            choices = MapSource.choices.map {
+                Choice(it, stringResource(SettingsLabels.mapSource(it)!!), stringResource(SettingsLabels.mapSourceDescription(it)!!))
+            },
+            selected = state.mapSource,
+            note = stringResource(R.string.desc_map_source_note),
+            onDismiss = onDismiss,
+            onSelect = select(actions::setMapSource),
         )
         SettingsDialog.LANGUAGE -> ChoiceDialog(
             title = stringResource(R.string.language),
@@ -12307,6 +12619,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
+import app.simple.positional.util.MapSource
 import app.simple.positional.util.NightMode
 import app.simple.positional.util.LocaleHelper
 
@@ -12317,6 +12630,7 @@ data class SettingsState(
     val isMetric: Boolean = true,
     val coordinatesFormat: Int = 0,
     val locationProvider: String = SettingsLabels.PROVIDER_ANDROID,
+    val mapSource: Int = MapSource.AUTO,
     val language: String = SettingsLabels.LANGUAGE_DEFAULT,
     val isCustomLocation: Boolean = false,
     val keepScreenOn: Boolean = false,
@@ -12337,6 +12651,7 @@ interface SettingsActions {
     fun setMetric(metric: Boolean)
     fun setCoordinatesFormat(format: Int)
     fun setLocationProvider(provider: String)
+    fun setMapSource(source: Int)
     fun openCustomLocations()
     fun setCustomLocation(enabled: Boolean)
     fun setKeepScreenOn(enabled: Boolean)
@@ -12347,7 +12662,7 @@ interface SettingsActions {
     fun openIssues()
 }
 
-internal enum class SettingsDialog { THEME, ICON, CORNERS, UNITS, COORDINATES, PROVIDER, LANGUAGE }
+internal enum class SettingsDialog { THEME, ICON, CORNERS, UNITS, COORDINATES, PROVIDER, MAP_SOURCE, LANGUAGE }
 
 object SettingsLabels {
     const val THEME_AUTO = 4
@@ -12409,6 +12724,22 @@ object SettingsLabels {
     fun locationProviderDescription(provider: String): Int? = when (provider) {
         PROVIDER_ANDROID -> R.string.desc_android_location_provider
         PROVIDER_FUSED -> R.string.desc_fused_location_provider
+        else -> null
+    }
+
+    @StringRes
+    fun mapSource(source: Int): Int? = when (source) {
+        MapSource.AUTO -> R.string.map_source_auto
+        MapSource.GOOGLE -> R.string.map_source_google
+        MapSource.OSM -> R.string.map_source_osm
+        else -> null
+    }
+
+    @StringRes
+    fun mapSourceDescription(source: Int): Int? = when (source) {
+        MapSource.AUTO -> R.string.desc_map_source_auto
+        MapSource.GOOGLE -> R.string.desc_map_source_google
+        MapSource.OSM -> R.string.desc_map_source_osm
         else -> null
     }
 
@@ -12516,6 +12847,11 @@ private fun ConfigurationSection(state: SettingsState, actions: SettingsActions,
             title = stringResource(R.string.location_provider),
             summary = SettingsLabels.locationProvider(state.locationProvider)?.let { stringResource(it) },
             onClick = { show(SettingsDialog.PROVIDER) },
+        )
+        PreferenceItem(
+            title = stringResource(R.string.map_source),
+            summary = SettingsLabels.mapSource(state.mapSource)?.let { stringResource(it) },
+            onClick = { show(SettingsDialog.MAP_SOURCE) },
         )
         PreferenceItem(
             title = stringResource(R.string.specified_location),
@@ -13490,7 +13826,6 @@ interface AppNavigator {
 ################################################################################
 package app.simple.positional.ui.navigation
 
-import android.content.res.Configuration
 import android.location.Address
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13503,9 +13838,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -13542,7 +13875,7 @@ import app.simple.positional.ui.compose.Record
 import app.simple.positional.ui.compose.RecordActions
 import app.simple.positional.ui.compose.RecordsScreen
 import app.simple.positional.ui.compose.TimeZoneScreen
-import app.simple.positional.ui.compose.rememberMapView
+import app.simple.positional.ui.compose.rememberPickerMap
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.TextViewUtils.capitalizeText
@@ -13552,10 +13885,6 @@ import app.simple.positional.viewmodels.viewmodel.DirectionsViewModel
 import app.simple.positional.viewmodels.viewmodel.MapSearchViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 
 @Composable
 fun AccentRoute(activity: ComponentActivity, topInset: Dp) {
@@ -13754,25 +14083,10 @@ fun MapSearchRoute(navigator: AppNavigator) {
     val context = LocalContext.current
     val viewModel: MapSearchViewModel = viewModel()
     val suggestions by viewModel.suggestions.collectAsState()
-    val mapView = rememberMapView()
-    var map by remember { mutableStateOf<GoogleMap?>(null) }
-    LaunchedEffect(mapView) {
-        mapView.getMapAsync { googleMap ->
-            map = googleMap
-            googleMap.uiSettings.isMapToolbarEnabled = false
-            googleMap.uiSettings.isCompassEnabled = false
-            val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-            runCatching {
-                googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, if (night) R.raw.maps_dark_labelled else R.raw.maps_light_labelled))
-            }
-            CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) ->
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), SEARCH_ZOOM))
-            }
-            googleMap.setOnCameraIdleListener {
-                googleMap.cameraPosition.target.let { viewModel.onCameraIdle(it.latitude, it.longitude) }
-            }
-            googleMap.setOnMapClickListener { googleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) }
-        }
+    val map = rememberPickerMap()
+    LaunchedEffect(map) {
+        CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) -> map.moveTo(lat, lon, animate = false) }
+        map.onIdle = viewModel::onCameraIdle
     }
     val actions = remember(viewModel) {
         object : MapSearchActions {
@@ -13780,7 +14094,7 @@ fun MapSearchRoute(navigator: AppNavigator) {
 
             override fun pick(address: Address) {
                 viewModel.pick(address)
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(address.latitude, address.longitude), SEARCH_ZOOM))
+                map.moveTo(address.latitude, address.longitude, animate = true)
             }
 
             override fun cancel() = navigator.back()
@@ -13797,7 +14111,7 @@ fun MapSearchRoute(navigator: AppNavigator) {
             }
         }
     }
-    MapSearchScreen(viewModel.form, suggestions, mapView, actions)
+    MapSearchScreen(viewModel.form, suggestions, map.view, actions)
 }
 
 @Composable
@@ -13821,7 +14135,6 @@ private fun app.simple.positional.ui.compose.CustomLocationForm.fill(result: Sea
     longitude = result.longitude.toString(),
 )
 
-private const val SEARCH_ZOOM = 15F
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/panels/ClockReport.kt
@@ -14204,9 +14517,8 @@ import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
-import app.simple.positional.decorations.maps.Maps
+import app.simple.positional.decorations.maps.GpsMap
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.math.MovementThreshold
@@ -14231,6 +14543,7 @@ import app.simple.positional.ui.compose.LocationDetailsDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.util.LocationShare
 import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
 import app.simple.positional.util.DMSConverter
@@ -14239,6 +14552,7 @@ import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
+import app.simple.positional.util.MapSource
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
 import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
@@ -14253,7 +14567,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private val maps: Maps
+    private val maps: GpsMap
     private val viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
     private var addressJob: Job? = null
@@ -14279,11 +14593,9 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     }
 
     init {
-        maps = Maps(activity).apply {
-            alpha = 0f
-            onCreate(null)
-            setOnMapsCallbackListener(this@GPS)
-            onTouch = { event, _ ->
+        maps = GpsMap.create(activity).apply {
+            setCallbacks(this@GPS)
+            onTouch = { event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> unregister()
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> registerWithRunnable()
@@ -14294,14 +14606,15 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     @Composable
     override fun Content(topInset: Dp) {
-        GpsScreen(state, maps, topInset, isLandscapeOrientation, this)
+        GpsScreen(state, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
-        owner.lifecycle.addObserver(MapLifecycle(maps))
+        owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
-        if (!LocationPrompt.checkGooglePlayServices(activity)) {
+        val needsPlayServices = !MapSource.isOsm() || MainPreferences.getLocationProvider() == SettingsLabels.PROVIDER_FUSED
+        if (needsPlayServices && !LocationPrompt.checkGooglePlayServices(activity)) {
             val message = getString(R.string.play_services_error)
             dialogs.show { MessageDialog(message, dialogs::dismiss) }
         }
@@ -14360,9 +14673,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         state.speed = if (metric) location.speed.toKiloMetersPerHour() else location.speed.toMilesPerHour()
 
         if (!state.custom) {
-            maps.setFirstLocation(location)
-            maps.location = location
-            maps.addMarker(LatLng(location.latitude, location.longitude))
+            maps.updateLocation(location)
             showCoordinates(location.latitude, location.longitude)
         }
     }
@@ -14657,9 +14968,8 @@ import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.decorations.measure.MeasureMaps
+import app.simple.positional.decorations.maps.MeasureMap
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.model.MeasurePoint
@@ -14683,7 +14993,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     private val state = MeasureState()
     private val locationViewModel: LocationViewModel
     private val measureViewModel: MeasureViewModel
-    private val maps: MeasureMaps
+    private val maps: MeasureMap
     private var location: Location? = null
 
     init {
@@ -14693,20 +15003,16 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     init {
-        maps = MeasureMaps(activity).apply {
-            alpha = 0f
-            onCreate(null)
-            setOnMapsCallbackListener(this@Measure)
-        }
+        maps = MeasureMap.create(activity).apply { setCallbacks(this@Measure) }
     }
 
     @Composable
     override fun Content(topInset: Dp) {
-        MeasureScreen(state, maps, topInset, this)
+        MeasureScreen(state, maps.view, topInset, this)
     }
 
     init {
-        owner.lifecycle.addObserver(MapLifecycle(maps))
+        owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
         locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
     }
@@ -14717,14 +15023,11 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
-            val latLng = LatLng(it.latitude, it.longitude)
-            maps.setFirstLocation(latLng)
-            maps.location = it
-            maps.addMarker(latLng)
+            maps.updateLocation(it)
         }
         measureViewModel.getMeasure().observe(owner) { measure ->
             if (MeasurePreferences.isMeasureSelected() && measure != null) {
-                maps.createMeasurePolylines(measure)
+                maps.showMeasure(measure)
                 state.selected = true
                 state.name = measure.name.orEmpty()
                 showSummary(measure)
@@ -14750,7 +15053,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     override fun onCameraDistance(latLng: LatLng?) {
-        val last = maps.getMeasurePoints().lastOrNull()
+        val last = maps.points.lastOrNull()
         state.current = if (latLng == null || last == null) "" else {
             distance(GeoDistance.meters(last.latitude, last.longitude, latLng.latitude, latLng.longitude))
         }
@@ -14807,18 +15110,13 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         if (close) {
             maps.resetCamera(CLOSE_ZOOM)
         } else {
-            maps.moveMapCamera(
-                LatLng(current.latitude, current.longitude),
-                MeasurePreferences.getMapZoom(),
-                MeasurePreferences.getMapTilt(),
-                MeasurePreferences.getMapBearing(),
-            )
+            maps.moveTo(current.latitude, current.longitude, MeasurePreferences.getMapZoom())
         }
     }
 
-    override fun addPoint() = maps.addPolyline()
+    override fun addPoint() = maps.addPoint()
 
-    override fun removeLast() = maps.removeRecentPolyline()
+    override fun removeLast() = maps.removeLast()
 
     override fun wrap() = MeasurePreferences.invertPolylinesWrapped()
 
@@ -14907,6 +15205,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
             isMetric = MainPreferences.isMetric(),
             coordinatesFormat = MainPreferences.getCoordinatesFormat(),
             locationProvider = MainPreferences.getLocationProvider(),
+            mapSource = MainPreferences.getMapSource(),
             language = MainPreferences.getAppLanguage() ?: SettingsLabels.LANGUAGE_DEFAULT,
             isCustomLocation = MainPreferences.isCustomCoordinate(),
             keepScreenOn = MainPreferences.isScreenOn(),
@@ -14949,6 +15248,8 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     override fun setCoordinatesFormat(format: Int) = MainPreferences.setCoordinatesFormat(format)
 
     override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
+
+    override fun setMapSource(source: Int) = MainPreferences.setMapSource(source)
 
     override fun openCustomLocations() = navigate(Routes.CUSTOM_LOCATIONS)
 
@@ -15182,9 +15483,8 @@ import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.trails.TrailMaps
+import app.simple.positional.decorations.maps.TrailMap
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.math.MathExtensions.round
@@ -15219,7 +15519,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private val trailData: TrailDataViewModel by activity.viewModels()
     private val trails: TrailsViewModel by activity.viewModels()
     private val locationViewModel: LocationViewModel
-    private val maps: TrailMaps
+    private val maps: TrailMap
     private var location: Location? = null
     private var pending: Triple<Double, Double, Float>? = null
 
@@ -15229,20 +15529,16 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     }
 
     init {
-        maps = TrailMaps(activity).apply {
-            alpha = 0f
-            onCreate(null)
-            setOnMapsCallbackListener(this@Trail)
-        }
+        maps = TrailMap.create(activity).apply { setCallbacks(this@Trail) }
     }
 
     @Composable
     override fun Content(topInset: Dp) {
-        TrailScreen(state, maps, topInset, isLandscapeOrientation, this)
+        TrailScreen(state, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
-        owner.lifecycle.addObserver(MapLifecycle(maps))
+        owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
         locationViewModel.getLocation().observe(owner) {
@@ -15251,9 +15547,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
             MainPreferences.setLastLongitude(it.longitude.toFloat())
             state.fixed = true
             state.enabled = getLocationStatus(activity)
-            maps.setFirstLocation(it)
-            maps.location = it
-            maps.addMarker(LatLng(it.latitude, it.longitude))
+            maps.updateLocation(it)
         }
         locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
 
@@ -15267,7 +15561,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
 
     private fun showPoints(points: List<TrailPoint>) {
-        maps.addPolylines(ArrayList(points))
+        maps.showPoints(points)
         val metric = MainPreferences.isMetric()
         val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
         state.summary = listOf(
@@ -15314,7 +15608,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     }
 
     override fun onMapInitialized() {
-        maps.addPolylines(ArrayList(trailData.points.value))
+        maps.showPoints(trailData.points.value)
     }
 
     override fun onMapClicked() {
@@ -15362,7 +15656,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         if (close) {
             maps.resetCamera(CLOSE_ZOOM)
         } else {
-            maps.moveMapCamera(LatLng(current.latitude, current.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
+            maps.moveTo(current.latitude, current.longitude, TrailPreferences.getMapZoom())
         }
     }
 
@@ -15375,9 +15669,9 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         requestMarker(current?.latitude ?: 0.0, current?.longitude ?: 0.0, current?.accuracy ?: 0f)
     }
 
-    override fun removeLast() = maps.removePolyline()
+    override fun removeLast() = maps.removeLast()
 
-    override fun wrap() = maps.wrapUnwrap()
+    override fun wrap() = maps.toggleWrap()
 
     override fun toggleCompass() = TrailPreferences.setCompassRotation(!TrailPreferences.isCompassRotation())
 
@@ -15424,13 +15718,13 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private fun save(point: TrailPoint) {
         trailData.save(point)
         if (!TrailPreferences.arePolylinesWrapped()) {
-            maps.moveMapCamera(LatLng(point.latitude, point.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
+            maps.moveTo(point.latitude, point.longitude, TrailPreferences.getMapZoom())
         }
     }
 
     override fun focus(item: TrailPointItem) {
         state.sheet = false
-        maps.moveMapCamera(LatLng(item.point.latitude, item.point.longitude), FOCUS_ZOOM, TrailPreferences.getMapTilt())
+        maps.moveTo(item.point.latitude, item.point.longitude, FOCUS_ZOOM)
     }
 
     override fun delete(item: TrailPointItem) = trailData.delete(item.point)
@@ -15457,6 +15751,52 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     companion object {
         private const val CLOSE_ZOOM = 18F
         private const val FOCUS_ZOOM = 15F
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/AccentThemes.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import android.os.Build
+import androidx.annotation.StyleRes
+import app.simple.positional.R
+import app.simple.positional.preferences.MainPreferences
+
+object AccentThemes {
+    private val themes = listOf(
+        R.color.positional to R.style.Positional,
+        R.color.blue to R.style.Blue,
+        R.color.blueGrey to R.style.BlueGrey,
+        R.color.darkBlue to R.style.DarkBlue,
+        R.color.red to R.style.Red,
+        R.color.green to R.style.Green,
+        R.color.orange to R.style.Orange,
+        R.color.purple to R.style.Purple,
+        R.color.yellow to R.style.Yellow,
+        R.color.caribbeanGreen to R.style.CaribbeanGreen,
+        R.color.persianGreen to R.style.PersianGreen,
+        R.color.amaranth to R.style.Amaranth,
+        R.color.indian_red to R.style.IndianRed,
+        R.color.light_coral to R.style.LightCoral,
+        R.color.pink_flare to R.style.PinkFlare,
+        R.color.makeup_tan to R.style.MakeupTan,
+        R.color.egg_yellow to R.style.EggYellow,
+        R.color.medium_green to R.style.MediumGreen,
+        R.color.olive to R.style.Olive,
+        R.color.copperfield to R.style.Copperfield,
+        R.color.mineral_green to R.style.MineralGreen,
+        R.color.lochinvar to R.style.Lochinvar,
+        R.color.beach_grey to R.style.BeachGrey,
+    )
+
+    @StyleRes
+    fun of(context: Context): Int? {
+        if (MainPreferences.isMaterialYouAccentColor() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return R.style.MaterialYou
+        val accent = MainPreferences.getAccentColor()
+        return themes.firstOrNull { context.getColor(it.first) == accent }?.second
     }
 }
 
@@ -15536,146 +15876,32 @@ package app.simple.positional.util
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Camera
 import android.graphics.Canvas
 import android.graphics.LinearGradient
-import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
-import android.graphics.RadialGradient
-import android.graphics.Rect
 import android.graphics.Shader
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
 
 object BitmapHelper {
     fun Bitmap.addLinearGradient(array: IntArray): Bitmap {
-        val width = width
-        val height = height
         val updatedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(updatedBitmap)
         canvas.drawBitmap(this, 0f, 0f, null)
         val paint = Paint()
-        val shader = LinearGradient(0f, 0f, 0f, height.toFloat(), array[0], array[1], Shader.TileMode.CLAMP)
-        paint.shader = shader
+        paint.shader = LinearGradient(0f, 0f, 0f, height.toFloat(), array[0], array[1], Shader.TileMode.CLAMP)
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
         return updatedBitmap
-    }
-
-    fun addLinearGradient(originalBitmap: Bitmap, array: IntArray, verticalOffset: Float): Bitmap {
-        val width = originalBitmap.width
-        val height = originalBitmap.height
-        val updatedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(updatedBitmap)
-        canvas.drawBitmap(originalBitmap, 0f, 0f, null)
-        val paint = Paint()
-        val shader = LinearGradient(0f, verticalOffset, 0f, height.toFloat(), array[0], array[1], Shader.TileMode.CLAMP)
-        paint.shader = shader
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
-        return updatedBitmap
-    }
-
-    fun addRadialGradient(originalBitmap: Bitmap, int: Int): Bitmap? {
-        val width = originalBitmap.width
-        val height = originalBitmap.height
-        val updatedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(updatedBitmap)
-        canvas.drawBitmap(originalBitmap, 0f, 0f, null)
-        val paint = Paint()
-        val shader = RadialGradient(width.div(2F), height.div(2F), 200f, 0x000000, int, Shader.TileMode.CLAMP)
-        paint.shader = shader
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
-        return updatedBitmap
-    }
-
-    fun rotateBitmap(bitmap: Bitmap, rotationAngleDegree: Float): Bitmap {
-        val w = bitmap.height
-        val h = bitmap.height
-        var newW = w
-        var newH = h
-        if (rotationAngleDegree == 90F || rotationAngleDegree == 270F) {
-            newW = h
-            newH = w
-        }
-        val rotatedBitmap = Bitmap.createBitmap(newW, newH, bitmap.config
-                                                            ?: Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(rotatedBitmap)
-        val rect = Rect(0, 0, newW, newH)
-        val matrix = Matrix()
-        val px: Float = rect.exactCenterX()
-        val py: Float = rect.exactCenterY()
-        matrix.postTranslate((-bitmap.width / 2).toFloat(), (-bitmap.height / 2).toFloat())
-        matrix.postRotate(rotationAngleDegree)
-        matrix.postTranslate(px, py)
-        canvas.drawBitmap(bitmap, matrix, Paint(Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG or Paint.FILTER_BITMAP_FLAG))
-        matrix.reset()
-        return rotatedBitmap
-    }
-
-    fun rotateBitmap(bitmap: Bitmap, rotationAngleDegree: Float, tilt: Float): Bitmap? {
-        val w = bitmap.height
-        val h = bitmap.height
-        var newW = w
-        var newH = h
-
-        if (rotationAngleDegree == 90F || rotationAngleDegree == 270F) {
-            newW = h
-            newH = w
-        }
-
-        val rotatedBitmap = Bitmap.createBitmap(newW, newH, bitmap.config
-                                                            ?: Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(rotatedBitmap)
-        val rect = Rect(0, 0, newW, newH)
-        val matrix = Matrix()
-
-        matrix.postRotate(rotationAngleDegree)
-
-        val camera = Camera()
-        camera.save()
-        camera.rotateX(tilt)
-        camera.getMatrix(matrix)
-        camera.restore()
-
-        val px: Float = rect.exactCenterX()
-        val py: Float = rect.exactCenterY()
-        matrix.postTranslate((-bitmap.width / 2).toFloat(), (-bitmap.height / 2).toFloat())
-        matrix.postTranslate(px, py)
-
-        canvas.drawBitmap(bitmap, matrix, Paint(Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG or Paint.FILTER_BITMAP_FLAG))
-        matrix.reset()
-        return rotatedBitmap
     }
 
     fun Int.toBitmap(context: Context, size: Int): Bitmap {
         val drawable = ContextCompat.getDrawable(context, this)
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable?.setBounds(0, 0, canvas.width, canvas.height)
-        drawable?.draw(canvas)
-        return bitmap
-    }
-
-    fun Int.toBitmap(context: Context, size: Int, @Suppress("UNUSED_PARAMETER") padding: Float): Bitmap {
-        val drawable = ContextCompat.getDrawable(context, this)
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable?.setBounds(0, 0, canvas.width, canvas.height)
-        drawable?.draw(canvas)
-        return bitmap
-    }
-
-    fun Int.toBitmap(context: Context, size: Int, alpha: Int): Bitmap {
-        val drawable = ContextCompat.getDrawable(context, this)
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable?.setBounds(0, 0, canvas.width, canvas.height)
-        drawable?.alpha = alpha
-        drawable?.draw(canvas)
+        drawable?.setBounds(0, 0, size, size)
+        drawable?.draw(Canvas(bitmap))
         return bitmap
     }
 
@@ -15685,19 +15911,18 @@ object BitmapHelper {
         val intrinsicHeight = drawable.intrinsicHeight * incrementFactor
         drawable.setBounds(0, 0, intrinsicWidth, intrinsicHeight)
         val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
         drawable.alpha = alpha
-        drawable.draw(canvas)
+        drawable.draw(Canvas(bitmap))
         return bitmap
     }
 
     fun Int.toBitmapKeepingSize(context: Context, @IntRange(from = 1, to = 10) incrementFactor: Int): Bitmap {
-        val vectorDrawable = ContextCompat.getDrawable(context, this)
-        val intrinsicWidth = vectorDrawable!!.intrinsicWidth * incrementFactor
-        val intrinsicHeight = vectorDrawable.intrinsicHeight * incrementFactor
-        vectorDrawable.setBounds(0, 0, intrinsicWidth, intrinsicHeight)
+        val drawable = ContextCompat.getDrawable(context, this)
+        val intrinsicWidth = drawable!!.intrinsicWidth * incrementFactor
+        val intrinsicHeight = drawable.intrinsicHeight * incrementFactor
+        drawable.setBounds(0, 0, intrinsicWidth, intrinsicHeight)
         val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
-        vectorDrawable.draw(Canvas(bitmap))
+        drawable.draw(Canvas(bitmap))
         return bitmap
     }
 }
@@ -16320,6 +16545,26 @@ object MapIntents {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/MapSource.kt
+################################################################################
+package app.simple.positional.util
+
+import app.simple.positional.BuildConfig
+import app.simple.positional.preferences.MainPreferences
+
+object MapSource {
+    const val AUTO = 0
+    const val GOOGLE = 1
+    const val OSM = 2
+
+    val choices = listOf(AUTO, GOOGLE, OSM)
+
+    fun useOsm(choice: Int, hasGoogleKey: Boolean) = choice == OSM || (choice != GOOGLE && !hasGoogleKey)
+
+    fun isOsm() = useOsm(MainPreferences.getMapSource(), BuildConfig.HAS_MAPS_KEY)
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/MoonAngle.kt
 ################################################################################
 package app.simple.positional.util
@@ -16581,11 +16826,8 @@ object Ordinal {
 package app.simple.positional.util
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.PermissionInfo
-import android.os.PowerManager
 import androidx.core.app.ActivityCompat
 
 object PermissionUtils {
@@ -16594,25 +16836,6 @@ object PermissionUtils {
                 == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)
-    }
-
-    fun Context.isIgnoringBatteryOptimizations(): Boolean {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        return powerManager.isIgnoringBatteryOptimizations(packageName)
-    }
-
-    fun Context.hasNotificationPermission(): Boolean {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        return notificationManager.areNotificationsEnabled()
-    }
-
-    fun String.getPermissionInfo(context: Context): PermissionInfo? {
-        try {
-            return context.packageManager.getPermissionInfo(this, PackageManager.GET_META_DATA)
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        }
-        return null
     }
 }
 
@@ -17641,236 +17864,162 @@ class TrailsViewModel(application: Application) : AndroidViewModel(application) 
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java
+# FILE: app/src/main/java/app/simple/positional/widgets/ClockWidgets.kt
 ################################################################################
-package app.simple.positional.widgets;
+package app.simple.positional.widgets
 
-import android.app.AlarmManager;
-import android.app.ForegroundServiceStartNotAllowedException;
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.SystemClock;
-import app.simple.positional.services.ClockWidgetService2x2;
-import app.simple.positional.util.PermissionUtils;
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.drawable.Icon
+import android.os.Build
+import android.view.ContextThemeWrapper
+import android.widget.RemoteViews
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
+import app.simple.positional.R
+import app.simple.positional.constants.ClockSkinsConstants
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.util.AccentThemes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
+import kotlin.math.roundToInt
 
-public class ClockWidget2x2 extends AppWidgetProvider {
-    @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
-        startService(context);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, getService(context));
-    }
+class ClockWidget2x2 : ClockWidget(ClockWidgetSpec(R.layout.widget_clock_2x2, 110, 10, 15, "2x2", 1522))
+class ClockWidget3x3 : ClockWidget(ClockWidgetSpec(R.layout.widget_clock_3x3, 180, 25, 25, "3x3", 1533))
+class ClockWidget4x4 : ClockWidget(ClockWidgetSpec(R.layout.widget_clock, 250, 25, 30, "4x4", 1544))
 
-    @Override
-    public void onEnabled(Context context) {
-        super.onEnabled(context);
-        startService(context);
-    }
+data class ClockWidgetSpec(val layout: Int, val sizeDp: Int, val handInsetDp: Int, val indicatorDp: Int, val legacyService: String, val legacyAlarm: Int)
 
-    @Override
-    public void onDisabled(Context context) {
-        super.onDisabled(context);
-        cancelWidgetProcess(context);
-    }
-
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        super.onDeleted(context, appWidgetIds);
-        cancelWidgetProcess(context);
-    }
-
-    private void cancelWidgetProcess(Context context) {
-        try {
-            context.stopService(new Intent(context, ClockWidgetService2x2.class));
-        } catch (IllegalStateException ignored) {
-        }
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(getService(context));
-    }
-
-    private void startService(Context context) {
-        if (PermissionUtils.INSTANCE.isIgnoringBatteryOptimizations(context)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    try {
-                        context.startForegroundService(new Intent(context, ClockWidgetService2x2.class));
-                    } catch (ForegroundServiceStartNotAllowedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    context.startForegroundService(new Intent(context, ClockWidgetService2x2.class));
-                }
-            } else {
-                context.startService(new Intent(context, ClockWidgetService2x2.class));
+abstract class ClockWidget(private val spec: ClockWidgetSpec) : AppWidgetProvider() {
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        val pending = goAsync()
+        val provider = javaClass
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                cancelLegacyAlarm(context)
+                appWidgetManager.updateAppWidget(appWidgetIds, ClockWidgetRenderer.render(context, spec))
+                ClockWidgets.schedule(context, provider, appWidgetIds)
+            } finally {
+                pending.finish()
             }
         }
     }
 
-    private PendingIntent getService(Context context) {
-        return PendingIntent.getService(context,
-                1522,
-                new Intent(context, ClockWidgetService2x2.class),
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    private fun cancelLegacyAlarm(context: Context) {
+        val intent = Intent().setClassName(context, "app.simple.positional.services.ClockWidgetService${spec.legacyService}")
+        PendingIntent.getService(context, spec.legacyAlarm, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE)?.let {
+            context.getSystemService(AlarmManager::class.java).cancel(it)
+            it.cancel()
+        }
+    }
+
+    override fun onDisabled(context: Context) {
+        context.getSystemService(AlarmManager::class.java).cancel(ClockWidgets.updateIntent(context, javaClass, intArrayOf()))
     }
 }
 
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java
-################################################################################
-package app.simple.positional.widgets;
+object ClockWidgets {
+    private val providers = listOf(ClockWidget2x2::class.java, ClockWidget3x3::class.java, ClockWidget4x4::class.java)
 
-import android.app.AlarmManager;
-import android.app.ForegroundServiceStartNotAllowedException;
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.SystemClock;
-import app.simple.positional.services.ClockWidgetService3x3;
-import app.simple.positional.util.PermissionUtils;
-
-public class ClockWidget3x3 extends AppWidgetProvider {
-    @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
-        startService(context);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, getService(context));
-    }
-
-    @Override
-    public void onEnabled(Context context) {
-        super.onEnabled(context);
-        startService(context);
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        super.onDisabled(context);
-        cancelWidgetProcess(context);
-    }
-
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        super.onDeleted(context, appWidgetIds);
-        cancelWidgetProcess(context);
-    }
-
-    private void cancelWidgetProcess(Context context) {
-        try {
-            context.stopService(new Intent(context, ClockWidgetService3x3.class));
-        } catch (IllegalStateException ignored) {
-        }
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(getService(context));
-    }
-
-    private void startService(Context context) {
-        if (PermissionUtils.INSTANCE.isIgnoringBatteryOptimizations(context)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    try {
-                        context.startForegroundService(new Intent(context, ClockWidgetService3x3.class));
-                    } catch (ForegroundServiceStartNotAllowedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    context.startForegroundService(new Intent(context, ClockWidgetService3x3.class));
-                }
-            } else {
-                context.startService(new Intent(context, ClockWidgetService3x3.class));
-            }
+    fun refresh(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        val manager = AppWidgetManager.getInstance(context) ?: return
+        providers.forEach { provider ->
+            val ids = manager.getAppWidgetIds(ComponentName(context, provider))
+            if (ids.isNotEmpty()) context.sendBroadcast(intent(context, provider, ids))
         }
     }
 
-    private PendingIntent getService(Context context) {
-        return PendingIntent.getService(context,
-                1533,
-                new Intent(context, ClockWidgetService3x3.class),
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    internal fun schedule(context: Context, provider: Class<out ClockWidget>, ids: IntArray) {
+        val next = DayNight.nextChange(ZonedDateTime.now()).toInstant().toEpochMilli()
+        context.getSystemService(AlarmManager::class.java).set(AlarmManager.RTC, next, updateIntent(context, provider, ids))
+    }
+
+    internal fun updateIntent(context: Context, provider: Class<out ClockWidget>, ids: IntArray): PendingIntent =
+        PendingIntent.getBroadcast(context, provider.name.hashCode(), intent(context, provider, ids), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+    private fun intent(context: Context, provider: Class<out ClockWidget>, ids: IntArray) = Intent(context, provider)
+        .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+        .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+}
+
+object DayNight {
+    private const val DAY_START = 6
+    private const val NIGHT_START = 19
+
+    fun isDay(hour: Int) = hour in DAY_START until NIGHT_START
+
+    fun nextChange(now: ZonedDateTime): ZonedDateTime {
+        val today = now.toLocalDate()
+        return when {
+            now.hour < DAY_START -> today.atTime(DAY_START, 0)
+            now.hour < NIGHT_START -> today.atTime(NIGHT_START, 0)
+            else -> today.plusDays(1).atTime(DAY_START, 0)
+        }.atZone(now.zone)
     }
 }
 
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java
-################################################################################
-package app.simple.positional.widgets;
+private object ClockWidgetRenderer {
+    private const val FACE_RADIUS = 0.47f
+    private const val TRAIL_INSET_DP = 5
+    private const val INDICATOR_SCALE = 2
 
-import android.app.AlarmManager;
-import android.app.ForegroundServiceStartNotAllowedException;
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProvider;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.SystemClock;
-import app.simple.positional.services.ClockWidgetService4x4;
-import app.simple.positional.util.PermissionUtils;
-
-public class ClockWidget4x4 extends AppWidgetProvider {
-    @Override
-    public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds);
-        startService(context);
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime(), 60000, getService(context));
-    }
-
-    @Override
-    public void onEnabled(Context context) {
-        super.onEnabled(context);
-        startService(context);
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        super.onDisabled(context);
-        cancelWidgetProcess(context);
-    }
-
-    @Override
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        super.onDeleted(context, appWidgetIds);
-        cancelWidgetProcess(context);
-    }
-
-    private void cancelWidgetProcess(Context context) {
-        try {
-            context.stopService(new Intent(context, ClockWidgetService4x4.class));
-        } catch (IllegalStateException ignored) {
-        }
-        ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(getService(context));
-    }
-
-    private void startService(Context context) {
-        if (PermissionUtils.INSTANCE.isIgnoringBatteryOptimizations(context)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    try {
-                        context.startForegroundService(new Intent(context, ClockWidgetService4x4.class));
-                    } catch (ForegroundServiceStartNotAllowedException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    context.startForegroundService(new Intent(context, ClockWidgetService4x4.class));
-                }
-            } else {
-                context.startService(new Intent(context, ClockWidgetService4x4.class));
-            }
+    fun render(context: Context, spec: ClockWidgetSpec): RemoteViews {
+        SharedPreferences.init(context)
+        val themed = ContextThemeWrapper(context, AccentThemes.of(context) ?: R.style.Positional)
+        val density = context.resources.displayMetrics.density
+        val size = (spec.sizeDp * density).roundToInt()
+        val inset = (spec.handInsetDp * density).roundToInt()
+        val indicator = (spec.indicatorDp * density).roundToInt() * INDICATOR_SCALE
+        val needles = ClockSkinsConstants.clockNeedleSkins.getOrElse(ClockPreferences.getClockNeedleTheme()) { ClockSkinsConstants.clockNeedleSkins[0] }
+        val dayNight = if (DayNight.isDay(ZonedDateTime.now().hour)) R.drawable.ic_day else R.drawable.ic_night
+        return RemoteViews(context.packageName, spec.layout).apply {
+            setImageViewBitmap(R.id.widget_clock_face, themed.bitmapOf(R.drawable.clock_face, size))
+            setImageViewBitmap(R.id.widget_day_night_indicator, themed.bitmapOf(dayNight, indicator))
+            setIcon(R.id.widget_clock, "setDial", Icon.createWithBitmap(Bitmap.createBitmap(size, size, Bitmap.Config.ALPHA_8)))
+            setIcon(R.id.widget_clock, "setHourHand", Icon.createWithBitmap(themed.bitmapOf(needles[0], size, inset)))
+            setIcon(R.id.widget_clock, "setMinuteHand", Icon.createWithBitmap(themed.bitmapOf(needles[1], size, inset)))
+            setIcon(R.id.widget_clock, "setSecondHand", Icon.createWithBitmap(themed.secondHand(needles[2], size, inset, (TRAIL_INSET_DP * density).roundToInt())))
         }
     }
 
-    private PendingIntent getService(Context context) {
-        return PendingIntent.getService(context,
-                1544,
-                new Intent(context, ClockWidgetService4x4.class),
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    private fun Context.bitmapOf(@DrawableRes id: Int, size: Int, inset: Int = 0): Bitmap {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        drawInto(Canvas(bitmap), id, size, inset)
+        return bitmap
+    }
+
+    private fun Context.secondHand(@DrawableRes id: Int, size: Int, inset: Int, trailInset: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val center = size / 2f
+        canvas.save()
+        canvas.rotate(-90f, center, center)
+        drawInto(canvas, R.drawable.clock_trail, size, trailInset)
+        canvas.restore()
+        canvas.drawCircle(center, center, size * FACE_RADIUS, Paint(Paint.ANTI_ALIAS_FLAG).apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) })
+        drawInto(canvas, id, size, inset)
+        return bitmap
+    }
+
+    private fun Context.drawInto(canvas: Canvas, @DrawableRes id: Int, size: Int, inset: Int) {
+        ContextCompat.getDrawable(this, id)?.run {
+            setBounds(inset, inset, size - inset, size - inset)
+            draw(canvas)
+        }
     }
 }
 
@@ -18221,15 +18370,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     android:layout_height="250dp">
 
     <ImageView
-        android:id="@+id/widget_sweep_seconds"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:padding="5dp"
-        android:rotation="-90"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
         android:id="@+id/widget_clock_face"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18245,43 +18385,25 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
         android:layout_marginBottom="60dp"
         tools:ignore="ContentDescription" />
 
-    <TextView
+    <TextClock
         android:id="@+id/widget_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="60dp"
-        android:gravity="center"
-        android:textSize="16sp"
         android:fontFamily="@font/clock_date"
+        android:format12Hour="EEE, MMM dd"
+        android:format24Hour="EEE, MMM dd"
+        android:gravity="center"
         android:textColor="@color/textPrimary"
-        android:layout_gravity="center_horizontal|bottom"/>
+        android:textSize="16sp" />
 
-    <ImageView
-        android:id="@+id/widget_hour"
+    <AnalogClock
+        android:id="@+id/widget_clock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="25dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/widget_minutes"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_margin="25dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/widget_seconds"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_margin="25dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
+        tools:ignore="Deprecated" />
 
 </FrameLayout>
 
@@ -18293,15 +18415,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="110dp"
     android:layout_height="110dp">
-
-    <ImageView
-        android:id="@+id/widget_sweep_seconds"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:padding="5dp"
-        android:rotation="-90"
-        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/widget_clock_face"
@@ -18319,44 +18432,26 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
         android:layout_marginBottom="25dp"
         tools:ignore="ContentDescription" />
 
-    <TextView
+    <TextClock
         android:id="@+id/widget_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="25dp"
-        android:gravity="center"
-        android:textSize="7sp"
-        android:fontFamily="@font/clock_date"
-        android:textColor="@color/textPrimary"
         android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="25dp"
+        android:fontFamily="@font/clock_date"
+        android:format12Hour="EEE, MMM dd"
+        android:format24Hour="EEE, MMM dd"
+        android:gravity="center"
+        android:textColor="@color/textPrimary"
+        android:textSize="7sp"
         tools:ignore="SmallSp" />
 
-    <ImageView
-        android:id="@+id/widget_hour"
+    <AnalogClock
+        android:id="@+id/widget_clock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/widget_minutes"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/widget_seconds"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
+        tools:ignore="Deprecated" />
 
 </FrameLayout>
 
@@ -18368,15 +18463,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="180dp"
     android:layout_height="180dp">
-
-    <ImageView
-        android:id="@+id/widget_sweep_seconds"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:padding="5dp"
-        android:rotation="-90"
-        tools:ignore="ContentDescription" />
 
     <ImageView
         android:id="@+id/widget_clock_face"
@@ -18394,43 +18480,25 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
         android:layout_marginBottom="45dp"
         tools:ignore="ContentDescription" />
 
-    <TextView
+    <TextClock
         android:id="@+id/widget_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="45dp"
-        android:gravity="center"
-        android:textSize="11sp"
         android:fontFamily="@font/clock_date"
+        android:format12Hour="EEE, MMM dd"
+        android:format24Hour="EEE, MMM dd"
+        android:gravity="center"
         android:textColor="@color/textPrimary"
-        android:layout_gravity="center_horizontal|bottom"/>
+        android:textSize="11sp" />
 
-    <ImageView
-        android:id="@+id/widget_hour"
+    <AnalogClock
+        android:id="@+id/widget_clock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="25dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/widget_minutes"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_margin="25dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/widget_seconds"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:layout_margin="25dp"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
+        tools:ignore="Deprecated" />
 
 </FrameLayout>
 
@@ -18592,6 +18660,14 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
 </resources>
 
 ################################################################################
+# FILE: app/src/main/res/values-v31/bools.xml
+################################################################################
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="clock_widgets">true</bool>
+</resources>
+
+################################################################################
 # FILE: app/src/main/res/values-v31/themes_accent.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -18682,6 +18758,14 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     <attr name="colorAppAccent" format="color" />
     <attr name="colorAppAccentLight" format="color" />
     <attr name="colorAccentRipple" format="color" />
+</resources>
+
+################################################################################
+# FILE: app/src/main/res/values/bools.xml
+################################################################################
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="clock_widgets">false</bool>
 </resources>
 
 ################################################################################
@@ -19071,8 +19155,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
 
     <string name="button_cancel">Cancel</string>
     <string name="button_set">Set</string>
-    <string name="button_close">Close</string>
-    <string name="button_grant">Grant</string>
 
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>
@@ -19146,8 +19228,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     <string name="customize_pin">Customize Pin</string>
     <string name="twenty_four_hours_clock">24 Hour Clock</string>
     <string name="gimbal_lock">Gimbal Lock</string>
-    <string name="clock_widget_notification">Clock widget is running.</string>
-    <string name="notification_desc">Turn off \"Widget Channel\" from the notification settings to hide this notification.</string>
     <string name="save">Save</string>
     <string name="set_and_save">Set and Save</string>
     <string name="failed">Failed!</string>
@@ -19178,7 +19258,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     <string name="use_maps_target">Use Maps\' Target</string>
     <string name="using_maps_target">Using Maps\' Target</string>
     <string name="edit">Edit</string>
-    <string name="battery_optimization_desc">Please disable battery optimization to allow the Clock widget to run properly.</string>
     <string name="use_as_target">Use as Target</string>
     <string name="create_new">New</string>
     <string name="save_from_target">Save from Target</string>
@@ -19186,7 +19265,6 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     <string name="mechanical">Mechanical</string>
     <string name="app_coordinates_format">Coordinates Format</string>
     <string name="share">Share</string>
-    <string name="notification_permission_desc">Notification access is required to persistently run the clock widget service.</string>
     <string name="true_altitude">True Altitude</string>
     <string name="elongation">Elongation</string>
     <string name="radius">Radius</string>
@@ -19194,6 +19272,14 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
     <string name="measure">Measure</string>
     <string name="name">Name</string>
     <string name="saved_measures">Saved Measures</string>
+    <string name="map_source">Map source</string>
+    <string name="map_source_auto">Automatic</string>
+    <string name="map_source_google">Google Maps</string>
+    <string name="map_source_osm">OpenStreetMap</string>
+    <string name="desc_map_source_auto">OpenStreetMap when this build has no Google Maps key, Google Maps otherwise.</string>
+    <string name="desc_map_source_google">Needs a working Google Maps key. Pick OpenStreetMap if the map stays blank.</string>
+    <string name="desc_map_source_osm">Free map tiles from OpenStreetMap, cached on the device.</string>
+    <string name="desc_map_source_note">Used by every map, including address search. Takes effect the next time a map opens.</string>
 </resources>
 
 ################################################################################
@@ -19386,10 +19472,10 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:initialLayout="@layout/widget_clock"
-    android:resizeMode="none"
     android:minWidth="250dp"
     android:minHeight="250dp"
-    android:configure="app.simple.positional.activities.service.ClockWidgetActivity"
+    android:previewImage="@drawable/widget_clock_preview"
+    android:resizeMode="none"
     android:updatePeriodMillis="0" />
 
 ################################################################################
@@ -19397,10 +19483,10 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configure="app.simple.positional.activities.service.ClockWidgetActivity"
     android:initialLayout="@layout/widget_clock_2x2"
     android:minWidth="110dp"
     android:minHeight="110dp"
+    android:previewImage="@drawable/widget_clock_preview"
     android:resizeMode="none"
     android:updatePeriodMillis="0" />
 
@@ -19409,10 +19495,10 @@ internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifie
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:configure="app.simple.positional.activities.service.ClockWidgetActivity"
-    android:initialLayout="@layout/widget_clock"
+    android:initialLayout="@layout/widget_clock_3x3"
     android:minWidth="180dp"
     android:minHeight="180dp"
+    android:previewImage="@drawable/widget_clock_preview"
     android:resizeMode="none"
     android:updatePeriodMillis="0" />
 
@@ -19540,6 +19626,102 @@ class MeasurePointConverterTest {
         val list = arrayListOf(MeasurePoint(3.0, 4.0, 1))
         list.remove(MeasurePoint(3.0, 4.0, 1))
         assertTrue(list.isEmpty())
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/decorations/maps/OsmStyleTest.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import app.simple.positional.math.GeoDistance
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class OsmStyleTest {
+    @Test
+    fun styleUsesOsmTilesAndOverlayLayers() {
+        val json = OsmStyle.json(dark = false)
+        assertTrue(json.contains("https://tile.openstreetmap.org/{z}/{x}/{y}.png"))
+        assertTrue(json.contains("OpenStreetMap contributors"))
+        listOf(OsmStyle.PIN, OsmStyle.ACCURACY, OsmStyle.LINE, OsmStyle.GUIDE, OsmStyle.MARKERS).forEach {
+            assertTrue(json.contains("\"id\":\"$it\""))
+            assertTrue(json.contains("\"$it\":{\"type\":\"geojson\""))
+        }
+        assertFalse(json.contains("raster-brightness-min"))
+    }
+
+    @Test
+    fun darkStyleInvertsTiles() {
+        assertTrue(OsmStyle.json(dark = true).contains("\"raster-brightness-min\":1"))
+    }
+
+    @Test
+    fun geometryUsesLongitudeFirst() {
+        assertEquals("""{"type":"Point","coordinates":[2.5,48.5]}""", OsmStyle.point(48.5, 2.5))
+        assertEquals("""{"type":"LineString","coordinates":[[2.0,1.0],[4.0,3.0]]}""", OsmStyle.line(listOf(1.0 to 2.0, 3.0 to 4.0)))
+    }
+
+    @Test
+    fun shortLinesAreEmpty() {
+        assertEquals(OsmStyle.EMPTY_FEATURES, OsmStyle.line(emptyList()))
+        assertEquals(OsmStyle.EMPTY_FEATURES, OsmStyle.line(listOf(1.0 to 2.0)))
+    }
+
+    @Test
+    fun markersCarryTheirIcon() {
+        assertEquals(
+            """{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[2.0,1.0]},"properties":{"icon":"trail-3"}}]}""",
+            OsmStyle.markers(listOf(Triple(1.0, 2.0, "trail-3"))),
+        )
+        assertEquals(OsmStyle.EMPTY_FEATURES, OsmStyle.markers(emptyList()))
+    }
+
+    @Test
+    fun circleIsClosedAndAtRadius() {
+        val points = OsmStyle.circlePoints(37.0, -76.5, 250.0)
+        assertEquals(points.first().first, points.last().first, 1e-9)
+        assertEquals(points.first().second, points.last().second, 1e-9)
+        points.forEach { assertEquals(250.0, GeoDistance.meters(37.0, -76.5, it.first, it.second), 1.0) }
+    }
+
+    @Test
+    fun polygonWrapsTheRing() {
+        assertTrue(OsmStyle.circle(0.0, 0.0, 10.0).startsWith("""{"type":"Polygon","coordinates":[[["""))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/decorations/maps/TrackPinTest.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.hardware.SensorManager
+import app.simple.positional.R
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class TrackPinTest {
+    @Test
+    fun noLocationShowsHistoricalPin() {
+        assertEquals(R.drawable.ic_place_historical, TrackPin.drawable(false, compass = true, accuracy = SensorManager.SENSOR_STATUS_ACCURACY_HIGH, moving = true))
+    }
+
+    @Test
+    fun compassPinFollowsSensorAccuracy() {
+        assertEquals(R.drawable.ic_pin_low, TrackPin.drawable(true, true, SensorManager.SENSOR_STATUS_ACCURACY_LOW, false))
+        assertEquals(R.drawable.ic_pin_medium, TrackPin.drawable(true, true, SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM, false))
+        assertEquals(R.drawable.ic_pin_high, TrackPin.drawable(true, true, SensorManager.SENSOR_STATUS_ACCURACY_HIGH, false))
+        assertEquals(R.drawable.ic_pin_unreliable, TrackPin.drawable(true, true, SensorManager.SENSOR_STATUS_UNRELIABLE, false))
+        assertEquals(R.drawable.ic_pin_unreliable, TrackPin.drawable(true, true, -1, false))
+    }
+
+    @Test
+    fun withoutCompassPinShowsMovement() {
+        assertEquals(R.drawable.ic_pin_bearing, TrackPin.drawable(true, false, -1, true))
+        assertEquals(R.drawable.ic_pin_no_speed, TrackPin.drawable(true, false, -1, false))
     }
 }
 
@@ -20288,6 +20470,7 @@ package app.simple.positional.ui.compose
 import app.simple.positional.util.NightMode
 import app.simple.positional.R
 import app.simple.positional.util.LocaleHelper
+import app.simple.positional.util.MapSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -20323,6 +20506,15 @@ class SettingsLabelsTest {
         assertEquals(R.string.fused_location_provider, SettingsLabels.locationProvider(SettingsLabels.PROVIDER_FUSED))
         assertNull(SettingsLabels.locationProvider("other"))
         assertEquals(R.string.desc_fused_location_provider, SettingsLabels.locationProviderDescription(SettingsLabels.PROVIDER_FUSED))
+    }
+
+    @Test
+    fun mapSourceLabels() {
+        assertEquals(R.string.map_source_auto, SettingsLabels.mapSource(MapSource.AUTO))
+        assertEquals(R.string.map_source_google, SettingsLabels.mapSource(MapSource.GOOGLE))
+        assertEquals(R.string.map_source_osm, SettingsLabels.mapSource(MapSource.OSM))
+        assertNull(SettingsLabels.mapSource(9))
+        MapSource.choices.forEach { assertNotNull(SettingsLabels.mapSourceDescription(it)) }
     }
 
     @Test
@@ -20632,6 +20824,35 @@ class LocationShareTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/util/MapSourceTest.kt
+################################################################################
+package app.simple.positional.util
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class MapSourceTest {
+    @Test
+    fun automaticFallsBackToOsmWithoutKey() {
+        assertTrue(MapSource.useOsm(MapSource.AUTO, hasGoogleKey = false))
+        assertFalse(MapSource.useOsm(MapSource.AUTO, hasGoogleKey = true))
+    }
+
+    @Test
+    fun explicitChoiceWins() {
+        assertTrue(MapSource.useOsm(MapSource.OSM, hasGoogleKey = true))
+        assertFalse(MapSource.useOsm(MapSource.GOOGLE, hasGoogleKey = false))
+    }
+
+    @Test
+    fun choicesAreDistinct() {
+        assertEquals(3, MapSource.choices.toSet().size)
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/util/NightModeTest.kt
 ################################################################################
 package app.simple.positional.util
@@ -20753,6 +20974,45 @@ class TwilightTest {
     @Test
     fun phasesHaveDistinctColors() {
         assertEquals(TwilightPhase.entries.size, TwilightPhase.entries.map { it.color }.toSet().size)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/widgets/DayNightTest.kt
+################################################################################
+package app.simple.positional.widgets
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.time.ZoneId
+import java.time.ZonedDateTime
+
+class DayNightTest {
+    private val zone = ZoneId.of("America/New_York")
+    private fun at(day: Int, hour: Int, minute: Int = 0) = ZonedDateTime.of(2026, 10, day, hour, minute, 0, 0, zone)
+
+    @Test
+    fun dayRunsFromSixToSevenPm() {
+        assertFalse(DayNight.isDay(5))
+        assertTrue(DayNight.isDay(6))
+        assertTrue(DayNight.isDay(18))
+        assertFalse(DayNight.isDay(19))
+    }
+
+    @Test
+    fun nextChangeIsTheNextBoundary() {
+        assertEquals(at(23, 6), DayNight.nextChange(at(23, 2, 30)))
+        assertEquals(at(23, 19), DayNight.nextChange(at(23, 6)))
+        assertEquals(at(23, 19), DayNight.nextChange(at(23, 18, 59)))
+        assertEquals(at(24, 6), DayNight.nextChange(at(23, 19)))
+        assertEquals(at(24, 6), DayNight.nextChange(at(23, 23, 59)))
+    }
+
+    @Test
+    fun nextChangeKeepsTheZone() {
+        assertEquals(zone, DayNight.nextChange(at(23, 12)).zone)
     }
 }
 
