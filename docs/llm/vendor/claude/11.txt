@@ -1,0 +1,9 @@
+72
+62
+
+Good news is the build passes, the apk publishes, I am able to install it, and the app works. 
+however, I see a visual regression in the time screen 
+the headline `Moon Illunimation` is in two lines on my oneplus nord N30 5G in portrait 
+which is fine but the M of Moon and I of illumination touch 
+I suspect this is a systemic problem  
+please fix all regressions and defects and continue with the next phase 
