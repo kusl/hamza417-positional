@@ -599,3 +599,151 @@ Claude finished the response
 
 
 Please continue with phase 8c
+also please fix the following and any other problems that might have occurred 
+github action is failing now 
+
+Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:parseDebugLocalResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:generateReleaseResValues FROM-CACHE
+> Task :app:generateReleaseResources
+> Task :app:mergeDebugResources
+> Task :app:packageReleaseResources
+> Task :app:processReleaseNavigationResources
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:extractProguardFiles
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:generateDebugGlobalSynthetics FROM-CACHE
+> Task :app:parseReleaseLocalResources
+> Task :app:l8DexDesugarLibDebug FROM-CACHE
+> Task :app:generateReleaseRFile FROM-CACHE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:processDebugResources
+> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+
+> Task :app:kspReleaseKotlin
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:15: There are multiple good constructors and Room will pick the no-arg constructor. You can use the @Ignore annotation to eliminate unwanted constructors.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:15: There are multiple good constructors and Room will pick the no-arg constructor. You can use the @Ignore annotation to eliminate unwanted constructors.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+
+> Task :app:mergeExtDexDebug
+
+> Task :app:kspDebugKotlin
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:15: There are multiple good constructors and Room will pick the no-arg constructor. You can use the @Ignore annotation to eliminate unwanted constructors.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:15: There are multiple good constructors and Room will pick the no-arg constructor. You can use the @Ignore annotation to eliminate unwanted constructors.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+
+> Task :app:compileReleaseKotlin
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt:488:57 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/extensions/activity/BaseActivity.kt:158:16 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/extensions/fragment/ScopedFragment.kt:40:37 Unnecessary safe call on a non-null receiver of type 'Display'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:178:25 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:179:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:180:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:183:26 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt:406:11 Redundant call of conversion method.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt:414:12 Redundant call of conversion method.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/launcher/SplashScreen.kt:79:24 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/MeasureViewModel.kt:57:33 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/MeasureViewModel.kt:68:38 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+
+> Task :app:compileReleaseKotlin
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt:488:57 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/extensions/activity/BaseActivity.kt:158:16 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/extensions/fragment/ScopedFragment.kt:40:37 Unnecessary safe call on a non-null receiver of type 'Display'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:178:25 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:179:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:180:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:183:26 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt:406:11 Redundant call of conversion method.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt:414:12 Redundant call of conversion method.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/launcher/SplashScreen.kt:79:24 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/MeasureViewModel.kt:57:33 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/MeasureViewModel.kt:68:38 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+
+> Task :app:compileReleaseJavaWithJavac
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java:18: error: cannot find symbol
+    public static final String MEASURE = Measure.TAG;
+                                                ^
+  symbol:   variable TAG
+  location: class Measure
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+1 error
+
+> Task :app:compileReleaseJavaWithJavac FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792757668608.json
+
+
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileReleaseJavaWithJavac' (registered by plugin 'com.android.internal.application').
+> Compilation failed; see the compiler output below.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java:18: error: cannot find symbol
+      public static final String MEASURE = Measure.TAG;
+                                                  ^
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+    symbol:   variable TAG
+49 actionable tasks: 31 executed, 18 from cache
+    location: class Measure
+  Note: Some input files use or override a deprecated API.
+  Note: Recompile with -Xlint:deprecation for details.
+  1 error
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 1m 43s
+Error: Process completed with exit code 1.
