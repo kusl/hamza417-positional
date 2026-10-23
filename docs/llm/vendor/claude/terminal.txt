@@ -374,4 +374,48 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.146s
 user	0m0.509s
 sys	0m0.659s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-08-25-50
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleTextView.java app/src/main/java/app/simple/positional/dialogs/clock/ClockMenu.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassMenu.kt app/src/main/java/app/simple/positional/dialogs/direction/DirectionMenu.kt app/src/main/java/app/simple/positional/dialogs/gps/GPSMenu.kt app/src/main/java/app/simple/positional/dialogs/measure/MeasureMenu.kt app/src/main/java/app/simple/positional/dialogs/trail/TrailMenu.kt app/src/main/res/drawable/ic_bloom.xml app/src/main/res/drawable/ic_bloom_skin.xml app/src/main/res/drawable/ic_direction_code.xml app/src/main/res/drawable/ic_filter_b_and_w.xml app/src/main/res/drawable/ic_geodesic.xml app/src/main/res/drawable/ic_gimbal_lock.xml app/src/main/res/drawable/ic_help.xml app/src/main/res/drawable/ic_label.xml app/src/main/res/drawable/ic_motion_type.xml app/src/main/res/drawable/ic_precision.xml app/src/main/res/drawable/ic_satellite.xml app/src/main/res/drawable/ic_square_root.xml app/src/main/res/drawable/ic_traffic.xml app/src/main/res/drawable/ic_twenty_four_hours.xml app/src/main/res/drawable/ic_zoom_in.xml app/src/main/res/layout/dialog_clock_menu.xml app/src/main/res/layout/dialog_compass_menu.xml app/src/main/res/layout/dialog_direction_menu.xml app/src/main/res/layout/dialog_gps_menu.xml app/src/main/res/layout/dialog_measure_menu.xml app/src/main/res/layout/dialog_trail_menu.xml
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleTextView.java'
+rm 'app/src/main/java/app/simple/positional/dialogs/clock/ClockMenu.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/compass/CompassMenu.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/direction/DirectionMenu.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/gps/GPSMenu.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/measure/MeasureMenu.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/trail/TrailMenu.kt'
+rm 'app/src/main/res/drawable/ic_bloom.xml'
+rm 'app/src/main/res/drawable/ic_bloom_skin.xml'
+rm 'app/src/main/res/drawable/ic_direction_code.xml'
+rm 'app/src/main/res/drawable/ic_filter_b_and_w.xml'
+rm 'app/src/main/res/drawable/ic_geodesic.xml'
+rm 'app/src/main/res/drawable/ic_gimbal_lock.xml'
+rm 'app/src/main/res/drawable/ic_help.xml'
+rm 'app/src/main/res/drawable/ic_label.xml'
+rm 'app/src/main/res/drawable/ic_motion_type.xml'
+rm 'app/src/main/res/drawable/ic_precision.xml'
+rm 'app/src/main/res/drawable/ic_satellite.xml'
+rm 'app/src/main/res/drawable/ic_square_root.xml'
+rm 'app/src/main/res/drawable/ic_traffic.xml'
+rm 'app/src/main/res/drawable/ic_twenty_four_hours.xml'
+rm 'app/src/main/res/drawable/ic_zoom_in.xml'
+rm 'app/src/main/res/layout/dialog_clock_menu.xml'
+rm 'app/src/main/res/layout/dialog_compass_menu.xml'
+rm 'app/src/main/res/layout/dialog_direction_menu.xml'
+rm 'app/src/main/res/layout/dialog_gps_menu.xml'
+rm 'app/src/main/res/layout/dialog_measure_menu.xml'
+rm 'app/src/main/res/layout/dialog_trail_menu.xml'
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.080s
+user	0m0.487s
+sys	0m0.615s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-08-26-23
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.097s
+user	0m0.508s
+sys	0m0.601s
 kushal@fedora:~/src/kotlin/positional$ 
+
