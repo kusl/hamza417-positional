@@ -1,5 +1,8 @@
 package app.simple.positional.ui.compose
 
+import android.graphics.Typeface
+import android.text.Spanned
+import android.text.style.StyleSpan
 import androidx.annotation.DimenRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -17,11 +20,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import app.simple.positional.R
 
 @Immutable
-data class InfoRow(val label: String, val value: String = "")
+data class InfoRow(val label: String, val value: String = "", val alert: Boolean = false)
 
 @Composable
 fun textSize(@DimenRes id: Int): TextUnit = with(LocalDensity.current) { dimensionResource(id).toSp() }
@@ -56,8 +61,8 @@ fun PanelToolbar(title: String, topInset: Dp, divider: Boolean = true, actions: 
 }
 
 @Composable
-fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null) {
-    Box(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
+fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null, modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
         if (graphic != null) {
             Image(
                 graphic,
@@ -80,7 +85,7 @@ fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null) {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(row.label) }
                         if (row.value.isNotEmpty()) {
                             append(" ")
-                            append(row.value)
+                            if (row.alert) withStyle(SpanStyle(color = Color.Red)) { append(row.value) } else append(row.value)
                         }
                     },
                     fontFamily = PositionalFonts.light,
@@ -90,6 +95,16 @@ fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null) {
                 )
             }
         }
+    }
+}
+
+fun Spanned.toAnnotatedString(): AnnotatedString {
+    val spanned = this
+    return buildAnnotatedString {
+        append(spanned.toString())
+        spanned.getSpans(0, spanned.length, StyleSpan::class.java)
+            .filter { it.style and Typeface.BOLD != 0 }
+            .forEach { addStyle(SpanStyle(fontWeight = FontWeight.Bold), spanned.getSpanStart(it), spanned.getSpanEnd(it)) }
     }
 }
 

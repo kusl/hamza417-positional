@@ -51,7 +51,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, attributeSet),
+class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(context, attributeSet),
     SensorEventListener {
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)
@@ -105,11 +105,6 @@ class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, a
         if (isCustomCoordinate) {
             customLatitude = MainPreferences.getCoordinates()[0].toDouble()
             customLongitude = MainPreferences.getCoordinates()[1].toDouble()
-        }
-
-        if (GPSPreferences.isUsingVolumeKeys()) {
-            this.isFocusableInTouchMode = true
-            this.requestFocus()
         }
 
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

@@ -96,7 +96,6 @@
     <string name="seconds">سیکنڈ</string>
 
     <string name="info_copied">کلپ بورڈ میں کاپی ہو گیا ہے</string>
-    <string name="info_error">کاپی نہیں ہوسکی!!</string>
     <string name="invalid_coordinates">غلط نقاط</string>
     <string name="internet_connection_alert">انٹرنیٹ کنکشن دستیاب نہیں ہے</string>
     <string name="error">خرابی واقع ہوئی</string>

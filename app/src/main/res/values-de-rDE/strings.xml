@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">In Zwischenablage kopiert</string>
-    <string name="info_error">Info konnte nicht kopiert werden!</string>
     <string name="invalid_coordinates">Ungültige Koordinaten</string>
     <string name="internet_connection_alert">Keine Internetverbindung verfügbar</string>
     <string name="error">Fehler</string>

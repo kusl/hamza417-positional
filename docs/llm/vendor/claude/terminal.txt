@@ -274,4 +274,42 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.294s
 user	0m0.581s
 sys	0m0.696s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.302s
+user	0m0.564s
+sys	0m0.728s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-05-16-07
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/constants/SpeedometerConstants.kt app/src/main/java/app/simple/positional/decorations/maps/MapToolbar.kt app/src/main/java/app/simple/positional/decorations/maps/MapsTools.kt app/src/main/java/app/simple/positional/decorations/maps/MapsToolsCallbacks.java app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareConstraintLayout.java app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareFrameLayout.java app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareNestedScrollView.java app/src/main/java/app/simple/positional/decorations/views/Speedometer.kt app/src/main/java/app/simple/positional/popups/location/PopupCoordinateBox.kt app/src/main/java/app/simple/positional/popups/location/PopupLocationMenu.kt app/src/main/res/drawable/ic_circle_stroke.xml app/src/main/res/drawable/ripple.xml app/src/main/res/layout-land/fragment_gps.xml app/src/main/res/layout-land/tools_maps.xml app/src/main/res/layout/bottom_sheet_gps.xml app/src/main/res/layout/fragment_gps.xml app/src/main/res/layout/info_panel_gps.xml app/src/main/res/layout/popup_coordinates_box.xml app/src/main/res/layout/popup_location_map.xml app/src/main/res/layout/speedometer.xml app/src/main/res/layout/toolbar_map_panel.xml app/src/main/res/layout/tools_maps.xml
+rm 'app/src/main/java/app/simple/positional/constants/SpeedometerConstants.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/maps/MapToolbar.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/maps/MapsTools.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/maps/MapsToolsCallbacks.java'
+rm 'app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareConstraintLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareFrameLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareNestedScrollView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/Speedometer.kt'
+rm 'app/src/main/java/app/simple/positional/popups/location/PopupCoordinateBox.kt'
+rm 'app/src/main/java/app/simple/positional/popups/location/PopupLocationMenu.kt'
+rm 'app/src/main/res/drawable/ic_circle_stroke.xml'
+rm 'app/src/main/res/drawable/ripple.xml'
+rm 'app/src/main/res/layout-land/fragment_gps.xml'
+rm 'app/src/main/res/layout-land/tools_maps.xml'
+rm 'app/src/main/res/layout/bottom_sheet_gps.xml'
+rm 'app/src/main/res/layout/fragment_gps.xml'
+rm 'app/src/main/res/layout/info_panel_gps.xml'
+rm 'app/src/main/res/layout/popup_coordinates_box.xml'
+rm 'app/src/main/res/layout/popup_location_map.xml'
+rm 'app/src/main/res/layout/speedometer.xml'
+rm 'app/src/main/res/layout/toolbar_map_panel.xml'
+rm 'app/src/main/res/layout/tools_maps.xml'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-05-16-22
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.193s
+user	0m0.520s
+sys	0m0.699s
 kushal@fedora:~/src/kotlin/positional$ 
+

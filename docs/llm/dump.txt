@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T05:15:57-04:00
+Generated: 2026-10-23T05:16:25-04:00
 Branch:    master
-Commit:    07e8da58 2026-10-23 05:15:48 -0400 add claude response
+Commit:    7d05e82b 2026-10-23 05:16:18 -0400 run scripts
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (1050 files)
+## TREE (1028 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -110,7 +110,6 @@ app/
                 HtmlPage.kt
                 LauncherBackground.kt
                 LocationPins.kt
-                SpeedometerConstants.kt
                 TrailIcons.kt
               database/
                 converters/
@@ -150,10 +149,7 @@ app/
                 interpolators/
                   LatLngInterpolator.java
                 maps/
-                  MapToolbar.kt
                   Maps.kt
-                  MapsTools.kt
-                  MapsToolsCallbacks.java
                 measure/
                   MeasureMaps.kt
                   MeasureToolbar.kt
@@ -161,10 +157,7 @@ app/
                   MeasureTools.kt
                   MeasureToolsCallbacks.java
                 padding/
-                  PaddingAwareConstraintLayout.java
-                  PaddingAwareFrameLayout.java
                   PaddingAwareLinearLayout.java
-                  PaddingAwareNestedScrollView.java
                 popup/
                   BasePopupWindow.kt
                   PopupLinearLayout.java
@@ -199,7 +192,6 @@ app/
                   CustomRecyclerView.kt
                   CustomWebView.kt
                   LocationButton.java
-                  Speedometer.kt
               dialogs/
                 app/
                   ErrorDialog.kt
@@ -263,9 +255,6 @@ app/
                 TrailEntry.java
                 TrailPoint.java
               popups/
-                location/
-                  PopupCoordinateBox.kt
-                  PopupLocationMenu.kt
                 miscellaneous/
                   DeletePopupMenu.kt
                 trail/
@@ -464,7 +453,6 @@ app/
           ic_car.xml
           ic_check.xml
           ic_circle.xml
-          ic_circle_stroke.xml
           ic_clear.xml
           ic_clock.xml
           ic_clock_shadow.xml
@@ -695,7 +683,6 @@ app/
           moon28.xml
           moon29.xml
           moon_phase_02.xml
-          ripple.xml
           ripple_btn.xml
           sc_01_clock.xml
           sc_02_compass.xml
@@ -723,10 +710,8 @@ app/
           regular.ttf
         layout-land/
           dialog_pin_customization.xml
-          fragment_gps.xml
           fragment_launcher.xml
           fragment_trail.xml
-          tools_maps.xml
           tools_trails.xml
         layout-v26/
           widget_suntime.xml
@@ -743,7 +728,6 @@ app/
           adapter_trail_data.xml
           adapter_trail_data_footer.xml
           adapter_trail_data_header.xml
-          bottom_sheet_gps.xml
           bottom_sheet_trail.xml
           dialog_clock_menu.xml
           dialog_clock_motion_type.xml
@@ -767,22 +751,15 @@ app/
           dialog_trail_name.xml
           expansion_dialog_coordinates.xml
           expansion_dialog_location.xml
-          fragment_gps.xml
           fragment_launcher.xml
           fragment_measure.xml
           fragment_trail.xml
-          info_panel_gps.xml
-          popup_coordinates_box.xml
           popup_delete_confirmation.xml
-          popup_location_map.xml
           popup_trail_markers.xml
           popup_trails_data.xml
-          speedometer.xml
           switch_view.xml
-          toolbar_map_panel.xml
           toolbar_measure.xml
           toolbar_trail_maps.xml
-          tools_maps.xml
           tools_measure.xml
           tools_trails.xml
           widget_clock.xml
@@ -4342,54 +4319,6 @@ object LocationPins {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/constants/SpeedometerConstants.kt
-################################################################################
-package app.simple.positional.constants
-
-import android.graphics.Color
-import kotlin.math.roundToInt
-
-object SpeedometerConstants {
-    private const val speedometerColorValueDivider = 10.0F
-
-    fun getSpeedometerColor(value: Double): Int {
-        return parseColor(getColor()[getValue(value)])
-    }
-
-    private fun getValue(value: Double): Int {
-        return if ((value / speedometerColorValueDivider).roundToInt() == 0) {
-            0
-        } else {
-            (value / speedometerColorValueDivider).roundToInt() - 1
-        }
-    }
-
-    private fun getColor(): Array<String> {
-        return arrayOf(
-                "#008f15",
-                "#3a9f11",
-                "#5daf0b",
-                "#7cbe04",
-                "#9cce00",
-                "#bcdd00",
-                "#ddeb01",
-                "#fff90f",
-                "#ffe000",
-                "#ffc600",
-                "#ffaa00",
-                "#ff8e00",
-                "#ff6f00",
-                "#ff4a00",
-                "#ff0000",
-        )
-    }
-
-    private fun parseColor(color: String): Int {
-        return Color.parseColor(color)
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/constants/TrailIcons.kt
 ################################################################################
 package app.simple.positional.constants
@@ -6517,142 +6446,6 @@ public interface LatLngInterpolator {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/maps/MapToolbar.kt
-################################################################################
-package app.simple.positional.decorations.maps
-
-import android.animation.LayoutTransition
-import android.content.Context
-import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.util.AttributeSet
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.animation.DecelerateInterpolator
-import android.widget.TextView
-import androidx.core.view.setPadding
-import app.simple.positional.R
-import app.simple.positional.constants.LocationPins.locationsPins
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.GPSPreferences.getPinSkin
-import app.simple.positional.preferences.MainPreferences.getCornerRadius
-import app.simple.positional.preferences.MainPreferences.isCustomCoordinate
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.StatusBarHeight
-import com.google.android.material.shape.CornerFamily
-import com.google.android.material.shape.MaterialShapeDrawable
-import com.google.android.material.shape.ShapeAppearanceModel
-
-class MapToolbar : DynamicCornerLinearLayout, OnSharedPreferenceChangeListener {
-    private lateinit var mapToolbarCallbacks: MapToolbarCallbacks
-    private lateinit var menu: DynamicRippleImageButton
-    private lateinit var customLocationButton: DynamicRippleImageButton
-
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
-        setProperties()
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        setProperties()
-    }
-
-    private fun setProperties() {
-        initViews()
-
-        val shapeAppearanceModel = ShapeAppearanceModel()
-                .toBuilder()
-                .setAllCorners(CornerFamily.ROUNDED, getCornerRadius().toFloat())
-                .build()
-
-        if (StatusBarHeight.isLandscape(context).invert()) {
-            background = MaterialShapeDrawable(shapeAppearanceModel)
-        }
-
-        gravity = Gravity.END
-        layoutTransition = LayoutTransition()
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-    }
-
-    private fun initViews() {
-        val view = LayoutInflater.from(context).inflate(R.layout.toolbar_map_panel, this, true)
-
-        setPadding(resources.getDimensionPixelSize(R.dimen.toolbar_padding).div(2))
-
-        post {
-            val params = layoutParams as MarginLayoutParams
-            params.setMargins(paddingLeft, StatusBarHeight.getStatusBarHeight(resources) + paddingTop, paddingRight, paddingBottom)
-            layoutParams = params
-
-            layoutParams.width = LayoutParams.MATCH_PARENT
-        }
-
-        menu = view.findViewById(R.id.gps_menu)
-        customLocationButton = view.findViewById(R.id.gps_custom_location)
-
-        with(view.findViewById<TextView>(R.id.map_toolbar_heading)) {
-            isSelected = true
-        }
-
-        if (isCustomCoordinate()) {
-            customLocationButton.setImageResource(R.drawable.ic_place_custom)
-        } else {
-            customLocationButton.setImageResource(locationsPins[getPinSkin()])
-        }
-
-        menu.setOnClickListener { mapToolbarCallbacks.onMenuClicked(it) }
-
-        customLocationButton.setOnClickListener {
-            mapToolbarCallbacks.onCustomLocationClicked(it)
-        }
-
-        customLocationButton.setOnLongClickListener {
-            mapToolbarCallbacks.onCustomLocationLongPressed(it)
-            true
-        }
-    }
-
-    fun hide() {
-        animate().translationY((height * -1).toFloat()).alpha(0f).setInterpolator(DecelerateInterpolator(1.5f)).start()
-        menu.isClickable = false
-        isClickable = false
-    }
-
-    fun show() {
-        animate().translationY(0f).alpha(1f).setInterpolator(DecelerateInterpolator(1.5f)).start()
-        menu.isClickable = true
-        isClickable = true
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        getSharedPreferences()
-                .unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    fun setOnMapToolbarCallbacks(mapToolbarCallbacks: MapToolbarCallbacks) {
-        this.mapToolbarCallbacks = mapToolbarCallbacks
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (GPSPreferences.pinSkin == key) {
-            if (!isCustomCoordinate()) {
-                customLocationButton.setImageResource(locationsPins[getPinSkin()])
-            }
-        }
-    }
-
-    interface MapToolbarCallbacks {
-        fun onMenuClicked(view: View)
-        fun onCustomLocationClicked(view: View)
-        fun onCustomLocationLongPressed(view: View)
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/maps/Maps.kt
 ################################################################################
 package app.simple.positional.decorations.maps
@@ -7444,293 +7237,6 @@ class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, a
                 setTraffic(GPSPreferences.isTrafficShown())
             }
         }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/maps/MapsTools.kt
-################################################################################
-package app.simple.positional.decorations.maps
-
-import android.animation.LayoutTransition
-import android.content.Context
-import android.content.SharedPreferences
-import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.animation.DecelerateInterpolator
-import app.simple.positional.R
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.LocationButton
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.ImageLoader
-import app.simple.positional.util.StatusBarHeight
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
-
-class MapsTools : DynamicCornerLinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
-    private lateinit var align: DynamicRippleImageButton
-    private lateinit var location: LocationButton
-    private lateinit var target: DynamicRippleImageButton
-    private lateinit var check: DynamicRippleImageButton
-    private lateinit var compass: DynamicRippleImageButton
-    private lateinit var bearing: DynamicRippleImageButton
-    private lateinit var northOnly: DynamicRippleImageButton
-
-    private lateinit var mapsToolsCallbacks: MapsToolsCallbacks
-
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
-        setProperties()
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        setProperties()
-    }
-
-    private fun setProperties() {
-        initViews()
-        layoutTransition = LayoutTransition()
-        app.simple.positional.singleton.SharedPreferences.getSharedPreferences()
-            .registerOnSharedPreferenceChangeListener(this)
-    }
-
-    private fun initViews() {
-        val view = LayoutInflater.from(context).inflate(R.layout.tools_maps, this, true)
-
-        align = view.findViewById(R.id.tools_align_btn)
-        location = view.findViewById(R.id.current_location)
-        target = view.findViewById(R.id.current_target)
-        check = view.findViewById(R.id.current_target_check)
-        compass = view.findViewById(R.id.compass)
-        bearing = view.findViewById(R.id.bearing)
-        northOnly = view.findViewById(R.id.north_up)
-
-        setAlignButtonState(animate = false)
-        updateNorthOnlyIcon(animate = false)
-        updateBearingIcon(animate = false)
-        updateCompassIcon(animate = false)
-        setTargetButtonState(animate = false)
-        setCheckButtonState(animate = false)
-
-        location.setOnClickListener {
-            mapsToolsCallbacks.onLocationClicked(it, false)
-        }
-
-        location.setOnLongClickListener {
-            mapsToolsCallbacks.onLocationClicked(it, true)
-            true
-        }
-
-        target.setOnClickListener {
-            if (GPSPreferences.isTargetMarkerSet()) {
-                mapsToolsCallbacks.removeTarget(it)
-            } else {
-                if (GPSPreferences.isTargetMarkerMode()) {
-                    GPSPreferences.setTargetMarkerMode(false)
-                } else {
-                    GPSPreferences.setTargetMarkerMode(true)
-                }
-            }
-        }
-
-        target.setOnLongClickListener {
-            if(!GPSPreferences.isTargetMarkerSet()) {
-                mapsToolsCallbacks.onTargetAdd(true)
-            }
-            true
-        }
-
-        check.setOnClickListener {
-            GPSPreferences.setTargetMarkerMode(false)
-            mapsToolsCallbacks.onTargetAdd(false)
-        }
-
-        align.setOnClickListener {
-            GPSPreferences.setToolsGravity(
-                    !GPSPreferences.isToolsGravityLeft()
-            )
-        }
-
-        compass.setOnClickListener {
-            with(GPSPreferences) {
-                setCompassRotation(true)
-                setBearingRotation(false)
-                setNorthOnly(false)
-            }
-        }
-
-        bearing.setOnClickListener {
-            with(GPSPreferences) {
-                setCompassRotation(false)
-                setBearingRotation(true)
-                setNorthOnly(false)
-            }
-        }
-
-        northOnly.setOnClickListener {
-            with(GPSPreferences) {
-                setCompassRotation(false)
-                setBearingRotation(false)
-                setNorthOnly(true)
-            }
-        }
-
-        if (MainPreferences.isCustomCoordinate()) {
-            bearing.gone()
-        }
-    }
-
-    private fun setCheckButtonState(animate: Boolean) {
-        if (GPSPreferences.isTargetMarkerMode()) {
-            check.visible(animate)
-        } else {
-            check.gone()
-        }
-    }
-
-    private fun setAlignButtonState(animate: Boolean) {
-        if(StatusBarHeight.isLandscape(context)) {
-            align.gone()
-        } else {
-            if (GPSPreferences.isToolsGravityLeft()) {
-                if (animate) {
-                    ImageLoader.setImage(R.drawable.ic_arrow_right, align, context, 0)
-                } else {
-                    align.setImageResource(R.drawable.ic_arrow_right)
-                }
-            } else {
-                if (animate) {
-                    ImageLoader.setImage(R.drawable.ic_arrow_left, align, context, 0)
-                } else {
-                    align.setImageResource(R.drawable.ic_arrow_left)
-                }
-            }
-        }
-    }
-
-    fun locationIndicatorUpdate(isFixed: Boolean) = location.locationIndicatorUpdate(isFixed)
-    fun locationIconStatusUpdates() = location.locationIconStatusUpdate()
-
-    private fun setTargetButtonState(animate: Boolean) {
-        if (GPSPreferences.isTargetMarkerSet() || GPSPreferences.isTargetMarkerMode()) {
-            if (animate) {
-                ImageLoader.setImage(R.drawable.ic_clear, target, context, 0)
-            } else {
-                target.setImageResource(R.drawable.ic_clear)
-            }
-        } else {
-            if (animate) {
-                ImageLoader.setImage(R.drawable.ic_crosshair, target, context, 0)
-            } else {
-                target.setImageResource(R.drawable.ic_crosshair)
-            }
-        }
-    }
-
-    private fun updateCompassIcon(animate: Boolean) {
-        if (GPSPreferences.isCompassRotation()) {
-            if (animate) {
-                compass.animate().alpha(1F).setInterpolator(DecelerateInterpolator()).start()
-            } else {
-                compass.alpha = 1F
-            }
-        } else {
-            if (animate) {
-                compass.animate().alpha(0.4F).setInterpolator(DecelerateInterpolator()).start()
-            } else {
-                compass.alpha = 0.4F
-            }
-        }
-    }
-
-    private fun updateBearingIcon(animate: Boolean) {
-        if (GPSPreferences.isBearingRotation()) {
-            if (animate) {
-                bearing.animate().alpha(1F).setInterpolator(DecelerateInterpolator()).start()
-            } else {
-                bearing.alpha = 1F
-            }
-        } else {
-            if (animate) {
-                bearing.animate().alpha(0.4F).setInterpolator(DecelerateInterpolator()).start()
-            } else {
-                bearing.alpha = 0.4F
-            }
-        }
-    }
-
-    private fun updateNorthOnlyIcon(animate: Boolean) {
-        if (GPSPreferences.isNorthOnly()) {
-            if (animate) {
-                northOnly.animate().alpha(1F).setInterpolator(DecelerateInterpolator()).start()
-            } else {
-                northOnly.alpha = 1F
-            }
-        } else {
-            if (animate) {
-                northOnly.animate().alpha(0.4F).setInterpolator(DecelerateInterpolator()).start()
-            } else {
-                northOnly.alpha = 0.4F
-            }
-        }
-    }
-
-    fun setOnToolsCallbacksListener(mapsToolsCallbacks: MapsToolsCallbacks) {
-        this.mapsToolsCallbacks = mapsToolsCallbacks
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            GPSPreferences.isNorthOnly -> {
-                updateNorthOnlyIcon(animate = true)
-            }
-            GPSPreferences.compassRotation -> {
-                updateCompassIcon(animate = true)
-            }
-            GPSPreferences.useBearingRotation -> {
-                updateBearingIcon(animate = true)
-            }
-            GPSPreferences.toolsGravity -> {
-                setAlignButtonState(animate = true)
-            }
-            GPSPreferences.mapTargetMarker,
-            GPSPreferences.isTargetMarkerMode -> {
-                setTargetButtonState(animate = true)
-                setCheckButtonState(animate = true)
-            }
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/maps/MapsToolsCallbacks.java
-################################################################################
-package app.simple.positional.decorations.maps;
-
-import android.view.View;
-import androidx.annotation.NonNull;
-
-public interface MapsToolsCallbacks {
-    default void onAlign(@NonNull View view) {
-    }
-
-    default void onLocationClicked(@NonNull View view, boolean longPressed) {
-    }
-
-    default void onTargetAdd(boolean longpress) {
-    }
-
-    default void removeTarget(View view) {
-    }
-
-    default void onCompassClicked(@NonNull View view) {
-    }
-
-    default void onBearingClicked(@NonNull View view) {
-    }
-
-    default void onNorthOnly(@NonNull View view) {
     }
 }
 
@@ -8676,78 +8182,6 @@ public interface MeasureToolsCallbacks {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareConstraintLayout.java
-################################################################################
-package app.simple.positional.decorations.padding;
-
-import android.content.Context;
-import android.util.AttributeSet;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import app.simple.positional.util.StatusBarHeight;
-
-public class PaddingAwareConstraintLayout extends ConstraintLayout {
-    public PaddingAwareConstraintLayout(@NonNull Context context) {
-        super(context);
-        init();
-    }
-
-    public PaddingAwareConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    public PaddingAwareConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init();
-    }
-
-    public PaddingAwareConstraintLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init();
-    }
-
-    private void init() {
-        setPadding(getPaddingLeft(),
-                StatusBarHeight.getStatusBarHeight(getResources()) + getPaddingTop(),
-                getPaddingRight(),
-                getPaddingBottom());
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareFrameLayout.java
-################################################################################
-package app.simple.positional.decorations.padding;
-
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.FrameLayout;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import app.simple.positional.util.StatusBarHeight;
-
-public class PaddingAwareFrameLayout extends FrameLayout {
-    public PaddingAwareFrameLayout(@NonNull Context context) {
-        super(context);
-        init();
-    }
-
-    public PaddingAwareFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    private void init() {
-        setPadding(getPaddingLeft(),
-                StatusBarHeight.getStatusBarHeight(getResources()) + getPaddingTop(),
-                getPaddingRight(),
-                getPaddingBottom());
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareLinearLayout.java
 ################################################################################
 package app.simple.positional.decorations.padding;
@@ -8767,42 +8201,6 @@ public class PaddingAwareLinearLayout extends LinearLayout {
 
     public PaddingAwareLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
-    }
-
-    private void init() {
-        setPadding(getPaddingLeft(),
-                StatusBarHeight.getStatusBarHeight(getResources()) + getPaddingTop(),
-                getPaddingRight(),
-                getPaddingBottom());
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareNestedScrollView.java
-################################################################################
-package app.simple.positional.decorations.padding;
-
-import android.content.Context;
-import android.util.AttributeSet;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView;
-import app.simple.positional.util.StatusBarHeight;
-
-public class PaddingAwareNestedScrollView extends NestedScrollView {
-    public PaddingAwareNestedScrollView(@NonNull Context context) {
-        super(context);
-        init();
-    }
-
-    public PaddingAwareNestedScrollView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    public PaddingAwareNestedScrollView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
         init();
     }
 
@@ -11038,157 +10436,6 @@ public class LocationButton extends DynamicRippleImageButton {
         super.onDetachedFromWindow();
         handler.removeCallbacks(blinking);
         clearAnimation();
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/views/Speedometer.kt
-################################################################################
-package app.simple.positional.decorations.views
-
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.widget.FrameLayout
-import android.widget.ImageView
-import androidx.core.widget.ImageViewCompat
-import androidx.dynamicanimation.animation.SpringAnimation
-import androidx.dynamicanimation.animation.SpringForce
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
-import app.simple.positional.R
-import app.simple.positional.constants.SpeedometerConstants
-import app.simple.positional.util.BitmapHelper
-import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.ImageLoader.loadImage
-import com.google.android.material.animation.ArgbEvaluatorCompat
-
-class Speedometer constructor(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
-    private var lastColor = Color.parseColor("#363636")
-    private var isGradientNeedle = false
-    private var firstGradientColor = 0
-    private var colorfulNeedle = false
-    private var whichImage = -1
-
-    private var needleAngleCompensator = 0F
-
-    private val needle: ImageView
-    private val dial: ImageView
-
-    private var objectAnimator: ObjectAnimator? = null
-    private var colorAnimation: ValueAnimator? = null
-    private var springAnimation: SpringAnimation? = null
-
-    init {
-        val view = LayoutInflater.from(context).inflate(R.layout.speedometer, this, true)
-        needle = view.findViewById(R.id.speedometer_needle)
-        dial = view.findViewById(R.id.speedometer_dial)
-
-        context.theme.obtainStyledAttributes(attrs, R.styleable.Speedometer, 0, 0).apply {
-            try {
-                isGradientNeedle = getBoolean(R.styleable.Speedometer_gradient_needle, false)
-                colorfulNeedle = getBoolean(R.styleable.Speedometer_colorful_needle, false)
-                firstGradientColor = getColor(R.styleable.Speedometer_first_gradient_color, Color.parseColor("#009bce"))
-                whichImage = R.drawable.speedometer_dial_normal_range
-            } finally {
-                recycle()
-            }
-        }
-    }
-
-    fun setSpeedValue(value: Float) {
-        println(value)
-        setDial(value * 2)
-        rotateNeedle(value * 2)
-    }
-
-    private fun setDial(value: Float) {
-        when {
-            value <= 300F -> {
-                if (whichImage != R.drawable.speedometer_dial_normal_range) {
-                    loadImage(R.drawable.speedometer_dial_normal_range, dial, context, 0)
-                    whichImage = R.drawable.speedometer_dial_normal_range
-                    needleAngleCompensator = 0F
-                }
-            }
-            value in 300.01F..600F -> {
-                if (whichImage != R.drawable.speedometer_dial_medium_range) {
-                    loadImage(R.drawable.speedometer_dial_medium_range, dial, context, 0)
-                    whichImage = R.drawable.speedometer_dial_medium_range
-                    needleAngleCompensator = 60F
-                }
-            }
-            value in 600.01F..900F -> {
-                if (whichImage != R.drawable.speedometer_dial_high_range) {
-                    loadImage(R.drawable.speedometer_dial_high_range, dial, context, 0)
-                    whichImage = R.drawable.speedometer_dial_high_range
-                    needleAngleCompensator = 120F
-                }
-            }
-            value >= 900.01F -> {
-                if (whichImage != R.drawable.speedometer_dial_max_range) {
-                    loadImage(R.drawable.speedometer_dial_max_range, dial, context, 0)
-                    whichImage = R.drawable.speedometer_dial_max_range
-                    needleAngleCompensator = 180F
-                }
-            }
-        }
-    }
-
-    private fun rotateNeedle(value: Float) {
-        if (springAnimation != null) {
-            springAnimation!!.cancel()
-        }
-
-        springAnimation = SpringAnimation(needle, SpringAnimation.ROTATION)
-        springAnimation!!.spring = SpringForce()
-                .setFinalPosition(value - needleAngleCompensator)
-                .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
-                .setStiffness(SpringForce.STIFFNESS_VERY_LOW)
-        springAnimation!!.setStartValue(needle.rotation)
-        springAnimation!!.start()
-
-        if (colorfulNeedle) {
-            animateColorChange(value = value)
-        }
-    }
-
-    private fun animateColorChange(value: Float) {
-        colorAnimation = ValueAnimator.ofObject(ArgbEvaluatorCompat(), lastColor, SpeedometerConstants.getSpeedometerColor(value / 2.0))
-        colorAnimation!!.duration = 1000L
-        colorAnimation!!.interpolator = LinearOutSlowInInterpolator()
-        colorAnimation!!.addUpdateListener { animation ->
-            lastColor = animation.animatedValue as Int
-            if (isGradientNeedle) {
-                needle.setImageBitmap(BitmapHelper.addLinearGradient(
-                        R.drawable.speedometer_needle.toBitmap(context, 500),
-                        intArrayOf(animation.animatedValue as Int, firstGradientColor),
-                        needle.height / 4F
-                ))
-            } else {
-                ImageViewCompat.setImageTintList(
-                        needle,
-                        ColorStateList.valueOf(animation.animatedValue as Int))
-            }
-        }
-        colorAnimation!!.start()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        clear()
-    }
-
-    fun clear() {
-        objectAnimator?.cancel()
-        colorAnimation?.cancel()
-        springAnimation?.cancel()
-        dial.clearAnimation()
-        needle.clearAnimation()
-        invalidate()
     }
 }
 
@@ -15284,113 +14531,6 @@ public class TrailPoint {
 
     public void setName(String name) {
         this.name = name;
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/popups/location/PopupCoordinateBox.kt
-################################################################################
-package app.simple.positional.popups.location
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import app.simple.positional.R
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.popup.BasePopupWindow
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-
-class PopupCoordinateBox(view: View) : BasePopupWindow() {
-    private lateinit var popupCoordinateBoxCallbacks: PopupCoordinateBoxCallbacks
-
-    init {
-        val contentView = LayoutInflater.from(view.context).inflate(R.layout.popup_coordinates_box,
-                DynamicCornerLinearLayout(view.context))
-
-        init(contentView, view, Gravity.END or Gravity.CENTER_VERTICAL, 2)
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.share).setOnClickListener {
-            popupCoordinateBoxCallbacks.send().also {
-                dismiss()
-            }
-        }
-    }
-
-    fun setPopupCoordinateBoxCallbacks(popupCoordinateBoxCallbacks: PopupCoordinateBoxCallbacks) {
-        this.popupCoordinateBoxCallbacks = popupCoordinateBoxCallbacks
-    }
-
-    companion object {
-        interface PopupCoordinateBoxCallbacks {
-            fun send()
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/popups/location/PopupLocationMenu.kt
-################################################################################
-package app.simple.positional.popups.location
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.PopupWindow
-import app.simple.positional.R
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.extensions.maps.MapsCallbacks
-import app.simple.positional.util.ViewUtils
-
-class PopupLocationMenu(anchor: View, x: Float, y: Float) : PopupWindow() {
-    private var mapsCallbacks: MapsCallbacks? = null
-    private val target: DynamicRippleTextView
-    private val navigate: DynamicRippleTextView
-
-    init {
-        val contentView = LayoutInflater.from(anchor.context)
-            .inflate(R.layout.popup_location_map, DynamicCornerLinearLayout(anchor.context), true)
-
-        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        contentView.clipToOutline = false
-        width = contentView.measuredWidth
-        height = contentView.measuredHeight
-        animationStyle = R.style.PopupAnimation
-        isClippingEnabled = false
-        isFocusable = true
-        elevation = 50F
-        overlapAnchor = true
-
-        ViewUtils.addShadow(contentView)
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            setIsClippedToScreen(false)
-            setIsLaidOutInScreen(true)
-        }
-
-        setContentView(contentView)
-
-        target = contentView.findViewById(R.id.map_menu_target)
-        navigate = contentView.findViewById(R.id.map_menu_navigate)
-
-        target.setOnClickListener {
-            mapsCallbacks?.onTargetAdd().also {
-                dismiss()
-            }
-        }
-
-        navigate.setOnClickListener {
-            mapsCallbacks?.onNavigate().also {
-                dismiss()
-            }
-        }
-
-        showAsDropDown(anchor, x.toInt() - width / 2, y.toInt() - height / 2, Gravity.NO_GRAVITY)
-        ViewUtils.dimBehind(contentView)
-    }
-
-    fun setOnMapsCallBackListener(mapsCallbacks: MapsCallbacks) {
-        this.mapsCallbacks = mapsCallbacks
     }
 }
 
@@ -26997,96 +26137,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout-land/fragment_gps.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="horizontal">
-
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <app.simple.positional.decorations.maps.Maps
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0" />
-
-        <ImageView
-            android:id="@+id/cross_hair"
-            android:layout_width="@dimen/app_button_size"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_gravity="center"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_crosshair"
-            android:visibility="gone"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription" />
-
-        <View
-            android:id="@+id/gps_dim"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0"
-            android:background="#7E000000"
-            android:translationZ="20dp" />
-
-        <app.simple.positional.decorations.maps.MapsTools
-            android:id="@+id/maps_tools"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_margin="@dimen/trail_tools_margin"
-            android:animateLayoutChanges="true"
-            android:backgroundTint="@color/mainBackground"
-            android:elevation="10dp"
-            android:orientation="horizontal"
-            android:padding="@dimen/trail_tools_padding" />
-
-    </FrameLayout>
-
-    <View
-        android:layout_width="1px"
-        android:layout_height="match_parent"
-        android:background="@color/dividerColor" />
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@color/mainBackground"
-        android:elevation="@dimen/app_views_elevation">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <app.simple.positional.decorations.maps.MapToolbar
-                android:id="@+id/map_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:backgroundTint="@color/mainBackground"
-                android:elevation="0dp" />
-
-            <include layout="@layout/bottom_sheet_gps" />
-
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-</LinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout-land/fragment_launcher.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -27223,96 +26273,6 @@ class TwilightWidget : AppWidgetProvider() {
     </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout-land/tools_maps.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:elevation="0dp"
-    android:orientation="horizontal"
-    android:padding="5dp"
-    tools:parentTag="android.widget.LinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/tools_align_btn"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="20dp"
-        android:src="@drawable/ic_arrow_right"
-        android:tint="@color/iconColor"
-        android:visibility="gone" />
-
-    <app.simple.positional.decorations.views.LocationButton
-        android:id="@+id/current_location"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:src="@drawable/ic_gps_not_fixed"
-        android:tint="@color/iconColor" />
-
-    <View
-        android:layout_width="1px"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="2dp"
-        android:background="@color/dividerColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/current_target"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:src="@drawable/ic_crosshair"
-        android:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/current_target_check"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:src="@drawable/ic_check"
-        android:tint="@color/iconColor" />
-
-    <View
-        android:layout_width="1px"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="2dp"
-        android:background="@color/dividerColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/compass"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:src="@drawable/ic_compass_on"
-        android:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/bearing"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:src="@drawable/ic_bearing_rotation"
-        android:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/north_up"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:src="@drawable/ic_north_only"
-        android:tint="@color/iconColor" />
-
-</merge>
 
 ################################################################################
 # FILE: app/src/main/res/layout-land/tools_trails.xml
@@ -28153,34 +27113,6 @@ class TwilightWidget : AppWidgetProvider() {
         app:layout_constraintTop_toBottomOf="@+id/adapter_trail_data_trail_distance" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/bottom_sheet_gps.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/gps_info_bottom_sheet"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:behavior_hideable="false"
-    android:elevation="200dp"
-    app:behavior_peekHeight="@dimen/bottom_nav_height"
-    app:layout_behavior="@string/bottom_sheet_behavior">
-
-    <ImageView
-        android:id="@+id/expand_up_gps_sheet"
-        android:layout_width="@dimen/expand_up_image_size"
-        android:layout_height="@dimen/expand_up_image_size"
-        android:layout_gravity="center_horizontal"
-        android:src="@drawable/ic_expand_up"
-        app:tint="@color/iconColor"
-        tools:ignore="ContentDescription" />
-
-    <include layout="@layout/info_panel_gps" />
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/bottom_sheet_trail.xml
@@ -31021,67 +29953,6 @@ class TwilightWidget : AppWidgetProvider() {
 </app.simple.positional.decorations.corners.DynamicCornersNestedScrollView>
 
 ################################################################################
-# FILE: app/src/main/res/layout/fragment_gps.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.maps.Maps
-        android:id="@+id/map"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0" />
-
-    <ImageView
-        android:id="@+id/cross_hair"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center"
-        android:scaleType="fitCenter"
-        android:visibility="gone"
-        android:src="@drawable/ic_crosshair"
-        tools:ignore="ContentDescription"
-        app:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.maps.MapToolbar
-        android:id="@+id/map_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:backgroundTint="@color/mainBackground"
-        android:elevation="5dp" />
-
-    <View
-        android:id="@+id/gps_dim"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0"
-        android:background="#7E000000"
-        android:translationZ="20dp" />
-
-    <app.simple.positional.decorations.maps.MapsTools
-        android:id="@+id/maps_tools"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginHorizontal="@dimen/trail_tools_margin"
-        android:animateLayoutChanges="true"
-        android:backgroundTint="@color/mainBackground"
-        android:elevation="10dp"
-        android:orientation="vertical"
-        android:padding="@dimen/trail_tools_padding" />
-
-    <include layout="@layout/bottom_sheet_gps" />
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/fragment_launcher.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -31321,381 +30192,6 @@ class TwilightWidget : AppWidgetProvider() {
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/info_panel_gps.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.padding.PaddingAwareNestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/gps_list_scroll_view"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:background="@color/toolbarBackground"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:overScrollMode="always"
-    android:paddingHorizontal="10dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        android:paddingVertical="10dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/gps_info_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:fontFamily="@font/medium"
-                android:text="@string/gps_info"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/gps_save"
-                android:layout_width="@dimen/copy_button_dimensions"
-                android:layout_height="@dimen/copy_button_dimensions"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/ripple_btn"
-                android:contentDescription="@string/save"
-                android:src="@drawable/ic_save"
-                app:tint="@color/iconColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/gps_copy"
-                android:layout_width="@dimen/copy_button_dimensions"
-                android:layout_height="@dimen/copy_button_dimensions"
-                android:layout_gravity="center_vertical"
-                android:background="@drawable/ripple_btn"
-                android:contentDescription="@string/copy"
-                android:src="@drawable/ic_content_copy"
-                app:tint="@color/iconColor" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                style="@style/PrimaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="@string/gps_provider"
-                android:textSize="@dimen/info_text_primary_size" />
-
-            <TextView
-                android:id="@+id/provider_status"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_status"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/provider_source"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginTop="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_source"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-        </LinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/gps_panel_location"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:background="@drawable/ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                style="@style/PrimaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:gravity="center_vertical"
-                android:text="@string/gps_location"
-                android:textSize="@dimen/info_text_primary_size"
-                app:drawableRightCompat="@drawable/ic_arrow_right" />
-
-            <TextView
-                android:id="@+id/gps_accuracy"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_accuracy"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/gps_altitude"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_altitude"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/gps_time_taken"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginTop="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_latency"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <LinearLayout
-            android:id="@+id/gps_panel_movement"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:background="@drawable/ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                style="@style/PrimaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="5dp"
-                android:gravity="center_vertical"
-                android:text="@string/gps_movement"
-                android:textSize="@dimen/info_text_primary_size" />
-
-            <TextView
-                android:id="@+id/gps_bearing"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_bearing"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/gps_direction"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_direction"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/gps_speed"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_speed"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <app.simple.positional.decorations.views.Speedometer
-                android:id="@+id/speedometer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/info_text_item_margin_vertical"
-                android:padding="20dp"
-                app:colorful_needle="false"
-                app:first_gradient_color="#009bce"
-                app:gradient_needle="false" />
-
-        </LinearLayout>
-
-        <View
-            android:id="@+id/gps_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_marginHorizontal="20dp"
-            android:background="@color/dividerColor"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/specified_location_notice_gps"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="30dp"
-            android:layout_marginTop="5dp"
-            android:fontFamily="@font/light"
-            android:gravity="center"
-            android:text="@string/specified_location_notice"
-            android:textAlignment="center"
-            android:textColor="@color/textSecondary"
-            android:visibility="gone" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/gps_panel_target"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/textView9"
-                style="@style/PrimaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="6dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="@string/target"
-                android:textSize="@dimen/info_text_primary_size"
-                app:layout_constraintBottom_toTopOf="@+id/gps_target_displacement"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/gps_target_data"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="6dp"
-                android:lineSpacingExtra="@dimen/info_text_item_line_spacing"
-                android:textSize="@dimen/info_text_secondary_size"
-                app:layout_constraintBottom_toTopOf="@+id/gps_target_bearing"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/textView9" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/gps_panel_coordinates"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:background="@drawable/ripple"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <TextView
-                android:id="@+id/coordinates"
-                style="@style/PrimaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/gps_coordinates"
-                android:textSize="@dimen/info_text_primary_size"
-                app:drawableRightCompat="@drawable/ic_pin_01" />
-
-            <TextView
-                android:id="@+id/latitude"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_latitude"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/longitude"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:maxLines="1"
-                android:text="@string/gps_longitude"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <TextView
-                android:id="@+id/gps_address"
-                style="@style/SecondaryTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/info_text_item_margin_horizontal"
-                android:layout_marginVertical="@dimen/info_text_item_margin_vertical"
-                android:text="@string/gps_address"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-    </LinearLayout>
-</app.simple.positional.decorations.padding.PaddingAwareNestedScrollView>
-
-################################################################################
-# FILE: app/src/main/res/layout/popup_coordinates_box.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:clipChildren="true"
-    android:clipToPadding="true"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding"
-    tools:parentTag="app.simple.positional.decorations.popup.PopupLinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/share"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/share"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-</merge>
-
-################################################################################
 # FILE: app/src/main/res/layout/popup_delete_confirmation.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -31731,49 +30227,6 @@ class TwilightWidget : AppWidgetProvider() {
         android:paddingHorizontal="30dp"
         android:paddingVertical="20dp"
         android:text="@string/button_cancel"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-</merge>
-
-################################################################################
-# FILE: app/src/main/res/layout/popup_location_map.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:clipChildren="true"
-    android:clipToPadding="true"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding"
-    tools:parentTag="android.widget.LinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/map_menu_target"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/target"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/map_menu_navigate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/navigate"
         android:textColor="@color/textPrimary"
         android:textSize="@dimen/popup_text_size" />
 
@@ -31867,32 +30320,6 @@ class TwilightWidget : AppWidgetProvider() {
 </merge>
 
 ################################################################################
-# FILE: app/src/main/res/layout/speedometer.xml
-################################################################################
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="20dp">
-
-    <ImageView
-        android:id="@+id/speedometer_dial"
-        android:layout_width="@dimen/clock_image_dimensions"
-        android:layout_height="@dimen/clock_image_dimensions"
-        android:layout_gravity="center"
-        android:src="@drawable/speedometer_dial_normal_range"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/speedometer_needle"
-        android:layout_width="@dimen/clock_image_dimensions"
-        android:layout_height="@dimen/clock_image_dimensions"
-        android:layout_gravity="center"
-        android:src="@drawable/speedometer_needle"
-        tools:ignore="ContentDescription" />
-</merge>
-
-################################################################################
 # FILE: app/src/main/res/layout/switch_view.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -31919,67 +30346,6 @@ class TwilightWidget : AppWidgetProvider() {
 
 
 
-
-################################################################################
-# FILE: app/src/main/res/layout/toolbar_map_panel.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:elevation="10dp"
-    android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="8dp"
-    tools:parentTag="app.simple.positional.decorations.corners.DynamicCornerLinearLayout">
-
-    <TextView
-        android:id="@+id/map_toolbar_heading"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_weight="1"
-        android:ellipsize="marquee"
-        android:fontFamily="@font/heading"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:singleLine="true"
-        android:text="@string/gps_location"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/top_bar_text_size"
-        android:textStyle="bold" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/gps_menu"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical|end"
-        android:layout_marginStart="@dimen/toolbar_padding"
-        android:background="@drawable/ripple_btn"
-        android:contentDescription="@string/gps_options"
-        android:src="@drawable/ic_menu"
-        android:tint="@color/iconColor" />
-
-    <View
-        android:layout_width="1px"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="10dp"
-        android:background="@color/dividerColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/gps_custom_location"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical|end"
-        android:clickable="true"
-        android:contentDescription="@string/clock_options"
-        android:focusable="true"
-        android:src="@drawable/ic_place_custom" />
-
-</merge>
 
 ################################################################################
 # FILE: app/src/main/res/layout/toolbar_measure.xml
@@ -32100,91 +30466,6 @@ class TwilightWidget : AppWidgetProvider() {
         android:background="@drawable/ripple_btn"
         android:contentDescription="@string/gps_options"
         android:src="@drawable/ic_menu"
-        android:tint="@color/iconColor" />
-
-</merge>
-
-################################################################################
-# FILE: app/src/main/res/layout/tools_maps.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:elevation="@dimen/app_views_elevation"
-    android:orientation="vertical"
-    android:padding="5dp"
-    tools:parentTag="android.widget.LinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/tools_align_btn"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="20dp"
-        android:src="@drawable/ic_arrow_right"
-        android:tint="@color/iconColor" />
-
-    <View
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="1px"
-        android:layout_marginVertical="2dp"
-        android:background="@color/dividerColor" />
-
-    <app.simple.positional.decorations.views.LocationButton
-        android:id="@+id/current_location"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:src="@drawable/ic_gps_not_fixed"
-        android:tint="@color/iconColor" />
-
-    <View
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="1px"
-        android:layout_marginVertical="2dp"
-        android:background="@color/dividerColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/current_target"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:src="@drawable/ic_crosshair"
-        android:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/current_target_check"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:src="@drawable/ic_check"
-        android:tint="@color/iconColor" />
-
-    <View
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="1px"
-        android:layout_marginVertical="2dp"
-        android:background="@color/dividerColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/compass"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:src="@drawable/ic_compass_on"
-        android:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/bearing"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_bearing_rotation"
-        android:tint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/north_up"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_marginTop="5dp"
-        android:src="@drawable/ic_north_only"
         android:tint="@color/iconColor" />
 
 </merge>

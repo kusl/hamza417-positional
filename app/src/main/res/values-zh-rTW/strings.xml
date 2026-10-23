@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">已複製到剪貼簿</string>
-    <string name="info_error">資訊無法複製！</string>
     <string name="invalid_coordinates">無效的座標</string>
     <string name="internet_connection_alert">網際網路連線不可用</string>
     <string name="error">錯誤</string>

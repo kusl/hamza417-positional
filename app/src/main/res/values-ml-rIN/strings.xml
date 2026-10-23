@@ -96,7 +96,6 @@
     <string name="seconds">സെക്കന്റുകൾ</string>
 
     <string name="info_copied">കോപ്പി ചെയ്യപ്പെട്ടു</string>
-    <string name="info_error">കോപ്പി ചെയ്യാൻ സാധിച്ചില്ല!!</string>
     <string name="invalid_coordinates">തെറ്റായ സൂചികകൾ</string>
     <string name="internet_connection_alert">ഇന്റർനെറ്റ് സേവനം ലഭ്യമല്ല</string>
     <string name="error">പിഴവ്</string>

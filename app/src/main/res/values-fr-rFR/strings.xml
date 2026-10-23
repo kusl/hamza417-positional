@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copié dans la Presse-Papiers</string>
-    <string name="info_error">Les infos n\'ont pas pu être copiées!!</string>
     <string name="invalid_coordinates">Coordonnées invalides</string>
     <string name="internet_connection_alert">Connexion Internet non disponible</string>
     <string name="error">Erreur</string>

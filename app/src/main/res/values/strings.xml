@@ -102,7 +102,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copied to Clipboard</string>
-    <string name="info_error">Info couldn\'t be copied!!</string>
     <string name="invalid_coordinates">Invalid Coordinates</string>
     <string name="internet_connection_alert">Internet connection not available</string>
     <string name="error">Error</string>

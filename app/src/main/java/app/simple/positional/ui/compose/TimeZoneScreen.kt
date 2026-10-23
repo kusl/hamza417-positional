@@ -1,5 +1,6 @@
 package app.simple.positional.ui.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -107,7 +109,7 @@ private fun TimeZoneRow(entry: TimeZoneEntry, selected: Boolean, onClick: () -> 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(12.dp)) {
-            if (selected) Icon(painterResource(R.drawable.ic_circle_stroke), contentDescription = null, tint = accent)
+            if (selected) Box(Modifier.fillMaxSize().background(accent, CircleShape))
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {

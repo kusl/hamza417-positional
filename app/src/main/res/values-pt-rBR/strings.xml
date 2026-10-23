@@ -103,7 +103,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copiado para a área de transferência</string>
-    <string name="info_error">A informação não pôde ser copiada!!</string>
     <string name="invalid_coordinates">Coordenadas inválidas</string>
     <string name="internet_connection_alert">Sem conexão com a Internet</string>
     <string name="error">Erro</string>

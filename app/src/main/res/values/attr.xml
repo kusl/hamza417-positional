@@ -26,12 +26,6 @@
         <attr name="s_marker_circle_style" format="boolean|reference" />
     </declare-styleable>
 
-    <declare-styleable name="Speedometer">
-        <attr name="gradient_needle" format="boolean" />
-        <attr name="first_gradient_color" format="color" />
-        <attr name="colorful_needle" format="boolean" />
-    </declare-styleable>
-
     <declare-styleable name="DynamicCornerLayout">
         <attr name="roundTopCorners" format="boolean" />
         <attr name="roundBottomCorners" format="boolean" />

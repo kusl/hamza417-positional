@@ -96,7 +96,6 @@
     <string name="seconds">से०</string>
 
     <string name="info_copied">क्लिपबोर्ड पर कॉपी किया गया</string>
-    <string name="info_error">जानकारी कॉपी नहीं की जा सकी!</string>
     <string name="invalid_coordinates">अमान्य निर्देशांक</string>
     <string name="internet_connection_alert">इंटरनेट कनेक्शन उपलब्ध नहीं</string>
     <string name="error">एरर!</string>

@@ -1,5 +1,6 @@
 package app.simple.positional.ui.compose
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -115,7 +118,7 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
             ) {
                 Box(Modifier.fillMaxWidth().padding(vertical = 100.dp), contentAlignment = Alignment.Center) {
                     Image(painterResource(R.drawable.ic_clock_shadow), null, Modifier.size(dimensionResource(R.dimen.clock_image_shadow_size)))
-                    RotatingImage(R.drawable.clock_trail, state.sweep, Modifier.size(clockSize).padding(5.dp))
+                    SweepTrail(state.sweep, Modifier.size(clockSize).padding(5.dp))
                     Image(painterResource(if (state.face24) R.drawable.clock_face_24 else R.drawable.clock_face), null, Modifier.size(clockSize))
                     Image(
                         painterResource(if (state.daytime) R.drawable.ic_day else R.drawable.ic_night),
@@ -140,6 +143,15 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
                 state.sky?.let { SkySections(it) }
             }
         }
+    }
+}
+
+@Composable
+private fun SweepTrail(state: RotationState, modifier: Modifier) {
+    LaunchedEffect(state) { state.run() }
+    val accent = MaterialTheme.colorScheme.primary
+    Canvas(modifier.rotation(state)) {
+        drawCircle(Brush.sweepGradient(listOf(Color.Transparent, Color.Transparent, accent)))
     }
 }
 

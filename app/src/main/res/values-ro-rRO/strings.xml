@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copiat în clipboard</string>
-    <string name="info_error">Informațiile nu au putut fi copiate!!</string>
     <string name="invalid_coordinates">Coordonate incorecte</string>
     <string name="internet_connection_alert">Conexiune la internet indisponibilă</string>
     <string name="error">Eroare</string>

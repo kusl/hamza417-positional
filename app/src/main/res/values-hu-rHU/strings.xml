@@ -96,7 +96,6 @@
     <string name="seconds">p</string>
 
     <string name="info_copied">Másolás a vágólapra</string>
-    <string name="info_error">Az adatokat nem sikerült átmásolni!!</string>
     <string name="invalid_coordinates">Érvénytelen koordináták</string>
     <string name="internet_connection_alert">Nincs internetkapcsolat</string>
     <string name="error">Hiba</string>

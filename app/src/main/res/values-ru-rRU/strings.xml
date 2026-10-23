@@ -96,7 +96,6 @@
     <string name="seconds">с</string>
 
     <string name="info_copied">Скопировано в буфер обмена</string>
-    <string name="info_error">Информация не может быть скопирована!!</string>
     <string name="invalid_coordinates">Неверные координаты</string>
     <string name="internet_connection_alert">Отсутствует интернет-соединение</string>
     <string name="error">Ошибка</string>

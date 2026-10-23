@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Zkopírováno do schránky</string>
-    <string name="info_error">Informace nelze zkopírovat!!</string>
     <string name="invalid_coordinates">Neplatné souřadnice</string>
     <string name="internet_connection_alert">Není k dispozici připojení k Internetu</string>
     <string name="error">Chyba</string>

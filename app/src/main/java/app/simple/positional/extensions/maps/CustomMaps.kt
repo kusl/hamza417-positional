@@ -4,8 +4,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.graphics.Point
 import android.location.Location
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -31,7 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, attrs),
+open class CustomMaps(context: Context, attrs: AttributeSet? = null) : MapView(context, attrs),
     OnMapReadyCallback,
     SharedPreferences.OnSharedPreferenceChangeListener,
     CoroutineScope {
@@ -105,11 +105,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
             onTouch?.invoke(ev, this)
             return this
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        onResume()
     }
 
     override fun onResume() {
@@ -200,6 +195,8 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
     internal fun isCameraWithinBounds(latLng: LatLng): Boolean {
         return googleMap?.projection?.visibleRegion?.latLngBounds?.contains(latLng)!!
     }
+
+    fun screenPoint(latLng: LatLng): Point? = googleMap?.projection?.toScreenLocation(latLng)
 
     fun setOnMapsCallbackListener(mapsCallbacks: MapsCallbacks) {
         this.mapsCallbacks = mapsCallbacks

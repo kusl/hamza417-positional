@@ -9,10 +9,9 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
+import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.MapSearchActions
 import app.simple.positional.ui.compose.MapSearchScreen
@@ -93,14 +92,6 @@ class MapSearchActivity : BaseActivity(), MapSearchActions {
             .putExtra("longitude", coordinates.second)
             .putExtra("address", form.address.trim()))
         finish()
-    }
-
-    private class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
-        override fun onStart(owner: LifecycleOwner) = mapView.onStart()
-        override fun onResume(owner: LifecycleOwner) = mapView.onResume()
-        override fun onPause(owner: LifecycleOwner) = mapView.onPause()
-        override fun onStop(owner: LifecycleOwner) = mapView.onStop()
-        override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
     }
 
     companion object {

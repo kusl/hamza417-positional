@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copiado al portapapeles</string>
-    <string name="info_error">No se pudo copiar la información!!</string>
     <string name="invalid_coordinates">Coordenadas no válidas</string>
     <string name="internet_connection_alert">No hay disponible ninguna conexión a Internet</string>
     <string name="error">Error</string>
