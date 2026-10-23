@@ -170,8 +170,6 @@
 
     <string name="button_cancel">Cancelar</string>
     <string name="button_set">Aplicar</string>
-    <string name="button_close">Fechar</string>
-    <string name="button_grant">Conceder</string>
 
     <string name="clock_options">Menu do Relógio</string>
     <string name="compass_options">Menu da Bússola</string>
@@ -243,8 +241,6 @@
     <string name="customize_pin">Pin personalizado</string>
     <string name="twenty_four_hours_clock">Relógio no formato 24 horas</string>
     <string name="gimbal_lock">Travar Gilbal</string>
-    <string name="clock_widget_notification">O widget do relógio está funcionando.</string>
-    <string name="notification_desc">Desative o \"Canal do Widget\" nas configurações de notificação para ocultar essa notificação.</string>
     <string name="save">Salvar</string>
     <string name="set_and_save">Definir e Salvar</string>
     <string name="failed">Falhou!</string>
@@ -275,7 +271,6 @@
     <string name="use_maps_target">Use os alvos do Mapa</string>
     <string name="using_maps_target">Usando o alvo do mapa</string>
     <string name="edit">Alterar</string>
-    <string name="battery_optimization_desc">Por favor, desabilite a otimização de bateria para permitir que o widget do relógio funcione corretamente.</string>
     <string name="use_as_target">Usar como destino</string>
     <string name="create_new">Novo</string>
     <string name="save_from_target">Salvar do destino</string>
@@ -283,7 +278,6 @@
     <string name="mechanical">Mecânico</string>
     <string name="app_coordinates_format">Formato das coordenadas</string>
     <string name="share">Compartilhar</string>
-    <string name="notification_permission_desc">O acesso à notificação é necessário para executar o serviço de widget de relógio persistentemente.</string>
     <string name="true_altitude">Altitude Verdadeira</string>
     <string name="elongation">Alongamento</string>
     <string name="radius">Raio</string>

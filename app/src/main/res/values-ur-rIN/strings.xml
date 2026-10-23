@@ -163,8 +163,6 @@
 
     <string name="button_cancel">منسوخ کریں</string>
     <string name="button_set">سیٹ کریں</string>
-    <string name="button_close">بند کریں</string>
-    <string name="button_grant">عطا</string>
 
     <string name="clock_options">گھڑی مینو</string>
     <string name="compass_options">کمپاس مینو</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">پن کو اپنی مرضی کے مطابق بنائیں</string>
     <string name="twenty_four_hours_clock">24 گھنٹے کی گھڑی</string>
     <string name="gimbal_lock">جیمبل لاک</string>
-    <string name="clock_widget_notification">گھڑی ویجیٹ چل رہا ہے۔</string>
-    <string name="notification_desc">اس اطلاع کو چھپانے کے لئے نوٹیفیکیشن کی ترتیبات سے \"ویجیٹ چینل\" کو بند کردیں۔</string>
     <string name="save">محفوظ کریں</string>
     <string name="set_and_save">سیٹ اور محفوظ کریں</string>
     <string name="failed">ناکام!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Maps کا ہدف استعمال کریں۔</string>
     <string name="using_maps_target">نقشہ جات کا ہدف استعمال کرنا</string>
     <string name="edit">تدوین کریں</string>
-    <string name="battery_optimization_desc">گھڑی ویجیٹ کو صحیح طریقے سے چلنے دینے کے لیے براہ کرم بیٹری کی اصلاح کو غیر فعال کریں۔.</string>
     <string name="use_as_target">ہدف کے طور پر استعمال کریں۔</string>
     <string name="create_new">نئی</string>
     <string name="save_from_target">ہدف سے بچائیں۔</string>
@@ -276,7 +271,6 @@
     <string name="mechanical">مکینیکل</string>
     <string name="app_coordinates_format">کوآرڈینیٹ فارمیٹ</string>
     <string name="share">بانٹیں</string>
-    <string name="notification_permission_desc">گھڑی ویجیٹ سروس کو مستقل طور پر چلانے کے لیے اطلاع تک رسائی درکار ہے۔</string>
     <string name="true_altitude">حقیقی اونچائی</string>
     <string name="elongation">لمبائی</string>
     <string name="radius">رداس</string>

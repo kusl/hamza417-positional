@@ -163,8 +163,6 @@
 
     <string name="button_cancel">Anulare</string>
     <string name="button_set">Setare</string>
-    <string name="button_close">Închidere</string>
-    <string name="button_grant">Permiteți</string>
 
     <string name="clock_options">Meniu ceas</string>
     <string name="compass_options">Meniu busolă</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">Personalizare marcator</string>
     <string name="twenty_four_hours_clock">Ceas 24 ore</string>
     <string name="gimbal_lock">Stabilizare</string>
-    <string name="clock_widget_notification">Widget-ul Ceas rulează.</string>
-    <string name="notification_desc">Dezactivați \"Canalul Widget-ului\" din setările de notificare pentru a ascunde această notificare.</string>
     <string name="save">Salvare</string>
     <string name="set_and_save">Setare și salvare</string>
     <string name="failed">Eșuat!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Folosind obiectivul hărților</string>
     <string name="using_maps_target">Folosind obiectivul hărților</string>
     <string name="edit">Editare</string>
-    <string name="battery_optimization_desc">Dezactivați optimizarea bateriei pentru a permite widget-ului Ceas să ruleze corect.</string>
     <string name="use_as_target">Folosește ca țintă</string>
     <string name="create_new">Nou</string>
     <string name="save_from_target">Salvează din Țintă</string>

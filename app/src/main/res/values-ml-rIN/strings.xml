@@ -163,8 +163,6 @@
 
     <string name="button_cancel">ഉപേക്ഷിക്കുക</string>
     <string name="button_set">സ്ഥിരീകരിക്കുക</string>
-    <string name="button_close">പുറത്തേക്ക് പോകാം</string>
-    <string name="button_grant">അനുവദിക്കുക</string>
 
     <string name="clock_options">ഘടികാര മെനു</string>
     <string name="compass_options">ദിശനോക്കി മെനു</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">പിൻ നവീകരിക്കുക</string>
     <string name="twenty_four_hours_clock">24 മണിക്കൂർ ക്ലോക്ക്</string>
     <string name="gimbal_lock">ജിമ്പൽ ലോക്ക് ചെയ്യുക</string>
-    <string name="clock_widget_notification">ക്ലോക്ക് വിഡ്ജറ്റ് പ്രവർത്തിക്കുന്നു.</string>
-    <string name="notification_desc">\"വിഡ്ജറ്റ് ചാനൽ\" നോട്ടിഫിക്കേഷൻ മറക്കുന്നതിന് നോട്ടിഫിക്കേഷൻ സെറ്റിംഗ്സിൽ ടേൺ ഓഫ് ചെയ്യുക.</string>
     <string name="save">സേവ് ചെയ്യുക</string>
     <string name="set_and_save">ക്രമീകരിച്ചു സേവ് ചെയ്യുക</string>
     <string name="failed">പരാജയം!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">മാപ്പിന്റെ ലക്ഷ്യം ഉപയോഗിക്കുക</string>
     <string name="using_maps_target">മാപ്പിന്റെ ലക്ഷ്യം ഉപയോഗിക്കുന്നു</string>
     <string name="edit">തിരുത്തുക</string>
-    <string name="battery_optimization_desc">ഘടികാര വിഡ്ജറ്റിന്റെ പ്രവർത്തനം സുഗമമായി മുന്നോട്ടു പോകുവാൻ ബാറ്ററി ഒപ്ടിമൈസേഷൻ ഓഫ് ചെയ്യുക.</string>
     <string name="use_as_target">ലക്ഷ്യമായി ഉപയോഗിക്കുക</string>
     <string name="create_new">പുതിയത്</string>
     <string name="save_from_target">ലക്ഷ്യത്തിൽ നിന്നും സേവ് ചെയ്യുക</string>
@@ -276,7 +271,6 @@
     <string name="mechanical">യാന്ത്രികം</string>
     <string name="app_coordinates_format">സൂചികകളുടെ ഫോർമാറ്റ്</string>
     <string name="share">പങ്കുവയ്ക്കുക</string>
-    <string name="notification_permission_desc">ഘടികാര വിഡ്ജറ്റിന്റെ പ്രവർത്തനം സുഗമമായി മുന്നോട്ടു പോകുവാൻ നോട്ടിഫിക്കേഷൻ അക്സസ് നൽകുക.</string>
     <string name="true_altitude">യഥാർത്ഥ ഉയരം</string>
     <string name="elongation">ഇ ലോ ങ്ങേ ഷൻ </string>
     <string name="radius">ആരം</string>

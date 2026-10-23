@@ -1,6 +1,5 @@
 package app.simple.positional.ui.navigation
 
-import android.content.res.Configuration
 import android.location.Address
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,9 +12,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -52,7 +49,7 @@ import app.simple.positional.ui.compose.Record
 import app.simple.positional.ui.compose.RecordActions
 import app.simple.positional.ui.compose.RecordsScreen
 import app.simple.positional.ui.compose.TimeZoneScreen
-import app.simple.positional.ui.compose.rememberMapView
+import app.simple.positional.ui.compose.rememberPickerMap
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.TextViewUtils.capitalizeText
@@ -62,10 +59,6 @@ import app.simple.positional.viewmodels.viewmodel.DirectionsViewModel
 import app.simple.positional.viewmodels.viewmodel.MapSearchViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 
 @Composable
 fun AccentRoute(activity: ComponentActivity, topInset: Dp) {
@@ -264,25 +257,10 @@ fun MapSearchRoute(navigator: AppNavigator) {
     val context = LocalContext.current
     val viewModel: MapSearchViewModel = viewModel()
     val suggestions by viewModel.suggestions.collectAsState()
-    val mapView = rememberMapView()
-    var map by remember { mutableStateOf<GoogleMap?>(null) }
-    LaunchedEffect(mapView) {
-        mapView.getMapAsync { googleMap ->
-            map = googleMap
-            googleMap.uiSettings.isMapToolbarEnabled = false
-            googleMap.uiSettings.isCompassEnabled = false
-            val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-            runCatching {
-                googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, if (night) R.raw.maps_dark_labelled else R.raw.maps_light_labelled))
-            }
-            CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) ->
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), SEARCH_ZOOM))
-            }
-            googleMap.setOnCameraIdleListener {
-                googleMap.cameraPosition.target.let { viewModel.onCameraIdle(it.latitude, it.longitude) }
-            }
-            googleMap.setOnMapClickListener { googleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) }
-        }
+    val map = rememberPickerMap()
+    LaunchedEffect(map) {
+        CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) -> map.moveTo(lat, lon, animate = false) }
+        map.onIdle = viewModel::onCameraIdle
     }
     val actions = remember(viewModel) {
         object : MapSearchActions {
@@ -290,7 +268,7 @@ fun MapSearchRoute(navigator: AppNavigator) {
 
             override fun pick(address: Address) {
                 viewModel.pick(address)
-                map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(address.latitude, address.longitude), SEARCH_ZOOM))
+                map.moveTo(address.latitude, address.longitude, animate = true)
             }
 
             override fun cancel() = navigator.back()
@@ -307,7 +285,7 @@ fun MapSearchRoute(navigator: AppNavigator) {
             }
         }
     }
-    MapSearchScreen(viewModel.form, suggestions, mapView, actions)
+    MapSearchScreen(viewModel.form, suggestions, map.view, actions)
 }
 
 @Composable
@@ -331,4 +309,3 @@ private fun app.simple.positional.ui.compose.CustomLocationForm.fill(result: Sea
     longitude = result.longitude.toString(),
 )
 
-private const val SEARCH_ZOOM = 15F

@@ -8,7 +8,7 @@ Location, trails, measurements, saved places and settings are stored only on you
 
 ## Third party services
 
-The map panels use the Google Maps SDK, and the location panels can use Google Play services and the Android Geocoder. These services may receive your location, IP address and device information under Google's privacy policy. All other features work offline.
+The map panels use the Google Maps SDK, and the location panels can use Google Play services and the Android Geocoder. These services may receive your location, IP address and device information under Google's privacy policy. When OpenStreetMap is the map source, map tiles are downloaded from the OpenStreetMap Foundation's tile servers, which receive your IP address, the app name and version, and the tiles around the area you view, under the [OSMF privacy policy](https://osmfoundation.org/wiki/Privacy_Policy). All other features work offline.
 
 ## Children
 

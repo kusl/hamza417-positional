@@ -163,8 +163,6 @@
 
     <string name="button_cancel">Abbrechen</string>
     <string name="button_set">Anwenden</string>
-    <string name="button_close">Schließen</string>
-    <string name="button_grant">Erlauben</string>
 
     <string name="clock_options">Uhrenmenü</string>
     <string name="compass_options">Kompassmenü</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">Pin anpassen</string>
     <string name="twenty_four_hours_clock">24-Stunden-Format</string>
     <string name="gimbal_lock">Gimbal-Modus</string>
-    <string name="clock_widget_notification">Uhr-Widget wird ausgeführt.</string>
-    <string name="notification_desc">Deaktivieren Sie \"Widget Channel\" in den Benachrichtigungseinstellungen, um diese Benachrichtigung zu verbergen.</string>
     <string name="save">Speichern</string>
     <string name="set_and_save">Festlegen und Speichern</string>
     <string name="failed">Fehlgeschlagen!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Verwenden Sie das Kartenziel</string>
     <string name="using_maps_target">Verwendung des Ziels von Maps</string>
     <string name="edit">Bearbeiten</string>
-    <string name="battery_optimization_desc">Bitte deaktivieren Sie die Batterieoptimierung, damit das Uhr-Widget korrekt läuft.</string>
     <string name="use_as_target">Als Ziel festlegen</string>
     <string name="create_new">Neu</string>
     <string name="save_from_target">Vom Ziel speichern</string>

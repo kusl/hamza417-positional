@@ -1,11 +1,8 @@
 package app.simple.positional.util
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.PermissionInfo
-import android.os.PowerManager
 import androidx.core.app.ActivityCompat
 
 object PermissionUtils {
@@ -14,24 +11,5 @@ object PermissionUtils {
                 == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED)
-    }
-
-    fun Context.isIgnoringBatteryOptimizations(): Boolean {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        return powerManager.isIgnoringBatteryOptimizations(packageName)
-    }
-
-    fun Context.hasNotificationPermission(): Boolean {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        return notificationManager.areNotificationsEnabled()
-    }
-
-    fun String.getPermissionInfo(context: Context): PermissionInfo? {
-        try {
-            return context.packageManager.getPermissionInfo(this, PackageManager.GET_META_DATA)
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-        }
-        return null
     }
 }

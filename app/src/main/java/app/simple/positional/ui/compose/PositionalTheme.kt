@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
 import app.simple.positional.R
@@ -33,6 +34,7 @@ object PositionalFonts {
 }
 
 private val typography = Typography(
+    bodyLarge = Typography().bodyLarge.copy(lineHeight = TextUnit.Unspecified),
     headlineMedium = TextStyle(fontFamily = PositionalFonts.heading, fontWeight = FontWeight.Bold, fontSize = 31.sp),
     titleLarge = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 22.sp),
     titleMedium = TextStyle(fontFamily = PositionalFonts.medium, fontSize = 16.sp),

@@ -2,6 +2,7 @@ package app.simple.positional.preferences
 
 import android.annotation.SuppressLint
 import androidx.annotation.IntRange
+import app.simple.positional.util.MapSource
 import app.simple.positional.util.NightMode
 import app.simple.positional.BuildConfig
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
@@ -20,6 +21,7 @@ object MainPreferences {
 
     const val isCustomCoordinate = "is_custom_coordinate_set"
     const val locationProvider = "location_provider"
+    const val mapSource = "map_source"
     const val unit = "all_measurement_unit"
     const val theme = "current_theme"
     const val latitude = "custom_latitude"
@@ -157,6 +159,14 @@ object MainPreferences {
 
     fun getLocationProvider(): String {
         return getSharedPreferences().getString(locationProvider, "android")!!
+    }
+
+    fun setMapSource(value: Int) {
+        getSharedPreferences().edit().putInt(mapSource, value).apply()
+    }
+
+    fun getMapSource(): Int {
+        return getSharedPreferences().getInt(mapSource, MapSource.AUTO)
     }
 
     fun setSkipSplashScreen(value: Boolean) {

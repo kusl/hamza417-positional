@@ -17,14 +17,14 @@ A location, compass, clock, level, trail and measurement toolkit for Android. Co
 - **Level**: bubble level from the accelerometer.
 - **Trail**: record and review paths with markers.
 - **Measure** and **Direction**: distances between points and bearings to targets.
-- Home screen widgets for clock, sun time, moon phase and twilight (Glance, hourly refresh).
+- Home screen widgets: analog clock (Android 12+, ticked by the launcher with no background service), sun time, moon phase and twilight (Glance, hourly refresh).
 
 ## Install
 
 1. Download the latest APK from [Releases](https://github.com/kusl/hamza417-positional/releases/latest), or
 2. Add `https://github.com/kusl/hamza417-positional` to [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
 
-Android 7.0 (API 24) or newer. Silent background updates through Obtainium need Android 12 or newer.
+Android 7.0 (API 24) or newer. Clock widgets and silent background updates through Obtainium need Android 12 or newer.
 
 Releases are signed with this fork's own key and cannot be installed over the Play Store build; uninstall that first.
 
@@ -39,9 +39,9 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, OpenStreetMap style and geometry, tracking pins, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
-The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
+Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings.
 
 ## Compose migration
 
@@ -68,8 +68,11 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 8j | Sub screens (accent colours, arts, time zones, saved measures, trails and directions, custom locations, map search, help pages) are Navigation Compose destinations inside `MainActivity`; the panel lifecycle follows its destination so sensors and maps pause while a sub screen is open; nine activities removed | Done |
 | 9a | Moon phase and sun time widgets on Glance (same receivers, so placed widgets keep working); location updates delivered through an in-process `LocationBus` instead of the deprecated `LocalBroadcastManager` | Done |
 | 9b | Twilight and sun time art widgets on Glance with shared widget parts; twilight times computed once in `Twilight` for the clock panel and widget; twilight and sun art widgets refresh hourly; info section graphics no longer overlap text | Done |
-| 9c | Clock widgets without a per-second foreground service | Next |
-| 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
+| 9c | Clock widgets on the platform `AnalogClock` (Android 12+): hands rendered once with the chosen skin and accent on the 12-hour face, ticked by the launcher; the widgets refresh when the app is left so skin and accent changes apply; date from `TextClock`; day and night icon refreshed by a non-waking alarm at 6:00 and 19:00. Foreground service, notification and battery optimization prompts removed. Text without an explicit style no longer inherits a fixed line height, so large wrapped headings do not overlap | Done |
+| 10a | Map source setting (automatic, Google Maps, OpenStreetMap); GPS panel on MapLibre with OpenStreetMap tiles, tile cache, pin, accuracy circle, target line, follow, compass and bearing rotation behind a `GpsMap` interface; pin bitmaps shared by both maps; APK limited to arm64-v8a, armeabi-v7a and x86_64 | Done |
+| 10b | Trail and measure panels on OpenStreetMap through `TrailMap` and `MeasureMap` interfaces on a shared `OsmMapView` base (camera, heading sensor, pin, accuracy circle, lines, trail markers, measure guide line, wrap to fit); trail auto center stops while paused instead of re-posting forever; tracking pins shared with the Google maps; unused measure label overlay removed | Done |
+| 10c | Address search map on OpenStreetMap through a `PickerMap` interface; map views share an `OsmMapView` base and a `MapHost` lifecycle contract; Google Play services prompt only when Google Maps or the fused provider is in use | Done |
+| 11 | Remaining Java (Room models, map callbacks, Google marker animation helpers) to Kotlin with the same Room schema | Next |
 
 ## Building
 
@@ -109,16 +112,16 @@ Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper a
 
 ```
 app/src/main/java/app/simple/positional/
-  activities/   launcher, main activity and widget setup
+  activities/   launcher and main activity
   ui/navigation/ routes and sub screen destinations
   constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
   sensors/      lifecycle-aware gravity and heading sensors
   ui/panels/    panel controllers
   extensions/   panel controller base, sensor panel, map lifecycle
-  decorations/  Google Maps view wrappers and marker helpers
+  decorations/  Google Maps and OpenStreetMap views, marker helpers
   database/     Room entities, DAOs and databases
-  services/     location and clock widget services
+  services/     location services
   widgets/      app widget providers
   math/         vectors, angles, rotation physics, distances, unit conversion
   util/         formatting and Android helpers

@@ -163,8 +163,6 @@
 
     <string name="button_cancel">Отменить</string>
     <string name="button_set">Установить</string>
-    <string name="button_close">Закрыть</string>
-    <string name="button_grant">Предоставить</string>
 
     <string name="clock_options">Меню часов</string>
     <string name="compass_options">Меню компаса</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">Настройка маркера</string>
     <string name="twenty_four_hours_clock">24-часовой формат</string>
     <string name="gimbal_lock">Подвесной замок</string>
-    <string name="clock_widget_notification">Виджет часов работает.</string>
-    <string name="notification_desc">Выключите \"Widget Channel\" в настройках уведомления, чтобы скрыть это уведомление.</string>
     <string name="save">Сохранить</string>
     <string name="set_and_save">Установить и сохранить</string>
     <string name="failed">Сбой!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Использование цели карты</string>
     <string name="using_maps_target">Использование цели карты</string>
     <string name="edit">Редактирование</string>
-    <string name="battery_optimization_desc">Пожалуйста, отключите оптимизацию батареи, чтобы виджет часов работал должным образом.</string>
     <string name="use_as_target">Использовать как цель</string>
     <string name="create_new">Нов</string>
     <string name="save_from_target">Сохранить из адресата</string>

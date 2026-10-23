@@ -3,6 +3,7 @@ package app.simple.positional.ui.compose
 import app.simple.positional.util.NightMode
 import app.simple.positional.R
 import app.simple.positional.util.LocaleHelper
+import app.simple.positional.util.MapSource
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -38,6 +39,15 @@ class SettingsLabelsTest {
         assertEquals(R.string.fused_location_provider, SettingsLabels.locationProvider(SettingsLabels.PROVIDER_FUSED))
         assertNull(SettingsLabels.locationProvider("other"))
         assertEquals(R.string.desc_fused_location_provider, SettingsLabels.locationProviderDescription(SettingsLabels.PROVIDER_FUSED))
+    }
+
+    @Test
+    fun mapSourceLabels() {
+        assertEquals(R.string.map_source_auto, SettingsLabels.mapSource(MapSource.AUTO))
+        assertEquals(R.string.map_source_google, SettingsLabels.mapSource(MapSource.GOOGLE))
+        assertEquals(R.string.map_source_osm, SettingsLabels.mapSource(MapSource.OSM))
+        assertNull(SettingsLabels.mapSource(9))
+        MapSource.choices.forEach { assertNotNull(SettingsLabels.mapSourceDescription(it)) }
     }
 
     @Test

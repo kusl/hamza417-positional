@@ -64,6 +64,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
             isMetric = MainPreferences.isMetric(),
             coordinatesFormat = MainPreferences.getCoordinatesFormat(),
             locationProvider = MainPreferences.getLocationProvider(),
+            mapSource = MainPreferences.getMapSource(),
             language = MainPreferences.getAppLanguage() ?: SettingsLabels.LANGUAGE_DEFAULT,
             isCustomLocation = MainPreferences.isCustomCoordinate(),
             keepScreenOn = MainPreferences.isScreenOn(),
@@ -106,6 +107,8 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     override fun setCoordinatesFormat(format: Int) = MainPreferences.setCoordinatesFormat(format)
 
     override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
+
+    override fun setMapSource(source: Int) = MainPreferences.setMapSource(source)
 
     override fun openCustomLocations() = navigate(Routes.CUSTOM_LOCATIONS)
 

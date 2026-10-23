@@ -12,6 +12,7 @@ import android.location.Location
 import android.util.AttributeSet
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
+import app.simple.positional.decorations.maps.TrackPin
 import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.utils.CircleUtils
 import app.simple.positional.decorations.utils.MarkerUtils
@@ -22,7 +23,6 @@ import app.simple.positional.math.Vector3
 import app.simple.positional.model.TrailPoint
 import app.simple.positional.preferences.TrailPreferences
 import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.ConditionUtils.isNull
@@ -78,7 +78,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
     private var isCompassRotation = true
     private var lastZoom = 20F
     private var lastTilt = 0F
-    private val incrementFactor = 2
     private var polylineOptions: PolylineOptions? = null
 
     init {
@@ -165,40 +164,10 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
     fun addMarker(latLng: LatLng) {
         launch {
             withContext(Dispatchers.Main) {
-                if (context.isNotNull() && googleMap.isNotNull())
-                    markerBitmap = if (location.isNotNull()) {
-                        if (TrailPreferences.isCompassRotation()) {
-                            when (accuracy) {
-                                SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                                    R.drawable.ic_pin_low.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> {
-                                    R.drawable.ic_pin_medium.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
-                                    R.drawable.ic_pin_high.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                else -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-                            }
-                        } else {
-                            if (location!!.speed == 0.0F) {
-                                R.drawable.ic_pin_no_speed.toBitmapKeepingSize(context, incrementFactor)
-                            } else {
-                                R.drawable.ic_pin_bearing.toBitmapKeepingSize(context, incrementFactor)
-                            }
-                        }
-                    } else {
-                        R.drawable.ic_place_historical.toBitmap(context, 60)
-                    }
+                if (context.isNotNull() && googleMap.isNotNull()) {
+                    val pin = TrackPin.drawable(location.isNotNull(), TrailPreferences.isCompassRotation(), accuracy, (location?.speed ?: 0F) > 0F)
+                    markerBitmap = TrackPin.bitmap(context, pin)
+                }
 
                 withContext(Dispatchers.Main) {
                     runCatching {

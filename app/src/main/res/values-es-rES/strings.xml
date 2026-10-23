@@ -163,8 +163,6 @@
 
     <string name="button_cancel">Cancelar</string>
     <string name="button_set">Establecer</string>
-    <string name="button_close">Cerrar</string>
-    <string name="button_grant">Permitir</string>
 
     <string name="clock_options">Menú de reloj</string>
     <string name="compass_options">Menú de brújula</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">Personalizar Pin</string>
     <string name="twenty_four_hours_clock">Reloj de 24 horas</string>
     <string name="gimbal_lock">Bloquear Gimbal</string>
-    <string name="clock_widget_notification">Widget de reloj se está ejecutando.</string>
-    <string name="notification_desc">Desactiva \"Canal de widget\" en la configuración de notificación para ocultar esta notificación.</string>
     <string name="save">Guardar</string>
     <string name="set_and_save">Establecer y Guardar</string>
     <string name="failed">Error!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Utilice el objetivo de Maps</string>
     <string name="using_maps_target">Usando objetivo de mapas</string>
     <string name="edit">Editar</string>
-    <string name="battery_optimization_desc">Por favor, deshabilite la optimización de la batería para permitir que el widget del reloj se ejecute correctamente.</string>
     <string name="use_as_target">Usar como destino</string>
     <string name="create_new">Nuevo</string>
     <string name="save_from_target">Guardar de destino</string>

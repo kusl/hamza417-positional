@@ -163,8 +163,6 @@
 
     <string name="button_cancel">Zrušit</string>
     <string name="button_set">Nastavit</string>
-    <string name="button_close">Zavřít</string>
-    <string name="button_grant">Povolit</string>
 
     <string name="clock_options">Nabídka hodin</string>
     <string name="compass_options">Nabídka kompasu</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">Přizpůsobení špendlíku</string>
     <string name="twenty_four_hours_clock">24hodinové hodiny</string>
     <string name="gimbal_lock">Uzamčení gimbalu</string>
-    <string name="clock_widget_notification">Widget hodin je spuštěn.</string>
-    <string name="notification_desc">Vypněte \"Widget kanál\" v nastavení oznámení pro skrytí tohoto oznámení.</string>
     <string name="save">Uložit</string>
     <string name="set_and_save">Nastavit a uložit</string>
     <string name="failed">Neúspěšné!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Použití cíle mapy</string>
     <string name="using_maps_target">Použití cíle mapy</string>
     <string name="edit">Upravit</string>
-    <string name="battery_optimization_desc">Zakažte optimalizaci baterie, aby widget hodin mohl správně fungovat.</string>
     <string name="use_as_target">Použít jako cíl</string>
     <string name="create_new">Nový</string>
     <string name="save_from_target">Uložit z cíle</string>
@@ -276,7 +271,6 @@
     <string name="mechanical">Mechanické</string>
     <string name="app_coordinates_format">Formát souřadnic</string>
     <string name="share">Sdílet</string>
-    <string name="notification_permission_desc">Pro trvalé spuštění widgetu hodin je vyžadován přístup k oznámení.</string>
     <string name="true_altitude">Skutečná výška</string>
     <string name="elongation">Prodloužení</string>
     <string name="radius">Poloměr</string>

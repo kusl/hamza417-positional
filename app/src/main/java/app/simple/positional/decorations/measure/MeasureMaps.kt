@@ -4,9 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -15,6 +13,7 @@ import android.util.AttributeSet
 import android.util.Log
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
+import app.simple.positional.decorations.maps.TrackPin
 import app.simple.positional.decorations.utils.CircleUtils
 import app.simple.positional.decorations.utils.MarkerUtils
 import app.simple.positional.extensions.maps.CustomMaps
@@ -26,7 +25,6 @@ import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MeasurePreferences
 import app.simple.positional.util.ArrayHelper.secondLastOrNull
 import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.ConditionUtils.isNull
@@ -81,14 +79,12 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     private var lastZoom = 20F
     private var lastTilt = 0F
     private var lastBearing = 0F
-    private val incrementFactor = 2
 
     private var polylineOptions: PolylineOptions? = null
     private val currentPolylines = arrayListOf<LatLng>()
     private val polylines = arrayListOf<Polyline>()
     private var lastPolyline: Polyline? = null
     private var cameraTargetPolyline: Polyline? = null
-    private val textPolylines = mutableListOf<TextPolyline>()
     private var measurePoints = arrayListOf<MeasurePoint>()
 
     private val pattern: List<PatternItem> = listOf(
@@ -182,40 +178,10 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     fun addMarker(latLng: LatLng) {
         launch {
             withContext(Dispatchers.Main) {
-                if (context.isNotNull() && googleMap.isNotNull())
-                    markerBitmap = if (location.isNotNull()) {
-                        if (MeasurePreferences.isCompassRotation()) {
-                            when (accuracy) {
-                                SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                                    R.drawable.ic_pin_low.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> {
-                                    R.drawable.ic_pin_medium.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
-                                    R.drawable.ic_pin_high.toBitmapKeepingSize(context, incrementFactor)
-                                }
-
-                                else -> {
-                                    R.drawable.ic_pin_unreliable.toBitmapKeepingSize(context, incrementFactor)
-                                }
-                            }
-                        } else {
-                            if (location!!.speed == 0.0F) {
-                                R.drawable.ic_pin_no_speed.toBitmapKeepingSize(context, incrementFactor)
-                            } else {
-                                R.drawable.ic_pin_bearing.toBitmapKeepingSize(context, incrementFactor)
-                            }
-                        }
-                    } else {
-                        R.drawable.ic_place_historical.toBitmap(context, 60)
-                    }
+                if (context.isNotNull() && googleMap.isNotNull()) {
+                    val pin = TrackPin.drawable(location.isNotNull(), MeasurePreferences.isCompassRotation(), accuracy, (location?.speed ?: 0F) > 0F)
+                    markerBitmap = TrackPin.bitmap(context, pin)
+                }
 
                 withContext(Dispatchers.Main) {
                     runCatching {
@@ -340,7 +306,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         polylines.clear()
         currentPolylines.clear()
         polylineOptions?.points?.clear()
-        textPolylines.clear()
 
         polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
         polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
@@ -498,7 +463,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         polylines.clear()
         currentPolylines.clear()
         polylineOptions?.points?.clear()
-        textPolylines.clear()
         cameraTargetPolyline?.remove()
         cameraTargetPolyline = null
         invalidate()
@@ -522,13 +486,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         polylineAnimator = MarkerUtils.animatePolyline(lastPoint, latLng, polylines.lastOrNull()!!)
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        for (textPolyline in textPolylines) {
-            textPolyline.draw(canvas)
-        }
-    }
-
     fun getMeasurePoints(): ArrayList<MeasurePoint> {
         return measurePoints
     }
@@ -547,27 +504,5 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         cameraTargetPolyline = null
         googleMap?.clear()
         invalidate()
-    }
-
-    inner class TextPolyline(private val polyline: Polyline, private val text: String) {
-        private val paint = Paint().apply {
-            color = Color.BLACK
-            textSize = 40f
-            isAntiAlias = true
-        }
-
-        fun draw(canvas: Canvas) {
-            val points = polyline.points
-            for (i in 0 until points.size - 1) {
-                val start = points[i]
-                val end = points[i + 1]
-                val midPoint = LatLng(
-                    (start.latitude + end.latitude) / 2,
-                    (start.longitude + end.longitude) / 2
-                )
-                val screenPoint = googleMap?.projection?.toScreenLocation(midPoint)!!
-                canvas.drawText(text, screenPoint.x.toFloat(), screenPoint.y.toFloat(), paint)
-            }
-        }
     }
 }

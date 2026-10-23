@@ -7,32 +7,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.google.android.gms.maps.MapView
+import app.simple.positional.decorations.maps.PickerMap
 
 @Composable
-fun rememberMapView(): MapView {
+fun rememberPickerMap(): PickerMap {
     val context = LocalContext.current
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    val mapView = remember { MapView(context).apply { onCreate(null) } }
-    DisposableEffect(lifecycle, mapView) {
-        var state = Lifecycle.State.CREATED
-        val observer = LifecycleEventObserver { _, event ->
+    val owner = LocalLifecycleOwner.current
+    val map = remember { PickerMap.create(context) }
+    DisposableEffect(owner, map) {
+        val delegate = map.lifecycleObserver
+        var state = Lifecycle.State.INITIALIZED
+        val observer = LifecycleEventObserver { source, event ->
             when (event) {
-                Lifecycle.Event.ON_START -> mapView.onStart()
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                Lifecycle.Event.ON_STOP -> mapView.onStop()
+                Lifecycle.Event.ON_START -> delegate.onStart(source)
+                Lifecycle.Event.ON_RESUME -> delegate.onResume(source)
+                Lifecycle.Event.ON_PAUSE -> delegate.onPause(source)
+                Lifecycle.Event.ON_STOP -> delegate.onStop(source)
+                Lifecycle.Event.ON_DESTROY -> delegate.onDestroy(source)
                 else -> Unit
             }
-            if (event != Lifecycle.Event.ON_DESTROY) state = event.targetState
+            state = event.targetState
         }
-        lifecycle.addObserver(observer)
+        owner.lifecycle.addObserver(observer)
         onDispose {
-            lifecycle.removeObserver(observer)
-            if (state.isAtLeast(Lifecycle.State.RESUMED)) mapView.onPause()
-            if (state.isAtLeast(Lifecycle.State.STARTED)) mapView.onStop()
-            mapView.onDestroy()
+            owner.lifecycle.removeObserver(observer)
+            if (state != Lifecycle.State.DESTROYED) {
+                if (state.isAtLeast(Lifecycle.State.RESUMED)) delegate.onPause(owner)
+                if (state.isAtLeast(Lifecycle.State.STARTED)) delegate.onStop(owner)
+                delegate.onDestroy(owner)
+            }
         }
     }
-    return mapView
+    return map
 }

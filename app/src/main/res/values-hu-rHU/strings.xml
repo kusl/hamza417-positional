@@ -163,8 +163,6 @@
 
     <string name="button_cancel">Mégse</string>
     <string name="button_set">Beállít</string>
-    <string name="button_close">Bezárás</string>
-    <string name="button_grant">Engedélyez</string>
 
     <string name="clock_options">Óra menü</string>
     <string name="compass_options">Iránytű menü</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">Jelölő testreszabása</string>
     <string name="twenty_four_hours_clock">24 órás időformátum</string>
     <string name="gimbal_lock">Giroszkóp zárolása</string>
-    <string name="clock_widget_notification">Az óra widget fut.</string>
-    <string name="notification_desc">Az értesítés elrejtéséhez kapcsolja ki a \"Widget csatorna\" opciót az értesítési beállítások közül.</string>
     <string name="save">Mentés</string>
     <string name="set_and_save">Beállítás és mentés</string>
     <string name="failed">Nem sikerült!</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">Térképek célpont használata</string>
     <string name="using_maps_target">Térképek célpontjának használata</string>
     <string name="edit">Szerkesztés</string>
-    <string name="battery_optimization_desc">Kérjük, kapcsolja ki az akkumulátor optimalizálását, hogy az Óra widget megfelelően működhessen.</string>
     <string name="use_as_target">Célpontként történő felhasználás</string>
     <string name="create_new">Új</string>
     <string name="save_from_target">Mentés a célból</string>

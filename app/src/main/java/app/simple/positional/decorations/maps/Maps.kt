@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -24,9 +23,7 @@ import app.simple.positional.math.LowPassFilter
 import app.simple.positional.math.Vector3
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.BitmapHelper.addLinearGradient
 import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import app.simple.positional.util.ConditionUtils.invert
 import app.simple.positional.util.ConditionUtils.isNotNull
@@ -326,33 +323,10 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
 
             withContext(Dispatchers.Default) {
                 if (isCustomCoordinate) {
-                    markerBitmap = LocationPins.getLocationPin()
-                            .toBitmapKeepingSize(
-                                context,
-                                GPSPreferences.getPinSize(),
-                                GPSPreferences.getPinOpacity()
-                            ).addLinearGradient(
-                                intArrayOf(
-                                    Color.parseColor("#FF1B50"),
-                                    Color.parseColor("#e11677")))
-                } else {
-                    if (location.isNotNull()) {
-                        if (!LocationExtension.getLocationStatus(context)) return@withContext
-
-                        markerBitmap = if (location!!.speed == 0.0F) {
-                            LocationPins.getLocationPin()
-                                    .toBitmapKeepingSize(
-                                        context,
-                                        GPSPreferences.getPinSize(),
-                                        GPSPreferences.getPinOpacity())
-                        } else {
-                            R.drawable.ic_bearing_marker
-                                    .toBitmapKeepingSize(
-                                        context,
-                                        GPSPreferences.getPinSize(),
-                                        GPSPreferences.getPinOpacity())
-                        }
-                    }
+                    markerBitmap = GpsPin.bitmap(context, custom = true, moving = false)
+                } else if (location.isNotNull()) {
+                    if (!LocationExtension.getLocationStatus(context)) return@withContext
+                    markerBitmap = GpsPin.bitmap(context, custom = false, moving = location!!.speed > 0F)
                 }
             }
 

@@ -42,6 +42,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import app.simple.positional.R
 import app.simple.positional.util.AppIcons
+import app.simple.positional.util.MapSource
 import kotlin.math.roundToInt
 
 @Composable
@@ -95,6 +96,16 @@ internal fun SettingsDialogHost(dialog: SettingsDialog, state: SettingsState, ac
             note = stringResource(R.string.desc_location_provider_note),
             onDismiss = onDismiss,
             onSelect = select(actions::setLocationProvider),
+        )
+        SettingsDialog.MAP_SOURCE -> ChoiceDialog(
+            title = stringResource(R.string.map_source),
+            choices = MapSource.choices.map {
+                Choice(it, stringResource(SettingsLabels.mapSource(it)!!), stringResource(SettingsLabels.mapSourceDescription(it)!!))
+            },
+            selected = state.mapSource,
+            note = stringResource(R.string.desc_map_source_note),
+            onDismiss = onDismiss,
+            onSelect = select(actions::setMapSource),
         )
         SettingsDialog.LANGUAGE -> ChoiceDialog(
             title = stringResource(R.string.language),

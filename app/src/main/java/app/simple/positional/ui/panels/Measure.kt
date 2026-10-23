@@ -9,9 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.decorations.measure.MeasureMaps
+import app.simple.positional.decorations.maps.MeasureMap
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.model.MeasurePoint
@@ -35,7 +34,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     private val state = MeasureState()
     private val locationViewModel: LocationViewModel
     private val measureViewModel: MeasureViewModel
-    private val maps: MeasureMaps
+    private val maps: MeasureMap
     private var location: Location? = null
 
     init {
@@ -45,20 +44,16 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     init {
-        maps = MeasureMaps(activity).apply {
-            alpha = 0f
-            onCreate(null)
-            setOnMapsCallbackListener(this@Measure)
-        }
+        maps = MeasureMap.create(activity).apply { setCallbacks(this@Measure) }
     }
 
     @Composable
     override fun Content(topInset: Dp) {
-        MeasureScreen(state, maps, topInset, this)
+        MeasureScreen(state, maps.view, topInset, this)
     }
 
     init {
-        owner.lifecycle.addObserver(MapLifecycle(maps))
+        owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
         locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
     }
@@ -69,14 +64,11 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
-            val latLng = LatLng(it.latitude, it.longitude)
-            maps.setFirstLocation(latLng)
-            maps.location = it
-            maps.addMarker(latLng)
+            maps.updateLocation(it)
         }
         measureViewModel.getMeasure().observe(owner) { measure ->
             if (MeasurePreferences.isMeasureSelected() && measure != null) {
-                maps.createMeasurePolylines(measure)
+                maps.showMeasure(measure)
                 state.selected = true
                 state.name = measure.name.orEmpty()
                 showSummary(measure)
@@ -102,7 +94,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     override fun onCameraDistance(latLng: LatLng?) {
-        val last = maps.getMeasurePoints().lastOrNull()
+        val last = maps.points.lastOrNull()
         state.current = if (latLng == null || last == null) "" else {
             distance(GeoDistance.meters(last.latitude, last.longitude, latLng.latitude, latLng.longitude))
         }
@@ -159,18 +151,13 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         if (close) {
             maps.resetCamera(CLOSE_ZOOM)
         } else {
-            maps.moveMapCamera(
-                LatLng(current.latitude, current.longitude),
-                MeasurePreferences.getMapZoom(),
-                MeasurePreferences.getMapTilt(),
-                MeasurePreferences.getMapBearing(),
-            )
+            maps.moveTo(current.latitude, current.longitude, MeasurePreferences.getMapZoom())
         }
     }
 
-    override fun addPoint() = maps.addPolyline()
+    override fun addPoint() = maps.addPoint()
 
-    override fun removeLast() = maps.removeRecentPolyline()
+    override fun removeLast() = maps.removeLast()
 
     override fun wrap() = MeasurePreferences.invertPolylinesWrapped()
 

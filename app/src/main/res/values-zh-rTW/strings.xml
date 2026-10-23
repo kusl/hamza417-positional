@@ -163,8 +163,6 @@
 
     <string name="button_cancel">取消</string>
     <string name="button_set">設定</string>
-    <string name="button_close">關閉</string>
-    <string name="button_grant">授予</string>
 
     <string name="clock_options">時鐘選單</string>
     <string name="compass_options">指南針選單</string>
@@ -236,8 +234,6 @@
     <string name="customize_pin">自訂圖釘</string>
     <string name="twenty_four_hours_clock">24 小時時鐘</string>
     <string name="gimbal_lock">環架鎖定</string>
-    <string name="clock_widget_notification">時鐘小工具正在執行。</string>
-    <string name="notification_desc">在通知設定中關閉「小工具頻道」以隱藏此通知。</string>
     <string name="save">儲存</string>
     <string name="set_and_save">設定並儲存</string>
     <string name="failed">失敗！</string>
@@ -268,7 +264,6 @@
     <string name="use_maps_target">使用地圖目標</string>
     <string name="using_maps_target">正在使用地圖目標</string>
     <string name="edit">編輯</string>
-    <string name="battery_optimization_desc">請停用電池效能最佳化以允許時鍾小工具正常執行。</string>
     <string name="use_as_target">用作目標</string>
     <string name="create_new">新增</string>
     <string name="save_from_target">儲存自目標</string>
@@ -276,7 +271,6 @@
     <string name="mechanical">機械</string>
     <string name="app_coordinates_format">座標格式</string>
     <string name="share">分享</string>
-    <string name="notification_permission_desc">通知存取需要持續執行時鐘小工具服務。</string>
     <string name="true_altitude">真實海拔</string>
     <string name="elongation">距角</string>
     <string name="radius">半徑</string>

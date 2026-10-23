@@ -23,9 +23,8 @@ import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.trails.TrailMaps
+import app.simple.positional.decorations.maps.TrailMap
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.math.MathExtensions.round
@@ -60,7 +59,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private val trailData: TrailDataViewModel by activity.viewModels()
     private val trails: TrailsViewModel by activity.viewModels()
     private val locationViewModel: LocationViewModel
-    private val maps: TrailMaps
+    private val maps: TrailMap
     private var location: Location? = null
     private var pending: Triple<Double, Double, Float>? = null
 
@@ -70,20 +69,16 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     }
 
     init {
-        maps = TrailMaps(activity).apply {
-            alpha = 0f
-            onCreate(null)
-            setOnMapsCallbackListener(this@Trail)
-        }
+        maps = TrailMap.create(activity).apply { setCallbacks(this@Trail) }
     }
 
     @Composable
     override fun Content(topInset: Dp) {
-        TrailScreen(state, maps, topInset, isLandscapeOrientation, this)
+        TrailScreen(state, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
-        owner.lifecycle.addObserver(MapLifecycle(maps))
+        owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
         locationViewModel.getLocation().observe(owner) {
@@ -92,9 +87,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
             MainPreferences.setLastLongitude(it.longitude.toFloat())
             state.fixed = true
             state.enabled = getLocationStatus(activity)
-            maps.setFirstLocation(it)
-            maps.location = it
-            maps.addMarker(LatLng(it.latitude, it.longitude))
+            maps.updateLocation(it)
         }
         locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
 
@@ -108,7 +101,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
 
     private fun showPoints(points: List<TrailPoint>) {
-        maps.addPolylines(ArrayList(points))
+        maps.showPoints(points)
         val metric = MainPreferences.isMetric()
         val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
         state.summary = listOf(
@@ -155,7 +148,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     }
 
     override fun onMapInitialized() {
-        maps.addPolylines(ArrayList(trailData.points.value))
+        maps.showPoints(trailData.points.value)
     }
 
     override fun onMapClicked() {
@@ -203,7 +196,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         if (close) {
             maps.resetCamera(CLOSE_ZOOM)
         } else {
-            maps.moveMapCamera(LatLng(current.latitude, current.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
+            maps.moveTo(current.latitude, current.longitude, TrailPreferences.getMapZoom())
         }
     }
 
@@ -216,9 +209,9 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         requestMarker(current?.latitude ?: 0.0, current?.longitude ?: 0.0, current?.accuracy ?: 0f)
     }
 
-    override fun removeLast() = maps.removePolyline()
+    override fun removeLast() = maps.removeLast()
 
-    override fun wrap() = maps.wrapUnwrap()
+    override fun wrap() = maps.toggleWrap()
 
     override fun toggleCompass() = TrailPreferences.setCompassRotation(!TrailPreferences.isCompassRotation())
 
@@ -265,13 +258,13 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private fun save(point: TrailPoint) {
         trailData.save(point)
         if (!TrailPreferences.arePolylinesWrapped()) {
-            maps.moveMapCamera(LatLng(point.latitude, point.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
+            maps.moveTo(point.latitude, point.longitude, TrailPreferences.getMapZoom())
         }
     }
 
     override fun focus(item: TrailPointItem) {
         state.sheet = false
-        maps.moveMapCamera(LatLng(item.point.latitude, item.point.longitude), FOCUS_ZOOM, TrailPreferences.getMapTilt())
+        maps.moveTo(item.point.latitude, item.point.longitude, FOCUS_ZOOM)
     }
 
     override fun delete(item: TrailPointItem) = trailData.delete(item.point)

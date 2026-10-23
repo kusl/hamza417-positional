@@ -42,6 +42,7 @@ import app.simple.positional.math.TimeConverter.getHoursInDegrees
 import app.simple.positional.math.TimeConverter.getHoursInDegreesFor24
 import app.simple.positional.math.TimeConverter.getMinutesInDegrees
 import app.simple.positional.math.TimeConverter.getSecondsInDegrees
+import app.simple.positional.widgets.DayNight
 import kotlinx.coroutines.delay
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -85,7 +86,7 @@ class ClockState {
         val seconds = getSecondsInDegrees(now, motion.fractional)
         second.update(seconds, motion.animated)
         sweep.update(seconds - 90f, motion.animated)
-        daytime = now.hour in 6..18
+        daytime = DayNight.isDay(now.hour)
     }
 }
 

@@ -19,9 +19,8 @@ import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
-import app.simple.positional.decorations.maps.Maps
+import app.simple.positional.decorations.maps.GpsMap
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.math.MovementThreshold
@@ -46,6 +45,7 @@ import app.simple.positional.ui.compose.LocationDetailsDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.util.LocationShare
 import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
 import app.simple.positional.util.DMSConverter
@@ -54,6 +54,7 @@ import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
+import app.simple.positional.util.MapSource
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
 import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
@@ -68,7 +69,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private val maps: Maps
+    private val maps: GpsMap
     private val viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
     private var addressJob: Job? = null
@@ -94,11 +95,9 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     }
 
     init {
-        maps = Maps(activity).apply {
-            alpha = 0f
-            onCreate(null)
-            setOnMapsCallbackListener(this@GPS)
-            onTouch = { event, _ ->
+        maps = GpsMap.create(activity).apply {
+            setCallbacks(this@GPS)
+            onTouch = { event ->
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> unregister()
                     MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> registerWithRunnable()
@@ -109,14 +108,15 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     @Composable
     override fun Content(topInset: Dp) {
-        GpsScreen(state, maps, topInset, isLandscapeOrientation, this)
+        GpsScreen(state, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
-        owner.lifecycle.addObserver(MapLifecycle(maps))
+        owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
-        if (!LocationPrompt.checkGooglePlayServices(activity)) {
+        val needsPlayServices = !MapSource.isOsm() || MainPreferences.getLocationProvider() == SettingsLabels.PROVIDER_FUSED
+        if (needsPlayServices && !LocationPrompt.checkGooglePlayServices(activity)) {
             val message = getString(R.string.play_services_error)
             dialogs.show { MessageDialog(message, dialogs::dismiss) }
         }
@@ -175,9 +175,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         state.speed = if (metric) location.speed.toKiloMetersPerHour() else location.speed.toMilesPerHour()
 
         if (!state.custom) {
-            maps.setFirstLocation(location)
-            maps.location = location
-            maps.addMarker(LatLng(location.latitude, location.longitude))
+            maps.updateLocation(location)
             showCoordinates(location.latitude, location.longitude)
         }
     }

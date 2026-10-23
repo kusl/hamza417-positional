@@ -7,9 +7,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -294,14 +291,6 @@
             android:exported="false"
             tools:targetApi="o" />
 
-        <activity
-            android:name=".activities.service.ClockWidgetActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".services.LocationService"
             android:enabled="true"
@@ -325,38 +314,9 @@
             android:stopWithTask="true"
             tools:ignore="ForegroundServicePermission" />
 
-        <service
-            android:name=".services.ClockWidgetService2x2"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="specialUse"
-            android:icon="@drawable/ic_access_time"
-            android:label="@string/clock"
-            android:stopWithTask="false" />
-
-        <service
-            android:name=".services.ClockWidgetService3x3"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="specialUse"
-            android:icon="@drawable/ic_access_time"
-            android:label="@string/clock"
-            android:stopWithTask="false" />
-
-        <service
-            android:name=".services.ClockWidgetService4x4"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="specialUse"
-            android:icon="@drawable/ic_access_time"
-            android:label="@string/clock"
-            android:stopWithTask="false" />
-
         <receiver
             android:name=".widgets.ClockWidget4x4"
+            android:enabled="@bool/clock_widgets"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
@@ -371,6 +331,7 @@
 
         <receiver
             android:name=".widgets.ClockWidget2x2"
+            android:enabled="@bool/clock_widgets"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
@@ -385,6 +346,7 @@
 
         <receiver
             android:name=".widgets.ClockWidget3x3"
+            android:enabled="@bool/clock_widgets"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">

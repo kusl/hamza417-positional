@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
+import app.simple.positional.util.MapSource
 import app.simple.positional.util.NightMode
 import app.simple.positional.util.LocaleHelper
 
@@ -49,6 +50,7 @@ data class SettingsState(
     val isMetric: Boolean = true,
     val coordinatesFormat: Int = 0,
     val locationProvider: String = SettingsLabels.PROVIDER_ANDROID,
+    val mapSource: Int = MapSource.AUTO,
     val language: String = SettingsLabels.LANGUAGE_DEFAULT,
     val isCustomLocation: Boolean = false,
     val keepScreenOn: Boolean = false,
@@ -69,6 +71,7 @@ interface SettingsActions {
     fun setMetric(metric: Boolean)
     fun setCoordinatesFormat(format: Int)
     fun setLocationProvider(provider: String)
+    fun setMapSource(source: Int)
     fun openCustomLocations()
     fun setCustomLocation(enabled: Boolean)
     fun setKeepScreenOn(enabled: Boolean)
@@ -79,7 +82,7 @@ interface SettingsActions {
     fun openIssues()
 }
 
-internal enum class SettingsDialog { THEME, ICON, CORNERS, UNITS, COORDINATES, PROVIDER, LANGUAGE }
+internal enum class SettingsDialog { THEME, ICON, CORNERS, UNITS, COORDINATES, PROVIDER, MAP_SOURCE, LANGUAGE }
 
 object SettingsLabels {
     const val THEME_AUTO = 4
@@ -141,6 +144,22 @@ object SettingsLabels {
     fun locationProviderDescription(provider: String): Int? = when (provider) {
         PROVIDER_ANDROID -> R.string.desc_android_location_provider
         PROVIDER_FUSED -> R.string.desc_fused_location_provider
+        else -> null
+    }
+
+    @StringRes
+    fun mapSource(source: Int): Int? = when (source) {
+        MapSource.AUTO -> R.string.map_source_auto
+        MapSource.GOOGLE -> R.string.map_source_google
+        MapSource.OSM -> R.string.map_source_osm
+        else -> null
+    }
+
+    @StringRes
+    fun mapSourceDescription(source: Int): Int? = when (source) {
+        MapSource.AUTO -> R.string.desc_map_source_auto
+        MapSource.GOOGLE -> R.string.desc_map_source_google
+        MapSource.OSM -> R.string.desc_map_source_osm
         else -> null
     }
 
@@ -248,6 +267,11 @@ private fun ConfigurationSection(state: SettingsState, actions: SettingsActions,
             title = stringResource(R.string.location_provider),
             summary = SettingsLabels.locationProvider(state.locationProvider)?.let { stringResource(it) },
             onClick = { show(SettingsDialog.PROVIDER) },
+        )
+        PreferenceItem(
+            title = stringResource(R.string.map_source),
+            summary = SettingsLabels.mapSource(state.mapSource)?.let { stringResource(it) },
+            onClick = { show(SettingsDialog.MAP_SOURCE) },
         )
         PreferenceItem(
             title = stringResource(R.string.specified_location),
