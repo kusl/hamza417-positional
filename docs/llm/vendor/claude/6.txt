@@ -16,3 +16,85 @@ Docs updated alongside code changes
 Low verbosity, no code comments
 I can't emphasize this enough
 NO CODE COMMENTS 
+
+Claude
+/
+please continue with phase 6
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this enough
+NO CODE COMMENTS
+
+Ran 49 commands, read memory
+I ran out of tool calls before packaging, so Phase 6 is not delivered yet. The code is written in my workspace, but there’s no tar.gz, the README isn’t updated, and I haven’t done the unused-resource sweep. Say “continue” and I’ll finish those and hand over the archive.
+
+What Phase 6 does:
+
+Trails, Measures, Directions and Time zones screens are now Jetpack Compose instead of fragments and RecyclerView adapters.
+Data loading: the four screens update automatically from the database. The direction, measure and trail databases now each stay open once for the app’s lifetime instead of being reopened and closed on every action.
+Shared parts: the list screens share one layout, one confirm dialog and one name-and-note dialog. The saved-locations screen now uses the same confirm dialog.
+Trail names: one rule now checks new trail names in both places they can be created. A name can’t be blank, can’t contain / or \, can’t be the reserved database name, and can’t duplicate an existing trail (ignoring case).
+New unit tests: TimeZoneCatalogTest and TrailNamesTest.
+Behaviour changes you should know about:
+
+Picking a time zone now closes the picker. The search text is no longer remembered between visits.
+Trails and measures have a delete button, with a confirm step, instead of the old popup menu.
+An empty trail note is saved as empty, not “N/A”.
+“Navigate” tries Google Maps first and falls back to any map app.
+Saving a direction no longer also sets it as the current target; you choose “Set” for that.
+Files to delete (planned; I’ll confirm this after the unused-resource sweep):
+
+git rm app/src/main/java/app/simple/positional/ui/subpanels/Directions.kt app/src/main/java/app/simple/positional/ui/subpanels/Measures.kt app/src/main/java/app/simple/positional/ui/subpanels/TimeZones.kt app/src/main/java/app/simple/positional/ui/subpanels/Trails.kt app/src/main/java/app/simple/positional/adapters/clock/TimeZoneAdapter.kt app/src/main/java/app/simple/positional/adapters/direction/AdapterDirections.kt app/src/main/java/app/simple/positional/adapters/measure/AdapterMeasures.kt app/src/main/java/app/simple/positional/adapters/trail/AdapterTrails.kt app/src/main/java/app/simple/positional/dialogs/direction/DirectionTarget.kt app/src/main/java/app/simple/positional/popups/directions/PopupDirectionAddMenu.kt app/src/main/java/app/simple/positional/popups/directions/PopupDirectionsMenu.kt app/src/main/java/app/simple/positional/popups/trail/PopupTrailsMenu.kt app/src/main/java/app/simple/positional/decorations/searchview/SearchView.java app/src/main/java/app/simple/positional/decorations/searchview/SearchViewEventListener.java app/src/main/java/app/simple/positional/preferences/SearchPreferences.kt app/src/main/java/app/simple/positional/model/DirectionModel.java app/src/main/res/layout/activity_sub.xml app/src/main/res/layout/adapter_directions.xml app/src/main/res/layout/adapter_header_directions.xml app/src/main/res/layout/adapter_measures_header.xml app/src/main/res/layout/adapter_timezone.xml app/src/main/res/layout/adapter_trails.xml app/src/main/res/layout/adapter_trails_header.xml app/src/main/res/layout/fragment_directions.xml app/src/main/res/layout/fragment_measures_list.xml app/src/main/res/layout/fragment_timezone_list.xml app/src/main/res/layout/fragment_trails_list.xml app/src/main/res/layout/dialog_direction_target.xml app/src/main/res/layout/popup_directions.xml app/src/main/res/layout/popup_directions_add_menu.xml app/src/main/res/layout/popup_trails.xml app/src/main/res/layout/search_view.xml
+Risks:
+
+Not compiled. There’s no Android SDK in my sandbox, so nothing has been built. CI will be the first real check.
+Saved directions could be lost. I rewrote DirectionModel from Java to Kotlin and kept the same table columns. If the table definition Room generates isn’t identical to before, Room will wipe the directions table on upgrade and saved directions would be lost. Check the CI build’s Room schema output for the directions database before installing on your phone. If it differs, tell me and I’ll keep the Java version, stripped down instead.
+Claude reached its tool-use limit for this turn.
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+19
+36
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
