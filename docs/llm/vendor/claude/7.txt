@@ -1026,3 +1026,276 @@ Claude is AI and can make mistakes. Please double-check responses.
 
 
 Claude finished the response
+
+63
+41
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+now the release is failing 
+Run ./gradlew --no-daemon assembleRelease
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs
+> Task :app:mergeReleaseArtProfile
+
+> Task :app:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:expandReleaseL8ArtProfileWildcards FROM-CACHE
+> Task :app:extractReleaseNativeSymbolTables FROM-CACHE
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:generateReleaseBuildConfig
+> Task :app:generateReleaseResValues
+> Task :app:generateReleaseResources
+> Task :app:packageReleaseResources
+> Task :app:processReleaseNavigationResources
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:compileReleaseNavigationResources FROM-CACHE
+> Task :app:checkReleaseAarMetadata
+> Task :app:parseReleaseLocalResources
+
+> Task :app:mergeReleaseResources
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-pt-rBR/strings.xml:277:4: Multiple substitutions specified in non-positional format of string resource string/eta_days. Did you mean to add the formatted="false" attribute?
+
+> Task :app:generateReleaseRFile
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:extractProguardFiles
+> Task :app:processReleaseManifestForPackage
+> Task :app:mergeReleaseStartupProfile
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:compressReleaseAssets FROM-CACHE
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:validateSigningRelease
+> Task :app:writeReleaseAppMetadata
+> Task :app:writeReleaseSigningConfigVersions
+warn: removing resource app.simple.positional:string/show_on_map without required default value.
+
+> Task :app:processReleaseResources
+
+> Task :app:kspReleaseKotlin
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:15: There are multiple good constructors and Room will pick the no-arg constructor. You can use the @Ignore annotation to eliminate unwanted constructors.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:15: There are multiple good constructors and Room will pick the no-arg constructor. You can use the @Ignore annotation to eliminate unwanted constructors.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+
+> Task :app:compileReleaseKotlin
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/database/instances/TrailPointDatabase.kt:22:22 'fun fallbackToDestructiveMigration(): RoomDatabase.Builder<TrailPointDatabase>' is deprecated. Replace by overloaded version with parameter to indicate if all tables should be dropped or not.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt:488:57 Unnecessary non-null assertion (!!) on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/extensions/activity/BaseActivity.kt:158:16 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/extensions/fragment/ScopedFragment.kt:40:37 Unnecessary safe call on a non-null receiver of type 'Display'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:178:25 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:179:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:180:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:183:26 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt:406:11 Redundant call of conversion method.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt:414:12 Redundant call of conversion method.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/launcher/SplashScreen.kt:79:24 'var statusBarColor: Int' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:477:26 'fun fallbackToDestructiveMigration(): RoomDatabase.Builder<LocationDatabase>' is deprecated. Replace by overloaded version with parameter to indicate if all tables should be dropped or not.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:489:37 Unnecessary safe call on a non-null receiver of type 'LocationDao'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:226:41 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:235:58 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/MeasureViewModel.kt:57:33 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/MeasureViewModel.kt:68:38 Unnecessary safe call on a non-null receiver of type 'ArrayList<MeasurePoint!>'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/TrailDataViewModel.kt:50:38 'fun fallbackToDestructiveMigration(): RoomDatabase.Builder<TrailPointDatabase>' is deprecated. Replace by overloaded version with parameter to indicate if all tables should be dropped or not.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/TrailDataViewModel.kt:68:66 'fun fallbackToDestructiveMigration(): RoomDatabase.Builder<TrailPointDatabase>' is deprecated. Replace by overloaded version with parameter to indicate if all tables should be dropped or not.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/TrailDataViewModel.kt:85:70 'fun fallbackToDestructiveMigration(): RoomDatabase.Builder<TrailPointDatabase>' is deprecated. Replace by overloaded version with parameter to indicate if all tables should be dropped or not.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/TrailDataViewModel.kt:101:66 'fun fallbackToDestructiveMigration(): RoomDatabase.Builder<TrailPointDatabase>' is deprecated. Replace by overloaded version with parameter to indicate if all tables should be dropped or not.
+Note: Some input files use or override a deprecated API.
+
+> Task :app:compileReleaseJavaWithJavac
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:mergeReleaseGeneratedProguardFiles
+> Task :app:processReleaseJavaRes
+> Task :app:generateReleaseLintVitalReportModel
+> Task :app:expandReleaseArtProfileWildcards
+> Task :app:mergeReleaseJavaResource
+> Task :app:produceReleaseComposeMapping
+> Task :app:reportReleaseComposeMappingErrors
+> Task :app:lintVitalAnalyzeRelease
+> Task :app:minifyReleaseWithR8
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-bg-rBG/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+
+    <string name="show_on_map">Покажи на картата</string>
+> Task :app:lintVitalReportRelease
+            ~~~~~~~~~~~~~~~~~~
+Lint found 13 errors. First failure:
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-cs-rCZ/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-bg-rBG/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Покажи на картата</string>
+            ~~~~~~~~~~~~~~~~~~
+
+
+> Task :app:lintVitalRelease FAILED
+    <string name="show_on_map">Zobrazit na mapě</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-de-rDE/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Auf Karte anzeigen</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-es-rES/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Mostrar en el mapa</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-fr-rFR/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Afficher sur la carte</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-hi-rIN/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">नक्शे पर दिखाएँ</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-hu-rHU/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Mutatás a térképen</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-ml-rIN/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">മാപ്പിൽ കാണുക</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-ro-rRO/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Afişare pe hartă</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-ru-rRU/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Показать на карте</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-ur-rIN/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">نقشہ پر دکھائیں</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-zh-rTW/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">在地圖上顯示</string>
+            ~~~~~~~~~~~~~~~~~~
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-pt-rBR/strings.xml:272: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+    <string name="show_on_map">Mostrar no mapa</string>
+            ~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "ExtraTranslation":
+   If a string appears in a specific language translation file, but there is
+   no corresponding string in the default locale, then this string is probably
+   unused. (It's technically possible that your application is only intended
+   to run in a specific locale, but it's still a good idea to provide a
+   fallback.)
+
+   Note that these strings can lead to crashes if the string is looked up on
+   any locale not providing a translation, so it's important to clean them
+   up.
+
+13 errors
+
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_4-1792743493821.json
+
+
+FAILURE: Build failed with an exception.
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+
+* What went wrong:
+Execution failed for task ':app:lintVitalRelease' (registered by plugin 'com.android.internal.application').
+> Lint found fatal errors while assembling a release target.
+  
+  Fix the issues identified by lint, or create a baseline to see only new errors.
+  To create a baseline, run `gradlew updateLintBaseline` after adding the following to the module's build.gradle file:
+  ```
+  android {
+      lint {
+          baseline = file("lint-baseline.xml")
+      }
+  }
+  ```
+  For more details, see https://developer.android.com/studio/write/lint#snapshot
+  
+  Lint found 13 errors. First failure:
+  
+  /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/res/values-bg-rBG/strings.xml:265: Error: "show_on_map" is translated here but not found in default locale [ExtraTranslation]
+      <string name="show_on_map">Покажи на картата</string>
+              ~~~~~~~~~~~~~~~~~~
+  
+  The full lint text report is located at:
+    /home/runner/work/hamza417-positional/hamza417-positional/app/build/intermediates/lint_vital_intermediate_text_report/release/lintVitalReportRelease/lint-results-release.txt
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+
+BUILD FAILED in 2m 18s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+47 actionable tasks: 41 executed, 6 from cache
+Error: Process completed with exit code 1.
