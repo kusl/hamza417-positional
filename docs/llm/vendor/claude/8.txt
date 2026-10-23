@@ -1699,3 +1699,202 @@ Claude finished the response
 
 
 Please continue with the next phase. 
+
+Claude
+/
+Ran 20 commands, shared files
+Replacing sparkline charts with Compose Canvas to simplify the codebase.
+Tracking a shared list mutation in graph data handling.
+Now write the helpers and the VM edit.
+Building composable dialogs for displaying location details.
+Cleaning up redundant null checks and reviewing state producer usage.
+Setting up GPS accuracy tracking in the app.
+Debugging non-local returns inside Kotlin's let function.
+Removing unused UI components and styleable entries from the codebase.
+Cleaning up unused layout attributes and resources.
+Tracking down unused imports in CustomLocationsActivity.
+Trimming unused code and stripping files to essentials.
+Cleaning up unused drawables, dimens, and dependencies.
+Tracing dependencies on the animation code elsewhere.
+Checking rounding logic for precise decimal calculations.
+Checking for leftover references after removing location code.
+Presented file
+Phase 8f is in positional-phase8f.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8e) passed CI. I can’t compile here, so the next CI run is the real check for 8f.
+
+Dialogs now in Compose:
+
+Location summary (the GPS toolbar pin button and the clock panel’s location button): time zone, latitude, longitude and address, with a share button. Share uses the same text as the GPS panel’s share, now in one shared helper.
+Location details: accuracy and altitude history drawn as Compose line charts, with min, max and average in metres or feet.
+Coordinate formats: degrees-minutes-seconds, degrees-minutes, decimal degrees, MGRS and UTM, with a copy button.
+Battery fix: the location view model was computing all five coordinate formats, including MGRS and UTM, on every GPS fix even when nothing showed them. They are now computed only while the coordinate dialog is open. The accuracy and altitude history lists are also handed out as copies, so the UI never reads a list while it is being changed.
+
+Removed:
+
+The three dialog fragments and their layouts.
+The old sparkline chart package.
+The fast-scroller package, the custom list view and its list-row helper. Nothing used them after this change.
+Two unused view classes.
+The dynamicanimation dependency.
+Unused styles, styleables, dimensions and strings, in every language.
+TextViewUtils is cut down to the one function still used.
+New tests: SeriesStatsTest and LocationShareTest.
+
+README: updated. The panel switcher moves to 8g, together with the single activity and dropping the AppCompat themes. It lives in MainActivity, which 8g replaces.
+
+Delete these:
+
+sh
+git rm -r app/src/main/java/app/simple/positional/decorations/corners/DynamicCornersNestedScrollView.java app/src/main/java/app/simple/positional/decorations/fastscroll app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleImageButton.java app/src/main/java/app/simple/positional/decorations/viewholders/VerticalListViewHolder.kt app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt app/src/main/java/app/simple/positional/dialogs/app/LocationParameters.kt app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt app/src/main/java/app/simple/positional/dialogs/gps/LocationExpansion.kt app/src/main/java/app/simple/positional/sparkline app/src/main/res/drawable/fs_md2_thumb.xml app/src/main/res/drawable/fs_md2_track.xml app/src/main/res/drawable/fs_thumb.xml app/src/main/res/drawable/ripple_btn.xml app/src/main/res/layout/dialog_custom_location_shortcut.xml app/src/main/res/layout/expansion_dialog_coordinates.xml app/src/main/res/layout/expansion_dialog_location.xml
+
+Positional phase8f.tar
+GZ 
+Please continue with the next phase.
+
+Ran 19 commands, shared files
+Reviewing Compose layout code for a UI component.
+Checking Android permission result constants for accuracy.
+Removing unused dialog animation styles and themes.
+Reviewing activity screens and components for potential issues.
+Checking whether removing ViewUtils breaks other usages.
+Presented file
+Phase 8g is in positional-phase8g.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8f) passed CI. I can’t compile here, so the next CI run is the real check for 8g.
+
+Main screen is now Compose:
+
+Panel hosting: MainActivity shows the current panel with AndroidFragment, so the existing panel fragments keep working unchanged. This needs a new dependency, androidx.fragment:fragment-compose. I set it to 1.9.1 to match fragment-ktx, but could not confirm that version exists, so CI will be the first check. The old view-pager bottom bar, its layout and the panel transition animation are gone.
+Panel switcher: a floating accent button at the bottom right replaces the old bottom bar.
+Tapping it opens a grid of all eight panels, each in its own colour.
+Swiping up or down on it steps to the next or previous panel.
+The panel name shows next to the button for about a second after each change.
+Map panels still hide it in full screen.
+Saved panel: saved by tag only, so the panel you last used still opens after the update. Home-screen shortcuts still work. Unknown or old values fall back to the GPS panel.
+Location permission: now requested through the Activity Result API instead of the deprecated callback.
+Location service: start, stop and switching between the Android and fused location sources share one small helper.
+Removed:
+
+The bottom-bar adapter, item list and model, the panel dialog and its adapter, and their callback interfaces.
+The page transformer, three rounded-corner and ripple layout classes, the layout background helper, the base bottom-sheet dialog and the old view helpers.
+The unused bottom-bar visibility preferences, since nothing read them.
+Four layouts, four animations, the bottom-sheet and dialog styles, the rounded-corner styleable and unused dimensions.
+The recyclerview dependency.
+New test: PanelCatalogTest (unknown tags fall back to GPS, swiping wraps around, tags are unique).
+
+README: updated. 8h is next: panels become plain Compose screens with Navigation Compose, the sub screens join the same navigation graph, and fragments and the AppCompat themes go away.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/adapters/app/AdapterPanels.kt app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarAdapter.kt app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarCallbacks.java app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java app/src/main/java/app/simple/positional/callbacks/PanelsCallback.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerFrameLayout.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerLinearLayout.java app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayout.java app/src/main/java/app/simple/positional/decorations/transformers/DepthTransformer.java app/src/main/java/app/simple/positional/decorations/utils/LayoutBackground.java app/src/main/java/app/simple/positional/decorations/views/CustomBottomSheetDialogFragment.kt app/src/main/java/app/simple/positional/dialogs/app/Panels.kt app/src/main/java/app/simple/positional/model/BottomBar.java app/src/main/java/app/simple/positional/preferences/BottomBarPreferences.kt app/src/main/java/app/simple/positional/util/ViewUtils.kt app/src/main/res/anim/bottom_sheet_dialog_in.xml app/src/main/res/anim/bottom_sheet_dialog_out.xml app/src/main/res/anim/grid_list_animation.xml app/src/main/res/anim/grid_list_animation_controller.xml app/src/main/res/layout/activity_main.xml app/src/main/res/layout/adapter_bottom_bar.xml app/src/main/res/layout/adapter_panel.xml app/src/main/res/layout/dialog_panel_switcher.xml
+
+Positional phase8g.tar
+GZ 
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+
+Claude finished the response
+
+84
+53
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
