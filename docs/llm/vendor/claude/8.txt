@@ -2499,6 +2499,8 @@ Claude finished the response
 
 
 tests are still failing 
+github action is failing. 
+please fix this and any other defect as well and continue with next phase 
 
 Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
