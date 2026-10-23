@@ -16,7 +16,7 @@ import app.simple.positional.ui.compose.LevelScreen
 class Level(activity: ComponentActivity) : SensorPanel(activity) {
     private var tilt by mutableStateOf(Tilt.zero)
     private var square by mutableStateOf(false)
-    private lateinit var sensor: GravitySensor
+    private val sensor: GravitySensor
 
     init {
         sensor = GravitySensor(activity) { tilt = it }

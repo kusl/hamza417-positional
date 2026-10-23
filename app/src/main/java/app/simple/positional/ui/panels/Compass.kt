@@ -27,7 +27,7 @@ import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
-    private lateinit var sensor: HeadingSensor
+    private val sensor: HeadingSensor
     private var lastReadings = 0L
 
     init {

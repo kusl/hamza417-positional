@@ -175,12 +175,12 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
 
                     onDataGenerated(clockModel)
 
-                    hour!!.recycle()
-                    minute!!.recycle()
-                    second!!.recycle()
+                    hour.recycle()
+                    minute.recycle()
+                    second.recycle()
                     faceBitmap.recycle()
                     dayNight!!.recycle()
-                    trail!!.recycle()
+                    trail.recycle()
                 }
             }
 

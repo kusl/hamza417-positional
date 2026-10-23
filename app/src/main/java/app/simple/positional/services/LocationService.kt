@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.PermissionUtils
 
@@ -39,38 +38,22 @@ class LocationService : Service(), LocationListener {
     }
 
     override fun onLocationChanged(location: Location) {
-        Intent().also { intent ->
-            intent.action = "location"
-            intent.putExtra("location", location)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishLocation(location)
     }
 
     @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-        Intent().also { intent ->
-            intent.action = "provider"
-            intent.putExtra("location_provider", provider)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishProvider(provider)
     }
 
     override fun onProviderEnabled(provider: String) {
         requestLastKnownLocation()
-        Intent().also { intent ->
-            intent.action = "provider"
-            intent.putExtra("location_provider", provider)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishProvider(provider)
     }
 
     override fun onProviderDisabled(provider: String) {
         handler.removeCallbacks(locationUpdater)
-        Intent().also { intent ->
-            intent.action = "provider"
-            intent.putExtra("location_provider", provider)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishProvider(provider)
     }
 
     private val locationUpdater: Runnable = object : Runnable {

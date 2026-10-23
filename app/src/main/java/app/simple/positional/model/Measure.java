@@ -69,7 +69,6 @@ public class Measure {
         this.note = note;
     }
 
-    @NonNull
     public ArrayList<MeasurePoint> getMeasurePoints() {
         if (measurePoints == null) {
             measurePoints = new ArrayList<>();
@@ -77,7 +76,7 @@ public class Measure {
         return measurePoints;
     }
 
-    public void setMeasurePoints(@NonNull ArrayList<MeasurePoint> measurePoints) {
+    public void setMeasurePoints(ArrayList<MeasurePoint> measurePoints) {
         this.measurePoints = measurePoints;
     }
 

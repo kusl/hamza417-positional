@@ -34,7 +34,7 @@ import java.time.ZoneId
 
 class Time(activity: ComponentActivity) : PanelController(activity) {
     private val state = ClockState()
-    private lateinit var report: ClockReport
+    private val report: ClockReport
     private var latitude = 0.0
     private var longitude = 0.0
     private var altitude = 0.0

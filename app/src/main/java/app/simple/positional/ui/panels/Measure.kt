@@ -33,9 +33,9 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
-    private lateinit var locationViewModel: LocationViewModel
-    private lateinit var measureViewModel: MeasureViewModel
-    private lateinit var maps: MeasureMaps
+    private val locationViewModel: LocationViewModel
+    private val measureViewModel: MeasureViewModel
+    private val maps: MeasureMaps
     private var location: Location? = null
 
     init {

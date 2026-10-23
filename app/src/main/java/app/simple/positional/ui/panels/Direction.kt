@@ -25,7 +25,7 @@ import com.google.android.gms.maps.model.LatLng
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = DirectionState()
-    private lateinit var sensor: HeadingSensor
+    private val sensor: HeadingSensor
     private var target = LatLng(0.0, 0.0)
     private var location: Location? = null
 

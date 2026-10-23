@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.PermissionUtils
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -65,11 +64,7 @@ class FusedLocationService : Service() {
 
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                Intent().also {
-                    it.action = "provider"
-                    it.putExtra("location_provider", intent?.action)
-                    LocalBroadcastManager.getInstance(baseContext).sendBroadcast(it)
-                }
+                LocationBus.publishProvider(intent?.action)
             }
         }
 
@@ -125,10 +120,6 @@ class FusedLocationService : Service() {
     }
 
     private fun broadcastLocation(location: Location) {
-        Intent().also { intent ->
-            intent.action = "location"
-            intent.putExtra("location", location)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishLocation(location)
     }
 }

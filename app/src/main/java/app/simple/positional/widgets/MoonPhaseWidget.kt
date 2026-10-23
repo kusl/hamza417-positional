@@ -1,44 +1,51 @@
 package app.simple.positional.widgets
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Column
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import app.simple.positional.R
 import app.simple.positional.math.MathExtensions
 import app.simple.positional.util.MoonAngle
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.shredzone.commons.suncalc.MoonIllumination
 import java.time.Instant
-import java.util.*
+import java.util.TimeZone
 
-class MoonPhaseWidget : AppWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager?, appWidgetIds: IntArray?) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-        onWidgetUpdate(context)
-    }
+class MoonPhaseWidget : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = MoonPhaseGlance()
+}
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
-        onWidgetUpdate(context)
-    }
-
-    private fun onWidgetUpdate(context: Context) {
-        CoroutineScope(Dispatchers.Default).launch {
-            val moonIllumination = MoonIllumination.compute().timezone(Calendar.getInstance().timeZone.id).on(Instant.now()).execute()
-
-            withContext(Dispatchers.Main) {
-                val views = RemoteViews(context.packageName, R.layout.widget_moon_phase)
-                views.setImageViewResource(R.id.widget_moon_phase_art, MoonAngle.getMoonPhaseGraphics(MathExtensions.round(moonIllumination.phase, 2)))
-                views.setTextViewText(R.id.widget_moon_phase, MoonAngle.getMoonPhase(context, moonIllumination.phase))
-
-                val componentName = ComponentName(context, MoonPhaseWidget::class.java)
-                val manager = AppWidgetManager.getInstance(context)
-                manager.updateAppWidget(componentName, views)
+class MoonPhaseGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val phase = withContext(Dispatchers.Default) {
+            MoonIllumination.compute().timezone(TimeZone.getDefault().id).on(Instant.now()).execute().phase
+        }
+        val art = MoonAngle.getMoonPhaseGraphics(MathExtensions.round(phase, 2))
+        val label = MoonAngle.getMoonPhase(context, phase)
+        provideContent {
+            Column(
+                GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(ImageProvider(art), contentDescription = label, modifier = GlanceModifier.size(120.dp))
+                Text(label, style = TextStyle(color = ColorProvider(R.color.textSecondary)))
             }
         }
     }

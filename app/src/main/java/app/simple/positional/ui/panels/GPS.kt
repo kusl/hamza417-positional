@@ -64,12 +64,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, MapsCallbacks {
-    private lateinit var state: GpsState
+    private val state: GpsState
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private lateinit var maps: Maps
-    private lateinit var viewModel: LocationViewModel
+    private val maps: Maps
+    private val viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
     private var addressJob: Job? = null
     private var location: Location? = null

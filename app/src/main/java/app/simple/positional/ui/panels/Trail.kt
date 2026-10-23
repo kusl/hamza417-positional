@@ -59,8 +59,8 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private val state = TrailState()
     private val trailData: TrailDataViewModel by activity.viewModels()
     private val trails: TrailsViewModel by activity.viewModels()
-    private lateinit var locationViewModel: LocationViewModel
-    private lateinit var maps: TrailMaps
+    private val locationViewModel: LocationViewModel
+    private val maps: TrailMaps
     private var location: Location? = null
     private var pending: Triple<Double, Double, Float>? = null
 

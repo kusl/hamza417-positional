@@ -1,10 +1,6 @@
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.location.Geocoder
 import android.location.Location
@@ -12,7 +8,6 @@ import android.text.Spanned
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.math.MathExtensions.round
@@ -20,6 +15,7 @@ import app.simple.positional.math.UnitConverter.toFeet
 import app.simple.positional.math.UnitConverter.toKilometers
 import app.simple.positional.math.UnitConverter.toMiles
 import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.services.LocationBus
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ArrayHelper.isLastValueSame
 import app.simple.positional.util.ConditionUtils.invert
@@ -28,7 +24,6 @@ import app.simple.positional.util.Direction
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.util.NetworkCheck
-import app.simple.positional.util.ParcelUtils.parcelable
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,8 +32,13 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-    private var filter: IntentFilter = IntentFilter()
-    private var locationBroadcastReceiver: BroadcastReceiver
+    private val listener = object : LocationBus.Listener {
+        override fun onLocation(location: Location) = onNewLocation(location)
+
+        override fun onProvider(provider: String?) {
+            this@LocationViewModel.provider.postValue(provider?.uppercase(Locale.getDefault()))
+        }
+    }
 
     private val accuracyData = ArrayList<Float>()
     private val altitudeData = ArrayList<Float>()
@@ -56,44 +56,24 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
     private var targetAddress: String? = null
 
     init {
-        filter.addAction("location")
-        filter.addAction("provider")
+        LocationBus.register(listener)
+    }
 
-        locationBroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent != null) {
-                    when (intent.action) {
-                        "location" -> {
-                            with(intent.parcelable<Location>("location")!!) {
-                                location.postValue(this)
-
-                                measureLatency()
-
-                                graphData(this)
-
-                                if (GPSPreferences.isTargetMarkerSet().invert()) {
-                                    GPSPreferences.setTargetMarkerStartLatitude(this.latitude.toFloat())
-                                    GPSPreferences.setTargetMarkerStartLongitude(this.longitude.toFloat())
-                                }
-
-                                targetData(
-                                    LatLng(GPSPreferences.getTargetMarkerCoordinates()[0].toDouble(), GPSPreferences.getTargetMarkerCoordinates()[1].toDouble()),
-                                    if (MainPreferences.isCustomCoordinate()) LatLng(MainPreferences.getCoordinates()[0].toDouble(), MainPreferences.getCoordinates()[1].toDouble()) else LatLng(this.latitude, this.longitude),
-                                    this.speed)
-                            }
-                        }
-
-                        "provider" -> {
-                            provider.postValue(intent.getStringExtra("location_provider")
-                                ?.uppercase(Locale.getDefault()))
-                        }
-                    }
-                }
-            }
+    private fun onNewLocation(newLocation: Location) {
+        location.postValue(newLocation)
+        measureLatency()
+        graphData(newLocation)
+        if (GPSPreferences.isTargetMarkerSet().invert()) {
+            GPSPreferences.setTargetMarkerStartLatitude(newLocation.latitude.toFloat())
+            GPSPreferences.setTargetMarkerStartLongitude(newLocation.longitude.toFloat())
         }
-
-        LocalBroadcastManager.getInstance(getApplication())
-            .registerReceiver(locationBroadcastReceiver, filter)
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        val origin = if (MainPreferences.isCustomCoordinate()) {
+            MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        } else {
+            LatLng(newLocation.latitude, newLocation.longitude)
+        }
+        targetData(LatLng(target[0].toDouble(), target[1].toDouble()), origin, newLocation.speed)
     }
 
     fun getLocation(): LiveData<Location> {
@@ -371,7 +351,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
 
     override fun onCleared() {
         super.onCleared()
-        LocalBroadcastManager.getInstance(getApplication())
-            .unregisterReceiver(locationBroadcastReceiver)
+        LocationBus.unregister(listener)
     }
 }
