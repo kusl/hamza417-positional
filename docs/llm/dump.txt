@@ -1,7 +1,7 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T19:51:11-04:00
+Generated: 2026-10-23T19:57:55-04:00
 Branch:    master
-Commit:    82c375d7 2026-10-23 19:51:01 -0400 add claude response
+Commit:    28f52c5c 2026-10-23 19:57:50 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
@@ -4080,7 +4080,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     SharedPreferences.OnSharedPreferenceChangeListener {
     override val view: View get() = this
     protected var map: MapLibreMap? = null
-    protected var callbacks: MapsCallbacks? = null
+    protected var mapCallbacks: MapsCallbacks? = null
     protected var location: Location? = null
     protected var heading = 0f
     protected var headingAccuracy = -1
@@ -4099,7 +4099,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected abstract fun onCameraIdle(position: CameraPosition)
     protected open fun onStyleReady() {}
     protected open fun onClick(latitude: Double, longitude: Double) {
-        callbacks?.onMapClicked()
+        mapCallbacks?.onMapClicked()
     }
     protected open fun onGesture() {}
     protected open fun onCameraMoved() {}
@@ -4149,7 +4149,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
             true
         }
         map.addOnMapLongClickListener {
-            callbacks?.onMapLongClicked(LatLng(it.latitude, it.longitude))
+            mapCallbacks?.onMapLongClicked(LatLng(it.latitude, it.longitude))
             true
         }
         map.addOnCameraMoveStartedListener { reason ->
@@ -4167,7 +4167,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
             layer(OsmStyle.LINE, PropertyFactory.lineColor(accent))
             layer(OsmStyle.GUIDE, PropertyFactory.lineColor(accent))
             onStyleReady()
-            callbacks?.onMapInitialized()
+            mapCallbacks?.onMapInitialized()
         }
     }
 
@@ -4293,7 +4293,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
 @SuppressLint("ViewConstructor")
 abstract class OsmPanelMap(context: Context) : OsmMapView(context), PanelMap {
     override fun setCallbacks(callbacks: MapsCallbacks) {
-        this.callbacks = callbacks
+        mapCallbacks = callbacks
     }
 }
 
@@ -4380,7 +4380,7 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         measurePoints.clear()
         measurePoints.addAll(measure.measurePoints)
         drawLines()
-        callbacks?.onLineCountChanged(measurePoints.size)
+        mapCallbacks?.onLineCountChanged(measurePoints.size)
         if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
@@ -4389,15 +4389,15 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         val point = MeasurePoint(latitude, longitude, measurePoints.size + 1)
         measurePoints.add(point)
         drawLines()
-        callbacks?.onLineAdded(point)
+        mapCallbacks?.onLineAdded(point)
         reportDistance()
     }
 
     override fun removeLast() {
         val last = measurePoints.removeLastOrNull() ?: return
         drawLines()
-        callbacks?.onLineDeleted(last)
-        callbacks?.onLineCountChanged(measurePoints.size)
+        mapCallbacks?.onLineDeleted(last)
+        mapCallbacks?.onLineCountChanged(measurePoints.size)
         reportDistance()
     }
 
@@ -4429,7 +4429,7 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
     }
 
     private fun reportDistance() {
-        target()?.let { callbacks?.onCameraDistance(LatLng(it.first, it.second)) }
+        target()?.let { mapCallbacks?.onCameraDistance(LatLng(it.first, it.second)) }
     }
 
     private fun drawPuck() {
@@ -4606,13 +4606,13 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override fun showPoints(points: List<TrailPoint>) {
         this.points = points
         drawPoints()
-        callbacks?.onLineCountChanged(points.size)
+        mapCallbacks?.onLineCountChanged(points.size)
         if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
     override fun removeLast() {
         val last = points.lastOrNull() ?: return
-        callbacks?.onLineDeleted(last)
+        mapCallbacks?.onLineDeleted(last)
         val previous = points.getOrNull(points.size - 2)
         if (TrailPreferences.arePolylinesWrapped() || previous == null) return
         moveTo(previous.latitude, previous.longitude, TrailPreferences.getMapZoom())
