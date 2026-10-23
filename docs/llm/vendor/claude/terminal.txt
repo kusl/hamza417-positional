@@ -23,4 +23,9 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.983s
 user	0m0.367s
 sys	0m0.581s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.816s
+user	0m0.379s
+sys	0m0.458s
 kushal@fedora:~/src/kotlin/positional$ 
