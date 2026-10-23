@@ -28,4 +28,27 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.472s
 user	0m0.671s
 sys	0m0.834s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.485s
+user	0m0.651s
+sys	0m0.867s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/res/layout/fragment_settings.xml app/src/main/res/layout/pref_about.xml app/src/main/res/layout/pref_appearance.xml app/src/main/res/layout/pref_configuration.xml app/src/main/res/layout/pref_contribute.xml app/src/main/res/layout/pref_other_apps.xml app/src/main/res/layout/popup_legal_notes.xml app/src/main/res/drawable-nodpi/inure.png app/src/main/java/app/simple/positional/popups/settings/LegalNotesPopupMenu.kt app/src/main/java/app/simple/positional/callbacks/CoordinatesCallback.kt app/src/main/assets/html/found_issue.html app/src/main/assets/html/translators.html app/src/main/assets/html/local_changelogs.html app/src/main/assets/css/translation_decoration.css app/src/main/assets/css/changelogs.css app/src/main/assets/css/local_changelogs.css app/src/main/assets/css/error.css
+rm 'app/src/main/assets/css/changelogs.css'
+rm 'app/src/main/assets/css/error.css'
+rm 'app/src/main/assets/css/local_changelogs.css'
+rm 'app/src/main/assets/css/translation_decoration.css'
+rm 'app/src/main/assets/html/found_issue.html'
+rm 'app/src/main/assets/html/local_changelogs.html'
+rm 'app/src/main/assets/html/translators.html'
+rm 'app/src/main/java/app/simple/positional/callbacks/CoordinatesCallback.kt'
+rm 'app/src/main/java/app/simple/positional/popups/settings/LegalNotesPopupMenu.kt'
+rm 'app/src/main/res/drawable-nodpi/inure.png'
+rm 'app/src/main/res/layout/fragment_settings.xml'
+rm 'app/src/main/res/layout/popup_legal_notes.xml'
+rm 'app/src/main/res/layout/pref_about.xml'
+rm 'app/src/main/res/layout/pref_appearance.xml'
+rm 'app/src/main/res/layout/pref_configuration.xml'
+rm 'app/src/main/res/layout/pref_contribute.xml'
+rm 'app/src/main/res/layout/pref_other_apps.xml'
 kushal@fedora:~/src/kotlin/positional$ 
