@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T10:07:25-04:00
+Generated: 2026-10-23T10:08:24-04:00
 Branch:    master
-Commit:    9837c3cb 2026-10-23 10:07:20 -0400 add claude response
+Commit:    4c80182f 2026-10-23 10:08:21 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (893 files)
+## TREE (895 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -135,6 +135,9 @@ app/
                   CustomMaps.kt
                   MapLifecycle.kt
                   MapsCallbacks.java
+                panel/
+                  PanelController.kt
+                  SensorPanel.kt
                 viewmodel/
                   WrappedViewModel.kt
               math/
@@ -1282,7 +1285,7 @@ The map panels use the Google Maps SDK and Google Play services location. Withou
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in activities through `setPositionalContent`. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1300,7 +1303,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
 | 8f | Location summary, location details (Compose `Canvas` sparklines) and coordinate formats dialogs in Compose; coordinate formats computed only while the dialog is open instead of on every fix; sparkline, fast scroller and recycler view decorations removed | Done |
 | 8g | `MainActivity` in Compose: panels hosted with `AndroidFragment`, floating panel switcher (tap for a grid, swipe to step) replaces the view pager bottom bar and panel dialog; permission request through the Activity Result API; all dialog fragments and bottom sheet styles removed | Done |
-| 8h | Panels as plain composables with Navigation Compose, sub screens in the same graph, fragments and AppCompat themes removed | Next |
+| 8h | Panels as plain `PanelController` classes with their own child lifecycle; panel fragments, `ScopedFragment` and the fragment Compose host removed | Done |
+| 8i | Sub screens and splash in a single activity with Navigation Compose, drop fragments and AppCompat themes | Next |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -1346,12 +1350,13 @@ app/src/main/java/app/simple/positional/
   constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
   sensors/      lifecycle-aware gravity and heading sensors
-  ui/           panel fragments
-  decorations/  legacy custom views, map wrappers, fast scroller
+  ui/panels/    panel controllers
+  extensions/   panel controller base, sensor panel, map lifecycle
+  decorations/  Google Maps view wrappers and marker helpers
   database/     Room entities, DAOs and databases
   services/     location and clock widget services
   widgets/      app widget providers
-  math/         vectors, quaternions, angles, unit conversion
+  math/         vectors, angles, rotation physics, distances, unit conversion
   util/         formatting and Android helpers
 app/src/test/   JVM unit tests
 docs/llm/       LLM context files (tracked, excluded from the dump)
@@ -1468,7 +1473,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation 'androidx.core:core-ktx:1.19.1'
     implementation 'androidx.fragment:fragment-ktx:1.9.1'
-    implementation 'androidx.fragment:fragment-compose:1.9.1'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -2168,7 +2172,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.core.content.ContextCompat
-import androidx.fragment.compose.AndroidFragment
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.Dp
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.extensions.activity.BaseActivity
@@ -2209,9 +2216,9 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
         super.onCreate(savedInstanceState)
         MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { }
         panel = PanelCatalog.resolve(FragmentPreferences.getCurrentTag())
-        setPositionalContent {
+        setPositionalContent { topInset ->
             Box(Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
-                key(panel) { PanelFragment(panel) }
+                key(panel) { Panel(panel, this@MainActivity, topInset) }
                 PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
             }
         }
@@ -2285,18 +2292,20 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
 }
 
 @Composable
-private fun PanelFragment(tag: String) {
-    val modifier = Modifier.fillMaxSize()
-    when (tag) {
-        PanelCatalog.CLOCK -> AndroidFragment<Time>(modifier)
-        PanelCatalog.COMPASS -> AndroidFragment<Compass>(modifier)
-        PanelCatalog.DIRECTION -> AndroidFragment<Direction>(modifier)
-        PanelCatalog.TRAIL -> AndroidFragment<Trail>(modifier)
-        PanelCatalog.MEASURE -> AndroidFragment<Measure>(modifier)
-        PanelCatalog.LEVEL -> AndroidFragment<Level>(modifier)
-        PanelCatalog.SETTINGS -> AndroidFragment<Settings>(modifier)
-        else -> AndroidFragment<GPS>(modifier)
-    }
+private fun Panel(tag: String, activity: ComponentActivity, topInset: Dp) {
+    val panel = remember(tag) { createPanel(tag, activity) }
+    panel.Host(topInset)
+}
+
+private fun createPanel(tag: String, activity: ComponentActivity): PanelController = when (tag) {
+    PanelCatalog.CLOCK -> Time(activity)
+    PanelCatalog.COMPASS -> Compass(activity)
+    PanelCatalog.DIRECTION -> Direction(activity)
+    PanelCatalog.TRAIL -> Trail(activity)
+    PanelCatalog.MEASURE -> Measure(activity)
+    PanelCatalog.LEVEL -> Level(activity)
+    PanelCatalog.SETTINGS -> Settings(activity)
+    else -> GPS(activity)
 }
 
 ################################################################################
@@ -6609,6 +6618,139 @@ public interface MapsCallbacks {
     }
 
     default void onCameraDistance(LatLng latLng) {
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/extensions/panel/PanelController.kt
+################################################################################
+package app.simple.positional.extensions.panel
+
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheet
+import app.simple.positional.ui.compose.MenuSheetState
+
+abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
+    private val registry = LifecycleRegistry(this)
+    private val launchers = mutableListOf<ActivityResultLauncher<*>>()
+    private val parentObserver = LifecycleEventObserver { _, event ->
+        if (event == Lifecycle.Event.ON_DESTROY) return@LifecycleEventObserver
+        registry.handleLifecycleEvent(event)
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> onResume()
+            Lifecycle.Event.ON_PAUSE -> onPause()
+            else -> Unit
+        }
+    }
+
+    override val lifecycle: Lifecycle get() = registry
+    protected val owner: LifecycleOwner get() = this
+    protected val dialogs = DialogHost()
+    protected val menuSheet = MenuSheetState()
+    protected val isLandscapeOrientation: Boolean = activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    @Composable
+    abstract fun Content(topInset: Dp)
+
+    protected open fun onResume() {}
+
+    protected open fun onPause() {}
+
+    protected open fun onCleared() {}
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
+
+    protected fun getString(@StringRes id: Int): String = activity.getString(id)
+
+    protected fun getString(@StringRes id: Int, vararg args: Any): String = activity.getString(id, *args)
+
+    protected fun startActivity(intent: Intent) = activity.startActivity(intent)
+
+    protected fun <I, O> register(contract: ActivityResultContract<I, O>, callback: (O) -> Unit): ActivityResultLauncher<I> =
+        activity.activityResultRegistry.register("${javaClass.name}#${launchers.size}", contract, callback).also { launchers += it }
+
+    fun attach() {
+        activity.lifecycle.addObserver(parentObserver)
+        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+    }
+
+    fun detach() {
+        activity.lifecycle.removeObserver(parentObserver)
+        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        launchers.forEach { it.unregister() }
+        if (registry.currentState.isAtLeast(Lifecycle.State.CREATED)) registry.currentState = Lifecycle.State.DESTROYED
+        onCleared()
+    }
+
+    @Composable
+    fun Host(topInset: Dp) {
+        DisposableEffect(this) {
+            attach()
+            onDispose { detach() }
+        }
+        Content(topInset)
+        MenuSheet(menuSheet)
+        dialogs.content?.invoke()
+    }
+}
+
+@Composable
+fun <T : PanelController> rememberPanel(activity: ComponentActivity, factory: (ComponentActivity) -> T): T = remember { factory(activity) }
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/extensions/panel/SensorPanel.kt
+################################################################################
+package app.simple.positional.extensions.panel
+
+import android.hardware.Sensor
+import android.hardware.SensorManager
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import app.simple.positional.R
+import app.simple.positional.ui.compose.CalibrationDialog
+import app.simple.positional.ui.compose.MessageDialog
+
+abstract class SensorPanel(activity: ComponentActivity) : PanelController(activity) {
+    private var calibrationShown = false
+    private var accelerometerAccuracy by mutableIntStateOf(-1)
+    private var magnetometerAccuracy by mutableIntStateOf(-1)
+
+    protected fun showSensorError() {
+        val message = getString(R.string.sensor_error)
+        dialogs.show { MessageDialog(message, dialogs::dismiss) }
+    }
+
+    protected fun showCalibration() {
+        dialogs.show { CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) }
+    }
+
+    protected fun checkCalibration(type: Int, accuracy: Int) {
+        when (type) {
+            Sensor.TYPE_ACCELEROMETER -> accelerometerAccuracy = accuracy
+            Sensor.TYPE_MAGNETIC_FIELD -> magnetometerAccuracy = accuracy
+        }
+        if (!calibrationShown && accuracy <= SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
+            calibrationShown = true
+            showCalibration()
+        }
     }
 }
 
@@ -12304,7 +12446,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -12315,7 +12456,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
-import androidx.fragment.app.Fragment
 import app.simple.positional.R
 import app.simple.positional.util.StatusBarHeight
 
@@ -12372,20 +12512,6 @@ fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -
             PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
         }
     })
-}
-
-fun Fragment.positionalComposeView(menu: MenuSheetState? = null, dialog: DialogHost? = null, content: @Composable (topInset: Dp) -> Unit): ComposeView {
-    val topInset = StatusBarHeight.getStatusBarHeight(resources)
-    return ComposeView(requireContext()).apply {
-        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-        setContent {
-            PositionalTheme {
-                content(with(LocalDensity.current) { topInset.toDp() })
-                menu?.let { MenuSheet(it) }
-                dialog?.content?.invoke()
-            }
-        }
-    }
 }
 
 ################################################################################
@@ -13021,10 +13147,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
 import app.simple.positional.util.LocaleHelper
@@ -13141,8 +13267,7 @@ object SettingsLabels {
 }
 
 @Composable
-fun SettingsScreen(state: SettingsState, actions: SettingsActions, topInset: Int) {
-    val top = with(LocalDensity.current) { topInset.toDp() }
+fun SettingsScreen(state: SettingsState, actions: SettingsActions, top: Dp) {
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
@@ -14384,15 +14509,14 @@ class ClockReport(private val context: Context) {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
 import android.hardware.GeomagneticField
 import android.hardware.Sensor
 import android.location.Location
-import android.os.Bundle
 import android.os.SystemClock
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
@@ -14400,7 +14524,7 @@ import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.PhysicalPropertiesDialog
-import app.simple.positional.extensions.fragment.SensorPanel
+import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.sensors.HeadingSensor
@@ -14408,28 +14532,24 @@ import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
-class Compass : SensorPanel(), HeadingSensor.Listener {
+class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
-    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var lastReadings = 0L
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sensor = HeadingSensor(requireActivity(), this)
+    init {
+        sensor = HeadingSensor(activity, this)
         lifecycle.addObserver(sensor)
         applyPreferences()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView(menuSheet, dialogs) { top ->
-            CompassScreen(state, top, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        CompassScreen(state, topInset, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
+    }
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.compass(
@@ -14437,15 +14557,14 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
                 dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
             },
             onPhysicalProperties = {
-                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES) } }
+                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(activity, HtmlPage.PHYSICAL_PROPERTIES) } }
             },
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    init {
         if (!sensor.isAvailable) showSensorError()
-        ViewModelProvider(requireActivity())[LocationViewModel::class.java].getLocation().observe(viewLifecycleOwner) { showField(it) }
+        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) { showField(it) }
     }
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
@@ -14499,8 +14618,6 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
             CompassPreferences.usePhysicalProperties,
             CompassPreferences.useGimbalLock,
         )
-
-        fun newInstance() = Compass()
     }
 }
 
@@ -14509,17 +14626,16 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.DirectionsActivity
-import app.simple.positional.extensions.fragment.SensorPanel
+import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
@@ -14527,8 +14643,6 @@ import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.ui.compose.DirectionPanel
 import app.simple.positional.ui.compose.DirectionState
 import app.simple.positional.ui.compose.InfoRow
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
@@ -14536,38 +14650,35 @@ import app.simple.positional.util.LocationExtension
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import com.google.android.gms.maps.model.LatLng
 
-class Direction : SensorPanel(), HeadingSensor.Listener {
+class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = DirectionState()
-    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var target = LatLng(0.0, 0.0)
     private var location: Location? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sensor = HeadingSensor(requireActivity(), this)
+    init {
+        sensor = HeadingSensor(activity, this)
         sensor.gimbalLock = DirectionPreferences.isGimbalLock()
         lifecycle.addObserver(sensor)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView(menuSheet, dialogs) { top ->
-            DirectionPanel(
-                state,
-                top,
-                onCalibrate = { showCalibration() },
-                onTarget = ::openTargets,
-                onMenu = { menuSheet.show { PanelMenus.direction(::openTargets) } },
-            )
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        DirectionPanel(
+            state,
+            topInset,
+            onCalibrate = { showCalibration() },
+            onTarget = ::openTargets,
+            onMenu = { menuSheet.show { PanelMenus.direction(::openTargets) } },
+        )
+    }
 
-    private fun openTargets() = startActivity(Intent(requireActivity(), DirectionsActivity::class.java))
+    private fun openTargets() = startActivity(Intent(activity, DirectionsActivity::class.java))
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    init {
         if (!sensor.isAvailable) showSensorError()
         loadTarget()
-        ViewModelProvider(requireActivity())[LocationViewModel::class.java].getLocation().observe(viewLifecycleOwner) {
+        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) {
             location = it
             updateTarget()
         }
@@ -14593,7 +14704,7 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
         val coordinates = if (usesMapsTarget()) GPSPreferences.getTargetMarkerCoordinates() else DirectionPreferences.getTargetCoordinates()
         target = LatLng(coordinates[0].toDouble(), coordinates[1].toDouble())
         state.target = if (usesMapsTarget()) getString(R.string.using_maps_target) else DirectionPreferences.getTargetLabel() ?: getString(R.string.not_available)
-        val formatted = DMSConverter.getFormattedCoordinates(target, requireContext())
+        val formatted = DMSConverter.getFormattedCoordinates(target, activity)
         state.coordinates = listOf(
             InfoRow(getString(R.string.gps_latitude), formatted[0]),
             InfoRow(getString(R.string.gps_longitude), formatted[1]),
@@ -14604,12 +14715,9 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
     private fun updateTarget() {
         val current = location ?: return
         state.bearing = LocationExtension.calculateBearingAngle(current.latitude, current.longitude, target.latitude, target.longitude).toFloat()
-        state.displacement = DistanceText.format(requireContext(), LocationExtension.measureDisplacement(arrayOf(LatLng(current.latitude, current.longitude), target)).toDouble(), MainPreferences.isMetric())
+        state.displacement = DistanceText.format(activity, LocationExtension.measureDisplacement(arrayOf(LatLng(current.latitude, current.longitude), target)).toDouble(), MainPreferences.isMetric())
     }
 
-    companion object {
-        fun newInstance() = Direction()
-    }
 }
 
 ################################################################################
@@ -14617,17 +14725,16 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14641,7 +14748,7 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.MathExtensions.round
@@ -14657,9 +14764,6 @@ import app.simple.positional.ui.compose.GpsScreen
 import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.DialogHost
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.MessageDialog
 import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
@@ -14681,24 +14785,20 @@ import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
+class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, MapsCallbacks {
     private lateinit var state: GpsState
-    private val menuSheet = MenuSheetState()
-    private val dialogs = DialogHost()
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private val search = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val search = register(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
             targetForm.fill(
@@ -14713,18 +14813,15 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
     private var addressJob: Job? = null
     private var location: Location? = null
-    private var camera: CameraPosition? = null
     private var pressed: LatLng? = null
     private var accuracyRow = InfoRow("")
     private var altitudeRow = InfoRow("")
     private var latencyRow = InfoRow("")
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
+    init {
+        viewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
         state = GpsState(MainPreferences.isCustomCoordinate())
-        camera = savedInstanceState?.parcelable(CAMERA)
-        state.fullScreen = !isLandscapeOrientation && (savedInstanceState?.getBoolean(FULL_SCREEN) ?: consumeFullScreenShortcut())
+        state.fullScreen = !isLandscapeOrientation && consumeFullScreenShortcut()
         readPreferences()
         accuracyRow = InfoRow(getString(R.string.gps_accuracy), PENDING)
         altitudeRow = InfoRow(getString(R.string.gps_altitude), PENDING)
@@ -14736,8 +14833,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         state.address = PENDING
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        maps = Maps(requireContext()).apply {
+    init {
+        maps = Maps(activity).apply {
             alpha = 0f
             onCreate(null)
             setOnMapsCallbackListener(this@GPS)
@@ -14748,15 +14845,18 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
                 }
             }
         }
-        return positionalComposeView(menuSheet, dialogs) { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+    @Composable
+    override fun Content(topInset: Dp) {
+        GpsScreen(state, maps, topInset, isLandscapeOrientation, this)
+    }
+
+    init {
+        owner.lifecycle.addObserver(MapLifecycle(maps))
         if (state.fullScreen) bottomBar(visible = false)
 
-        if (!LocationPrompt.checkGooglePlayServices(requireContext())) {
+        if (!LocationPrompt.checkGooglePlayServices(activity)) {
             val message = getString(R.string.play_services_error)
             dialogs.show { MessageDialog(message, dialogs::dismiss) }
         }
@@ -14766,32 +14866,26 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
         }
 
-        viewModel.getLocation().observe(viewLifecycleOwner, ::onLocation)
-        viewModel.getProvider().observe(viewLifecycleOwner) {
-            state.enabled = getLocationStatus(requireContext())
+        viewModel.getLocation().observe(owner, ::onLocation)
+        viewModel.getProvider().observe(owner) {
+            state.enabled = getLocationStatus(activity)
             state.provider = providerRows(it)
         }
-        viewModel.latency.observe(viewLifecycleOwner) {
+        viewModel.latency.observe(owner) {
             val unit = getString(if (it.second) R.string.seconds else R.string.milliseconds)
             latencyRow = InfoRow(getString(R.string.gps_latency), "${it.first} $unit", it.second && it.first.toDouble() > LATE)
             publishLocationRows()
         }
-        viewModel.targetData.observe(viewLifecycleOwner) { state.target = it.toAnnotatedString() }
-        viewModel.accuracyGraphData.observe(viewLifecycleOwner) { accuracySeries = it.toList() }
-        viewModel.altitudeGraphData.observe(viewLifecycleOwner) { altitudeSeries = it.toList() }
+        viewModel.targetData.observe(owner) { state.target = it.toAnnotatedString() }
+        viewModel.accuracyGraphData.observe(owner) { accuracySeries = it.toList() }
+        viewModel.altitudeGraphData.observe(owner) { altitudeSeries = it.toList() }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onCleared() {
         addressJob?.cancel()
         addressThreshold.reset()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(FULL_SCREEN, state.fullScreen)
-        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
-    }
 
     private fun onLocation(location: Location) {
         this.location = location
@@ -14805,10 +14899,10 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         val altitude = if (metric) location.altitude else location.altitude.toFeet()
         val kmh = location.speed.toDouble().toKiloMetersPerHour()
         val speed = if (metric) kmh else kmh.toMilesPerHour()
-        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(requireContext(), location.bearing.toDouble()) else getString(R.string.not_available)
+        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(activity, location.bearing.toDouble()) else getString(R.string.not_available)
 
         state.fixed = true
-        state.enabled = getLocationStatus(requireContext())
+        state.enabled = getLocationStatus(activity)
         state.provider = providerRows(location.provider?.uppercase(LocaleHelper.getAppLocale()) ?: getString(R.string.not_available))
         accuracyRow = InfoRow(getString(R.string.gps_accuracy), "${round(accuracy, 2)} $length")
         altitudeRow = InfoRow(getString(R.string.gps_altitude), "${round(altitude, 2)} $length")
@@ -14830,14 +14924,14 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     private fun showCoordinates(latitude: Double, longitude: Double) {
         state.coordinates = listOf(
-            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, requireContext())),
-            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, requireContext())),
+            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, activity)),
+            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, activity)),
         )
         if (!addressThreshold.accept(latitude, longitude)) return
         addressJob?.cancel()
-        addressJob = viewLifecycleOwner.lifecycleScope.launch {
-            state.address = if (isNetworkAvailable(requireContext())) {
-                ReverseGeocoder.addressLine(requireContext(), latitude, longitude) ?: getString(R.string.no_address_found)
+        addressJob = owner.lifecycleScope.launch {
+            state.address = if (isNetworkAvailable(activity)) {
+                ReverseGeocoder.addressLine(activity, latitude, longitude) ?: getString(R.string.no_address_found)
             } else {
                 addressThreshold.reset()
                 getString(R.string.internet_connection_alert)
@@ -14846,7 +14940,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     private fun providerRows(source: String) = listOf(
-        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(requireContext())) R.string.gps_enabled else R.string.gps_disabled)),
+        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(activity)) R.string.gps_enabled else R.string.gps_disabled)),
         InfoRow(getString(R.string.gps_source), source),
     )
 
@@ -14868,18 +14962,17 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     private fun consumeFullScreenShortcut(): Boolean {
-        val intent = requireActivity().intent ?: return false
+        val intent = activity.intent ?: return false
         if (intent.action != FULL_SCREEN_ACTION) return false
         intent.action = null
         return true
     }
 
     private fun bottomBar(visible: Boolean) {
-        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
+        (activity as? BottomBarHost)?.showBottomBar(visible)
     }
 
     override fun onMapInitialized() {
-        camera?.let(maps::setCamera)
     }
 
     override fun onMapClicked() {
@@ -14896,7 +14989,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     override fun menu() = menuSheet.show {
         PanelMenus.gps(onPin = ::pinCustomization) {
-            WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
+            WebPageViewerActivity.open(activity, HtmlPage.MEDIA_KEYS)
         }
     }
 
@@ -14915,11 +15008,11 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
 
     override fun locate(close: Boolean) {
-        if (getLocationStatus(requireContext())) {
+        if (getLocationStatus(activity)) {
             maps.isMapMovementEnabled = true
             maps.resetCamera(if (close) CLOSE_ZOOM else GPSPreferences.getMapZoom())
         } else {
-            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+            LocationPrompt.displayLocationSettingsRequest(activity)
         }
     }
 
@@ -14936,7 +15029,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         dialogs.show {
             TargetCoordinatesDialog(
                 targetForm,
-                onSearch = { search.launch(Intent(requireContext(), MapSearchActivity::class.java)) },
+                onSearch = { search.launch(Intent(activity, MapSearchActivity::class.java)) },
                 onDismiss = dialogs::dismiss,
             ) { latitude, longitude ->
                 GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
@@ -14974,15 +15067,15 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             address = state.address
             date = System.currentTimeMillis()
         }
-        val dao = LocationDatabase.getInstance(requireContext()).locationDao()
-        viewLifecycleOwner.lifecycleScope.launch {
+        val dao = LocationDatabase.getInstance(activity).locationDao()
+        owner.lifecycleScope.launch {
             withContext(NonCancellable) { dao.insertLocation(entry) }
             state.message = R.string.location_saved
         }
     }
 
     override fun copy() {
-        val clipboard = requireContext().getSystemService<ClipboardManager>() ?: return
+        val clipboard = activity.getSystemService<ClipboardManager>() ?: return
         val text = buildString {
             section(getString(R.string.gps_provider), state.provider)
             section(getString(R.string.gps_location), state.location)
@@ -15002,7 +15095,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     override fun share() {
         val (latitude, longitude) = coordinates()
-        LocationShare.share(requireContext(), latitude, longitude, state.address)
+        LocationShare.share(activity, latitude, longitude, state.address)
     }
 
     override fun locationDetails() = dialogs.show {
@@ -15027,7 +15120,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     override fun navigatePressed() {
         state.pressed = null
         val latLng = pressed ?: return
-        MapIntents.navigate(requireContext(), latLng.latitude, latLng.longitude)
+        MapIntents.navigate(activity, latLng.latitude, latLng.longitude)
     }
 
     override fun zoom(zoomIn: Boolean) = if (zoomIn) maps.zoomIn() else maps.zoomOut()
@@ -15040,8 +15133,6 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     companion object {
         private const val PENDING = "-"
-        private const val CAMERA = "camera"
-        private const val FULL_SCREEN = "fullscreen"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
         private const val CLOSE_ZOOM = 18F
         private const val LATE = 5.0
@@ -15056,8 +15147,6 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             GPSPreferences.isNorthOnly,
             GPSPreferences.useVolumeKeys,
         )
-
-        fun newInstance() = GPS()
     }
 }
 
@@ -15066,40 +15155,36 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import app.simple.positional.extensions.fragment.SensorPanel
+import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.math.Tilt
 import app.simple.positional.preferences.LevelPreferences
 import app.simple.positional.sensors.GravitySensor
 import app.simple.positional.ui.compose.LevelScreen
-import app.simple.positional.ui.compose.positionalComposeView
 
-class Level : SensorPanel() {
+class Level(activity: ComponentActivity) : SensorPanel(activity) {
     private var tilt by mutableStateOf(Tilt.zero)
     private var square by mutableStateOf(false)
     private lateinit var sensor: GravitySensor
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sensor = GravitySensor(requireActivity()) { tilt = it }
+    init {
+        sensor = GravitySensor(activity) { tilt = it }
         lifecycle.addObserver(sensor)
         square = LevelPreferences.isSquareStyle()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView(dialog = dialogs) { top ->
-            LevelScreen({ tilt }, square, top) { LevelPreferences.setSquareStyle(!square) }
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        LevelScreen({ tilt }, square, topInset) { LevelPreferences.setSquareStyle(!square) }
+    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    init {
         if (!sensor.isAvailable) showSensorError()
     }
 
@@ -15107,9 +15192,6 @@ class Level : SensorPanel() {
         if (key == LevelPreferences.isSquareStyle) square = LevelPreferences.isSquareStyle()
     }
 
-    companion object {
-        fun newInstance() = Level()
-    }
 }
 
 ################################################################################
@@ -15117,19 +15199,18 @@ class Level : SensorPanel() {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.MeasuresActivity
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.decorations.measure.MeasureMaps
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
@@ -15140,74 +15221,60 @@ import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MeasureActions
 import app.simple.positional.ui.compose.MeasureScreen
 import app.simple.positional.ui.compose.MeasureState
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.DialogHost
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.NameNoteDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
-import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import app.simple.positional.model.Measure as MeasureModel
 
-class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
+class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
-    private val menuSheet = MenuSheetState()
-    private val dialogs = DialogHost()
     private lateinit var locationViewModel: LocationViewModel
     private lateinit var measureViewModel: MeasureViewModel
     private lateinit var maps: MeasureMaps
     private var location: Location? = null
-    private var camera: CameraPosition? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        locationViewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
-        measureViewModel = ViewModelProvider(requireActivity())[MeasureViewModel::class.java]
-        camera = savedInstanceState?.parcelable(CAMERA)
-        state.fullScreen = !isLandscapeOrientation && savedInstanceState?.getBoolean(FULL_SCREEN) == true
+    init {
+        locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
+        measureViewModel = ViewModelProvider(activity)[MeasureViewModel::class.java]
         readPreferences()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        maps = MeasureMaps(requireContext()).apply {
+    init {
+        maps = MeasureMaps(activity).apply {
             alpha = 0f
             onCreate(null)
             setOnMapsCallbackListener(this@Measure)
         }
-        return positionalComposeView(menuSheet, dialogs) { top -> MeasureScreen(state, maps, top, this) }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+    @Composable
+    override fun Content(topInset: Dp) {
+        MeasureScreen(state, maps, topInset, this)
+    }
+
+    init {
+        owner.lifecycle.addObserver(MapLifecycle(maps))
         if (state.fullScreen) bottomBar(visible = false)
-        locationViewModel.getProvider().observe(viewLifecycleOwner) { state.enabled = getLocationStatus(requireContext()) }
+        locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(FULL_SCREEN, state.fullScreen)
-        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
-    }
 
     override fun onMapInitialized() {
-        camera?.let(maps::setCamera)
-        locationViewModel.getLocation().observe(viewLifecycleOwner) {
+        locationViewModel.getLocation().observe(owner) {
             location = it
             state.fixed = true
-            state.enabled = getLocationStatus(requireContext())
+            state.enabled = getLocationStatus(activity)
             val latLng = LatLng(it.latitude, it.longitude)
             maps.setFirstLocation(latLng)
             maps.location = it
             maps.addMarker(latLng)
         }
-        measureViewModel.getMeasure().observe(viewLifecycleOwner) { measure ->
+        measureViewModel.getMeasure().observe(owner) { measure ->
             if (MeasurePreferences.isMeasureSelected() && measure != null) {
                 maps.createMeasurePolylines(measure)
                 state.selected = true
@@ -15227,11 +15294,11 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     override fun onLineAdded(measurePoint: MeasurePoint) {
-        measureViewModel.addMeasurePoint(measurePoint) { measure -> view?.post { showSummary(measure) } }
+        measureViewModel.addMeasurePoint(measurePoint) { measure -> activity.runOnUiThread { showSummary(measure) } }
     }
 
     override fun onLineDeleted(measurePoint: MeasurePoint?) {
-        measureViewModel.removeMeasurePoint(measurePoint) { measure -> view?.post { showSummary(measure) } }
+        measureViewModel.removeMeasurePoint(measurePoint) { measure -> activity.runOnUiThread { showSummary(measure) } }
     }
 
     override fun onCameraDistance(latLng: LatLng?) {
@@ -15250,7 +15317,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
         )
     }
 
-    private fun distance(meters: Double) = DistanceText.format(requireContext(), meters, MainPreferences.isMetric())
+    private fun distance(meters: Double) = DistanceText.format(activity, meters, MainPreferences.isMetric())
 
     private fun clearMeasure() {
         maps.clear()
@@ -15266,7 +15333,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     private fun bottomBar(visible: Boolean) {
-        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
+        (activity as? BottomBarHost)?.showBottomBar(visible)
     }
 
     override fun addMeasure() {
@@ -15279,13 +15346,13 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
         }
     }
 
-    override fun measures() = startActivity(Intent(requireContext(), MeasuresActivity::class.java))
+    override fun measures() = startActivity(Intent(activity, MeasuresActivity::class.java))
 
     override fun menu() = menuSheet.show { PanelMenus.measure() }
 
     override fun locate(close: Boolean) {
-        if (!getLocationStatus(requireContext())) {
-            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+        if (!getLocationStatus(activity)) {
+            LocationPrompt.displayLocationSettingsRequest(activity)
             return
         }
         val current = location ?: return
@@ -15319,11 +15386,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     companion object {
-        private const val CAMERA = "camera"
-        private const val FULL_SCREEN = "fullscreen"
         private const val CLOSE_ZOOM = 18F
-
-        fun newInstance() = Measure()
     }
 }
 
@@ -15336,20 +15399,16 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Bundle
 import android.provider.Settings as AndroidSettings
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.net.toUri
 import app.simple.positional.BuildConfig
 import app.simple.positional.activities.subactivity.AccentColorsActivity
@@ -15357,57 +15416,42 @@ import app.simple.positional.activities.subactivity.ArtsActivity
 import app.simple.positional.activities.subactivity.CustomLocationsActivity
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.ui.compose.PositionalTheme
 import app.simple.positional.ui.compose.SettingsActions
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.compose.SettingsState
 import app.simple.positional.util.AppIcons
 import app.simple.positional.util.PermissionUtils
-import app.simple.positional.util.StatusBarHeight
 import app.simple.positional.util.ThemeSetter
 
-class Settings : ScopedFragment(), SettingsActions {
+class Settings(activity: ComponentActivity) : PanelController(activity), SettingsActions {
     private var state by mutableStateOf(SettingsState())
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private var appSettingsOpened = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            if (result.values.any { !it } && !appSettingsOpened) {
-                appSettingsOpened = true
-                startActivity(Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", requireContext().packageName, null)
-                })
-            }
-            refresh()
+    private val permissionLauncher = register(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        if (result.values.any { !it } && !appSettingsOpened) {
+            appSettingsOpened = true
+            startActivity(Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", activity.packageName, null)
+            })
         }
+        refresh()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val topInset = StatusBarHeight.getStatusBarHeight(resources)
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                PositionalTheme {
-                    SettingsScreen(state, this@Settings, topInset)
-                }
-            }
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        SettingsScreen(state, this, topInset)
     }
 
     override fun onResume() {
-        super.onResume()
         appSettingsOpened = false
         refresh()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == MainPreferences.accentColor) {
-            requireActivity().recreate()
+            activity.recreate()
         } else {
             refresh()
         }
@@ -15415,7 +15459,7 @@ class Settings : ScopedFragment(), SettingsActions {
 
     private fun refresh() {
         state = SettingsState(
-            hasLocationPermission = PermissionUtils.checkPermission(requireContext()),
+            hasLocationPermission = PermissionUtils.checkPermission(activity),
             themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else AppCompatDelegate.getDefaultNightMode(),
             isMetric = MainPreferences.isMetric(),
             coordinatesFormat = MainPreferences.getCoordinatesFormat(),
@@ -15424,7 +15468,7 @@ class Settings : ScopedFragment(), SettingsActions {
             isCustomLocation = MainPreferences.isCustomCoordinate(),
             keepScreenOn = MainPreferences.isScreenOn(),
             skipSplashScreen = MainPreferences.getSkipSplashScreen(),
-            iconIndex = AppIcons.current(requireContext()),
+            iconIndex = AppIcons.current(activity),
             cornerRadius = MainPreferences.getCornerRadius() * 5,
             versionName = BuildConfig.VERSION_NAME,
         )
@@ -15441,22 +15485,22 @@ class Settings : ScopedFragment(), SettingsActions {
         refresh()
     }
 
-    override fun openAccent() = startActivity(Intent(requireContext(), AccentColorsActivity::class.java))
+    override fun openAccent() = startActivity(Intent(activity, AccentColorsActivity::class.java))
 
     override fun setIcon(index: Int) {
-        AppIcons.select(requireContext(), index)
+        AppIcons.select(activity, index)
         refresh()
     }
 
     override fun setCornerRadius(value: Int) {
         if (value == MainPreferences.getCornerRadius() * 5) return
         MainPreferences.setCornerRadius(value)
-        requireActivity().recreate()
+        activity.recreate()
     }
 
     override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
 
-    override fun openArts() = startActivity(Intent(requireContext(), ArtsActivity::class.java))
+    override fun openArts() = startActivity(Intent(activity, ArtsActivity::class.java))
 
     override fun setMetric(metric: Boolean) = MainPreferences.setUnit(metric)
 
@@ -15464,7 +15508,7 @@ class Settings : ScopedFragment(), SettingsActions {
 
     override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
 
-    override fun openCustomLocations() = startActivity(Intent(requireContext(), CustomLocationsActivity::class.java))
+    override fun openCustomLocations() = startActivity(Intent(activity, CustomLocationsActivity::class.java))
 
     override fun setCustomLocation(enabled: Boolean) {
         if (enabled) openCustomLocations() else MainPreferences.setCustomCoordinates(false)
@@ -15473,20 +15517,20 @@ class Settings : ScopedFragment(), SettingsActions {
     override fun setKeepScreenOn(enabled: Boolean) {
         MainPreferences.setScreenOn(enabled)
         if (enabled) {
-            requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
-            requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
     override fun setLanguage(code: String) {
         if (code == MainPreferences.getAppLanguage()) return
         MainPreferences.setAppLanguage(code)
-        requireActivity().recreate()
+        activity.recreate()
     }
 
     override fun openLegal(page: Int) {
-        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(requireContext(), it) }
+        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(activity, it) }
     }
 
     override fun openReleases() = openUrl("$REPOSITORY_URL/releases")
@@ -15501,8 +15545,6 @@ class Settings : ScopedFragment(), SettingsActions {
 
     companion object {
         private const val REPOSITORY_URL = "https://github.com/kusl/hamza417-positional"
-
-        fun newInstance() = Settings()
     }
 }
 
@@ -15511,13 +15553,12 @@ class Settings : ScopedFragment(), SettingsActions {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.Bundle
 import android.os.SystemClock
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -15526,20 +15567,17 @@ import app.simple.positional.R
 import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.ClockScreen
 import app.simple.positional.ui.compose.ClockState
-import app.simple.positional.ui.compose.positionalComposeView
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
-import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.LocationSummaryDialog
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15548,32 +15586,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.ZoneId
 
-class Time : ScopedFragment() {
+class Time(activity: ComponentActivity) : PanelController(activity) {
     private val state = ClockState()
-    private val menuSheet = MenuSheetState()
-    private val dialogs = DialogHost()
     private lateinit var report: ClockReport
     private var latitude = 0.0
     private var longitude = 0.0
     private var altitude = 0.0
     private var lastSky = 0L
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        report = ClockReport(requireContext())
+    init {
+        report = ClockReport(activity)
         applyPreferences()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView(menuSheet, dialogs) { top ->
-            ClockScreen(
-                state,
-                top,
-                onTimezone = { startActivity(Intent(requireActivity(), TimezonePickerActivity::class.java)) },
-                onMenu = ::showMenu,
-                onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
-            )
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        ClockScreen(
+            state,
+            topInset,
+            onTimezone = { startActivity(Intent(activity, TimezonePickerActivity::class.java)) },
+            onMenu = ::showMenu,
+            onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
+        )
+    }
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.clock(
@@ -15595,17 +15630,16 @@ class Time : ScopedFragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        ViewModelProvider(requireActivity())[LocationViewModel::class.java].getLocation().observe(viewLifecycleOwner) {
+    init {
+        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) {
             if (state.customLocation) return@observe
             latitude = it.latitude
             longitude = it.longitude
             altitude = it.altitude
             if (SystemClock.elapsedRealtime() - lastSky > SKY_MIN_INTERVAL) refreshSkyAsync()
         }
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        owner.lifecycleScope.launch {
+            owner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 launch {
                     while (true) {
                         val zone = state.zone
@@ -15628,7 +15662,7 @@ class Time : ScopedFragment() {
     }
 
     private fun refreshSkyAsync() {
-        if (view != null) viewLifecycleOwner.lifecycleScope.launch { refreshSky() }
+        owner.lifecycleScope.launch { refreshSky() }
     }
 
     private fun applyPreferences() {
@@ -15676,8 +15710,6 @@ class Time : ScopedFragment() {
             MainPreferences.unit,
             GPSPreferences.pinSkin,
         )
-
-        fun newInstance() = Time()
     }
 }
 
@@ -15686,15 +15718,14 @@ class Time : ScopedFragment() {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15702,7 +15733,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
-import androidx.fragment.app.viewModels
+import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -15712,7 +15743,7 @@ import app.simple.positional.activities.subactivity.TrailsViewerActivity
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.trails.TrailMaps
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
@@ -15726,10 +15757,7 @@ import app.simple.positional.ui.compose.TrailActions
 import app.simple.positional.ui.compose.TrailPointItem
 import app.simple.positional.ui.compose.TrailScreen
 import app.simple.positional.ui.compose.TrailState
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MarkerIconRow
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.NameNoteDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
@@ -15739,75 +15767,65 @@ import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
-import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.util.TimeFormatter.formatDate
 import app.simple.positional.util.TrailNames
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 
-class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
+class Trail(activity: ComponentActivity) : PanelController(activity), TrailActions, MapsCallbacks {
     private val state = TrailState()
-    private val menuSheet = MenuSheetState()
-    private val dialogs = DialogHost()
-    private val trailData: TrailDataViewModel by viewModels()
-    private val trails: TrailsViewModel by viewModels()
+    private val trailData: TrailDataViewModel by activity.viewModels()
+    private val trails: TrailsViewModel by activity.viewModels()
     private lateinit var locationViewModel: LocationViewModel
     private lateinit var maps: TrailMaps
     private var location: Location? = null
-    private var camera: CameraPosition? = null
     private var pending: Triple<Double, Double, Float>? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        locationViewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
-        camera = savedInstanceState?.parcelable(CAMERA)
-        state.fullScreen = !isLandscapeOrientation && savedInstanceState?.getBoolean(FULL_SCREEN) == true
+    init {
+        locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
         readPreferences()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        maps = TrailMaps(requireContext()).apply {
+    init {
+        maps = TrailMaps(activity).apply {
             alpha = 0f
             onCreate(null)
             setOnMapsCallbackListener(this@Trail)
         }
-        return positionalComposeView(menuSheet, dialogs) { top -> TrailScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+    @Composable
+    override fun Content(topInset: Dp) {
+        TrailScreen(state, maps, topInset, isLandscapeOrientation, this)
+    }
+
+    init {
+        owner.lifecycle.addObserver(MapLifecycle(maps))
         if (state.fullScreen) bottomBar(visible = false)
 
-        locationViewModel.getLocation().observe(viewLifecycleOwner) {
+        locationViewModel.getLocation().observe(owner) {
             location = it
             MainPreferences.setLastLatitude(it.latitude.toFloat())
             MainPreferences.setLastLongitude(it.longitude.toFloat())
             state.fixed = true
-            state.enabled = getLocationStatus(requireContext())
+            state.enabled = getLocationStatus(activity)
             maps.setFirstLocation(it)
             maps.location = it
             maps.addMarker(LatLng(it.latitude, it.longitude))
         }
-        locationViewModel.getProvider().observe(viewLifecycleOwner) { state.enabled = getLocationStatus(requireContext()) }
+        locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        owner.lifecycleScope.launch {
+            owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { trailData.trail.collect { state.trail = it } }
                 trailData.points.collect(::showPoints)
             }
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(FULL_SCREEN, state.fullScreen)
-        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
-    }
 
     private fun showPoints(points: List<TrailPoint>) {
         maps.addPolylines(ArrayList(points))
@@ -15815,7 +15833,7 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
         val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
         state.summary = listOf(
             InfoRow(getString(R.string.total), points.size.toString()),
-            InfoRow(getString(R.string.gps_displacement), DistanceText.format(requireContext(), distance, metric)),
+            InfoRow(getString(R.string.gps_displacement), DistanceText.format(activity, distance, metric)),
         )
         state.points = points.asReversed().map { item(it, metric) }
     }
@@ -15829,8 +15847,8 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
             note = point.note.ifEmpty { getString(R.string.not_available) },
             coordinates = getString(
                 R.string.coordinates_format,
-                DMSConverter.getFormattedLatitude(point.latitude, requireContext()),
-                DMSConverter.getFormattedLongitude(point.longitude, requireContext()),
+                DMSConverter.getFormattedLatitude(point.latitude, activity),
+                DMSConverter.getFormattedLongitude(point.longitude, activity),
             ),
             accuracy = getString(R.string.trail_data_accuracy, round(accuracy, 1).toString(), getString(unit)),
             date = point.timeAdded.formatDate(),
@@ -15844,7 +15862,7 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     }
 
     private fun bottomBar(visible: Boolean) {
-        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
+        (activity as? BottomBarHost)?.showBottomBar(visible)
     }
 
     private fun requestMarker(latitude: Double, longitude: Double, accuracy: Float) {
@@ -15857,7 +15875,6 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     }
 
     override fun onMapInitialized() {
-        camera?.let(maps::setCamera)
         maps.addPolylines(ArrayList(trailData.points.value))
     }
 
@@ -15871,7 +15888,7 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
 
     override fun onLineDeleted(trailPoint: TrailPoint?) = trailData.delete(trailPoint)
 
-    override fun trails() = startActivity(Intent(requireContext(), TrailsViewerActivity::class.java))
+    override fun trails() = startActivity(Intent(activity, TrailsViewerActivity::class.java))
 
     override fun addTrail() {
         val title = getString(R.string.enter_trail_name)
@@ -15895,11 +15912,11 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
         }
     }
 
-    override fun menu() = menuSheet.show { PanelMenus.trail { WebPageViewerActivity.open(requireContext(), HtmlPage.TRAIL_HELP) } }
+    override fun menu() = menuSheet.show { PanelMenus.trail { WebPageViewerActivity.open(activity, HtmlPage.TRAIL_HELP) } }
 
     override fun locate(close: Boolean) {
-        if (!getLocationStatus(requireContext())) {
-            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+        if (!getLocationStatus(activity)) {
+            LocationPrompt.displayLocationSettingsRequest(activity)
             return
         }
         val current = location ?: return
@@ -15913,7 +15930,7 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     override fun addPoint() {
         val current = location
         if (current == null && TrailPreferences.getCurrentTrail().isNotEmpty()) {
-            Toast.makeText(requireContext(), R.string.location_not_available, Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.location_not_available, Toast.LENGTH_SHORT).show()
             return
         }
         requestMarker(current?.latitude ?: 0.0, current?.longitude ?: 0.0, current?.accuracy ?: 0f)
@@ -15981,12 +15998,12 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
 
     override fun copy(item: TrailPointItem) {
         val text = listOf(item.name, item.note, "geo:${item.point.latitude},${item.point.longitude}", item.date).joinToString("\n\n")
-        requireContext().getSystemService<ClipboardManager>()?.setPrimaryClip(ClipData.newPlainText(item.name, text))
+        activity.getSystemService<ClipboardManager>()?.setPrimaryClip(ClipData.newPlainText(item.name, text))
     }
 
-    override fun navigate(item: TrailPointItem) = MapIntents.navigate(requireContext(), item.point.latitude, item.point.longitude)
+    override fun navigate(item: TrailPointItem) = MapIntents.navigate(activity, item.point.latitude, item.point.longitude)
 
-    override fun share(item: TrailPointItem) = MapIntents.open(requireContext(), item.point.latitude, item.point.longitude)
+    override fun share(item: TrailPointItem) = MapIntents.open(activity, item.point.latitude, item.point.longitude)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
@@ -15999,12 +16016,8 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     }
 
     companion object {
-        private const val CAMERA = "camera"
-        private const val FULL_SCREEN = "fullscreen"
         private const val CLOSE_ZOOM = 18F
         private const val FOCUS_ZOOM = 15F
-
-        fun newInstance() = Trail()
     }
 }
 
