@@ -1,0 +1,25 @@
+ok it feels like the app has stabilized 
+we have the latest gradle stuff 
+now to actually modernize the app 
+start upgrading as much as possible 
+remove references in the app 
+for the upstream repository and the telegram group 
+we don't want anyone to bother them 
+if we introduce any defects 
+that would not be good 
+
+and yes please plan and upgrade to kotlin compose and all that fun stuff 
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this 
+NO CODE COMMENTS 
