@@ -53,4 +53,10 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.947s
 user	0m0.361s
 sys	0m0.548s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/util/ParcelUtils.kt app/src/main/res/drawable/moon_phase_02.xml app/src/main/res/layout-v26/widget_suntime.xml app/src/main/res/layout/widget_moon_phase.xml app/src/main/res/layout/widget_suntime.xml
+rm 'app/src/main/java/app/simple/positional/util/ParcelUtils.kt'
+rm 'app/src/main/res/drawable/moon_phase_02.xml'
+rm 'app/src/main/res/layout-v26/widget_suntime.xml'
+rm 'app/src/main/res/layout/widget_moon_phase.xml'
+rm 'app/src/main/res/layout/widget_suntime.xml'
 kushal@fedora:~/src/kotlin/positional$ 

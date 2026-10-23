@@ -2736,3 +2736,365 @@ Error: Process completed with exit code 1.
 0s
 0s
 
+Claude
+/
+Ran 19 commands, created a file, shared files
+positional-phase8j.tar.gz has the build fix and phase 8j. It contains only changed and new files; extract it at the repo root. I still can’t compile here, so CI is the real check.
+
+Build fix. Removing the support libraries in 8i also removed two things that Java files still used:
+
+CircleUtils and MarkerUtils used LinearOutSlowInInterpolator from the removed library. They now use the platform’s PathInterpolator(0f, 0f, 0.2f, 1f), which is the same curve.
+StatusBarHeight.java referred to an AppCompat-only attribute in an unused method. It is now a small Kotlin file with just the status-bar height function the screens use.
+Phase 8j: one activity for everything.
+
+Sub screens: accent colours, arts, time zones, saved measures, trails, directions, custom locations, map search and help pages are now Navigation Compose screens inside MainActivity. Back works as before.
+Map search results: the GPS target dialog, the directions screen and the custom-locations screen all receive the chosen location from map search directly. The old activity-result passing is gone.
+Panels pause while a sub screen is open. The current panel stays alive, so a GPS target dialog you started is still there when you come back. Its sensors and map are paused until you return.
+Map reuse fix: a map panel’s map view is detached from its old container before being shown again. Without this, returning from a sub screen would have crashed with “child already has a parent”.
+Removed: nine sub-screen activities and their manifest entries.
+Dependencies added:
+navigation-compose 2.9.0, chosen as a version I know exists; Dependabot can raise it later.
+lifecycle-runtime-compose and lifecycle-viewmodel-compose.
+Behaviour change: sub screens no longer keep their map or web page position across rotation. Each one reloads.
+New test: RoutesTest.
+README: updated, including the project layout. Phase 8 is complete; phase 9, the widgets on Glance, is next. The OpenStreetMap fallback is phase 10, as you asked.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/subactivity/AccentColorsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/ArtsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/CustomLocationsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/DirectionsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/MapSearchActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/MeasuresActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/TimezonePickerActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/TrailsViewerActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/WebPageViewerActivity.kt app/src/main/java/app/simple/positional/util/StatusBarHeight.java
+
+Positional phase8j.tar
+GZ 
+dump_3c6217.txt
+dump_3c6217.txt
+TXT
+tests are still failing 
+github action is failing. 
+please fix this and any other defect as well and continue with next phase 
+
+Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+Task :app:preBuild UP-TO-DATE
+Task :app:preDebugBuild UP-TO-DATE
+Task :app:generateDebugBuildConfig FROM-CACHE
+Task :app:generateDebugResValues FROM-CACHE
+Task :app:generateDebugResources FROM-CACHE
+Task :app:packageDebugResources FROM-CACHE
+Task :app:processDebugNavigationResources FROM-CACHE
+Task :app:parseDebugLocalResources FROM-CACHE
+Task :app:javaPreCompileDebug FROM-CACHE
+Task :app:generateDebugRFile
+Task :app:checkDebugAarMetadata
+Task :app:mapDebugSourceSetPaths
+Task :app:compileDebugNavigationResources FROM-CACHE
+Task :app:createDebugCompatibleScreenManifests
+Task :app:extractDeepLinksDebug FROM-CACHE
+Task :app:processDebugMainManifest
+Task :app:processDebugManifest
+Task :app:preDebugUnitTestBuild UP-TO-DATE
+Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+Task :app:preReleaseBuild UP-TO-DATE
+Task :app:generateReleaseBuildConfig FROM-CACHE
+Task :app:generateReleaseResValues FROM-CACHE
+Task :app:generateReleaseResources FROM-CACHE
+Task :app:packageReleaseResources FROM-CACHE
+Task :app:processReleaseNavigationResources FROM-CACHE
+Task :app:processDebugManifestForPackage
+Task :app:parseReleaseLocalResources FROM-CACHE
+Task :app:generateReleaseRFile FROM-CACHE
+Task :app:javaPreCompileRelease FROM-CACHE
+Task :app:extractProguardFiles
+Task :app:extractDeepLinksRelease FROM-CACHE
+Task :app:processReleaseMainManifest
+Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+Task :app:generateDebugAssets UP-TO-DATE
+Task :app:mergeDebugAssets
+Task :app:compressDebugAssets FROM-CACHE
+Task :app:generateDebugGlobalSynthetics FROM-CACHE
+Task :app:l8DexDesugarLibDebug FROM-CACHE
+Task :app:mergeDebugResources
+Task :app:checkDebugDuplicateClasses
+Task :app:desugarDebugFileDependencies FROM-CACHE
+Task :app:processDebugResources
+
+Task :app:kspReleaseKotlin
+
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+
+Task :app:mergeLibDexDebug FROM-CACHE
+Task :app:mergeDebugJniLibFolders
+
+Task :app:kspDebugKotlin
+
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its getter returns java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values in the database when app.simple.positional.model.Measure is inserted into database.
+w: [ksp] /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/model/Measure.java:29: app.simple.positional.model.Measure's measurePoints property has type java.util.ArrayList<app.simple.positional.model.MeasurePoint?>? but its setter accepts java.util.ArrayList<app.simple.positional.model.MeasurePoint?>. This mismatch might cause unexpected measurePoints values when app.simple.positional.model.Measure is read from the database.
+
+Task :app:mergeDebugNativeLibs
+
+Task :app:stripDebugDebugSymbols
+
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+Task :app:validateSigningDebug
+Task :app:writeDebugAppMetadata
+Task :app:writeDebugSigningConfigVersions
+Task :app:mergeExtDexDebug
+Task :app:compileReleaseKotlin
+Task :app:compileDebugKotlin
+
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:178:25 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:179:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:180:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:183:26 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/FusedLocationService.kt:71:21 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/FusedLocationService.kt:131:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:45:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:54:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:63:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:72:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Compass.kt:30:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Direction.kt:28:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:67:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:71:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:72:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Level.kt:19:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:36:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:37:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:38:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Time.kt:37:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Trail.kt:62:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Trail.kt:63:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/LocationViewModel.kt:95:9 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/LocationViewModel.kt:374:9 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+
+Task :app:compileReleaseKotlin
+
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:178:25 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:179:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:180:27 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/ClockWidgetService.kt:183:26 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Bitmap'.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/FusedLocationService.kt:71:21 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/FusedLocationService.kt:131:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:45:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:54:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:63:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/services/LocationService.kt:72:13 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Compass.kt:30:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Direction.kt:28:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:67:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:71:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/GPS.kt:72:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Level.kt:19:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:36:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:37:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Measure.kt:38:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Time.kt:37:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Trail.kt:62:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/ui/panels/Trail.kt:63:13 'lateinit' is unnecessary: definitely initialized in constructors.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/LocationViewModel.kt:95:9 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/viewmodels/viewmodel/LocationViewModel.kt:374:9 'class LocalBroadcastManager : Any' is deprecated. Deprecated in Java.
+
+Task :app:compileDebugJavaWithJavac
+Task :app:bundleDebugClassesToRuntimeJar
+Task :app:processDebugJavaRes
+Task :app:bundleDebugClassesToCompileJar
+Task :app:kspDebugUnitTestKotlin
+Task :app:compileReleaseJavaWithJavac
+Task :app:generateReleaseLintVitalReportModel
+Task :app:compileDebugUnitTestKotlin
+Task :app:mergeDebugJavaResource
+Task :app:dexBuilderDebug
+Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+Task :app:processDebugUnitTestJavaRes
+Task :app:testDebugUnitTest
+Task :app:mergeProjectDexDebug
+Task :app:packageDebug
+Task :app:createDebugApkListingFileRedirect
+Task :app:assembleDebug
+Task :app:lintVitalAnalyzeRelease
+
+Task :app:lintVitalReportRelease
+
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt:42: Error: Upgrade Fragment version to at least 1.3.0. [InvalidFragmentVersionForActivityResult from androidx.activity]
+Lint found 2 errors. First failure:
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt:42: Error: Upgrade Fragment version to at least 1.3.0. [InvalidFragmentVersionForActivityResult from androidx.activity]
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                                            ^
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/activities/main/MainActivity.kt:73: Error: Upgrade Fragment version to at least 1.3.0. [InvalidFragmentVersionForActivityResult from androidx.activity]
+    private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+                              ^
+
+   Explanation for issues of type "InvalidFragmentVersionForActivityResult":
+   In order to use the ActivityResult APIs you must upgrade your              
+     Fragment version to 1.3.0. Previous versions of FragmentActivity         
+          failed to call super.onRequestPermissionsResult() and used invalid
+   request codes
+
+   https://developer.android.com/training/permissions/requesting#make-the-request
+
+   Vendor: Android Open Source Project
+   Identifier: androidx.activity
+   Feedback: https://issuetracker.google.com/issues/new?component=527362
+
+2 errors
+
+                                            ^
+
+Task :app:lintVitalRelease FAILED
+
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792785357424.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+FAILURE: Build failed with an exception.
+
+What went wrong:
+Execution failed for task ':app:lintVitalRelease' (registered by plugin 'com.android.internal.application').
+
+Lint found fatal errors while assembling a release target.
+
+Fix the issues identified by lint, or create a baseline to see only new errors.
+To create a baseline, run gradlew updateLintBaseline after adding the following to the module's build.gradle file:
+
+android {
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+}
+For more details, see https://developer.android.com/studio/write/lint#snapshot
+
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt:42: Error: Upgrade Fragment version to at least 1.3.0. [InvalidFragmentVersionForActivityResult from androidx.activity]
+
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                                            ^
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+/home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/activities/main/MainActivity.kt:73: Error: Upgrade Fragment version to at least 1.3.0. [InvalidFragmentVersionForActivityResult from androidx.activity]
+
+    private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+                                ^
+66 actionable tasks: 42 executed, 24 from cache
+
+     Explanation for issues of type "InvalidFragmentVersionForActivityResult":
+     In order to use the ActivityResult APIs you must upgrade your              
+       Fragment version to 1.3.0. Previous versions of FragmentActivity         
+            failed to call super.onRequestPermissionsResult() and used invalid
+     request codes
+
+     https://developer.android.com/training/permissions/requesting#make-the-request
+
+     Vendor: Android Open Source Project
+     Identifier: androidx.activity
+     Feedback: https://issuetracker.google.com/issues/new?component=527362
+
+  2 errors
+
+Try: > Run with --stacktrace option to get the stack trace. > Run with --info or --debug option to get more log output. > Run with --scan to get full insights from a Build Scan (powered by Develocity). > Get more help at https://help.gradle.org.
+BUILD FAILED in 2m 16s
+Error: Process completed with exit code 1.
+1s
+8s
+1s
+0s
+0s
+
+Ran 16 commands, shared files
+The lint failure is fixed and phase 9a is done; positional-phase9a.tar.gz has only the changed files. I can’t compile here, so the next CI run is the real check.
+
+Build fix. The unit tests passed in that run; what failed was lintVitalRelease. The Google Play location and maps libraries bring in a very old version of the Android “fragment” library, so lint concluded the app’s permission requests might not deliver their results. I added androidx.fragment:fragment:1.9.1 so that old copy is replaced. That is the same version the build already used before 8i.
+
+Other defects fixed:
+
+Location updates: they used a deprecated Android message system (LocalBroadcastManager) to reach the screens. They now go through a small in-app LocationBus instead. The location view model handles each fix in one function, and the localbroadcastmanager dependency and an unused parcel helper are gone.
+Compiler warnings: cleared the unnecessary lateinit warnings in seven panels and the !! warnings in ClockWidgetService.
+Room warning: removed the null-safety mismatch Room warned about on Measure.measurePoints. The database schema is unchanged.
+Phase 9a: two widgets on Glance (Compose-style home-screen widgets).
+
+Moon phase and sun times: both now draw with Glance. The widget class names are unchanged, so widgets already on your home screen keep working.
+Sun times: now uses your saved fallback location (if the app has never had a location fix, that defaults to Paris rather than 0,0), and shows -- when the sun doesn’t rise or set that day.
+New dependency: glance-appwidget 1.1.1, chosen as a version I know exists; Dependabot can raise it.
+Removed: the three old widget layouts and an unused moon image.
+README: phase 9 is now split:
+
+Phase	Scope
+9a	Moon phase and sun time widgets on Glance (done)
+9b	Twilight and sun time art widgets (next)
+9c	Clock widgets
+The clock widgets currently run a foreground service that redraws every second, which is hard on the battery; 9c will replace that.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/util/ParcelUtils.kt app/src/main/res/drawable/moon_phase_02.xml app/src/main/res/layout-v26/widget_suntime.xml app/src/main/res/layout/widget_moon_phase.xml app/src/main/res/layout/widget_suntime.xml
+
+Positional phase9a.tar
+GZ 
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+
+
+
+Claude finished the response
+
+55
+60
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
