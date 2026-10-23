@@ -15,7 +15,7 @@ import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.decorations.switchview.SwitchView
 import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.decorations.views.PhysicalRotationImageView
+import app.simple.positional.math.RotationPhysics
 import app.simple.positional.preferences.CompassPreferences
 
 class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
@@ -94,9 +94,9 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
         })
 
         reset.setOnClickListener {
-            updateSeekbar(dampingCoefficient, PhysicalRotationImageView.ALPHA_DEFAULT.toInt())
-            updateSeekbar(rotationalInertia, PhysicalRotationImageView.INERTIA_MOMENT_DEFAULT.toInt())
-            updateSeekbar(magneticCoefficient, PhysicalRotationImageView.MB_DEFAULT.toInt())
+            updateSeekbar(dampingCoefficient, RotationPhysics.DAMPING.toInt())
+            updateSeekbar(rotationalInertia, RotationPhysics.INERTIA.toInt())
+            updateSeekbar(magneticCoefficient, RotationPhysics.MAGNETIC.toInt())
         }
 
         help.setOnClickListener {

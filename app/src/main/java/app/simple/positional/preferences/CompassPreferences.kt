@@ -1,6 +1,6 @@
 package app.simple.positional.preferences
 
-import app.simple.positional.decorations.views.PhysicalRotationImageView
+import app.simple.positional.math.RotationPhysics
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
 object CompassPreferences {
@@ -42,7 +42,7 @@ object CompassPreferences {
     }
 
     fun getDampingCoefficient(): Float {
-        return getSharedPreferences().getFloat(dampingCoefficient, PhysicalRotationImageView.ALPHA_DEFAULT)
+        return getSharedPreferences().getFloat(dampingCoefficient, RotationPhysics.DAMPING)
     }
 
     fun setRotationalInertia(value: Float) {
@@ -50,7 +50,7 @@ object CompassPreferences {
     }
 
     fun getRotationalInertia(): Float {
-        return getSharedPreferences().getFloat(rotationalInertia, PhysicalRotationImageView.INERTIA_MOMENT_DEFAULT)
+        return getSharedPreferences().getFloat(rotationalInertia, RotationPhysics.INERTIA)
     }
 
     fun setMagneticCoefficient(value: Float) {
@@ -58,7 +58,7 @@ object CompassPreferences {
     }
 
     fun getMagneticCoefficient(): Float {
-        return getSharedPreferences().getFloat(magneticCoefficient, PhysicalRotationImageView.MB_DEFAULT)
+        return getSharedPreferences().getFloat(magneticCoefficient, RotationPhysics.MAGNETIC)
     }
 
     fun setUsePhysicalProperties(value: Boolean) {

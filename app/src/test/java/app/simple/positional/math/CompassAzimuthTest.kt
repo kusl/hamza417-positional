@@ -25,4 +25,12 @@ class CompassAzimuthTest {
     fun inverseAddsHalfTurn() {
         assertEquals(190f, CompassAzimuth.inverse(10f), 0f)
     }
+
+    @Test
+    fun adjustsForDisplayRotation() {
+        assertEquals(100f, CompassAzimuth.adjustForRotation(100f, 0), 0f)
+        assertEquals(-170f, CompassAzimuth.adjustForRotation(100f, 1), 0f)
+        assertEquals(-80f, CompassAzimuth.adjustForRotation(100f, 2), 0f)
+        assertEquals(10f, CompassAzimuth.adjustForRotation(100f, 3), 0f)
+    }
 }

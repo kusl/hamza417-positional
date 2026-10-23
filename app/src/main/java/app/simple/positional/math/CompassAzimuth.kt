@@ -6,44 +6,34 @@ import app.simple.positional.math.MathExtensions.normalizeAngle
 import app.simple.positional.math.MathExtensions.toDegrees
 import kotlin.math.atan2
 
-@Suppress("unused")
 object CompassAzimuth {
-    @Suppress("deprecation")
-    fun adjustAzimuthForDisplayRotation(azimuth: Float, windowManager: WindowManager): Float {
-        return when (val displayRotation = windowManager.defaultDisplay.rotation) {
-            Surface.ROTATION_0 -> azimuth
-            Surface.ROTATION_90 -> azimuth - 270f
-            Surface.ROTATION_180 -> azimuth - 180f
-            Surface.ROTATION_270 -> azimuth - 90f
-            else -> throw IllegalArgumentException("Unexpected display rotation: $displayRotation")
-        }
+    fun adjustForRotation(azimuth: Float, rotation: Int): Float = when (rotation) {
+        Surface.ROTATION_90 -> azimuth - 270f
+        Surface.ROTATION_180 -> azimuth - 180f
+        Surface.ROTATION_270 -> azimuth - 90f
+        else -> azimuth
     }
+
+    @Suppress("DEPRECATION")
+    fun adjustAzimuthForDisplayRotation(azimuth: Float, windowManager: WindowManager): Float =
+        adjustForRotation(azimuth, windowManager.defaultDisplay.rotation)
 
     fun calculate(gravity: Vector3, magneticField: Vector3): Float {
         val normGravity = gravity.normalize()
         val normMagField = magneticField.normalize()
-
         val east = normMagField.cross(normGravity)
         val normEast = east.normalize()
 
-        val eastMagnitude = east.magnitude()
-        val gravityMagnitude = gravity.magnitude()
-        val magneticMagnitude = magneticField.magnitude()
-        if (gravityMagnitude * magneticMagnitude * eastMagnitude < 0.1f) {
+        if (gravity.magnitude() * magneticField.magnitude() * east.magnitude() < 0.1f) {
             return 0F
         }
 
-        val dotProduct = normGravity.dot(normMagField)
-        val north = normMagField.minus(normGravity * dotProduct)
+        val north = normMagField.minus(normGravity * normGravity.dot(normMagField))
         val normNorth = north.normalize()
 
         val sin = normEast.y - normNorth.x
         val cos = normEast.x + normNorth.y
         val azimuth = if (!(sin == 0f && sin == cos)) atan2(sin, cos) else 0f
-
-        if (azimuth.isNaN()) {
-            return 0F
-        }
 
         return if (azimuth.isNaN() || !azimuth.isFinite()) 0f else normalizeAngle(azimuth.toDegrees())
     }

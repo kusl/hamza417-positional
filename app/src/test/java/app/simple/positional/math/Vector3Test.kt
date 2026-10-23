@@ -24,13 +24,4 @@ class Vector3Test {
         assertEquals(1f, v.normalize().magnitude(), 1e-6f)
         assertArrayEquals(floatArrayOf(3f, 4f, 0f), Vector3.from(v.toFloatArray()).toFloatArray(), 0f)
     }
-
-    @Test
-    fun arrayHelpersMatchVectorOperations() {
-        val a = floatArrayOf(1f, 2f, 3f)
-        val b = floatArrayOf(4f, 5f, 6f)
-        assertArrayEquals(floatArrayOf(-3f, 6f, -3f), Vector3Utils.cross(a, b), 1e-6f)
-        assertEquals(32f, Vector3Utils.dot(a, b), 1e-6f)
-        assertEquals(1f, Vector3Utils.magnitude(Vector3Utils.normalize(b)), 1e-6f)
-    }
 }

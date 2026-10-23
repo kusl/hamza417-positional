@@ -39,13 +39,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog and trail name rules.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion and sensor accuracy.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -55,9 +55,10 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 4 | Accent colors and custom locations screens, Room `Flow` for saved places | Done |
 | 5 | Arts pager, help and legal page viewer, map search with debounced geocoding; unused target address screen removed | Done |
 | 6 | Trails, measures, directions and time zone screens; Room `Flow` and singleton databases; search view and list adapters removed | Done |
-| 7 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Next |
-| 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 7 | Level, compass, clock and direction panels in Compose; settle-aware needle physics, lifecycle-bound sensors, sun diagram on `Canvas` | Done |
+| 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Next |
 | 9 | Widgets on Glance | Planned |
+| 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
 ## Building
 
@@ -100,6 +101,7 @@ app/src/main/java/app/simple/positional/
   activities/   entry points and sub screens
   constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
+  sensors/      lifecycle-aware gravity and heading sensors
   ui/           panel fragments
   decorations/  legacy custom views, map wrappers, fast scroller
   database/     Room entities, DAOs and databases

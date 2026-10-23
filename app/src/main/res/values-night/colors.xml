@@ -13,6 +13,7 @@
     <color name="editTextBackground">#3C3C3C</color>
 
     <color name="iconRegular">#808080</color>
+    <color name="indicator">#3A3A3A</color>
 
     <color name="switch_off">#B5404040</color>
 

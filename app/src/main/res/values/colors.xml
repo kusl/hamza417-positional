@@ -13,6 +13,7 @@
     <color name="editTextBackground">#F6F6F6</color>
 
     <color name="iconRegular">#9A9A9A</color>
+    <color name="indicator">#F3F3F3</color>
 
     <color name="time_bb_color">#cb4335</color>
     <color name="compass_bb_color">#76448a</color>
@@ -38,7 +39,6 @@
 
     <color name="switch_off">#EAEAEA</color>
 
-    // Pin Color
     <color name="compass_pin_color">#1B9CFF</color>
     <color name="compass_pin_stroke_color">#FFFFFF</color>
     <color name="map_circle_color">#261B9CFF</color>

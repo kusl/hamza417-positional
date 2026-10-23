@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
+import androidx.fragment.app.Fragment
 import app.simple.positional.R
 import app.simple.positional.util.StatusBarHeight
 
@@ -28,6 +30,8 @@ object PositionalFonts {
     val regular = FontFamily(Font(R.font.regular))
     val medium = FontFamily(Font(R.font.medium, FontWeight.Medium))
     val heading = FontFamily(Font(R.font.heading, FontWeight.Bold))
+    val light = FontFamily(Font(R.font.light, FontWeight.Light))
+    val degrees = FontFamily(Font(R.font.degrees))
 }
 
 private val typography = Typography(
@@ -75,4 +79,14 @@ fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -
             PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
         }
     })
+}
+
+fun Fragment.positionalComposeView(content: @Composable (topInset: Dp) -> Unit): ComposeView {
+    val topInset = StatusBarHeight.getStatusBarHeight(resources)
+    return ComposeView(requireContext()).apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
+        }
+    }
 }
