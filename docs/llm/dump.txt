@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T05:16:25-04:00
+Generated: 2026-10-23T05:17:22-04:00
 Branch:    master
-Commit:    7d05e82b 2026-10-23 05:16:18 -0400 run scripts
+Commit:    3f88b7ca 2026-10-23 05:17:18 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (1028 files)
+## TREE (1036 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -230,6 +230,7 @@ app/
                   SensorPanel.kt
                 maps/
                   CustomMaps.kt
+                  MapLifecycle.kt
                   MapsCallbacks.java
                 viewmodel/
                   WrappedViewModel.kt
@@ -237,6 +238,7 @@ app/
                 Angle.kt
                 ClockMotion.kt
                 CompassAzimuth.kt
+                GeoDistance.kt
                 LowPassFilter.kt
                 MathExtensions.kt
                 RotationPhysics.kt
@@ -301,6 +303,7 @@ app/
                   CustomLocationScreen.kt
                   DirectionPanel.kt
                   DirectionsScreen.kt
+                  GpsScreen.kt
                   LevelScreen.kt
                   MapSearchScreen.kt
                   PanelComponents.kt
@@ -311,6 +314,7 @@ app/
                   SavedListScreen.kt
                   SettingsDialogs.kt
                   SettingsScreen.kt
+                  Speedometer.kt
                   SunPositionDiagram.kt
                   TimeZoneScreen.kt
                 launcher/
@@ -345,6 +349,7 @@ app/
                 Ordinal.kt
                 ParcelUtils.kt
                 PermissionUtils.kt
+                ReverseGeocoder.kt
                 StatusBarHeight.java
                 TextViewUtils.kt
                 ThemeSetter.kt
@@ -1127,6 +1132,7 @@ app/
                 AngleTest.kt
                 ClockMotionTest.kt
                 CompassAzimuthTest.kt
+                GeoDistanceTest.kt
                 LowPassFilterTest.kt
                 MathExtensionsTest.kt
                 RotationPhysicsTest.kt
@@ -1140,9 +1146,11 @@ app/
                 compose/
                   AccentPaletteTest.kt
                   ArtsCatalogTest.kt
+                  ComposeDrawablesTest.kt
                   CoordinateInputTest.kt
                   MapSearchQueryTest.kt
                   SettingsLabelsTest.kt
+                  SpeedometerDialTest.kt
                   TimeZoneCatalogTest.kt
               util/
                 AppIconsTest.kt
@@ -1442,13 +1450,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion and sensor accuracy.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map views follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1459,7 +1467,9 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 5 | Arts pager, help and legal page viewer, map search with debounced geocoding; unused target address screen removed | Done |
 | 6 | Trails, measures, directions and time zone screens; Room `Flow` and singleton databases; search view and list adapters removed | Done |
 | 7 | Level, compass, clock and direction panels in Compose; settle-aware needle physics, lifecycle-bound sensors, sun diagram on `Canvas` | Done |
-| 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Next |
+| 8a | GPS map panel in Compose: toolbar, map tools, info sheet, speedometer; shared map lifecycle observer; address lookups only after moving 25 m | Done |
+| 8b | Trail and measure map panels in Compose | Next |
+| 8c | Remaining dialogs, single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -3109,10 +3119,9 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
+import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.MapSearchActions
 import app.simple.positional.ui.compose.MapSearchScreen
@@ -3193,14 +3202,6 @@ class MapSearchActivity : BaseActivity(), MapSearchActions {
             .putExtra("longitude", coordinates.second)
             .putExtra("address", form.address.trim()))
         finish()
-    }
-
-    private class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
-        override fun onStart(owner: LifecycleOwner) = mapView.onStart()
-        override fun onResume(owner: LifecycleOwner) = mapView.onResume()
-        override fun onPause(owner: LifecycleOwner) = mapView.onPause()
-        override fun onStop(owner: LifecycleOwner) = mapView.onStop()
-        override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
     }
 
     companion object {
@@ -6501,7 +6502,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, attributeSet),
+class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(context, attributeSet),
     SensorEventListener {
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)
@@ -6555,11 +6556,6 @@ class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, a
         if (isCustomCoordinate) {
             customLatitude = MainPreferences.getCoordinates()[0].toDouble()
             customLongitude = MainPreferences.getCoordinates()[1].toDouble()
-        }
-
-        if (GPSPreferences.isUsingVolumeKeys()) {
-            this.isFocusableInTouchMode = true
-            this.requestFocus()
         }
 
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -13186,8 +13182,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.graphics.Point
 import android.location.Location
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -13213,7 +13209,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
-open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, attrs),
+open class CustomMaps(context: Context, attrs: AttributeSet? = null) : MapView(context, attrs),
     OnMapReadyCallback,
     SharedPreferences.OnSharedPreferenceChangeListener,
     CoroutineScope {
@@ -13287,11 +13283,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
             onTouch?.invoke(ev, this)
             return this
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        onResume()
     }
 
     override fun onResume() {
@@ -13383,6 +13374,8 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
         return googleMap?.projection?.visibleRegion?.latLngBounds?.contains(latLng)!!
     }
 
+    fun screenPoint(latLng: LatLng): Point? = googleMap?.projection?.toScreenLocation(latLng)
+
     fun setOnMapsCallbackListener(mapsCallbacks: MapsCallbacks) {
         this.mapsCallbacks = mapsCallbacks
     }
@@ -13430,6 +13423,23 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
     companion object {
         const val CAMERA_SPEED = 3000
     }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/extensions/maps/MapLifecycle.kt
+################################################################################
+package app.simple.positional.extensions.maps
+
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.maps.MapView
+
+class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
+    override fun onStart(owner: LifecycleOwner) = mapView.onStart()
+    override fun onResume(owner: LifecycleOwner) = mapView.onResume()
+    override fun onPause(owner: LifecycleOwner) = mapView.onPause()
+    override fun onStop(owner: LifecycleOwner) = mapView.onStop()
+    override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
 }
 
 ################################################################################
@@ -13637,6 +13647,43 @@ object CompassAzimuth {
 
     fun inverse(azimuth: Float): Float {
         return azimuth + 180F
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/math/GeoDistance.kt
+################################################################################
+package app.simple.positional.math
+
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
+
+object GeoDistance {
+    private const val EARTH_RADIUS = 6_371_008.8
+
+    fun meters(fromLatitude: Double, fromLongitude: Double, toLatitude: Double, toLongitude: Double): Double {
+        val dLat = Math.toRadians(toLatitude - fromLatitude)
+        val dLon = Math.toRadians(toLongitude - fromLongitude)
+        val a = sin(dLat / 2).let { it * it } +
+                cos(Math.toRadians(fromLatitude)) * cos(Math.toRadians(toLatitude)) * sin(dLon / 2).let { it * it }
+        return 2 * EARTH_RADIUS * asin(sqrt(a.coerceIn(0.0, 1.0)))
+    }
+}
+
+class MovementThreshold(private val meters: Double) {
+    private var last: Pair<Double, Double>? = null
+
+    fun accept(latitude: Double, longitude: Double): Boolean {
+        val previous = last
+        if (previous != null && GeoDistance.meters(previous.first, previous.second, latitude, longitude) < meters) return false
+        last = latitude to longitude
+        return true
+    }
+
+    fun reset() {
+        last = null
     }
 }
 
@@ -17523,6 +17570,7 @@ fun <T> ChoiceDialog(
 ################################################################################
 package app.simple.positional.ui.compose
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17548,6 +17596,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -17638,7 +17688,7 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
             ) {
                 Box(Modifier.fillMaxWidth().padding(vertical = 100.dp), contentAlignment = Alignment.Center) {
                     Image(painterResource(R.drawable.ic_clock_shadow), null, Modifier.size(dimensionResource(R.dimen.clock_image_shadow_size)))
-                    RotatingImage(R.drawable.clock_trail, state.sweep, Modifier.size(clockSize).padding(5.dp))
+                    SweepTrail(state.sweep, Modifier.size(clockSize).padding(5.dp))
                     Image(painterResource(if (state.face24) R.drawable.clock_face_24 else R.drawable.clock_face), null, Modifier.size(clockSize))
                     Image(
                         painterResource(if (state.daytime) R.drawable.ic_day else R.drawable.ic_night),
@@ -17663,6 +17713,15 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
                 state.sky?.let { SkySections(it) }
             }
         }
+    }
+}
+
+@Composable
+private fun SweepTrail(state: RotationState, modifier: Modifier) {
+    LaunchedEffect(state) { state.run() }
+    val accent = MaterialTheme.colorScheme.primary
+    Canvas(modifier.rotation(state)) {
+        drawCircle(Brush.sweepGradient(listOf(Color.Transparent, Color.Transparent, accent)))
     }
 }
 
@@ -18332,6 +18391,405 @@ private fun DirectionTargetDialog(form: CustomLocationForm, actions: DirectionsA
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/GpsScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import android.view.View
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import app.simple.positional.R
+import app.simple.positional.preferences.MainPreferences
+import kotlinx.coroutines.delay
+
+enum class MapRotation { Compass, Bearing, North }
+
+@Stable
+class GpsState(val custom: Boolean) {
+    var provider by mutableStateOf(emptyList<InfoRow>())
+    var location by mutableStateOf(emptyList<InfoRow>())
+    var movement by mutableStateOf(emptyList<InfoRow>())
+    var coordinates by mutableStateOf(emptyList<InfoRow>())
+    var address by mutableStateOf("")
+    var target by mutableStateOf(AnnotatedString(""))
+    var speed by mutableFloatStateOf(0f)
+    var message by mutableStateOf<Int?>(null)
+    var fixed by mutableStateOf(false)
+    var enabled by mutableStateOf(true)
+    var pin by mutableIntStateOf(R.drawable.ic_place_custom)
+    var targetMode by mutableStateOf(false)
+    var targetSet by mutableStateOf(false)
+    var toolsLeft by mutableStateOf(false)
+    var rotation by mutableStateOf(MapRotation.North)
+    var volumeKeys by mutableStateOf(false)
+    var fullScreen by mutableStateOf(false)
+    var sheet by mutableStateOf(false)
+    var pressed by mutableStateOf<IntOffset?>(null)
+}
+
+interface GpsActions {
+    fun menu()
+    fun customLocation()
+    fun pinCustomization()
+    fun locate(close: Boolean)
+    fun toggleTargetMode()
+    fun confirmTarget()
+    fun targetCoordinates()
+    fun removeTarget()
+    fun toggleToolsSide()
+    fun rotate(rotation: MapRotation)
+    fun sheet(open: Boolean)
+    fun save()
+    fun copy()
+    fun share()
+    fun locationDetails()
+    fun coordinateDetails()
+    fun showTarget()
+    fun setPressedTarget()
+    fun navigatePressed()
+    fun zoom(zoomIn: Boolean)
+    fun recenter()
+}
+
+@Composable
+fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, actions: GpsActions) {
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(state.volumeKeys) { if (state.volumeKeys) runCatching { focus.requestFocus() } }
+    val keys = Modifier
+        .focusRequester(focus)
+        .focusable(state.volumeKeys)
+        .onKeyEvent { event ->
+            if (!state.volumeKeys || event.type != KeyEventType.KeyDown) return@onKeyEvent false
+            when (event.key) {
+                Key.VolumeUp -> actions.zoom(true)
+                Key.VolumeDown -> actions.zoom(false)
+                Key.MediaPlayPause -> actions.recenter()
+                else -> return@onKeyEvent false
+            }
+            true
+        }
+    Surface(Modifier.fillMaxSize().then(keys), color = MaterialTheme.colorScheme.background) {
+        if (landscape) {
+            Row(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f).fillMaxHeight()) {
+                    MapLayer(state, map, actions)
+                    MapTools(state, actions, horizontal = true, modifier = Modifier.align(Alignment.BottomCenter).padding(dimensionResource(R.dimen.trail_tools_margin)))
+                }
+                VerticalDivider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.outline)
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = dimensionResource(R.dimen.bottom_nav_height) + 24.dp),
+                ) {
+                    GpsToolbar(state, actions, Modifier.padding(top = topInset))
+                    GpsInfo(state, actions)
+                }
+            }
+        } else {
+            Box(Modifier.fillMaxSize()) {
+                MapLayer(state, map, actions)
+                AnimatedVisibility(
+                    !state.fullScreen,
+                    enter = slideInVertically { -it } + fadeIn(),
+                    exit = slideOutVertically { -it } + fadeOut(),
+                    modifier = Modifier.align(Alignment.TopCenter),
+                ) {
+                    GpsToolbar(state, actions, Modifier.padding(top = topInset).padding(dimensionResource(R.dimen.toolbar_padding) / 2))
+                }
+                MapTools(
+                    state,
+                    actions,
+                    horizontal = false,
+                    modifier = Modifier
+                        .align(if (state.toolsLeft) Alignment.CenterStart else Alignment.CenterEnd)
+                        .padding(horizontal = dimensionResource(R.dimen.trail_tools_margin)),
+                )
+                AnimatedVisibility(!state.fullScreen, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
+                    SheetHandle { actions.sheet(true) }
+                }
+            }
+            if (state.sheet) InfoSheet(state, actions)
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.MapLayer(state: GpsState, map: View, actions: GpsActions) {
+    AndroidView(factory = { map }, modifier = Modifier.fillMaxSize())
+    if (state.targetMode) {
+        Icon(
+            painterResource(R.drawable.ic_crosshair),
+            contentDescription = null,
+            tint = colorResource(R.color.iconColor),
+            modifier = Modifier.size(dimensionResource(R.dimen.app_button_size)).align(Alignment.Center),
+        )
+    }
+    state.pressed?.let { point ->
+        Box(Modifier.offset { point }) {
+            DropdownMenu(expanded = true, onDismissRequest = { state.pressed = null }) {
+                MenuEntry(R.string.target) { actions.setPressedTarget() }
+                MenuEntry(R.string.navigate) { actions.navigatePressed() }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GpsToolbar(state: GpsState, actions: GpsActions, modifier: Modifier = Modifier) {
+    val radius = with(LocalDensity.current) { MainPreferences.getCornerRadius().toDp() }
+    Surface(modifier.fillMaxWidth(), shape = RoundedCornerShape(radius), color = MaterialTheme.colorScheme.background, shadowElevation = 5.dp) {
+        Row(Modifier.padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.gps_location), style = MaterialTheme.typography.titleLarge, maxLines = 1, modifier = Modifier.weight(1f))
+            ToolButton(if (state.custom) R.drawable.ic_place_custom else state.pin, tint = false, onLongClick = actions::pinCustomization, onClick = actions::customLocation)
+            IconAction(R.drawable.ic_menu, stringResource(R.string.gps_location), actions::menu)
+        }
+    }
+}
+
+@Composable
+private fun MapTools(state: GpsState, actions: GpsActions, horizontal: Boolean, modifier: Modifier) {
+    var confirm by remember { mutableStateOf(false) }
+    val content: @Composable () -> Unit = {
+        if (!horizontal) ToolButton(if (state.toolsLeft) R.drawable.ic_arrow_right else R.drawable.ic_arrow_left, onClick = actions::toggleToolsSide)
+        ToolButton(locationIcon(state), onLongClick = { actions.locate(true) }) { actions.locate(false) }
+        Box {
+            ToolButton(
+                if (state.targetSet || state.targetMode) R.drawable.ic_clear else R.drawable.ic_crosshair,
+                onLongClick = { if (!state.targetSet) actions.targetCoordinates() },
+            ) { if (state.targetSet) confirm = true else actions.toggleTargetMode() }
+            DropdownMenu(expanded = confirm, onDismissRequest = { confirm = false }) {
+                MenuEntry(R.string.sure) {
+                    confirm = false
+                    actions.removeTarget()
+                }
+                MenuEntry(R.string.button_cancel) { confirm = false }
+            }
+        }
+        if (state.targetMode) ToolButton(R.drawable.ic_check, onClick = actions::confirmTarget)
+        ToolButton(R.drawable.ic_compass_on, alpha = rotationAlpha(state, MapRotation.Compass)) { actions.rotate(MapRotation.Compass) }
+        if (!state.custom) ToolButton(R.drawable.ic_bearing_rotation, alpha = rotationAlpha(state, MapRotation.Bearing)) { actions.rotate(MapRotation.Bearing) }
+        ToolButton(R.drawable.ic_north_only, alpha = rotationAlpha(state, MapRotation.North)) { actions.rotate(MapRotation.North) }
+    }
+    val radius = with(LocalDensity.current) { MainPreferences.getCornerRadius().toDp() }
+    Surface(modifier, shape = RoundedCornerShape(radius), color = MaterialTheme.colorScheme.background, shadowElevation = 10.dp) {
+        val padding = Modifier.padding(dimensionResource(R.dimen.trail_tools_padding))
+        if (horizontal) {
+            Row(padding, horizontalArrangement = Arrangement.SpaceEvenly) { content() }
+        } else {
+            Column(padding, horizontalAlignment = Alignment.CenterHorizontally) { content() }
+        }
+    }
+}
+
+@Composable
+private fun rotationAlpha(state: GpsState, rotation: MapRotation): Float =
+    animateFloatAsState(if (state.rotation == rotation) 1f else 0.4f, label = "rotation").value
+
+@Composable
+private fun locationIcon(state: GpsState): Int {
+    var blink by remember { mutableStateOf(false) }
+    val searching = state.enabled && !state.fixed
+    LaunchedEffect(searching) {
+        while (searching) {
+            delay(BLINK)
+            blink = !blink
+        }
+    }
+    return when {
+        !state.enabled -> R.drawable.ic_gps_off
+        state.fixed || blink -> R.drawable.ic_gps_fixed
+        else -> R.drawable.ic_gps_not_fixed
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ToolButton(@DrawableRes icon: Int, alpha: Float = 1f, tint: Boolean = true, onLongClick: (() -> Unit)? = null, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(dimensionResource(R.dimen.app_button_size) + 8.dp)
+            .combinedClickable(onLongClick = onLongClick, onClick = onClick)
+            .alpha(alpha),
+        contentAlignment = Alignment.Center,
+    ) {
+        val modifier = Modifier.size(24.dp)
+        if (tint) {
+            Icon(painterResource(icon), contentDescription = null, tint = colorResource(R.color.iconColor), modifier = modifier)
+        } else {
+            Image(painterResource(icon), contentDescription = null, modifier = modifier)
+        }
+    }
+}
+
+@Composable
+private fun SheetHandle(onClick: () -> Unit) {
+    Box(
+        Modifier
+            .navigationBarsPadding()
+            .padding(bottom = dimensionResource(R.dimen.bottom_nav_height) + 16.dp),
+    ) {
+        Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.background, shadowElevation = 5.dp, onClick = onClick) {
+            Icon(
+                painterResource(R.drawable.ic_expand_up),
+                contentDescription = stringResource(R.string.gps_info),
+                tint = colorResource(R.color.iconColor),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).size(dimensionResource(R.dimen.app_button_size)),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InfoSheet(state: GpsState, actions: GpsActions) {
+    ModalBottomSheet(
+        onDismissRequest = { actions.sheet(false) },
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()) {
+            GpsInfo(state, actions)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun GpsInfo(state: GpsState, actions: GpsActions) {
+    var shareMenu by remember { mutableStateOf(false) }
+    LaunchedEffect(state.message) {
+        if (state.message != null) {
+            delay(MESSAGE)
+            state.message = null
+        }
+    }
+    Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
+        Row(Modifier.fillMaxWidth().padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            AnimatedContent(state.message ?: R.string.gps_info, modifier = Modifier.weight(1f), label = "message") {
+                Text(stringResource(it), style = MaterialTheme.typography.titleLarge)
+            }
+            if (!state.custom) IconAction(R.drawable.ic_save, stringResource(R.string.location_saved), actions::save)
+            IconAction(R.drawable.ic_content_copy, stringResource(R.string.info_copied), actions::copy)
+        }
+        InfoSection(stringResource(R.string.gps_provider), state.provider)
+        InfoSection(stringResource(R.string.gps_location), state.location, modifier = Modifier.combinedClickable(onClick = actions::locationDetails))
+        InfoSection(stringResource(R.string.gps_movement), state.movement)
+        Speedometer(state.speed)
+        if (state.custom) {
+            HorizontalDivider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.outline)
+            Text(
+                stringResource(R.string.specified_location_notice),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorResource(R.color.textSecondary),
+                modifier = Modifier.padding(10.dp),
+            )
+        }
+        TargetSection(state.target, Modifier.combinedClickable(onClick = actions::showTarget))
+        Box {
+            InfoSection(
+                stringResource(R.string.gps_coordinates),
+                state.coordinates + InfoRow(stringResource(R.string.gps_address) + ":", state.address),
+                graphic = painterResource(if (state.custom) R.drawable.ic_place_custom else state.pin),
+                modifier = Modifier.combinedClickable(onLongClick = { shareMenu = true }, onClick = actions::coordinateDetails),
+            )
+            DropdownMenu(expanded = shareMenu, onDismissRequest = { shareMenu = false }) {
+                MenuEntry(R.string.share) {
+                    shareMenu = false
+                    actions.share()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TargetSection(target: AnnotatedString, modifier: Modifier) {
+    Column(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
+        Text(
+            stringResource(R.string.target),
+            fontFamily = PositionalFonts.light,
+            fontSize = textSize(R.dimen.info_text_primary_size),
+            color = colorResource(R.color.textPrimary),
+        )
+        Text(
+            target,
+            fontFamily = PositionalFonts.light,
+            fontSize = textSize(R.dimen.info_text_secondary_size),
+            color = colorResource(R.color.textSecondary),
+        )
+    }
+}
+
+private const val BLINK = 500L
+private const val MESSAGE = 3000L
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/LevelScreen.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -18576,6 +19034,9 @@ fun MapSearchScreen(form: CustomLocationForm, suggestions: List<Address>, map: V
 ################################################################################
 package app.simple.positional.ui.compose
 
+import android.graphics.Typeface
+import android.text.Spanned
+import android.text.style.StyleSpan
 import androidx.annotation.DimenRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -18593,11 +19054,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -18609,7 +19072,7 @@ import androidx.compose.ui.unit.dp
 import app.simple.positional.R
 
 @Immutable
-data class InfoRow(val label: String, val value: String = "")
+data class InfoRow(val label: String, val value: String = "", val alert: Boolean = false)
 
 @Composable
 fun textSize(@DimenRes id: Int): TextUnit = with(LocalDensity.current) { dimensionResource(id).toSp() }
@@ -18632,8 +19095,8 @@ fun PanelToolbar(title: String, topInset: Dp, divider: Boolean = true, actions: 
 }
 
 @Composable
-fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null) {
-    Box(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
+fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null, modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
         if (graphic != null) {
             Image(
                 graphic,
@@ -18656,7 +19119,7 @@ fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null) {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(row.label) }
                         if (row.value.isNotEmpty()) {
                             append(" ")
-                            append(row.value)
+                            if (row.alert) withStyle(SpanStyle(color = Color.Red)) { append(row.value) } else append(row.value)
                         }
                     },
                     fontFamily = PositionalFonts.light,
@@ -18666,6 +19129,16 @@ fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null) {
                 )
             }
         }
+    }
+}
+
+fun Spanned.toAnnotatedString(): AnnotatedString {
+    val spanned = this
+    return buildAnnotatedString {
+        append(spanned.toString())
+        spanned.getSpans(0, spanned.length, StyleSpan::class.java)
+            .filter { it.style and Typeface.BOLD != 0 }
+            .forEach { addStyle(SpanStyle(fontWeight = FontWeight.Bold), spanned.getSpanStart(it), spanned.getSpanEnd(it)) }
     }
 }
 
@@ -19655,6 +20128,70 @@ private fun AboutSection(state: SettingsState, actions: SettingsActions) {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/Speedometer.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+
+object SpeedometerDial {
+    private const val RANGE = 300f
+    private const val COMPENSATION = 60f
+    private val dials = intArrayOf(
+        R.drawable.speedometer_dial_normal_range,
+        R.drawable.speedometer_dial_medium_range,
+        R.drawable.speedometer_dial_high_range,
+        R.drawable.speedometer_dial_max_range,
+    )
+
+    fun range(degrees: Float): Int = when {
+        degrees <= RANGE -> 0
+        degrees <= RANGE * 2 -> 1
+        degrees <= RANGE * 3 -> 2
+        else -> 3
+    }
+
+    fun dial(degrees: Float): Int = dials[range(degrees)]
+
+    fun needle(degrees: Float): Float = degrees - range(degrees) * COMPENSATION
+}
+
+@Composable
+fun Speedometer(speed: Float, modifier: Modifier = Modifier) {
+    val degrees = speed * 2
+    val angle by animateFloatAsState(
+        SpeedometerDial.needle(degrees),
+        spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessVeryLow),
+        label = "needle",
+    )
+    val size = dimensionResource(R.dimen.clock_image_dimensions)
+    Box(modifier.fillMaxWidth().padding(20.dp), contentAlignment = Alignment.Center) {
+        Image(painterResource(SpeedometerDial.dial(degrees)), contentDescription = null, modifier = Modifier.size(size))
+        Image(
+            painterResource(R.drawable.speedometer_needle),
+            contentDescription = null,
+            modifier = Modifier.size(size).graphicsLayer { rotationZ = angle },
+        )
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/SunPositionDiagram.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -19749,6 +20286,7 @@ private fun DrawScope.icon(painter: Painter, center: Offset, half: Float) {
 ################################################################################
 package app.simple.positional.ui.compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19763,6 +20301,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19856,7 +20395,7 @@ private fun TimeZoneRow(entry: TimeZoneEntry, selected: Boolean, onClick: () -> 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(12.dp)) {
-            if (selected) Icon(painterResource(R.drawable.ic_circle_stroke), contentDescription = null, tint = accent)
+            if (selected) Box(Modifier.fillMaxSize().background(accent, CircleShape))
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
@@ -20436,55 +20975,27 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
 ################################################################################
 package app.simple.positional.ui.panels
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.Spannable
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
-import android.util.Log
-import android.view.Gravity
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.text.toSpannable
-import androidx.core.view.isVisible
-import androidx.core.widget.NestedScrollView
+import androidx.core.content.getSystemService
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
-import androidx.transition.TransitionInflater
-import androidx.transition.TransitionManager
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomSheetSlide
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
-import app.simple.positional.decorations.maps.MapToolbar
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.decorations.maps.MapsTools
-import app.simple.positional.decorations.maps.MapsToolsCallbacks
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.views.Speedometer
 import app.simple.positional.dialogs.app.ErrorDialog
 import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.dialogs.gps.CoordinatesExpansion
@@ -20493,828 +21004,366 @@ import app.simple.positional.dialogs.gps.LocationExpansion
 import app.simple.positional.dialogs.gps.PinCustomization
 import app.simple.positional.dialogs.gps.TargetCoordinates
 import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.math.MovementThreshold
 import app.simple.positional.math.UnitConverter.toFeet
 import app.simple.positional.math.UnitConverter.toKiloMetersPerHour
 import app.simple.positional.math.UnitConverter.toMilesPerHour
 import app.simple.positional.model.Locations
-import app.simple.positional.popups.location.PopupCoordinateBox
-import app.simple.positional.popups.location.PopupLocationMenu
-import app.simple.positional.popups.miscellaneous.DeletePopupMenu
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.ui.compose.GpsActions
+import app.simple.positional.ui.compose.GpsScreen
+import app.simple.positional.ui.compose.GpsState
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.ui.compose.MapRotation
+import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.toAnnotatedString
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
-import app.simple.positional.util.HtmlHelper.fromHtml
+import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
 import app.simple.positional.util.ParcelUtils.parcelable
-import app.simple.positional.util.TextViewUtils.setTextAnimation
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
+import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.util.Locale
 
-class GPS : ScopedFragment() {
-    private lateinit var expandUp: ImageView
-    private lateinit var crossHair: ImageView
-    private lateinit var scrollView: NestedScrollView
-    private lateinit var toolbar: MapToolbar
-    private lateinit var tools: MapsTools
-    private lateinit var bottomSheetSlide: BottomSheetSlide
-    private lateinit var divider: View
-    private var dim: View? = null
-    private lateinit var locationBox: LinearLayout
-    private lateinit var targetBox: DynamicRippleLinearLayout
-    private lateinit var movementBox: LinearLayout
-    private lateinit var coordinatesBox: DynamicRippleLinearLayout
-    private lateinit var copy: ImageButton
-    private lateinit var save: ImageButton
-    private lateinit var accuracy: TextView
-    private lateinit var address: TextView
-    private lateinit var latitude: TextView
-    private lateinit var longitude: TextView
-    private lateinit var providerStatus: TextView
-    private lateinit var providerSource: TextView
-    private lateinit var altitude: TextView
-    private lateinit var bearing: TextView
-    private lateinit var latency: TextView
-    private lateinit var targetData: TextView
-    private lateinit var direction: TextView
-    private lateinit var speed: TextView
-    private lateinit var speedometer: Speedometer
-    private lateinit var specifiedLocationTextView: TextView
-    private lateinit var infoText: TextView
-
-    private lateinit var handler: Handler
-    private var bottomSheetInfoPanel: BottomSheetBehavior<CoordinatorLayout>? = null
+class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
+    private lateinit var state: GpsState
+    private lateinit var maps: Maps
+    private lateinit var viewModel: LocationViewModel
+    private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
+    private var addressJob: Job? = null
     private var location: Location? = null
-    private var backPress: OnBackPressedDispatcher? = null
-    private lateinit var locationViewModel: LocationViewModel
+    private var camera: CameraPosition? = null
+    private var pressed: LatLng? = null
+    private var accuracyRow = InfoRow("")
+    private var altitudeRow = InfoRow("")
+    private var latencyRow = InfoRow("")
 
-    private var isMetric = true
-    private var isFullScreen = false
-    private var isCustomCoordinate = false
-    private var isCompassRotation = false
-    private var customLatitude = 0.0
-    private var customLongitude = 0.0
-    private var lastLatitude = 0.0
-    private var lastLongitude = 0.0
-    private var peekHeight = 0
-    private var x = 0F
-    private var y = 0F
-
-    private var maps: Maps? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
+        state = GpsState(MainPreferences.isCustomCoordinate())
+        camera = savedInstanceState?.parcelable(CAMERA)
+        state.fullScreen = !isLandscapeOrientation && (savedInstanceState?.getBoolean(FULL_SCREEN) ?: consumeFullScreenShortcut())
+        readPreferences()
+        accuracyRow = InfoRow(getString(R.string.gps_accuracy), PENDING)
+        altitudeRow = InfoRow(getString(R.string.gps_altitude), PENDING)
+        latencyRow = InfoRow(getString(R.string.gps_latency), PENDING)
+        publishLocationRows()
+        state.provider = providerRows(PENDING)
+        state.movement = listOf(R.string.gps_bearing, R.string.gps_direction, R.string.gps_speed).map { InfoRow(getString(it), PENDING) }
+        state.coordinates = listOf(R.string.gps_latitude, R.string.gps_longitude).map { InfoRow(getString(it), PENDING) }
+        state.address = PENDING
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val view: View = inflater.inflate(R.layout.fragment_gps, container, false)
-
-        toolbar = view.findViewById(R.id.map_toolbar)
-        tools = view.findViewById(R.id.maps_tools)
-        scrollView = view.findViewById(R.id.gps_list_scroll_view)
-        scrollView.alpha = if (isLandscape()) 1F else 0F
-        divider = view.findViewById(R.id.gps_divider)
-        dim = view.findViewById(R.id.gps_dim)
-        copy = view.findViewById(R.id.gps_copy)
-        save = view.findViewById(R.id.gps_save)
-        crossHair = view.findViewById(R.id.cross_hair)
-        expandUp = view.findViewById(R.id.expand_up_gps_sheet)
-
-        kotlin.runCatching {
-            bottomSheetInfoPanel = BottomSheetBehavior.from(view.findViewById(R.id.gps_info_bottom_sheet))
-        }
-
-        locationBox = view.findViewById(R.id.gps_panel_location)
-        targetBox = view.findViewById(R.id.gps_panel_target)
-        movementBox = view.findViewById(R.id.gps_panel_movement)
-        coordinatesBox = view.findViewById(R.id.gps_panel_coordinates)
-
-        accuracy = view.findViewById(R.id.gps_accuracy)
-        address = view.findViewById(R.id.gps_address)
-        latitude = view.findViewById(R.id.latitude)
-        longitude = view.findViewById(R.id.longitude)
-        providerSource = view.findViewById(R.id.provider_source)
-        providerStatus = view.findViewById(R.id.provider_status)
-        altitude = view.findViewById(R.id.gps_altitude)
-        latency = view.findViewById(R.id.gps_time_taken)
-        targetData = view.findViewById(R.id.gps_target_data)
-        bearing = view.findViewById(R.id.gps_bearing)
-        direction = view.findViewById(R.id.gps_direction)
-        speed = view.findViewById(R.id.gps_speed)
-        speedometer = view.findViewById(R.id.speedometer)
-        specifiedLocationTextView = view.findViewById(R.id.specified_location_notice_gps)
-        infoText = view.findViewById(R.id.gps_info_text)
-
-        handler = Handler(Looper.getMainLooper())
-        locationViewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
-
-        maps = view.findViewById(R.id.map)
-
-        maps?.onCreate(savedInstanceState)
-
-        if (requireActivity().intent.isNotNull()) {
-            if (requireActivity().intent.action == "action_map_panel_full") {
-                if (!isLandscapeOrientation) {
-                    isFullScreen = false
-                    setFullScreen()
-                    requireActivity().intent.action = null
+        maps = Maps(requireContext()).apply {
+            alpha = 0f
+            onCreate(null)
+            setOnMapsCallbackListener(this@GPS)
+            onTouch = { event, _ ->
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> unregister()
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> registerWithRunnable()
                 }
             }
         }
-
-        isMetric = MainPreferences.isMetric()
-
-        if (MainPreferences.isCustomCoordinate()) {
-            isCustomCoordinate = true
-            customLatitude = MainPreferences.getCoordinates()[0].toDouble()
-            customLongitude = MainPreferences.getCoordinates()[1].toDouble()
-        }
-
-        isCompassRotation = GPSPreferences.isCompassRotation()
-
-        lastLatitude = MainPreferences.getLastCoordinates()[0].toDouble()
-        lastLongitude = MainPreferences.getLastCoordinates()[1].toDouble()
-
-        bottomSheetSlide = requireActivity() as BottomSheetSlide
-        backPress = requireActivity().onBackPressedDispatcher
-
-        peekHeight = bottomSheetInfoPanel?.peekHeight ?: 0
-        tools.locationIndicatorUpdate(false)
-
-        updateToolsGravity(view)
-
-        return view
+        return positionalComposeView { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        setLocationPin()
-        targetMode()
-
-        if (isCustomCoordinate) {
-            specifiedLocationTextView.isVisible = true
-            divider.isVisible = true
-            save.gone()
-            updateCoordinates(customLatitude, customLongitude)
-            getAddress(LatLng(customLatitude, customLongitude))
-        }
-
-        if (GPSPreferences.isUsingVolumeKeys()) {
-            view.isFocusableInTouchMode = true
-            view.requestFocus()
-        }
-
-        providerStatus.text =
-                fromHtml("<b>${getString(R.string.gps_status)}</b> ${if (getLocationStatus(requireContext())) getString(R.string.gps_enabled) else getString(R.string.gps_disabled)}")
+        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+        if (state.fullScreen) bottomBar(visible = false)
 
         if (!LocationPrompt.checkGooglePlayServices(requireContext())) {
-            ErrorDialog.newInstance(getString(R.string.play_services_error))
-                    .show(childFragmentManager, "error_dialog")
+            ErrorDialog.newInstance(getString(R.string.play_services_error)).show(childFragmentManager, "error_dialog")
         }
 
-        locationViewModel.getLocation().observe(viewLifecycleOwner) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.Default) {
-                    location = it
-
-                    MainPreferences.setLastLatitude(location!!.latitude.toFloat())
-                    MainPreferences.setLastLongitude(location!!.longitude.toFloat())
-                    MainPreferences.setLastAltitude(location!!.altitude.toFloat())
-
-                    val accuracy: Spanned
-                    val altitude: Spanned
-                    val speed: Spanned
-
-                    val providerSource = fromHtml("<b>${getString(R.string.gps_source)}</b> ${location!!.provider?.uppercase(Locale.getDefault())}")
-                    val providerStatus = fromHtml("<b>${getString(R.string.gps_status)}</b> ${
-                        if (getLocationStatus(requireContext())) getString(R.string.gps_enabled) else getString(
-                                R.string.gps_disabled
-                        )
-                    }")
-
-                    if (isMetric) {
-                        accuracy = fromHtml("<b>${getString(R.string.gps_accuracy)}</b> ${round(location!!.accuracy.toDouble(), 2)} ${getString(R.string.meter)}")
-                        altitude = fromHtml("<b>${getString(R.string.gps_altitude)}</b> ${round(location!!.altitude, 2)} ${getString(R.string.meter)}")
-                        speed = fromHtml("<b>${getString(R.string.gps_speed)}</b> ${round(location!!.speed.toDouble().toKiloMetersPerHour(), 2)} ${getString(R.string.kilometer_hour)}")
-                    } else {
-                        accuracy = fromHtml("<b>${getString(R.string.gps_accuracy)}</b> ${round(location!!.accuracy.toDouble().toFeet(), 2)} ${getString(R.string.feet)}")
-                        altitude = fromHtml("<b>${getString(R.string.gps_altitude)}</b> ${round(location!!.altitude.toFeet(), 2)} ${getString(R.string.feet)}")
-                        speed = fromHtml("<b>${getString(R.string.gps_speed)}</b> ${round(location!!.speed.toDouble().toKiloMetersPerHour().toMilesPerHour(), 2)} ${getString(R.string.miles_hour)}")
-                    }
-
-                    val bearing: Spanned = fromHtml("<b>${getString(R.string.gps_bearing)}</b> ${location!!.bearing}°")
-
-                    val direction: Spanned = if (location!!.speed > 0f) {
-                        fromHtml("<b>${getString(R.string.gps_direction)}</b> ${getDirectionNameFromAzimuth(requireContext(), location!!.bearing.toDouble())}")
-                    } else {
-                        fromHtml("<b>${getString(R.string.gps_direction)}</b> N/A")
-                    }
-
-                    withContext(Dispatchers.Main) {
-                        this@GPS.tools.locationIndicatorUpdate(true)
-                        this@GPS.providerSource.text = providerSource
-                        this@GPS.providerStatus.text = providerStatus
-                        this@GPS.altitude.text = altitude
-                        this@GPS.speed.text = speed
-                        this@GPS.bearing.text = bearing
-                        this@GPS.accuracy.text = accuracy
-                        this@GPS.direction.text = direction
-
-                        speedometer.setSpeedValue(if (MainPreferences.isMetric()) {
-                            it.speed.toKiloMetersPerHour()
-                        } else {
-                            it.speed.toMilesPerHour()
-                        })
-
-                        if (!isCustomCoordinate) {
-                            maps?.setFirstLocation(location)
-                            maps?.location = location
-                            maps?.addMarker(LatLng(location!!.latitude, location!!.longitude))
-                            getAddress(LatLng(location!!.latitude, location!!.longitude))
-
-                            with(DMSConverter.getFormattedCoordinates(location!!, requireContext())) {
-                                latitude.text = fromHtml("<b>${getString(R.string.gps_latitude)}</b> ${this[0]}")
-                                longitude.text = fromHtml("<b>${getString(R.string.gps_longitude)}</b> ${this[1]}")
-                            }
-                        }
-                    }
-                }
-            }
+        if (state.custom) {
+            val coordinates = MainPreferences.getCoordinates()
+            showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
         }
 
-        locationViewModel.dms.observe(viewLifecycleOwner) {
-            if (isCustomCoordinate) return@observe
-            Log.d("GPS", "DMS: ${it.first} ${it.second}")
+        viewModel.getLocation().observe(viewLifecycleOwner, ::onLocation)
+        viewModel.getProvider().observe(viewLifecycleOwner) {
+            state.enabled = getLocationStatus(requireContext())
+            state.provider = providerRows(it)
         }
-
-        locationViewModel.latency.observe(viewLifecycleOwner) {
-            val str: Spannable = fromHtml("<b>${getString(R.string.gps_latency)}</b> " +
-                    "${it.first} " +
-                    if (it.second) getString(R.string.seconds) else getString(R.string.milliseconds)).toSpannable()
-
-            if (it.second) {
-                if (it.first.toDouble() > 5.0) {
-                    str.setSpan(ForegroundColorSpan(Color.RED), getString(R.string.gps_latency).length, str.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                }
-            }
-
-            latency.text = str
+        viewModel.latency.observe(viewLifecycleOwner) {
+            val unit = getString(if (it.second) R.string.seconds else R.string.milliseconds)
+            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.first} $unit", it.second && it.first.toDouble() > LATE)
+            publishLocationRows()
         }
-
-        locationViewModel.getProvider().observe(viewLifecycleOwner) {
-            providerStatus.text = fromHtml(
-                    "<b>${getString(R.string.gps_status)}</b> ${
-                        if (getLocationStatus(requireContext())) {
-                            getString(R.string.gps_enabled)
-                        } else {
-                            getString(R.string.gps_disabled)
-                        }
-                    }"
-            )
-
-            providerSource.text = fromHtml(
-                    "<b>${getString(R.string.gps_source)}</b> $it"
-            )
-
-            tools.locationIconStatusUpdates()
-        }
-
-        locationViewModel.targetData.observe(viewLifecycleOwner) {
-            targetData.text = it
-        }
-
-        bottomSheetInfoPanel?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when (newState) {
-                    BottomSheetBehavior.STATE_DRAGGING -> {
-                        maps?.unregister()
-                        locationBox.isClickable = false
-                        targetBox.isClickable = false
-                        movementBox.isClickable = false
-                        coordinatesBox.isClickable = false
-                        copy.isClickable = false
-                    }
-
-                    BottomSheetBehavior.STATE_EXPANDED -> {
-                        backPressed(true)
-                        maps?.unregister()
-                        locationBox.isClickable = true
-                        targetBox.isClickable = true
-                        movementBox.isClickable = true
-                        coordinatesBox.isClickable = true
-                        copy.isClickable = true
-                    }
-
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-                        backPressed(false)
-                        while (backPress!!.hasEnabledCallbacks()) {
-                            backPress?.onBackPressed()
-                        }
-                        maps?.registerWithRunnable()
-                        locationBox.isClickable = false
-                        targetBox.isClickable = false
-                        movementBox.isClickable = false
-                        coordinatesBox.isClickable = false
-                        copy.isClickable = false
-                    }
-
-                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-                    }
-
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-                    }
-
-                    BottomSheetBehavior.STATE_SETTLING -> {
-                    }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                scrollView.alpha = slideOffset
-                expandUp.alpha = 1 - slideOffset
-                expandUp.rotationX = -180 * slideOffset
-                dim?.alpha = slideOffset
-                if (!isFullScreen) {
-                    bottomSheetSlide.onBottomSheetSliding(slideOffset, true)
-                }
-            }
-        })
-
-        expandUp.setOnClickListener {
-            if (bottomSheetInfoPanel?.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                bottomSheetInfoPanel?.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-        }
-
-        toolbar.setOnMapToolbarCallbacks(object : MapToolbar.MapToolbarCallbacks {
-            override fun onMenuClicked(view: View) {
-                GPSMenu().show(parentFragmentManager, "gps_menu")
-            }
-
-            override fun onCustomLocationClicked(view: View) {
-                LocationParameters.newInstance()
-                        .show(parentFragmentManager, "location_params")
-            }
-
-            override fun onCustomLocationLongPressed(view: View) {
-                PinCustomization.newInstance(true)
-                        .show(parentFragmentManager, "pin_customization")
-            }
-        })
-
-        tools.setOnToolsCallbacksListener(object : MapsToolsCallbacks {
-            override fun onLocationClicked(view: View, longPressed: Boolean) {
-                if (getLocationStatus(requireContext())) {
-                    maps?.isMapMovementEnabled = true
-
-                    if (longPressed) {
-                        maps?.resetCamera(18F)
-                    } else {
-                        maps?.resetCamera(GPSPreferences.getMapZoom())
-                    }
-                } else {
-                    LocationPrompt.displayLocationSettingsRequest(requireActivity())
-                }
-            }
-
-            override fun onTargetAdd(longpress: Boolean) {
-                if (longpress) {
-                    TargetCoordinates.newInstance()
-                            .show(childFragmentManager, "target_coordinates")
-                } else {
-                    maps?.setTargetMarker(null)
-                }
-            }
-
-            override fun removeTarget(view: View) {
-                DeletePopupMenu(view) {
-                    GPSPreferences.setTargetMarker(false)
-                }
-            }
-        })
-
-        save.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
-                val isLocationSaved: Boolean
-                val db = Room.databaseBuilder(requireContext(), LocationDatabase::class.java, "locations.db")
-                        .fallbackToDestructiveMigration().build()
-
-                val locations = Locations()
-
-                if (location.isNull()) {
-                    isLocationSaved = false
-                } else {
-                    locations.latitude = location?.latitude!!
-                    locations.longitude = location?.longitude!!
-                    locations.address = address.text.toString()
-                    locations.date = System.currentTimeMillis()
-
-                    db.locationDao()?.insertLocation(locations)
-                    db.close()
-
-                    isLocationSaved = true
-                }
-
-                withContext(Dispatchers.Main) {
-                    handler.removeCallbacks(textAnimationRunnable)
-
-                    if (isLocationSaved) {
-                        infoText.setTextAnimation(getString(R.string.location_saved), 300)
-                        handler.postDelayed(textAnimationRunnable, 3000)
-                    } else {
-                        infoText.setTextAnimation(getString(R.string.location_not_saved), 300)
-                        handler.postDelayed(textAnimationRunnable, 3000)
-                    }
-                }
-            }
-        }
-
-        copy.setOnClickListener {
-            handler.removeCallbacks(textAnimationRunnable)
-            val clipboard: ClipboardManager =
-                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-            if (accuracy.text != "") {
-                val stringBuilder = StringBuilder().apply {
-                    append("${getString(R.string.gps_provider)}\n")
-                    append("${providerStatus.text}\n")
-                    append("${providerSource.text}\n\n")
-
-                    append("${getString(R.string.gps_location)}\n")
-                    append("${accuracy.text}\n")
-                    append("${altitude.text}\n")
-                    append("${bearing.text}\n\n")
-
-                    append("${getString(R.string.gps_movement)}\n")
-                    append("${direction.text}\n")
-                    append("${speed.text}\n")
-
-                    if (isCustomCoordinate) {
-                        append("\n${specifiedLocationTextView.text}\n")
-                    }
-
-                    append("\n${getString(R.string.gps_coordinates)}\n")
-                    append("${latitude.text}\n")
-                    append("${longitude.text}\n\n")
-
-                    append("${getString(R.string.gps_address)}: ${address.text}")
-                }
-
-                val clip: ClipData = ClipData.newPlainText("GPS Data", stringBuilder)
-                clipboard.setPrimaryClip(clip)
-            }
-
-            if (clipboard.hasPrimaryClip()) {
-                infoText.setTextAnimation(getString(R.string.info_copied), 300)
-                handler.postDelayed(textAnimationRunnable, 3000)
-            } else {
-                infoText.setTextAnimation(getString(R.string.info_error), 300)
-                handler.postDelayed(textAnimationRunnable, 3000)
-            }
-        }
-
-        locationBox.setOnClickListener {
-            LocationExpansion.newInstance().show(childFragmentManager, "location_expansion")
-        }
-
-        targetBox.setOnClickListener {
-            bottomSheetInfoPanel?.state = BottomSheetBehavior.STATE_COLLAPSED
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                maps?.moveCameraToTarget()
-            } else {
-                GPSPreferences.setTargetMarkerMode(true)
-            }
-        }
-
-        coordinatesBox.setOnClickListener {
-            CoordinatesExpansion.newInstance()
-                    .show(childFragmentManager, "coordinates_expansion")
-        }
-
-        coordinatesBox.setOnLongClickListener { view1 ->
-            PopupCoordinateBox(view1).setPopupCoordinateBoxCallbacks(object : PopupCoordinateBox.Companion.PopupCoordinateBoxCallbacks {
-                override fun send() {
-                    share()
-                }
-            })
-            true
-        }
-
-        maps?.setOnMapsCallbackListener(object : MapsCallbacks {
-            override fun onMapInitialized() {
-                if (savedInstanceState.isNotNull()) {
-                    maps?.setCamera(savedInstanceState!!.parcelable("camera"))
-                }
-            }
-
-            override fun onMapClicked() {
-                if (!isLandscapeOrientation) {
-                    setFullScreen()
-                }
-            }
-
-            override fun onMapLongClicked(latLng: LatLng) {
-                PopupLocationMenu(dim!!, x, y).setOnMapsCallBackListener(object : MapsCallbacks {
-                    override fun onTargetAdd() {
-                        maps?.setTargetMarker(latLng)
-                    }
-
-                    override fun onNavigate() {
-                        kotlin.runCatching {
-                            val uri: Uri = Uri.parse("google.navigation:q=" + latLng.latitude.toString() + "," + latLng.longitude.toString() + "&mode=d")
-                            val intent = Intent(Intent.ACTION_VIEW, uri)
-                            intent.setPackage("com.google.android.apps.maps")
-                            startActivity(intent)
-                        }.getOrElse {
-                            Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                })
-            }
-
-            override fun onTargetUpdated(target: LatLng?, current: LatLng?, speed: Float) {
-                kotlin.runCatching {
-                }
-            }
-        })
-
-        dim?.setOnTouchListener { _, event ->
-            when (event!!.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    x = event.x
-                    y = event.y
-                }
-            }
-            false
-        }
-
-        view.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN) {
-                when (keyCode) {
-                    KeyEvent.KEYCODE_VOLUME_UP -> {
-                        maps?.zoomIn()
-                    }
-
-                    KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                        maps?.zoomOut()
-                    }
-
-                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
-                        maps?.resetCamera(GPSPreferences.getMapZoom())
-                    }
-
-                    KeyEvent.KEYCODE_BACK -> {
-                        requireActivity().onBackPressedDispatcher.onBackPressed()
-                    }
-                }
-            }
-
-            true
-        }
-
-        maps?.onTouch = { event, _ ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    maps?.unregister()
-                }
-
-                MotionEvent.ACTION_UP -> {
-                    if (bottomSheetInfoPanel?.state != BottomSheetBehavior.STATE_EXPANDED) {
-                        maps?.registerWithRunnable()
-                    }
-                }
-            }
-        }
+        viewModel.targetData.observe(viewLifecycleOwner) { state.target = it.toAnnotatedString() }
     }
 
-    private fun updateCoordinates(latitude: Double, longitude: Double) {
-        this.latitude.text =
-                fromHtml("<b>${getString(R.string.gps_latitude)}</b> ${DMSConverter.getFormattedLatitude(latitude, requireContext())}")
-        this.longitude.text =
-                fromHtml("<b>${getString(R.string.gps_longitude)}</b> ${DMSConverter.getFormattedLongitude(longitude, requireContext())}")
-    }
-
-    @Suppress("RemoveCurlyBracesFromTemplate")
-    private fun share() {
-        kotlin.runCatching {
-            val latitude1 = round(location?.latitude!!, 6)
-            val longitude2 = round(location?.longitude!!, 6)
-            val link = "https://www.google.com/maps/search/?api=1&query=${latitude1},${longitude2}"
-            val geoLink = "geo:${latitude1},${longitude2}?q=${latitude1},${longitude2}"
-            val info = "${getString(R.string.gps_coordinates)}: ${latitude1}, ${longitude2}"
-            val address = address.text.toString()
-
-            val combined = "$info\n\n$address\n\nMaps:\n$link\n\nGeoLink:\n$geoLink"
-
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.type = "text/plain"
-            intent.putExtra(Intent.EXTRA_TEXT, combined)
-            startActivity(Intent.createChooser(intent, getString(R.string.share)))
-        }.getOrElse {
-            Toast.makeText(requireContext(), it.message
-                    ?: getString(R.string.error), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun setFullScreen() {
-        if (isFullScreen) {
-            toolbar.show()
-            bottomSheetInfoPanel?.peekHeight = peekHeight
-        } else {
-            toolbar.hide()
-            bottomSheetInfoPanel?.peekHeight = 0
-        }
-
-        if (isLandscapeOrientation) {
-            toolbar.show()
-            bottomSheetSlide.onMapClicked(fullScreen = true)
-        } else {
-            bottomSheetSlide.onMapClicked(fullScreen = isFullScreen)
-        }
-
-        isFullScreen = !isFullScreen
-    }
-
-    private val textAnimationRunnable: Runnable = Runnable {
-        infoText.setTextAnimation(getString(R.string.gps_info), 300)
-    }
-
-    private fun getAddress(latLng: LatLng) {
-        lifecycleScope.launch(Dispatchers.Default) {
-            var address: String = getString(R.string.not_available)
-
-            runCatching {
-                address = try {
-                    if (!isNetworkAvailable(requireContext())) {
-                        getString(R.string.internet_connection_alert)
-                    } else {
-                        val geocoder = Geocoder(requireContext(), Locale.getDefault())
-
-                        @Suppress("DEPRECATION")
-                        with(geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)) {
-                            if (!this.isNullOrEmpty()) {
-                                this[0].getAddressLine(0)
-                            } else {
-                                getString(R.string.not_available)
-                            }
-                        }
-                    }
-                } catch (e: IOException) {
-                    "${e.message}"
-                } catch (e: NullPointerException) {
-                    "${e.message}\n${getString(R.string.no_address_found)}"
-                } catch (e: IllegalArgumentException) {
-                    getString(R.string.invalid_coordinates)
-                }
-            }
-
-            withContext(Dispatchers.Main) {
-                this@GPS.address.text = fromHtml("<b>${getString(R.string.gps_address)}:</b> $address")
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        maps?.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        maps?.onPause()
-        if (backPress!!.hasEnabledCallbacks()) {
-            backPressed(false)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        maps?.removeCallbacks { }
-        maps?.onDestroy()
-        handler.removeCallbacks(textAnimationRunnable)
-        infoText.clearAnimation()
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        maps?.onLowMemory()
-    }
-
-    private fun setLocationPin() {
-        view?.findViewById<TextView>(R.id.coordinates)!!
-                .setCompoundDrawablesWithIntrinsicBounds(0, 0, LocationPins.locationsPins[GPSPreferences.getPinSkin()], 0)
-    }
-
-    private fun targetMode() {
-        if (GPSPreferences.isTargetMarkerMode()) {
-            crossHair.visible(true)
-        } else {
-            crossHair.gone(true)
-        }
-    }
-
-    private fun backPressed(value: Boolean) {
-        backPress?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(value) {
-            override fun handleOnBackPressed() {
-                if (bottomSheetInfoPanel?.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomSheetInfoPanel?.state = BottomSheetBehavior.STATE_COLLAPSED
-                }
-                remove()
-            }
-        })
+    override fun onDestroyView() {
+        super.onDestroyView()
+        addressJob?.cancel()
+        addressThreshold.reset()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat("translation", toolbar.translationY)
-        outState.putBoolean("fullscreen", isFullScreen)
-        outState.putParcelable("camera", maps?.getCamera())
         super.onSaveInstanceState(outState)
+        outState.putBoolean(FULL_SCREEN, state.fullScreen)
+        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        if (savedInstanceState.isNotNull()) {
-            isFullScreen = savedInstanceState!!.getBoolean("fullscreen")
-            if (isLandscapeOrientation) {
-                setFullScreen()
+    private fun onLocation(location: Location) {
+        this.location = location
+        MainPreferences.setLastLatitude(location.latitude.toFloat())
+        MainPreferences.setLastLongitude(location.longitude.toFloat())
+        MainPreferences.setLastAltitude(location.altitude.toFloat())
+
+        val metric = MainPreferences.isMetric()
+        val length = getString(if (metric) R.string.meter else R.string.feet)
+        val accuracy = if (metric) location.accuracy.toDouble() else location.accuracy.toDouble().toFeet()
+        val altitude = if (metric) location.altitude else location.altitude.toFeet()
+        val kmh = location.speed.toDouble().toKiloMetersPerHour()
+        val speed = if (metric) kmh else kmh.toMilesPerHour()
+        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(requireContext(), location.bearing.toDouble()) else getString(R.string.not_available)
+
+        state.fixed = true
+        state.enabled = getLocationStatus(requireContext())
+        state.provider = providerRows(location.provider?.uppercase(LocaleHelper.getAppLocale()) ?: getString(R.string.not_available))
+        accuracyRow = InfoRow(getString(R.string.gps_accuracy), "${round(accuracy, 2)} $length")
+        altitudeRow = InfoRow(getString(R.string.gps_altitude), "${round(altitude, 2)} $length")
+        publishLocationRows()
+        state.movement = listOf(
+            InfoRow(getString(R.string.gps_bearing), "${location.bearing}°"),
+            InfoRow(getString(R.string.gps_direction), direction),
+            InfoRow(getString(R.string.gps_speed), "${round(speed, 2)} ${getString(if (metric) R.string.kilometer_hour else R.string.miles_hour)}"),
+        )
+        state.speed = if (metric) location.speed.toKiloMetersPerHour() else location.speed.toMilesPerHour()
+
+        if (!state.custom) {
+            maps.setFirstLocation(location)
+            maps.location = location
+            maps.addMarker(LatLng(location.latitude, location.longitude))
+            showCoordinates(location.latitude, location.longitude)
+        }
+    }
+
+    private fun showCoordinates(latitude: Double, longitude: Double) {
+        state.coordinates = listOf(
+            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, requireContext())),
+            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, requireContext())),
+        )
+        if (!addressThreshold.accept(latitude, longitude)) return
+        addressJob?.cancel()
+        addressJob = viewLifecycleOwner.lifecycleScope.launch {
+            state.address = if (isNetworkAvailable(requireContext())) {
+                ReverseGeocoder.addressLine(requireContext(), latitude, longitude) ?: getString(R.string.no_address_found)
             } else {
-                setFullScreen()
+                addressThreshold.reset()
+                getString(R.string.internet_connection_alert)
             }
         }
-        super.onViewStateRestored(savedInstanceState)
     }
 
-    private fun updateToolsGravity(view: View) {
+    private fun providerRows(source: String) = listOf(
+        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(requireContext())) R.string.gps_enabled else R.string.gps_disabled)),
+        InfoRow(getString(R.string.gps_source), source),
+    )
+
+    private fun publishLocationRows() {
+        state.location = listOf(accuracyRow, altitudeRow, latencyRow)
+    }
+
+    private fun readPreferences() {
+        state.pin = LocationPins.getLocationPin()
+        state.targetMode = GPSPreferences.isTargetMarkerMode()
+        state.targetSet = GPSPreferences.isTargetMarkerSet()
+        state.toolsLeft = GPSPreferences.isToolsGravityLeft()
+        state.volumeKeys = GPSPreferences.isUsingVolumeKeys()
+        state.rotation = when {
+            GPSPreferences.isCompassRotation() -> MapRotation.Compass
+            GPSPreferences.isBearingRotation() -> MapRotation.Bearing
+            else -> MapRotation.North
+        }
+    }
+
+    private fun consumeFullScreenShortcut(): Boolean {
+        val intent = requireActivity().intent ?: return false
+        if (intent.action != FULL_SCREEN_ACTION) return false
+        intent.action = null
+        return true
+    }
+
+    private fun bottomBar(visible: Boolean) {
+        (requireActivity() as? BottomSheetSlide)?.onMapClicked(visible)
+    }
+
+    override fun onMapInitialized() {
+        camera?.let(maps::setCamera)
+    }
+
+    override fun onMapClicked() {
         if (isLandscapeOrientation) return
-
-        TransitionManager.beginDelayedTransition(
-                view as ViewGroup,
-                TransitionInflater.from(requireContext())
-                        .inflateTransition(R.transition.tools_transition))
-
-        val params = CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        params.apply {
-            gravity = if (GPSPreferences.isToolsGravityLeft()) {
-                Gravity.START or Gravity.CENTER_VERTICAL
-            } else {
-                Gravity.END or Gravity.CENTER_VERTICAL
-            }
-
-            marginStart = resources.getDimensionPixelSize(R.dimen.trail_tools_margin)
-            marginEnd = resources.getDimensionPixelSize(R.dimen.trail_tools_margin)
-        }
-
-        tools.layoutParams = params
+        state.fullScreen = !state.fullScreen
+        bottomBar(!state.fullScreen)
     }
+
+    override fun onMapLongClicked(latLng: LatLng) {
+        val point = maps.screenPoint(latLng) ?: return
+        pressed = latLng
+        state.pressed = IntOffset(point.x, point.y)
+    }
+
+    override fun menu() = GPSMenu().show(parentFragmentManager, "gps_menu")
+
+    override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
+
+    override fun pinCustomization() = PinCustomization.newInstance(true).show(parentFragmentManager, "pin_customization")
+
+    override fun locate(close: Boolean) {
+        if (getLocationStatus(requireContext())) {
+            maps.isMapMovementEnabled = true
+            maps.resetCamera(if (close) CLOSE_ZOOM else GPSPreferences.getMapZoom())
+        } else {
+            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+        }
+    }
+
+    override fun toggleTargetMode() = GPSPreferences.setTargetMarkerMode(!GPSPreferences.isTargetMarkerMode())
+
+    override fun confirmTarget() {
+        GPSPreferences.setTargetMarkerMode(false)
+        maps.setTargetMarker(null)
+    }
+
+    override fun targetCoordinates() = TargetCoordinates.newInstance().show(childFragmentManager, "target_coordinates")
+
+    override fun removeTarget() = GPSPreferences.setTargetMarker(false)
+
+    override fun toggleToolsSide() = GPSPreferences.setToolsGravity(!GPSPreferences.isToolsGravityLeft())
+
+    override fun rotate(rotation: MapRotation) {
+        GPSPreferences.setCompassRotation(rotation == MapRotation.Compass)
+        GPSPreferences.setBearingRotation(rotation == MapRotation.Bearing)
+        GPSPreferences.setNorthOnly(rotation == MapRotation.North)
+    }
+
+    override fun sheet(open: Boolean) {
+        state.sheet = open
+        if (open) maps.unregister() else maps.registerWithRunnable()
+    }
+
+    override fun save() {
+        val current = location
+        if (current == null) {
+            state.message = R.string.location_not_saved
+            return
+        }
+        val entry = Locations().apply {
+            latitude = current.latitude
+            longitude = current.longitude
+            address = state.address
+            date = System.currentTimeMillis()
+        }
+        val dao = LocationDatabase.getInstance(requireContext()).locationDao()
+        viewLifecycleOwner.lifecycleScope.launch {
+            withContext(NonCancellable) { dao.insertLocation(entry) }
+            state.message = R.string.location_saved
+        }
+    }
+
+    override fun copy() {
+        val clipboard = requireContext().getSystemService<ClipboardManager>() ?: return
+        val text = buildString {
+            section(getString(R.string.gps_provider), state.provider)
+            section(getString(R.string.gps_location), state.location)
+            section(getString(R.string.gps_movement), state.movement)
+            if (state.custom) append(getString(R.string.specified_location_notice)).append("\n\n")
+            section(getString(R.string.gps_coordinates), state.coordinates + InfoRow(getString(R.string.gps_address) + ":", state.address))
+        }.trim()
+        clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.gps_info), text))
+        state.message = R.string.info_copied
+    }
+
+    private fun StringBuilder.section(title: String, rows: List<InfoRow>) {
+        append(title).append('\n')
+        rows.forEach { append(it.label).append(' ').append(it.value).append('\n') }
+        append('\n')
+    }
+
+    override fun share() {
+        val target = location?.let { it.latitude to it.longitude }
+            ?: MainPreferences.getCoordinates().takeIf { state.custom }?.let { it[0].toDouble() to it[1].toDouble() }
+            ?: return
+        val latitude = round(target.first, 6)
+        val longitude = round(target.second, 6)
+        val text = "${getString(R.string.gps_coordinates)}: $latitude, $longitude\n\n${state.address}\n\n" +
+                "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude\n\ngeo:$latitude,$longitude?q=$latitude,$longitude"
+        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), getString(R.string.share)))
+    }
+
+    override fun locationDetails() = LocationExpansion.newInstance().show(childFragmentManager, "location_expansion")
+
+    override fun coordinateDetails() = CoordinatesExpansion.newInstance().show(childFragmentManager, "coordinates_expansion")
+
+    override fun showTarget() {
+        sheet(false)
+        if (GPSPreferences.isTargetMarkerSet()) maps.moveCameraToTarget() else GPSPreferences.setTargetMarkerMode(true)
+    }
+
+    override fun setPressedTarget() {
+        pressed?.let(maps::setTargetMarker)
+        state.pressed = null
+    }
+
+    override fun navigatePressed() {
+        state.pressed = null
+        val latLng = pressed ?: return
+        val navigation = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${latLng.latitude},${latLng.longitude}&mode=d"))
+            .setPackage(GOOGLE_MAPS)
+        val generic = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${latLng.latitude},${latLng.longitude}?q=${latLng.latitude},${latLng.longitude}"))
+        runCatching { startActivity(navigation) }
+            .recoverCatching { startActivity(generic) }
+            .onFailure { Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show() }
+    }
+
+    override fun zoom(zoomIn: Boolean) = if (zoomIn) maps.zoomIn() else maps.zoomOut()
+
+    override fun recenter() = maps.resetCamera(GPSPreferences.getMapZoom())
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            GPSPreferences.useVolumeKeys -> {
-                view?.isFocusableInTouchMode = GPSPreferences.isUsingVolumeKeys()
-                if (GPSPreferences.isUsingVolumeKeys()) {
-                    view?.requestFocus()
-                } else {
-                    view?.clearFocus()
-                }
-            }
-
-            GPSPreferences.pinSkin -> {
-                setLocationPin()
-            }
-
-            GPSPreferences.toolsGravity -> {
-                updateToolsGravity(requireView())
-            }
-
-            GPSPreferences.isTargetMarkerMode -> {
-                targetMode()
-            }
-        }
+        if (key in gpsKeys) readPreferences()
     }
 
     companion object {
-        fun newInstance(): GPS {
-            val args = Bundle()
-            val fragment = GPS()
-            fragment.arguments = args
-            return fragment
-        }
+        private const val PENDING = "-"
+        private const val CAMERA = "camera"
+        private const val FULL_SCREEN = "fullscreen"
+        private const val FULL_SCREEN_ACTION = "action_map_panel_full"
+        private const val GOOGLE_MAPS = "com.google.android.apps.maps"
+        private const val CLOSE_ZOOM = 18F
+        private const val LATE = 5.0
+        private const val ADDRESS_DISTANCE = 25.0
+        private val gpsKeys = setOf(
+            GPSPreferences.pinSkin,
+            GPSPreferences.toolsGravity,
+            GPSPreferences.isTargetMarkerMode,
+            GPSPreferences.mapTargetMarker,
+            GPSPreferences.compassRotation,
+            GPSPreferences.useBearingRotation,
+            GPSPreferences.isNorthOnly,
+            GPSPreferences.useVolumeKeys,
+        )
+
+        fun newInstance() = GPS()
     }
 }
 
@@ -23808,6 +23857,52 @@ object PermissionUtils {
             e.printStackTrace()
         }
         return null
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/ReverseGeocoder.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import android.location.Address
+import android.location.Geocoder
+import android.os.Build
+import androidx.annotation.RequiresApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+
+object ReverseGeocoder {
+    suspend fun addressLine(context: Context, latitude: Double, longitude: Double): String? {
+        if (!Geocoder.isPresent()) return null
+        val geocoder = Geocoder(context.applicationContext, LocaleHelper.getAppLocale())
+        val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            geocoder.lookup(latitude, longitude)
+        } else {
+            withContext(Dispatchers.IO) {
+                @Suppress("DEPRECATION")
+                runCatching { geocoder.getFromLocation(latitude, longitude, 1) }.getOrNull().orEmpty()
+            }
+        }
+        return addresses.firstOrNull()?.getAddressLine(0)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun Geocoder.lookup(latitude: Double, longitude: Double): List<Address> = suspendCancellableCoroutine { continuation ->
+        runCatching {
+            getFromLocation(latitude, longitude, 1, object : Geocoder.GeocodeListener {
+                override fun onGeocode(addresses: MutableList<Address>) {
+                    if (continuation.isActive) continuation.resume(addresses)
+                }
+
+                override fun onError(errorMessage: String?) {
+                    if (continuation.isActive) continuation.resume(emptyList())
+                }
+            })
+        }.onFailure { if (continuation.isActive) continuation.resume(emptyList()) }
     }
 }
 
@@ -31300,7 +31395,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="info_text_item_line_spacing">10dp</dimen>
     <dimen name="expand_up_image_size">20dp</dimen>
     <dimen name="info_text_primary_size">20sp</dimen>
     <dimen name="info_text_secondary_size">12sp</dimen>
@@ -31443,7 +31537,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="info_text_item_line_spacing">10dp</dimen>
     <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
@@ -31514,7 +31607,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="info_text_item_line_spacing">10dp</dimen>
     <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
@@ -31617,7 +31709,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="info_text_item_line_spacing">10dp</dimen>
     <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">31sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
@@ -31674,7 +31765,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="info_text_item_line_spacing">10dp</dimen>
     <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
@@ -31744,12 +31834,6 @@ class TwilightWidget : AppWidgetProvider() {
         <attr name="s_marker_border_size" format="dimension|reference" />
 
         <attr name="s_marker_circle_style" format="boolean|reference" />
-    </declare-styleable>
-
-    <declare-styleable name="Speedometer">
-        <attr name="gradient_needle" format="boolean" />
-        <attr name="first_gradient_color" format="color" />
-        <attr name="colorful_needle" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="DynamicCornerLayout">
@@ -31882,7 +31966,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="info_text_item_line_spacing">10dp</dimen>
     <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
@@ -32118,7 +32201,6 @@ class TwilightWidget : AppWidgetProvider() {
     <string name="seconds">s</string>
 
     <string name="info_copied">Copied to Clipboard</string>
-    <string name="info_error">Info couldn\'t be copied!!</string>
     <string name="invalid_coordinates">Invalid Coordinates</string>
     <string name="internet_connection_alert">Internet connection not available</string>
     <string name="error">Error</string>
@@ -32765,6 +32847,58 @@ class CompassAzimuthTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/math/GeoDistanceTest.kt
+################################################################################
+package app.simple.positional.math
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class GeoDistanceTest {
+    @Test
+    fun samePointIsZero() {
+        assertEquals(0.0, GeoDistance.meters(37.0, -76.4, 37.0, -76.4), 1e-9)
+    }
+
+    @Test
+    fun oneDegreeOfLatitude() {
+        assertEquals(111_195.0, GeoDistance.meters(0.0, 0.0, 1.0, 0.0), 5.0)
+    }
+
+    @Test
+    fun antipodesAreHalfCircumference() {
+        assertEquals(20_015_115.0, GeoDistance.meters(0.0, 0.0, 0.0, 180.0), 50.0)
+    }
+
+    @Test
+    fun distanceIsSymmetric() {
+        val forward = GeoDistance.meters(51.5, -0.12, 48.85, 2.35)
+        val backward = GeoDistance.meters(48.85, 2.35, 51.5, -0.12)
+        assertEquals(forward, backward, 1e-6)
+        assertEquals(343_500.0, forward, 1_500.0)
+    }
+
+    @Test
+    fun thresholdIgnoresSmallMoves() {
+        val threshold = MovementThreshold(25.0)
+        assertTrue(threshold.accept(10.0, 10.0))
+        assertFalse(threshold.accept(10.0001, 10.0))
+        assertTrue(threshold.accept(10.001, 10.0))
+        assertFalse(threshold.accept(10.001, 10.0))
+    }
+
+    @Test
+    fun resetAcceptsAgain() {
+        val threshold = MovementThreshold(25.0)
+        assertTrue(threshold.accept(1.0, 1.0))
+        threshold.reset()
+        assertTrue(threshold.accept(1.0, 1.0))
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/math/LowPassFilterTest.kt
 ################################################################################
 package app.simple.positional.math
@@ -33115,6 +33249,38 @@ class ArtsCatalogTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/ComposeDrawablesTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.io.File
+
+class ComposeDrawablesTest {
+    private val sources = listOf("src/main/java/app/simple/positional/ui/compose", "src/main/java/app/simple/positional/constants", "src/main/java/app/simple/positional/util/MoonAngle.kt")
+    private val reference = Regex("""R\.drawable\.(\w+)""")
+    private val root = Regex("""<([a-zA-Z-]+)[\s>]""")
+
+    @Test
+    fun composeDrawablesAreVectorsOrBitmaps() {
+        val names = sources.flatMap { path -> File(path).walk().filter { it.extension == "kt" }.toList() }
+            .flatMap { file -> reference.findAll(file.readText()).map { it.groupValues[1] }.toList() }
+            .toSet()
+        assertTrue(names.isNotEmpty())
+        val drawables = File("src/main/res").listFiles { file -> file.name.startsWith("drawable") }.orEmpty().flatMap { it.listFiles().orEmpty().toList() }
+        names.forEach { name ->
+            val files = drawables.filter { it.nameWithoutExtension == name }
+            assertTrue(name, files.isNotEmpty())
+            files.filter { it.extension == "xml" }.forEach { file ->
+                val text = file.readText().replace(Regex("""<\?xml[^>]*>"""), "")
+                assertTrue("$name is ${root.find(text)?.groupValues?.get(1)}", root.find(text)?.groupValues?.get(1) == "vector")
+            }
+        }
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/ui/compose/CoordinateInputTest.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -33263,6 +33429,43 @@ class SettingsLabelsTest {
     @Test
     fun legalPagesAreDistinct() {
         assertEquals(6, SettingsLabels.legalPages.toSet().size)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/SpeedometerDialTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import app.simple.positional.R
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class SpeedometerDialTest {
+    @Test
+    fun rangesSwitchEveryThreeHundredDegrees() {
+        assertEquals(0, SpeedometerDial.range(0f))
+        assertEquals(0, SpeedometerDial.range(300f))
+        assertEquals(1, SpeedometerDial.range(300.5f))
+        assertEquals(1, SpeedometerDial.range(600f))
+        assertEquals(2, SpeedometerDial.range(900f))
+        assertEquals(3, SpeedometerDial.range(901f))
+    }
+
+    @Test
+    fun needleIsCompensatedPerRange() {
+        assertEquals(120f, SpeedometerDial.needle(120f), 0f)
+        assertEquals(340f, SpeedometerDial.needle(400f), 0f)
+        assertEquals(580f, SpeedometerDial.needle(700f), 0f)
+        assertEquals(820f, SpeedometerDial.needle(1000f), 0f)
+    }
+
+    @Test
+    fun dialMatchesRange() {
+        assertEquals(R.drawable.speedometer_dial_normal_range, SpeedometerDial.dial(10f))
+        assertEquals(R.drawable.speedometer_dial_medium_range, SpeedometerDial.dial(450f))
+        assertEquals(R.drawable.speedometer_dial_high_range, SpeedometerDial.dial(750f))
+        assertEquals(R.drawable.speedometer_dial_max_range, SpeedometerDial.dial(2000f))
     }
 }
 
