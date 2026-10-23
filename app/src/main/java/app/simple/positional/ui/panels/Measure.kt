@@ -51,7 +51,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class Measure : ScopedFragment(), FloatingButtonStateCommunicator.FloatingButtonStateCallbacks {
-
     private lateinit var toolbar: MeasureToolbar
     private lateinit var tools: MeasureTools
     private lateinit var crossHair: ImageView

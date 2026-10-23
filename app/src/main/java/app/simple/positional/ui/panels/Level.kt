@@ -16,11 +16,9 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.ColorInt
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
@@ -42,7 +40,6 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 class Level : ScopedFragment(), SensorEventListener {
-
     private lateinit var levelIndicator: ImageView
     private lateinit var levelDot: ImageView
     private lateinit var boundingBox: FrameLayout
@@ -116,10 +113,6 @@ class Level : ScopedFragment(), SensorEventListener {
         screenHeight = displayMetrics.heightPixels
         screenWidth = displayMetrics.widthPixels
 
-        /**
-         * Gravity constant multiplied by 2
-         * (9.8 m(s * s)) * 2 = 19.6
-         */
         gravityWidthMotionCompensator = screenWidth / 19.6F
         gravityHeightMotionCompensator = screenHeight / 19.6F
 
@@ -210,7 +203,6 @@ class Level : ScopedFragment(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_GRAVITY) {
-
             smoothAndSetReadings(gravityReadings, event.values, readingsAlpha)
 
             val roll = atan2(gravityReadings[0], sqrt(gravityReadings[1] * gravityReadings[1] + gravityReadings[2] * gravityReadings[2])).toDegrees()
@@ -228,13 +220,10 @@ class Level : ScopedFragment(), SensorEventListener {
 
             val y = euler.pitch
 
-            val levelSizeCompensator = 1.0F // TODO - Buggy if (isLarge) scaleLarge else scaleNormal
+            val levelSizeCompensator = 1.0F
 
-            levelDot.translationX = levelIndicator.translationX * -0.3f //gravityReadings[0] * -1 * gravityWidthMotionCompensator / 4
-            levelDot.translationY = levelIndicator.translationY * -0.3f //gravityReadings[1] * gravityHeightMotionCompensator / 4
-
-            // level_dot.scaleX = 2 - ((gravityReadings[0] + gravityReadings[1]) / 2)
-            // level_dot.scaleY = 2 - ((gravityReadings[0] + gravityReadings[1]) / 2)
+            levelDot.translationX = levelIndicator.translationX * -0.3f
+            levelDot.translationY = levelIndicator.translationY * -0.3f
 
             if (gravityReadings[0] in -0.2..0.2 && gravityReadings[1] in -0.2..0.2) {
                 levelDot.imageTintList = ColorStateList.valueOf(parseColor("#37A4CF"))
@@ -276,11 +265,6 @@ class Level : ScopedFragment(), SensorEventListener {
                 }
             }
 
-            /**
-             * Alternative rounding method
-             */
-            //String.format("%.2g%n", abs(x))
-
             if (isLandscapeOrientation) {
                 levelX.text = fromHtml("<b>X:</b> ${abs(round(y.toDouble(), 2))}°")
                 levelY.text = fromHtml("<b>Y:</b> ${abs(round(x.toDouble(), 2))}°")
@@ -292,7 +276,6 @@ class Level : ScopedFragment(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        /* no-op */
     }
 
     private fun setStyle() {
@@ -316,18 +299,6 @@ class Level : ScopedFragment(), SensorEventListener {
                 setStyle()
             }
         }
-    }
-
-    // TODO - fix animation framework
-    private fun ImageView.changeTint(@ColorInt color: Int) {
-        if (imageTintList?.defaultColor == color) return
-        animTint = ValueAnimator.ofArgb(imageTintList?.defaultColor ?: parseColor("#37A4CF"), color)
-        animTint?.duration = 500L
-        animTint?.interpolator = DecelerateInterpolator(1.5F)
-        animTint?.addUpdateListener {
-            imageTintList = ColorStateList.valueOf(it.animatedValue as Int)
-        }
-        animTint?.start()
     }
 
     companion object {

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Panels -->
     <string name="clock">Време</string>
     <string name="compass">Компас</string>
     <string name="gps_location">Местоположение</string>
     <string name="level">Ниво</string>
     <string name="settings">Настройки</string>
-    <!-- Info Headers -->
+
     <string name="clock_info">Информация относно времето</string>
     <string name="compass_info">Информация за компаса</string>
     <string name="gps_info">GPS Инфо</string>
-    <!-- Clock Information Headers-->
+
     <string name="local_time">Местно време</string>
     <string name="utc_time">UTC време</string>
     <string name="sun_position">Положение на слънцето</string>
@@ -20,15 +19,15 @@
     <string name="moon_time">Лунно време</string>
     <string name="moon_illumination">Лунно осветяване</string>
     <string name="moon_dates">Лунни дати</string>
-    <!-- GPS Information Headers -->
+
     <string name="gps_provider">Доставчик</string>
     <string name="gps_movement">Движения</string>
     <string name="gps_coordinates">Координати</string>
     <string name="gps_address">Адрес</string>
-    <!--Compass Information Header -->
+
     <string name="compass_accuracy">Точност</string>
     <string name="compass_field">Магнитно поле</string>
-    <!-- Clock Information Items-->
+
     <string name="local_timezone">Часова зона:</string>
     <string name="local_time_24hr">24ч. време:</string>
     <string name="local_time_12hr">12ч. време:</string>
@@ -63,7 +62,7 @@
     <string name="moon_new_moon">Новолуние:</string>
     <string name="moon_first_quarter">Първа четвърт:</string>
     <string name="moon_last_quarter">Последна четвърт:</string>
-    <!-- Compass information items -->
+
     <string name="magnetometer">Магнетометър</string>
     <string name="accelerometer">Акселерометър</string>
     <string name="accelerometer_accuracy">Акселерометър:</string>
@@ -71,7 +70,7 @@
     <string name="compass_inclination">Наклон:</string>
     <string name="compass_declination">Отклонение:</string>
     <string name="compass_field_strength">Сила на полето:</string>
-    <!-- GPS Information Panel -->
+
     <string name="gps_status">Статус:</string>
     <string name="gps_source">Източник:</string>
     <string name="gps_accuracy">Точност:</string>
@@ -83,15 +82,15 @@
     <string name="gps_speed">Скорост:</string>
     <string name="gps_latitude">Геогр. ширина:</string>
     <string name="gps_longitude">Геогр. дължина:</string>
-    <!-- Sensor Accuracy -->
+
     <string name="sensor_accuracy_unreliable">Ненадеждно</string>
     <string name="sensor_accuracy_low">Ниско</string>
     <string name="sensor_accuracy_medium">Средно</string>
     <string name="sensor_accuracy_high">Високо</string>
-    <!-- GPS Source Status -->
+
     <string name="gps_enabled">Включено</string>
     <string name="gps_disabled">Изключено</string>
-    <!-- Units -->
+
     <string name="meter">м</string>
     <string name="kilometer">км</string>
     <string name="feet">фт</string>
@@ -100,7 +99,7 @@
     <string name="miles_hour">мили/ч</string>
     <string name="milliseconds">мс</string>
     <string name="seconds">с</string>
-    <!-- Alert -->
+
     <string name="info_copied">Копирано в клипборда</string>
     <string name="info_error">Информацията не може да бъде копирана!!</string>
     <string name="invalid_coordinates">Невалидни координати</string>
@@ -112,12 +111,12 @@
     <string name="location_not_saved">Не може да бъде запазено!</string>
     <string name="no_update">Няма нови актуализации</string>
     <string name="location_not_available">Местоположението все още не е налично</string>
-    <!-- Settings Categories -->
+
     <string name="appearance">Външен вид</string>
     <string name="configuration">Конфигурация</string>
     <string name="about">Относно приложението</string>
     <string name="contribute">Допринасяне</string>
-    <!-- Settings Heading -->
+
     <string name="theme">Тема</string>
     <string name="icon">Икона</string>
     <string name="corner_radius">Радиус на ъгъл</string>
@@ -131,7 +130,7 @@
     <string name="app_version">Версия на приложението</string>
     <string name="found_an_issue">Намерихте проблем?</string>
     <string name="translate">Превод</string>
-    <!-- Settings Description -->
+
     <string name="theme_follow_system">Следвай системната тема</string>
     <string name="theme_day">Светла</string>
     <string name="theme_night">Тъмна</string>
@@ -142,30 +141,30 @@
     <string name="desc_legal">Прочетете Отказ от отговорност, Политика за поверителност и Условия за използване на приложението</string>
     <string name="desc_git">Отворете хранилището на приложението</string>
     <string name="desc_translate">Помогнете за превода на приложението на вашия роден език</string>
-    <!-- Clock Menu -->
+
     <string name="needles">Стрелки</string>
     <string name="motion_type">Тип на движението</string>
     <string name="time_format">Използвай 12-часов формат</string>
     <string name="motion_type_smooth">Плавно</string>
     <string name="motion_type_tick">Тиктакане</string>
-    <!-- Compass Menu -->
+
     <string name="bloom">Цветенца</string>
     <string name="bloom_skins">Дизайн на цветенцата</string>
     <string name="show_code">Показване на кода</string>
-    <!-- GPS Menu -->
+
     <string name="labels">Етикети</string>
     <string name="buildings">Сгради</string>
     <string name="traffic">Трафик</string>
     <string name="satellite_mode">Сателит</string>
     <string name="high_contrast_mode">Висок контраст на картата</string>
-    <!-- Settings Menus -->
+
     <string name="unit_metric">Метрични</string>
     <string name="unit_imperial">Британски</string>
-    <!-- Specified Coordinates Menu -->
+
     <string name="specified_hint_header">Въведете местоположение</string>
     <string name="specified_hint_latitude">Географска ширина (±90)</string>
     <string name="specified_hint_longitude">Географска дължина (±180)</string>
-    <!-- Info -->
+
     <string name="compass_calibration_notice">Ако точността на сензора на компаса на вашето устройство е ниска, движете устройство във фигура осем за калибриране на сензорите.</string>
     <string name="specified_location_notice">Информацията, показана по-долу, се актуализира за посочените координати на местоположението.</string>
     <string name="show_again">Покажи отново</string>
@@ -176,27 +175,27 @@
     <string name="auto_system_default_language">Автоматично (по подразбиране)</string>
     <string name="location_permission_denied">"Разрешение за местоположение бе отказано!"</string>
     <string name="no_location_permission_alert">Някои функции може да не работят без разрешение за местоположение</string>
-    <!-- Button Text -->
+
     <string name="button_cancel">Отказ</string>
     <string name="button_set">Задай</string>
     <string name="button_close">Затвори</string>
     <string name="button_grant">Разреши</string>
     <string name="button_reset">Изчисти</string>
-    <!-- Button Descriptions -->
+
     <string name="clock_options">Информация за часовника</string>
     <string name="compass_options">Компас меню</string>
     <string name="gps_options">GPS меню</string>
     <string name="gps_reset_location">Нулиране на локацията</string>
     <string name="delete_all">Изтрий всичко</string>
     <string name="open_specified_location_documentation">Отворете документацията за определено местоположение</string>
-    <!-- Legal Menu -->
+
     <string name="disclaimer">Отказване от права</string>
     <string name="privacy_policy">Политика за Поверителност</string>
     <string name="terms_of_use">Условия за Ползване</string>
     <string name="permissions">Разрешения</string>
     <string name="credits">Благодарности</string>
     <string name="internet_uses">Използване на интернет</string>
-    <!-- Moon Illumination -->
+
     <string name="waning">Намаляваща</string>
     <string name="waning_gibbous">Намаляваща полупълна</string>
     <string name="waning_crescent">Залязващ полумесец</string>
@@ -207,7 +206,7 @@
     <string name="new_moon">Новолуние</string>
     <string name="third_quarter">Трета четвърт</string>
     <string name="first_quarter">Първа четвърт</string>
-    <!-- Directions -->
+
     <string name="north">Север</string>
     <string name="north_west">Северозапад</string>
     <string name="west">Запад</string>
@@ -224,17 +223,17 @@
     <string name="south_east_SE">ЮИ</string>
     <string name="east_E">И</string>
     <string name="north_east_NE">СИ</string>
-    <!-- Graph -->
+
     <string name="location_details">Местоположение детайли</string>
     <string name="min">Мин:</string>
     <string name="max">Макс:</string>
     <string name="avg">Средно:</string>
-    <!-- UTM -->
+
     <string name="utm_zone">Зона:</string>
     <string name="utm_easting">Отклонение към изток:</string>
     <string name="utm_northing">Отклонение към север:</string>
     <string name="utm_meridian">Централен меридиан:</string>
-    <!-- Location Provider -->
+
     <string name="desc_android_location_provider">API за местоположение по подразбиране на Android, изключително точен, но е ограничен само до един доставчик на местоположение в даден момент и заявките за местоположение на закрито могат да повлияят на неговата точност, изисква мощен GPS сензор за бързо актуализиране на местоположението.</string>
     <string name="desc_fused_location_provider">API на Google Fused Location, който триангулира данните за местоположението от различни доставчици на местоположение и осреднява резултата в поредица от местоположения. Може да даде различни резултати, но използва по-малко батерия.</string>
     <string name="desc_location_provider_note">Забележка: Използването на който и да е от API може да даде различни резултати в зависимост от различните фактори и нито един от тях не е доказателство за точност един за друг, тествайте API и запазете избрания, който работи най-добре във вашия регион.</string>

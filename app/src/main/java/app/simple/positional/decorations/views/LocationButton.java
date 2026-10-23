@@ -4,13 +4,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
-
 import app.simple.positional.R;
 import app.simple.positional.decorations.ripple.DynamicRippleImageButton;
 import app.simple.positional.util.LocationExtension;
 
 public class LocationButton extends DynamicRippleImageButton {
-
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private boolean isBlinked = false;

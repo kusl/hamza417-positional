@@ -53,7 +53,6 @@ import kotlinx.coroutines.withContext
 
 class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, attributeSet),
     SensorEventListener {
-
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)
     private var readingsAlpha = 0.03f
@@ -217,12 +216,10 @@ class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, a
         when {
             isCustomCoordinate -> {
                 moveMapCamera(LatLng(customLatitude, customLongitude), zoom)
-                // addMarker(LatLng(customLatitude, customLongitude))
             }
 
             location.isNotNull() -> {
                 moveMapCamera(LatLng(location!!.latitude, location!!.longitude), zoom)
-                // addMarker(LatLng(location!!.latitude, location!!.longitude))
             }
 
             else               -> {
@@ -645,7 +642,6 @@ class Maps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, a
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        /* no-op */
     }
 
     fun registerWithRunnable() {

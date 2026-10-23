@@ -9,7 +9,6 @@ import app.simple.positional.model.Locations
 
 @Database(entities = [Locations::class], exportSchema = false, version = 2)
 abstract class LocationDatabase : RoomDatabase() {
-
     abstract fun locationDao(): LocationDao?
 
     companion object {

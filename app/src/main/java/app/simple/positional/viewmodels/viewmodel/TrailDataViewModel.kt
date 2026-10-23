@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import kotlin.system.measureTimeMillis
 
 class TrailDataViewModel(application: Application) : WrappedViewModel(application) {
-
     private var trailName = TrailPreferences.getCurrentTrail()
 
     val trailPointAscending: MutableLiveData<ArrayList<TrailPoint>> by lazy {
@@ -56,7 +55,7 @@ class TrailDataViewModel(application: Application) : WrappedViewModel(applicatio
 
             trailPointAscending.postValue(list as ArrayList<TrailPoint>)
 
-            delay(500) // For animation
+            delay(500)
 
             trailPointDescending.postValue(listDesc as ArrayList<TrailPoint>)
         }

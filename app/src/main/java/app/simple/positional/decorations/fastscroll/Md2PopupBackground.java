@@ -13,25 +13,23 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.drawable.DrawableCompat;
 import app.simple.positional.R;
 
 class Md2PopupBackground extends Drawable {
-    
     @NonNull
     private final Paint mPaint;
     private final int mPaddingStart;
     private final int mPaddingEnd;
-    
+
     @NonNull
     private final Path mPath = new Path();
-    
+
     @NonNull
     private final Matrix mTempMatrix = new Matrix();
-    
+
     public Md2PopupBackground(@NonNull Context context) {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
@@ -41,55 +39,53 @@ class Md2PopupBackground extends Drawable {
         mPaddingStart = resources.getDimensionPixelOffset(R.dimen.afs_md2_popup_padding_start);
         mPaddingEnd = resources.getDimensionPixelOffset(R.dimen.afs_md2_popup_padding_end);
     }
-    
+
     @Override
     public void draw(@NonNull Canvas canvas) {
         canvas.drawPath(mPath, mPaint);
     }
-    
+
     @Override
     public boolean onLayoutDirectionChanged(int layoutDirection) {
         updatePath();
         return true;
     }
-    
+
     @Override
     public void setAlpha(int alpha) {
     }
-    
+
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
     }
-    
+
     @Override
     public boolean isAutoMirrored() {
         return true;
     }
-    
+
     private boolean needMirroring() {
         return DrawableCompat.getLayoutDirection(this) == View.LAYOUT_DIRECTION_RTL;
     }
-    
+
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
     }
-    
+
     @Override
     protected void onBoundsChange(@NonNull Rect bounds) {
         updatePath();
     }
-    
+
     private void updatePath() {
-        
         mPath.reset();
-        
+
         Rect bounds = getBounds();
         float width = bounds.width();
         float height = bounds.height();
         float r = height / 2;
         float sqrt2 = (float) Math.sqrt(2);
-        // Ensure we are convex.
         width = Math.max(r + sqrt2 * r, width);
         pathArcTo(mPath, r, r, r, 90, 180);
         float o1X = width - sqrt2 * r;
@@ -99,7 +95,7 @@ class Md2PopupBackground extends Drawable {
         pathArcTo(mPath, o2X, r, r2, -45, 90);
         pathArcTo(mPath, o1X, r, r, 45f, 45f);
         mPath.close();
-        
+
         if (needMirroring()) {
             mTempMatrix.setScale(-1, 1, width / 2, 0);
         }
@@ -109,13 +105,13 @@ class Md2PopupBackground extends Drawable {
         mTempMatrix.postTranslate(bounds.left, bounds.top);
         mPath.transform(mTempMatrix);
     }
-    
+
     private static void pathArcTo(@NonNull Path path, float centerX, float centerY, float radius,
             float startAngle, float sweepAngle) {
         path.arcTo(centerX - radius, centerY - radius, centerX + radius, centerY + radius,
                 startAngle, sweepAngle, false);
     }
-    
+
     @Override
     public boolean getPadding(@NonNull Rect padding) {
         if (needMirroring()) {
@@ -126,17 +122,10 @@ class Md2PopupBackground extends Drawable {
         }
         return true;
     }
-    
+
     @Override
     public void getOutline(@NonNull Outline outline) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && !mPath.isConvex()) {
-            /*
-            
-             The outline path must be convex before Q, but we may run into floating point error
-             caused by calculation involving sqrt(2) or OEM implementation difference, so in this
-             case we just omit the shadow instead of crashing.
-            
-            */
             super.getOutline(outline);
             return;
         }

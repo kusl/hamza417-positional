@@ -1,17 +1,14 @@
 <resources>
-    <!-- Panels -->
     <string name="clock">Time</string>
     <string name="compass">Compass</string>
     <string name="gps_location">Location</string>
     <string name="level">Level</string>
     <string name="settings">Settings</string>
 
-    <!-- Info Headers -->
     <string name="clock_info">Time Information</string>
     <string name="compass_info">Compass Information</string>
     <string name="gps_info">GPS Information</string>
 
-    <!-- Clock Information Headers-->
     <string name="local_time">Local Time</string>
     <string name="utc_time">UTC Time</string>
     <string name="sun_position">Sun Position</string>
@@ -22,17 +19,14 @@
     <string name="moon_illumination">Moon Illumination</string>
     <string name="moon_dates">Moon Dates</string>
 
-    <!-- GPS Information Headers -->
     <string name="gps_provider">Provider</string>
     <string name="gps_movement">Movement</string>
     <string name="gps_coordinates">Coordinates</string>
     <string name="gps_address">Address</string>
 
-    <!--Compass Information Header -->
     <string name="compass_accuracy">Accuracy</string>
     <string name="compass_field">Magnetic Field</string>
 
-    <!-- Clock Information Items-->
     <string name="local_timezone">Timezone:</string>
     <string name="local_time_24hr">Time 24Hr:</string>
     <string name="local_time_12hr">Time 12Hr:</string>
@@ -75,7 +69,6 @@
     <string name="moon_first_quarter">First Quarter:</string>
     <string name="moon_last_quarter">Last Quarter:</string>
 
-    <!-- Compass information items -->
     <string name="magnetometer">Magnetometer</string>
     <string name="accelerometer">Accelerometer</string>
     <string name="accelerometer_accuracy">Accelerometer:</string>
@@ -84,7 +77,6 @@
     <string name="compass_declination">Declination:</string>
     <string name="compass_field_strength">Field Strength:</string>
 
-    <!-- GPS Information Panel -->
     <string name="gps_status">Status:</string>
     <string name="gps_source">Source:</string>
     <string name="gps_accuracy">Accuracy:</string>
@@ -97,17 +89,14 @@
     <string name="gps_latitude">Latitude:</string>
     <string name="gps_longitude">Longitude:</string>
 
-    <!-- Sensor Accuracy -->
     <string name="sensor_accuracy_unreliable">Unreliable</string>
     <string name="sensor_accuracy_low">Low</string>
     <string name="sensor_accuracy_medium">Medium</string>
     <string name="sensor_accuracy_high">High</string>
 
-    <!-- GPS Source Status -->
     <string name="gps_enabled">Enabled</string>
     <string name="gps_disabled">Disabled</string>
 
-    <!-- Units -->
     <string name="meter">m</string>
     <string name="kilometer">km</string>
     <string name="feet">ft</string>
@@ -117,7 +106,6 @@
     <string name="milliseconds">ms</string>
     <string name="seconds">s</string>
 
-    <!-- Alert -->
     <string name="info_copied">Copied to Clipboard</string>
     <string name="info_error">Info couldn\'t be copied!!</string>
     <string name="invalid_coordinates">Invalid Coordinates</string>
@@ -130,13 +118,11 @@
     <string name="no_update">No Update Available</string>
     <string name="location_not_available">Location is not yet available</string>
 
-    <!-- Settings Categories -->
     <string name="appearance">Appearance</string>
     <string name="configuration">Configuration</string>
     <string name="about">About</string>
     <string name="contribute">Contribute</string>
 
-    <!-- Settings Heading -->
     <string name="theme">Theme</string>
     <string name="icon">Icon</string>
     <string name="corner_radius">Corner Radius</string>
@@ -151,7 +137,6 @@
     <string name="found_an_issue">Found an issue?</string>
     <string name="translate">Translation</string>
 
-    <!-- Settings Description -->
     <string name="theme_follow_system">Follow System</string>
     <string name="theme_day">Light</string>
     <string name="theme_night">Dark</string>
@@ -163,35 +148,29 @@
     <string name="desc_git">Open app\'s repository</string>
     <string name="desc_translate">Help translating the app in your native language</string>
 
-    <!-- Clock Menu -->
     <string name="needles">Needle</string>
     <string name="motion_type">Motion Type</string>
     <string name="time_format">Use 12 Hour Format</string>
     <string name="motion_type_smooth">Smooth</string>
     <string name="motion_type_tick">Tick</string>
 
-    <!-- Compass Menu -->
     <string name="bloom">Bloom</string>
     <string name="bloom_skins">Bloom Skins</string>
     <string name="show_code">Show Code</string>
 
-    <!-- GPS Menu -->
     <string name="labels">Labels</string>
     <string name="buildings">Buildings</string>
     <string name="traffic">Traffic</string>
     <string name="satellite_mode">Satellite Mode</string>
     <string name="high_contrast_mode">High Contrast Map</string>
 
-    <!-- Settings Menus -->
     <string name="unit_metric">Metric</string>
     <string name="unit_imperial">Imperial</string>
 
-    <!-- Specified Coordinates Menu -->
     <string name="specified_hint_header">Enter Location Data</string>
     <string name="specified_hint_latitude">Latitude (±90)</string>
     <string name="specified_hint_longitude">Longitude (±180)</string>
 
-    <!-- Info -->
     <string name="compass_calibration_notice">If your device compass sensor accuracy is low, move your device in figure eight direction to calibrate the sensors.</string>
     <string name="specified_location_notice">Information shown below are being updated for specified location coordinates.</string>
     <string name="show_again">Show Again</string>
@@ -203,14 +182,12 @@
     <string name="location_permission_denied">"Location Permission Denied!"</string>
     <string name="no_location_permission_alert">Some features may not work without location permission</string>
 
-    <!-- Button Text -->
     <string name="button_cancel">Cancel</string>
     <string name="button_set">Set</string>
     <string name="button_close">Close</string>
     <string name="button_grant">Grant</string>
     <string name="button_reset">Reset</string>
 
-    <!-- Button Descriptions -->
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>
     <string name="gps_options">GPS Menu</string>
@@ -218,7 +195,6 @@
     <string name="delete_all">Delete all</string>
     <string name="open_specified_location_documentation">Open specified location documentation</string>
 
-    <!-- Legal Menu -->
     <string name="disclaimer">Disclaimer</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_of_use">Terms of Use</string>
@@ -226,7 +202,6 @@
     <string name="credits">Credits</string>
     <string name="internet_uses">Internet Uses</string>
 
-    <!-- Moon Illumination -->
     <string name="waning">Waning</string>
     <string name="waning_gibbous">Waning Gibbous</string>
     <string name="waning_crescent">Waning Crescent</string>
@@ -238,7 +213,6 @@
     <string name="third_quarter">Third Quarter</string>
     <string name="first_quarter">First Quarter</string>
 
-    <!-- Directions -->
     <string name="north">North</string>
     <string name="north_west">North West</string>
     <string name="west">West</string>
@@ -256,19 +230,16 @@
     <string name="east_E">E</string>
     <string name="north_east_NE">NE</string>
 
-    <!-- Graph -->
     <string name="location_details">Location Details</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Avg:</string>
 
-    <!-- UTM -->
     <string name="utm_zone">Zone:</string>
     <string name="utm_easting">Easting:</string>
     <string name="utm_northing">Northing:</string>
     <string name="utm_meridian">Central Meridian:</string>
 
-    <!-- Location Provider -->
     <string name="desc_android_location_provider">Default Android\'s Location API, highly accurate but is limited to only one location provider at a time and indoor location requests can impact its accuracy, requires a powerful GPS sensor to update location quickly.</string>
     <string name="desc_fused_location_provider">Google\'s Fused Location API that triangulates location data from various location providers and averages out the result into a series of locations. Can give varying results but uses less battery.</string>
     <string name="desc_location_provider_note">Note: Using any of the APIs can give different results depending on the various factors and none of them are a proof of accuracy for one another, test the APIs and keep the one selected that works best within your region.</string>

@@ -11,7 +11,6 @@ import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
 import app.simple.positional.model.BottomBar
 
 class AdapterPanels(private val items: ArrayList<BottomBar>, private val onClick: (View, String, Int) -> Unit) : RecyclerView.Adapter<AdapterPanels.Holder>() {
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         return Holder(LayoutInflater.from(parent.context)
                 .inflate(R.layout.adapter_panel, parent, false))
@@ -21,7 +20,6 @@ class AdapterPanels(private val items: ArrayList<BottomBar>, private val onClick
         val item = items[position]
 
         holder.icon.setImageResource(item.icon)
-        // holder.icon.imageTintList = ColorStateList.valueOf(item.color)
         holder.label.text = item.name
 
         holder.container.setOnClickListener {

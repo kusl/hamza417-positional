@@ -7,14 +7,12 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
-
 import java.util.ArrayList;
 
 import app.simple.positional.database.converters.MeasurePointConverter;
 
 @Entity(tableName = "measures")
 public class Measure {
-
     @PrimaryKey
     @ColumnInfo(name = "date_added")
     long dateCreated;
@@ -37,7 +35,6 @@ public class Measure {
     }
 
     public Measure() {
-
     }
 
     @Ignore

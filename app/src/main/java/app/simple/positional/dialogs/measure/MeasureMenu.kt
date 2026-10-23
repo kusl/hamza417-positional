@@ -12,7 +12,6 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.MeasurePreferences
 
 class MeasureMenu : CustomBottomSheetDialogFragment() {
-
     private lateinit var label: SwitchView
     private lateinit var labelContainer: DynamicRippleLinearLayout
     private lateinit var building: SwitchView

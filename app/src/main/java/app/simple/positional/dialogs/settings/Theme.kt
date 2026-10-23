@@ -12,7 +12,6 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ThemeSetter
 
 class Theme : CustomBottomSheetDialogFragment() {
-
     private lateinit var light: CustomRadioButton
     private lateinit var dark: CustomRadioButton
     private lateinit var followSystem: CustomRadioButton
@@ -56,7 +55,6 @@ class Theme : CustomBottomSheetDialogFragment() {
     }
 
     private fun setButtons(value: Int) {
-
         MainPreferences.setDayNight(value == 4)
 
         if (value != 4) {

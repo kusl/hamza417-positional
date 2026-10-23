@@ -6,17 +6,10 @@ import app.simple.positional.model.Locales
 import java.util.Locale
 
 object LocaleHelper {
-
     private var appLocale = Locale.getDefault()
 
-    /**
-     * List of languages currently supported by
-     * the app.
-     *
-     * Do not include incomplete translations.
-     */
     val localeList = arrayListOf(
-            Locales("autoSystemLanguageString" /* Placeholder */, "default"),
+            Locales("autoSystemLanguageString"  , "default"),
             Locales("English (US)", "en"),
             Locales("български", "bg"),
             Locales("Français", "fr"),

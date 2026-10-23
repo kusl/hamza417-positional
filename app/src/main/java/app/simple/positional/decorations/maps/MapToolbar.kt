@@ -27,7 +27,6 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 
 class MapToolbar : DynamicCornerLinearLayout, OnSharedPreferenceChangeListener {
-
     private lateinit var mapToolbarCallbacks: MapToolbarCallbacks
     private lateinit var menu: DynamicRippleImageButton
     private lateinit var customLocationButton: DynamicRippleImageButton
@@ -62,13 +61,11 @@ class MapToolbar : DynamicCornerLinearLayout, OnSharedPreferenceChangeListener {
 
         setPadding(resources.getDimensionPixelSize(R.dimen.toolbar_padding).div(2))
 
-        // Set margin
         post {
             val params = layoutParams as MarginLayoutParams
             params.setMargins(paddingLeft, StatusBarHeight.getStatusBarHeight(resources) + paddingTop, paddingRight, paddingBottom)
             layoutParams = params
 
-            // set wrap content width
             layoutParams.width = LayoutParams.MATCH_PARENT
         }
 

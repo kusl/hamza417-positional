@@ -10,7 +10,6 @@ import app.simple.positional.decorations.ripple.DynamicRippleImageButton
 import app.simple.positional.decorations.viewholders.VerticalListViewHolder
 
 class AdapterPopupMarkers : RecyclerView.Adapter<AdapterPopupMarkers.Holder>() {
-
     var onIconClicked: (position: Int) -> Unit = {}
     var onIconLongClicked: (position: Int) -> Unit = {}
 

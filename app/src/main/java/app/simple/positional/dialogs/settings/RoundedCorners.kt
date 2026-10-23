@@ -21,7 +21,6 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 
 class RoundedCorners : CustomBottomSheetDialogFragment() {
-
     private lateinit var radiusValue: TextView
     private lateinit var radiusSeekBar: SeekBar
     private lateinit var cancel: DynamicRippleButton
@@ -45,7 +44,6 @@ class RoundedCorners : CustomBottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
         lastCornerValue = getCornerRadius() * 5
         radiusValue.text = buildSpannableString("${getCornerRadius()} px", 2)
         radiusSeekBar.max = 400
@@ -69,7 +67,6 @@ class RoundedCorners : CustomBottomSheetDialogFragment() {
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
             }
         })
 

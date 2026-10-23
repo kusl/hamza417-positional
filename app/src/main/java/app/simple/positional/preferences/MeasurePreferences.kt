@@ -4,7 +4,6 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import com.google.android.gms.maps.model.LatLng
 
 object MeasurePreferences {
-
     const val COMPASS_ROTATION = "measure_compass_rotation"
     const val POLYLINES_WRAPPED = "measure_polylines_wrapped"
     const val MAP_ZOOM = "measure_map_zoom_value"
@@ -20,8 +19,6 @@ object MeasurePreferences {
     private const val LAST_LATITUDE = "_measure_last_latitude"
     private const val LAST_LONGITUDE = "_measure_last_longitude"
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun isCompassRotation(): Boolean {
         return getSharedPreferences().getBoolean(COMPASS_ROTATION, false)
     }
@@ -33,8 +30,6 @@ object MeasurePreferences {
     fun invertCompassRotation() {
         setCompassRotation(!isCompassRotation())
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun arePolylinesWrapped(): Boolean {
         return getSharedPreferences().getBoolean(POLYLINES_WRAPPED, false)
@@ -48,8 +43,6 @@ object MeasurePreferences {
         setPolylinesWrapped(!arePolylinesWrapped())
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setMapZoom(value: Float) {
         getSharedPreferences().edit().putFloat(MAP_ZOOM, value).apply()
     }
@@ -57,8 +50,6 @@ object MeasurePreferences {
     fun getMapZoom(): Float {
         return getSharedPreferences().getFloat(MAP_ZOOM, 15F)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setMapTilt(value: Float) {
         getSharedPreferences().edit().putFloat(MAP_TILT, value).apply()
@@ -68,8 +59,6 @@ object MeasurePreferences {
         return getSharedPreferences().getFloat(MAP_TILT, 0F)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setMapBearing(value: Float) {
         getSharedPreferences().edit().putFloat(MAP_BEARING, value).apply()
     }
@@ -77,8 +66,6 @@ object MeasurePreferences {
     fun getMapBearing(): Float {
         return getSharedPreferences().getFloat(MAP_BEARING, 0F)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun isLabelOn(): Boolean {
         return getSharedPreferences().getBoolean(LABEL_MODE, true)
@@ -88,8 +75,6 @@ object MeasurePreferences {
         getSharedPreferences().edit().putBoolean(LABEL_MODE, value).apply()
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setShowBuildingsOnMap(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(SHOW_BUILDINGS, boolean).apply()
     }
@@ -97,8 +82,6 @@ object MeasurePreferences {
     fun getShowBuildingsOnMap(): Boolean {
         return getSharedPreferences().getBoolean(SHOW_BUILDINGS, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setSatelliteMode(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(SATELLITE_MAP, boolean).apply()
@@ -108,8 +91,6 @@ object MeasurePreferences {
         return getSharedPreferences().getBoolean(SATELLITE_MAP, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setHighContrastMap(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(HIGH_CONTRAST_MAP, boolean).apply()
     }
@@ -117,8 +98,6 @@ object MeasurePreferences {
     fun getHighContrastMap(): Boolean {
         return getSharedPreferences().getBoolean(HIGH_CONTRAST_MAP, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setToolsGravityToLeft(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(TOOLS_GRAVITY, boolean).apply()
@@ -132,8 +111,6 @@ object MeasurePreferences {
         setToolsGravityToLeft(!isToolsGravityToLeft())
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setLastSelectedMeasure(id: Long) {
         getSharedPreferences().edit().putLong(LAST_SELECTED_MEASURE, id).apply()
     }
@@ -145,8 +122,6 @@ object MeasurePreferences {
     fun isMeasureSelected(): Boolean {
         return getLastSelectedMeasure() != -1L
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setLastLatitude(latitude: Double) {
         getSharedPreferences().edit().putFloat(LAST_LATITUDE, latitude.toFloat()).apply()
@@ -166,9 +141,5 @@ object MeasurePreferences {
 
     fun getLastLatLng(): LatLng {
         return LatLng(getLastLatitude(), getLastLongitude())
-    }
-
-    fun isLocationSet(): Boolean {
-        return getLastLatitude() != 0.0 && getLastLongitude() != 0.0
     }
 }

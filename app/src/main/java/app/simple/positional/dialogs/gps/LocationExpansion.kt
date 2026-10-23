@@ -17,7 +17,6 @@ import app.simple.positional.util.HtmlHelper.fromHtml
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
 class LocationExpansion : CustomBottomSheetDialogFragment() {
-
     private lateinit var locationViewModel: LocationViewModel
 
     private lateinit var accuracyChart: SparkLineLayout
@@ -47,15 +46,13 @@ class LocationExpansion : CustomBottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         locationViewModel.getLocation().observe(viewLifecycleOwner) {
-            if (MainPreferences.isMetric()) { // Metric
+            if (MainPreferences.isMetric()) {
                 accuracyTextView.text = fromHtml("<b>${getString(R.string.gps_accuracy)}</b> " +
                         "${MathExtensions.round(it.accuracy.toDouble(), 2)} ${getString(R.string.meter)}")
 
                 altitudeTextView.text = fromHtml("<b>${getString(R.string.gps_altitude)}</b> " +
                         "${MathExtensions.round(it.altitude, 2)} ${getString(R.string.meter)}")
-
-            } else { // Imperial
-
+            } else {
                 accuracyTextView.text = fromHtml("<b>${getString(R.string.gps_accuracy)}</b> " +
                         "${
                             MathExtensions.round(it.accuracy.toDouble().toFeet(), 2)

@@ -9,7 +9,6 @@ import app.simple.positional.decorations.popup.PopupLinearLayout
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 
 class PopupDirectionsMenu(anchor: View) : BasePopupWindow() {
-
     private var popupDirectionsCallbacks: PopupDirectionsCallbacks? = null
 
     init {

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Panels -->
     <string name="clock">時間</string>
     <string name="compass">指南針</string>
     <string name="gps_location">位置</string>
     <string name="level">水平儀</string>
     <string name="settings">設定</string>
-    <!-- Info Headers -->
+
     <string name="clock_info">時間資訊</string>
     <string name="compass_info">指南針資訊</string>
     <string name="gps_info">GPS 資訊</string>
-    <!-- Clock Information Headers-->
+
     <string name="local_time">當地時間</string>
     <string name="utc_time">UTC 時間</string>
     <string name="sun_position">太陽位置</string>
@@ -20,15 +19,15 @@
     <string name="moon_time">月亮時間</string>
     <string name="moon_illumination">月亮照明</string>
     <string name="moon_dates">月亮日期</string>
-    <!-- GPS Information Headers -->
+
     <string name="gps_provider">提供者</string>
     <string name="gps_movement">移動</string>
     <string name="gps_coordinates">座標</string>
     <string name="gps_address">地址</string>
-    <!--Compass Information Header -->
+
     <string name="compass_accuracy">精確度</string>
     <string name="compass_field">磁場</string>
-    <!-- Clock Information Items-->
+
     <string name="local_timezone">時區:</string>
     <string name="local_time_24hr">24 小時制時間:</string>
     <string name="local_time_12hr">12 小時制時間:</string>
@@ -63,7 +62,7 @@
     <string name="moon_new_moon">新月:</string>
     <string name="moon_first_quarter">上弦月:</string>
     <string name="moon_last_quarter">下弦月:</string>
-    <!-- Compass information items -->
+
     <string name="magnetometer">磁力計</string>
     <string name="accelerometer">加速計</string>
     <string name="accelerometer_accuracy">加速計:</string>
@@ -71,7 +70,7 @@
     <string name="compass_inclination">傾斜:</string>
     <string name="compass_declination">偏角:</string>
     <string name="compass_field_strength">場強:</string>
-    <!-- GPS Information Panel -->
+
     <string name="gps_status">狀態:</string>
     <string name="gps_source">來源:</string>
     <string name="gps_accuracy">精確度:</string>
@@ -83,15 +82,15 @@
     <string name="gps_speed">速度:</string>
     <string name="gps_latitude">緯度:</string>
     <string name="gps_longitude">經度:</string>
-    <!-- Sensor Accuracy -->
+
     <string name="sensor_accuracy_unreliable">不可靠</string>
     <string name="sensor_accuracy_low">低</string>
     <string name="sensor_accuracy_medium">中</string>
     <string name="sensor_accuracy_high">高</string>
-    <!-- GPS Source Status -->
+
     <string name="gps_enabled">已啟用</string>
     <string name="gps_disabled">已停用</string>
-    <!-- Units -->
+
     <string name="meter">m</string>
     <string name="kilometer">km</string>
     <string name="feet">ft</string>
@@ -100,7 +99,7 @@
     <string name="miles_hour">mph</string>
     <string name="milliseconds">ms</string>
     <string name="seconds">s</string>
-    <!-- Alert -->
+
     <string name="info_copied">已複製到剪貼簿</string>
     <string name="info_error">資訊無法複製！</string>
     <string name="invalid_coordinates">無效的座標</string>
@@ -112,12 +111,12 @@
     <string name="location_not_saved">無法儲存！</string>
     <string name="no_update">沒有可用的更新</string>
     <string name="location_not_available">位置尚無法使用</string>
-    <!-- Settings Categories -->
+
     <string name="appearance">外觀</string>
     <string name="configuration">組態</string>
     <string name="about">關於</string>
     <string name="contribute">參與</string>
-    <!-- Settings Heading -->
+
     <string name="theme">主題</string>
     <string name="icon">圖示</string>
     <string name="corner_radius">圓角半徑</string>
@@ -131,7 +130,7 @@
     <string name="app_version">應用程式版本</string>
     <string name="found_an_issue">發現問題？</string>
     <string name="translate">翻譯</string>
-    <!-- Settings Description -->
+
     <string name="theme_follow_system">跟隨系統</string>
     <string name="theme_day">淺色</string>
     <string name="theme_night">深色</string>
@@ -142,30 +141,30 @@
     <string name="desc_legal">閱讀應用程式的免責聲明、隱私權政策和使用條款</string>
     <string name="desc_git">開啟應用程式存放庫</string>
     <string name="desc_translate">協助將這個應用程式翻譯為您的母語</string>
-    <!-- Clock Menu -->
+
     <string name="needles">指針</string>
     <string name="motion_type">動作類型</string>
     <string name="time_format">使用 12 小時制</string>
     <string name="motion_type_smooth">平滑</string>
     <string name="motion_type_tick">跳動</string>
-    <!-- Compass Menu -->
+
     <string name="bloom">反射</string>
     <string name="bloom_skins">反射表皮</string>
     <string name="show_code">顯示代碼</string>
-    <!-- GPS Menu -->
+
     <string name="labels">標籤</string>
     <string name="buildings">建築</string>
     <string name="traffic">交通</string>
     <string name="satellite_mode">衛星模式</string>
     <string name="high_contrast_mode">高對比地圖</string>
-    <!-- Settings Menus -->
+
     <string name="unit_metric">公制</string>
     <string name="unit_imperial">英制</string>
-    <!-- Specified Coordinates Menu -->
+
     <string name="specified_hint_header">輸入位置資料</string>
     <string name="specified_hint_latitude">緯度 (±90)</string>
     <string name="specified_hint_longitude">經度 (±180)</string>
-    <!-- Info -->
+
     <string name="compass_calibration_notice">若您的裝置指南針感應器精確度過低，將您的裝置向 8 字方向移動以校正感應器。</string>
     <string name="specified_location_notice">下面顯示的資訊正在為指定的位置座標進行更新。</string>
     <string name="show_again">再次顯示</string>
@@ -176,27 +175,27 @@
     <string name="auto_system_default_language">自動 (系統預設)</string>
     <string name="location_permission_denied">"位置權限遭拒！"</string>
     <string name="no_location_permission_alert">沒有位置權限，有些功能可能無法運作</string>
-    <!-- Button Text -->
+
     <string name="button_cancel">取消</string>
     <string name="button_set">設定</string>
     <string name="button_close">關閉</string>
     <string name="button_grant">授予</string>
     <string name="button_reset">重設</string>
-    <!-- Button Descriptions -->
+
     <string name="clock_options">時鐘選單</string>
     <string name="compass_options">指南針選單</string>
     <string name="gps_options">GPS 選單</string>
     <string name="gps_reset_location">重設位置</string>
     <string name="delete_all">全部刪除</string>
     <string name="open_specified_location_documentation">開啟指定的位置文件</string>
-    <!-- Legal Menu -->
+
     <string name="disclaimer">免責聲明</string>
     <string name="privacy_policy">隱私權政策</string>
     <string name="terms_of_use">使用條款</string>
     <string name="permissions">權限</string>
     <string name="credits">致謝</string>
     <string name="internet_uses">網際網路使用</string>
-    <!-- Moon Illumination -->
+
     <string name="waning">漸殘</string>
     <string name="waning_gibbous">虧凸月</string>
     <string name="waning_crescent">殘月</string>
@@ -207,7 +206,7 @@
     <string name="new_moon">新月</string>
     <string name="third_quarter">下弦月</string>
     <string name="first_quarter">上弦月</string>
-    <!-- Directions -->
+
     <string name="north">北</string>
     <string name="north_west">西北</string>
     <string name="west">西</string>
@@ -224,17 +223,17 @@
     <string name="south_east_SE">SE</string>
     <string name="east_E">E</string>
     <string name="north_east_NE">NE</string>
-    <!-- Graph -->
+
     <string name="location_details">位置詳細資料</string>
     <string name="min">最小:</string>
     <string name="max">最大:</string>
     <string name="avg">平均:</string>
-    <!-- UTM -->
+
     <string name="utm_zone">時區:</string>
     <string name="utm_easting">橫距:</string>
     <string name="utm_northing">縱距:</string>
     <string name="utm_meridian">中央子午線:</string>
-    <!-- Location Provider -->
+
     <string name="desc_android_location_provider">預設的 Android 位置 API 具有極高的精確度，但每次僅限於一個位置提供者，而且室內位置會影響其精確度，需要一個強大的 GPS 感應器以快速更新位置。</string>
     <string name="desc_fused_location_provider">Google 的 Fused 位置 API，從不同的位置提供者進行三角測量位置資料，將結果平均化為一系列的位置。可能會得到不同的結果，但消耗較少的電力。</string>
     <string name="desc_location_provider_note">注意：使用任何一個 API 都可能得到不同的結果，這取決於各種因素，它們都不能證明彼此的準確度，測試 API 並保持在你的區域內選取一個最適合的 API。</string>

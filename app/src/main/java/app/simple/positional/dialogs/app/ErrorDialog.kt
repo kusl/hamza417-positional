@@ -9,7 +9,6 @@ import app.simple.positional.R
 import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 
 class ErrorDialog : CustomBottomSheetDialogFragment() {
-
     private lateinit var error: TextView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

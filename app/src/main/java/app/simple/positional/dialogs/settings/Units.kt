@@ -10,7 +10,6 @@ import app.simple.positional.decorations.views.CustomRadioButton
 import app.simple.positional.preferences.MainPreferences
 
 class Units : CustomBottomSheetDialogFragment() {
-
     private lateinit var metric: CustomRadioButton
     private lateinit var imperial: CustomRadioButton
 

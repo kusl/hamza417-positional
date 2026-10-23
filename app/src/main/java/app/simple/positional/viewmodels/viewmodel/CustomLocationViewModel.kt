@@ -8,11 +8,9 @@ import androidx.room.Room
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.model.Locations
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class CustomLocationViewModel(application: Application) : AndroidViewModel(application) {
-
     val customLocations: MutableLiveData<MutableList<Locations>> by lazy {
         MutableLiveData<MutableList<Locations>>().also {
             loadLocations()

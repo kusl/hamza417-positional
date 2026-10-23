@@ -19,7 +19,6 @@ import app.simple.positional.util.ViewUtils.visible
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 
 class AddTrail : CustomDialogFragment() {
-
     private lateinit var nameInputEditText: EditText
     private lateinit var noteInputEditText: EditText
     private lateinit var save: DynamicRippleButton

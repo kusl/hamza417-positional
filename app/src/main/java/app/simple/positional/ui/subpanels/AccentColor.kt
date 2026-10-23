@@ -15,7 +15,6 @@ import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.preferences.MainPreferences
 
 class AccentColor : ScopedFragment() {
-
     private lateinit var recyclerView: CustomRecyclerView
     private lateinit var accentColorAdapter: AccentColorAdapter
 

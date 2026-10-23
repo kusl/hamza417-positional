@@ -53,7 +53,6 @@ import kotlinx.coroutines.withContext
 
 class MeasureMaps(context: Context, attrs: AttributeSet) : CustomMaps(context, attrs),
     SensorEventListener {
-
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)
     private var readingsAlpha = 0.03f
@@ -315,7 +314,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet) : CustomMaps(context, a
 
             val bounds = builder.build()
 
-            //BOUND_PADDING is an int to specify padding of bound.. try 100.
             if (animate) {
                 googleMap!!.animateCamera(CameraUpdateFactory
                         .newLatLngBounds(bounds, 250))
@@ -336,7 +334,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet) : CustomMaps(context, a
     }
 
     private fun updatePolylines(points: ArrayList<MeasurePoint>) {
-        googleMap?.clear() // Will clear all markers, polylines, and circles
+        googleMap?.clear()
         marker = null
         cameraTargetPolyline = null
         polylines.clear()
@@ -380,37 +378,12 @@ class MeasureMaps(context: Context, attrs: AttributeSet) : CustomMaps(context, a
         cameraTargetPolyline?.remove()
         cameraTargetPolyline = null
 
-//        kotlin.runCatching {
-//            if (MeasurePreferences.arePolylinesWrapped()) {
-//                wrap(true)
-//            } else {
-//                with(measurePoints.lastOrNull()!!) {
-//                    moveMapCamera(latLng, MeasurePreferences.getMapZoom(), MeasurePreferences.getMapTilt(), cameraSpeed)
-//                }
-//            }
-//        }.getOrElse {
-//            moveMapCamera(latLng!!, MeasurePreferences.getMapZoom(), MeasurePreferences.getMapTilt(), cameraSpeed)
-//        }
-
         initCameraTargetPolyline()
         if (currentPolylines.isNotEmpty()) {
             polylines.add(cameraTargetPolyline!!)
         }
         invalidate()
         mapsCallbacks?.onCameraDistance(googleMap?.cameraPosition?.target!!)
-    }
-
-    // Function to add text markers along a polyline
-    private fun addTextMarkersAlongPolyline(polyline: Polyline, text: String) {
-        val points = polyline.points
-        for (point in points) {
-            googleMap?.addMarker(
-                MarkerOptions()
-                        .position(point)
-                        .title(text)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-            )
-        }
     }
 
     private fun registerSensors() {

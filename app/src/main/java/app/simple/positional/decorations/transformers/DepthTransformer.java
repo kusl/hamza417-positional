@@ -1,7 +1,6 @@
 package app.simple.positional.decorations.transformers;
 
 import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.viewpager2.widget.ViewPager2;
 

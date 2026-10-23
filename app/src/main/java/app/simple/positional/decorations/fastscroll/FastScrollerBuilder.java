@@ -1,19 +1,3 @@
-/*
- * Copyright 2019 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package app.simple.positional.decorations.fastscroll;
 
 import android.content.Context;
@@ -23,7 +7,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.res.ResourcesCompat;
@@ -33,43 +16,42 @@ import androidx.recyclerview.widget.RecyclerView;
 import app.simple.positional.R;
 
 public class FastScrollerBuilder {
-    
     @NonNull
     private final ViewGroup mView;
-    
+
     @Nullable
     private FastScroller.ViewHelper mViewHelper;
-    
+
     @Nullable
     private PopupTextProvider mPopupTextProvider;
-    
+
     @Nullable
     private Rect mPadding;
-    
+
     private Drawable mTrackDrawable;
     private Drawable mThumbDrawable;
     private Consumer <TextView> mPopupStyle;
-    
+
     @Nullable
     private FastScroller.AnimationHelper mAnimationHelper;
-    
+
     public FastScrollerBuilder(@NonNull ViewGroup view) {
         mView = view;
         useMd2Style();
     }
-    
+
     @NonNull
     public FastScrollerBuilder setViewHelper(@Nullable FastScroller.ViewHelper viewHelper) {
         mViewHelper = viewHelper;
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder setPopupTextProvider(@Nullable PopupTextProvider popupTextProvider) {
         mPopupTextProvider = popupTextProvider;
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder setPadding(int left, int top, int right, int bottom) {
         if (mPadding == null) {
@@ -78,7 +60,7 @@ public class FastScrollerBuilder {
         mPadding.set(left, top, right, bottom);
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder setPadding(@Nullable Rect padding) {
         if (padding != null) {
@@ -92,25 +74,25 @@ public class FastScrollerBuilder {
         }
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder setTrackDrawable(@NonNull Drawable trackDrawable) {
         mTrackDrawable = trackDrawable;
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder setThumbDrawable(@NonNull Drawable thumbDrawable) {
         mThumbDrawable = thumbDrawable;
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder setPopupStyle(@NonNull Consumer <TextView> popupStyle) {
         mPopupStyle = popupStyle;
         return this;
     }
-    
+
     @NonNull
     public FastScrollerBuilder useMd2Style() {
         Context context = mView.getContext();
@@ -119,23 +101,23 @@ public class FastScrollerBuilder {
         mPopupStyle = PopupStyles.MD2;
         return this;
     }
-    
+
     public void setAnimationHelper(@Nullable FastScroller.AnimationHelper animationHelper) {
         mAnimationHelper = animationHelper;
     }
-    
+
     public void disableScrollbarAutoHide() {
         DefaultAnimationHelper animationHelper = new DefaultAnimationHelper(mView);
         animationHelper.setScrollbarAutoHideEnabled(false);
         mAnimationHelper = animationHelper;
     }
-    
+
     @NonNull
     public FastScroller build() {
         return new FastScroller(mView, getOrCreateViewHelper(), mPadding, mTrackDrawable,
                 mThumbDrawable, mPopupStyle, getOrCreateAnimationHelper());
     }
-    
+
     @NonNull
     private FastScroller.ViewHelper getOrCreateViewHelper() {
         if (mViewHelper != null) {
@@ -167,7 +149,7 @@ public class FastScrollerBuilder {
                     + " is not supported for fast scroll");
         }
     }
-    
+
     @NonNull
     private FastScroller.AnimationHelper getOrCreateAnimationHelper() {
         if (mAnimationHelper != null) {

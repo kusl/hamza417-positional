@@ -9,7 +9,6 @@ import app.simple.positional.model.ClockModel
 import app.simple.positional.widgets.ClockWidget4x4
 
 class ClockWidgetService4x4 : ClockWidgetService() {
-
     override fun onBind(intent: Intent): IBinder? {
         return null
     }

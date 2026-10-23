@@ -22,12 +22,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
-/**
- * Service class to use [FusedLocationProviderClient] as location
- * provider and broadcast the location throughout the app.
- */
 class FusedLocationService : Service() {
-
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback

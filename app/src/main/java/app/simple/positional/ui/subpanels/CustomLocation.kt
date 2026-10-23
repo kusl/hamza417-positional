@@ -49,7 +49,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CustomLocation : ScopedFragment() {
-
     private lateinit var recyclerView: RecyclerView
     private lateinit var art: ImageView
     private lateinit var search: DynamicRippleImageButton
@@ -305,9 +304,6 @@ class CustomLocation : ScopedFragment() {
         })
     }
 
-    /**
-     * Always runs the toast message from the main thread
-     */
     private fun showToast(message: String) {
         requireActivity().runOnUiThread {
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
@@ -326,13 +322,11 @@ class CustomLocation : ScopedFragment() {
 
     private val simpleItemTouchCallback: ItemTouchHelper.SimpleCallback = object
         : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-
         override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
             return false
         }
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, swipeDir: Int) {
-            // Remove swiped item from list and notify the RecyclerView
             val p0 = locationsAdapter.removeItem(viewHolder.absoluteAdapterPosition)
 
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {

@@ -15,7 +15,6 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.GPSPreferences
 
 class GPSMenu : CustomBottomSheetDialogFragment() {
-
     private lateinit var toggleLabel: SwitchView
     private lateinit var toggleBuilding: SwitchView
     private lateinit var toggleTraffic: SwitchView
@@ -129,10 +128,6 @@ class GPSMenu : CustomBottomSheetDialogFragment() {
             true
         }
 
-        /**
-         * Calling this here because adding click event listeners
-         * resets the [View.isClickable] state to true
-         */
         if (toggleSatellite.isChecked) {
             satelliteOverrides(0.4F, isChecked = true)
         }

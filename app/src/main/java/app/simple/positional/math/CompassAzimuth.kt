@@ -20,15 +20,12 @@ object CompassAzimuth {
     }
 
     fun calculate(gravity: Vector3, magneticField: Vector3): Float {
-        // Gravity
         val normGravity = gravity.normalize()
         val normMagField = magneticField.normalize()
 
-        // East vector
         val east = normMagField.cross(normGravity)
         val normEast = east.normalize()
 
-        // Magnitude check
         val eastMagnitude = east.magnitude()
         val gravityMagnitude = gravity.magnitude()
         val magneticMagnitude = magneticField.magnitude()
@@ -36,13 +33,10 @@ object CompassAzimuth {
             return 0F
         }
 
-        // North vector
         val dotProduct = normGravity.dot(normMagField)
         val north = normMagField.minus(normGravity * dotProduct)
         val normNorth = north.normalize()
 
-        // Azimuth
-        // NB: see https://math.stackexchange.com/questions/381649/whats-the-best-3d-angular-co-ordinate-system-for-working-with-smartfone-apps
         val sin = normEast.y - normNorth.x
         val cos = normEast.x + normNorth.y
         val azimuth = if (!(sin == 0f && sin == cos)) atan2(sin, cos) else 0f
@@ -56,10 +50,6 @@ object CompassAzimuth {
 
     fun calculate(gravity: Vector3, magneticField: Vector3, windowManager: WindowManager): Float {
         return adjustAzimuthForDisplayRotation(calculate(gravity, magneticField), windowManager)
-    }
-
-    fun withDeclination(declination: Float, azimuth: Float): Float {
-        return azimuth + declination
     }
 
     fun inverse(azimuth: Float): Float {

@@ -17,7 +17,6 @@ import app.simple.positional.util.ViewUtils.gone
 import app.simple.positional.util.ViewUtils.visible
 
 class TrailTools : DynamicCornerLinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
-
     private lateinit var location: LocationButton
     private lateinit var remove: DynamicRippleImageButton
     private lateinit var wrap: DynamicRippleImageButton

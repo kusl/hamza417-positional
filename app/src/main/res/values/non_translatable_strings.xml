@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- These strings are not to be translated and should be used as is -->
-
-    <string name="licensing_key" translatable="false">@string/thisAppLicensingKey</string>
     <string name="app_name" translatable="false">Positional</string>
     <string name="moon_azimuth" translatable="false">@string/sun_azimuth</string>
     <string name="moon_distance" translatable="false">@string/sun_distance</string>
@@ -16,5 +13,4 @@
     <string name="inure_app_manager" translatable="false">Inure App Manager</string>
     <string name="inure_app_manager_summary" translatable="false">An elegant and beautiful premium Android app manager for both rooted and non-rooted devices and a built-in terminal, analytics panel and an independent custom theme engine, developed with purely custom APIs created for this app and has Shizuku support.</string>
 
-    <!-- Bottom Bar -->
 </resources>

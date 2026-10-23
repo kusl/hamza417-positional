@@ -26,7 +26,6 @@ import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import com.google.android.material.card.MaterialCardView
 
 class Measures : ScopedFragment() {
-
     private lateinit var recyclerView: CustomRecyclerView
     private lateinit var adapterMeasures: AdapterMeasures
     private lateinit var add: MaterialCardView
@@ -66,7 +65,6 @@ class Measures : ScopedFragment() {
                     val popup = PopupTrailsMenu(
                         layoutInflater.inflate(R.layout.popup_trails,
                             DynamicCornerLinearLayout(requireContext())), view)
-
 
                     popup.setOnPopupCallbacksListener(object : PopupTrailsMenu.Companion.PopupTrailsCallbacks {
                         override fun onShowOnMap() {

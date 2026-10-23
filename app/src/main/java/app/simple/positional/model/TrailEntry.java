@@ -6,7 +6,6 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "trails")
 public class TrailEntry {
-
     @PrimaryKey(autoGenerate = true)
     public int keyTag = 0;
 

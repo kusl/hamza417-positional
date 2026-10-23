@@ -21,8 +21,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.CompassPreferences
-import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
 import app.simple.positional.util.ContextUtils
@@ -30,21 +28,15 @@ import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.ThemeSetter
 
 open class BaseActivity : AppCompatActivity() {
-
     private val handler = Handler(Looper.getMainLooper())
 
     override fun attachBaseContext(newBaseContext: Context) {
-        /**
-         * Initialize [SharedPreferences] singleton here
-         */
         SharedPreferences.init(newBaseContext)
         super.attachBaseContext(ContextUtils.updateLocale(newBaseContext, MainPreferences.getAppLanguage()!!))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // StrictMode.enableDefaults()
 
         if (MainPreferences.isDayNightOn()) {
             ThemeSetter.setAppTheme(4)
@@ -66,15 +58,8 @@ open class BaseActivity : AppCompatActivity() {
             window.colorMode = ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT
         }
 
-        /**
-         * Sets the graphics to 8bit by default
-         */
         window.setFormat(PixelFormat.RGBA_8888)
 
-        /**
-         * Checks if keep screen on flag is on
-         * and update the flags accordingly
-         */
         if (MainPreferences.isScreenOn()) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
@@ -82,19 +67,9 @@ open class BaseActivity : AppCompatActivity() {
         makeAppFullScreen()
         fixNavigationBarOverlap()
 
-        /**
-         * Keeps the instance of current locale of the app
-         */
         LocaleHelper.setAppLocale(ConfigurationCompat.getLocales(resources.configuration)[0]!!)
 
         setTheme()
-    }
-
-    private fun resetLitePrefs() {
-        CompassPreferences.setFlowerBloom(false)
-        ClockPreferences.setClockNeedleTheme(1)
-        MainPreferences.setCustomCoordinates(false)
-        GPSPreferences.setPinSkin(0)
     }
 
     private fun setTheme() {
@@ -184,34 +159,18 @@ open class BaseActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
-    /**
-     * Making the Navigation system bar not overlapping with the activity
-     */
     private fun fixNavigationBarOverlap() {
-        /**
-         * Root ViewGroup of this activity
-         */
         val root = findViewById<FrameLayout>(android.R.id.content)
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
 
-            /**
-             * Apply the insets as a margin to the view. Here the system is setting
-             * only the bottom, left, and right dimensions, but apply whichever insets are
-             * appropriate to your layout. You can also update the view padding
-             * if that's more appropriate.
-             */
             view.layoutParams = (view.layoutParams as LinearLayout.LayoutParams).apply {
                 leftMargin = insets.left
                 bottomMargin = insets.bottom
                 rightMargin = insets.right
             }
 
-            /**
-             * Return CONSUMED if you don't want want the window insets to keep being
-             * passed down to descendant views.
-             */
             WindowInsetsCompat.CONSUMED
         }
     }

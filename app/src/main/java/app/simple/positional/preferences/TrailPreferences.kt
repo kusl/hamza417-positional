@@ -4,7 +4,6 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import org.jetbrains.annotations.NotNull
 
 object TrailPreferences {
-
     private const val mapZoom = "trail_map_zoom_value"
     private const val mapTilt = "trail_map_tilt_value"
     private const val mapBearing = "trail_map_bearing"
@@ -23,8 +22,6 @@ object TrailPreferences {
     const val toolsMenuGravity = "trail_tools_view_gravity"
     const val compass = "trail_map_compass_or_bearing"
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setGeodesic(@NotNull value: Boolean) {
         getSharedPreferences().edit().putBoolean(geodesic, value).apply()
     }
@@ -32,8 +29,6 @@ object TrailPreferences {
     fun isTrailGeodesic(): Boolean {
         return getSharedPreferences().getBoolean(geodesic, true)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun isLabelOn(): Boolean {
         return getSharedPreferences().getBoolean(trailLabelMode, true)
@@ -43,8 +38,6 @@ object TrailPreferences {
         getSharedPreferences().edit().putBoolean(trailLabelMode, value).apply()
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun isSatelliteOn(): Boolean {
         return getSharedPreferences().getBoolean(trailSatellite, false)
     }
@@ -52,8 +45,6 @@ object TrailPreferences {
     fun setSatelliteMode(@NotNull value: Boolean) {
         getSharedPreferences().edit().putBoolean(trailSatellite, value).apply()
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setHighContrastMap(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(trailHighContrastMap, boolean).apply()
@@ -63,8 +54,6 @@ object TrailPreferences {
         return getSharedPreferences().getBoolean(trailHighContrastMap, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setShowBuildingsOnMap(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(trailShowBuilding, boolean).apply()
     }
@@ -72,8 +61,6 @@ object TrailPreferences {
     fun getShowBuildingsOnMap(): Boolean {
         return getSharedPreferences().getBoolean(trailShowBuilding, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setMapZoom(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapZoom, value).apply()
@@ -83,8 +70,6 @@ object TrailPreferences {
         return getSharedPreferences().getFloat(mapZoom, 15F)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setMapTilt(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapTilt, value).apply()
     }
@@ -92,8 +77,6 @@ object TrailPreferences {
     fun getMapTilt(): Float {
         return getSharedPreferences().getFloat(mapTilt, 0F)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setMapBearing(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapBearing, value).apply()
@@ -103,8 +86,6 @@ object TrailPreferences {
         return getSharedPreferences().getFloat(mapBearing, 0F)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setWrapStatus(@NotNull value: Boolean) {
         getSharedPreferences().edit().putBoolean(wrapped, value).apply()
     }
@@ -112,8 +93,6 @@ object TrailPreferences {
     fun arePolylinesWrapped(): Boolean {
         return getSharedPreferences().getBoolean(wrapped, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setCurrentTrailName(value: String) {
         getSharedPreferences().edit().putString(selectedTrail, value).apply()
@@ -123,8 +102,6 @@ object TrailPreferences {
         return getSharedPreferences().getString(selectedTrail, "")!!
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setToolsGravityToLeft(value: Boolean) {
         getSharedPreferences().edit().putBoolean(toolsMenuGravity, value).apply()
     }
@@ -132,8 +109,6 @@ object TrailPreferences {
     fun isToolsGravityToLeft(): Boolean {
         return getSharedPreferences().getBoolean(toolsMenuGravity, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setMapAutoCenter(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(mapAutoCenter, boolean).apply()
@@ -143,8 +118,6 @@ object TrailPreferences {
         return getSharedPreferences().getBoolean(mapAutoCenter, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setCompassRotation(value: Boolean) {
         getSharedPreferences().edit().putBoolean(compass, value).apply()
     }
@@ -152,8 +125,6 @@ object TrailPreferences {
     fun isCompassRotation(): Boolean {
         return getSharedPreferences().getBoolean(compass, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setLastTrailName(value: String) {
         getSharedPreferences().edit().putString(trailName, value).apply()
@@ -163,8 +134,6 @@ object TrailPreferences {
         return getSharedPreferences().getString(trailName, "")!!
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setLastTrailNote(value: String) {
         getSharedPreferences().edit().putString(trailNote, value).apply()
     }
@@ -173,8 +142,6 @@ object TrailPreferences {
         return getSharedPreferences().getString(trailNote, "")!!
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setLastMarkerName(value: String) {
         getSharedPreferences().edit().putString(markerName, value).apply()
     }
@@ -182,8 +149,6 @@ object TrailPreferences {
     fun getLastMarkerName(): String {
         return getSharedPreferences().getString(markerName, "")!!
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setLastMarkerNote(value: String) {
         getSharedPreferences().edit().putString(markerNote, value).apply()

@@ -13,7 +13,6 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.MainPreferences
 
 class Locales : CustomBottomSheetDialogFragment(), LocaleCallback {
-
     private lateinit var recyclerView: RecyclerView
     private lateinit var localeAdapter: LocaleAdapter
 

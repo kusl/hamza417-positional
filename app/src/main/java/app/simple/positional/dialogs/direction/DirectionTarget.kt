@@ -24,7 +24,6 @@ import app.simple.positional.util.ViewUtils.gone
 import app.simple.positional.util.ViewUtils.visible
 
 class DirectionTarget : CustomDialogFragment() {
-
     private lateinit var label: EditText
     private lateinit var latitude: EditText
     private lateinit var longitude: EditText

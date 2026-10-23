@@ -4,7 +4,6 @@ import android.graphics.Color
 import kotlin.math.roundToInt
 
 object SpeedometerConstants {
-
     private const val speedometerColorValueDivider = 10.0F
 
     fun getSpeedometerColor(value: Double): Int {

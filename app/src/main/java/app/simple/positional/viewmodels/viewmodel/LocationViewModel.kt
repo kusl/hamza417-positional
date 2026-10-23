@@ -45,14 +45,7 @@ import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
-/**
- * This viewmodel receives the location updated by location services
- * and updates the UI in the observing views. The only reason this
- * viewmodel is to prevent loss of location data between switching
- * fragments.
- */
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-
     private var filter: IntentFilter = IntentFilter()
     private var locationBroadcastReceiver: BroadcastReceiver
 
@@ -343,7 +336,7 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
                             @Suppress("DEPRECATION")
                             with(geocoder.getFromLocation(target.latitude, target.longitude, 1)) {
                                 if (!this.isNullOrEmpty()) {
-                                    this[0].getAddressLine(0) //"$city, $state, $country, $postalCode, $knownName"
+                                    this[0].getAddressLine(0)
                                 } else {
                                     getString(R.string.not_available)
                                 }

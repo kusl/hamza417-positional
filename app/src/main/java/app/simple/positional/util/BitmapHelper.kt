@@ -12,11 +12,8 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Rect
 import android.graphics.Shader
-import android.view.View
 import androidx.annotation.IntRange
 import androidx.core.content.ContextCompat
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 
 object BitmapHelper {
     fun Bitmap.addLinearGradient(array: IntArray): Bitmap {
@@ -120,13 +117,6 @@ object BitmapHelper {
         return rotatedBitmap
     }
 
-    /**
-     * Convert vector resource into Bitmap
-     *
-     * @param context [Context]
-     * @param size Resolution/Dimension of the output bitmap
-     * @return [Bitmap]
-     */
     fun Int.toBitmap(context: Context, size: Int): Bitmap {
         val drawable = ContextCompat.getDrawable(context, this)
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -136,13 +126,6 @@ object BitmapHelper {
         return bitmap
     }
 
-    /**
-     * Convert vector resource into Bitmap
-     *
-     * @param context [Context]
-     * @param size Resolution/Dimension of the output bitmap
-     * @return [Bitmap]
-     */
     fun Int.toBitmap(context: Context, size: Int, @Suppress("UNUSED_PARAMETER") padding: Float): Bitmap {
         val drawable = ContextCompat.getDrawable(context, this)
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -152,14 +135,6 @@ object BitmapHelper {
         return bitmap
     }
 
-    /**
-     * Convert vector resource into Bitmap
-     *
-     * @param context [Context]
-     * @param size Resolution/Dimension of the output bitmap
-     * @param alpha 0 - 255 opacity of output bitmap
-     * @return [Bitmap]
-     */
     fun Int.toBitmap(context: Context, size: Int, alpha: Int): Bitmap {
         val drawable = ContextCompat.getDrawable(context, this)
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -170,14 +145,6 @@ object BitmapHelper {
         return bitmap
     }
 
-    /**
-     * Convert vector resource into Bitmap
-     *
-     * @param context [Context]
-     * @param incrementFactor Resolution/Dimension of the output bitmap
-     * @param alpha 0 - 255 opacity of output bitmap
-     * @return [Bitmap]
-     */
     fun Int.toBitmapKeepingSize(context: Context, incrementFactor: Int, alpha: Int): Bitmap {
         val drawable = ContextCompat.getDrawable(context, this)
         val intrinsicWidth = drawable!!.intrinsicWidth * incrementFactor
@@ -198,23 +165,5 @@ object BitmapHelper {
         val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
         vectorDrawable.draw(Canvas(bitmap))
         return bitmap
-    }
-
-    fun Int.toBitmapDescriptor(context: Context): BitmapDescriptor {
-        val vectorDrawable = ContextCompat.getDrawable(context, this)
-        vectorDrawable!!.setBounds(0, 0, vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
-        val bitmap = Bitmap.createBitmap(vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
-        vectorDrawable.draw(Canvas(bitmap))
-        return BitmapDescriptorFactory.fromBitmap(bitmap)
-    }
-
-    fun View.loadBitmapFromView(v: View): Bitmap? {
-        val b = Bitmap.createBitmap(v.layoutParams.width, v.layoutParams.height, Bitmap.Config.ARGB_8888)
-        val c = Canvas(b)
-
-        v.layout(v.left, v.top, v.right, v.bottom)
-        v.draw(c)
-
-        return b
     }
 }

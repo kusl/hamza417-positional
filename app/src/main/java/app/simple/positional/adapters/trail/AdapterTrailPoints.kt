@@ -29,7 +29,6 @@ import com.google.android.gms.maps.model.LatLng
 
 class AdapterTrailPoints(private val trailPoint: Pair<ArrayList<TrailPoint>, Triple<String?, Spanned?, Spanned?>>) :
     RecyclerView.Adapter<VerticalListViewHolder>() {
-
     private lateinit var trailsDataCallbacks: AdapterTrailsDataCallbacks
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {
@@ -50,7 +49,6 @@ class AdapterTrailPoints(private val trailPoint: Pair<ArrayList<TrailPoint>, Tri
     }
 
     override fun onBindViewHolder(holder: VerticalListViewHolder, position_: Int) {
-
         val position = position_ - 1
 
         if (holder is Holder) {

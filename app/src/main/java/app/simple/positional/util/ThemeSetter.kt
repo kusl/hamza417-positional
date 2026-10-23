@@ -29,11 +29,6 @@ object ThemeSetter {
         }
     }
 
-    /**
-     * Check if it is day or night
-     *
-     * @return true if it is day, false if it is night
-     */
     fun isDayOrNight(): Boolean {
         val cal = Calendar.getInstance()
         cal.timeInMillis = System.currentTimeMillis()

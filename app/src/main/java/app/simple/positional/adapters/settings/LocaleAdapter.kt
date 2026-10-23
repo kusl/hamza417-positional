@@ -3,9 +3,7 @@ package app.simple.positional.adapters.settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import app.simple.positional.R
 import app.simple.positional.callbacks.LocaleCallback
@@ -17,7 +15,6 @@ import app.simple.positional.util.LocaleHelper
 import java.util.*
 
 class LocaleAdapter : RecyclerView.Adapter<LocaleAdapter.Holder>() {
-
     var localeCallback: LocaleCallback? = null
 
     private var localeList: MutableList<Locales> = LocaleHelper.localeList.also { it ->

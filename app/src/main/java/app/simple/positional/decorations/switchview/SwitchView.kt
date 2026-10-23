@@ -21,7 +21,6 @@ import app.simple.positional.util.ViewUtils
 @SuppressLint("ClickableViewAccessibility")
 class SwitchView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
     : SwitchFrameLayout(context, attrs, defStyleAttr) {
-
     private var thumb: ImageView
     private var switchCallbacks: SwitchCallbacks? = null
 
@@ -128,10 +127,6 @@ class SwitchView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         thumb.clearAnimation()
     }
 
-    /**
-     * Inverts the switch's checked status. If the switch is checked then
-     * it will be unchecked and vice-versa
-     */
     fun invertCheckedStatus() {
         isChecked = !isChecked
     }

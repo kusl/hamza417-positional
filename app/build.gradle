@@ -1,54 +1,45 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.devtools.ksp'
 
-def noKeyFound = '"NO_KEY_FOUND"'
-def googleMapsAPIKey = noKeyFound
-def thisAppLicensingKey = noKeyFound
-
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
-    localProperties.load(new FileInputStream(localPropertiesFile))
-    if (localProperties['GOOGlE_MAPS_API_KEY']) {
-        googleMapsAPIKey = localProperties['GOOGlE_MAPS_API_KEY']
-    }
-    if (localProperties['LICENSE_KEY']) {
-        thisAppLicensingKey = localProperties['LICENSE_KEY']
-    }
-} else {
-    println("local.properties file not found.")
+    localPropertiesFile.withInputStream { localProperties.load(it) }
 }
 
-if (googleMapsAPIKey == noKeyFound) {
-    throw new GradleException("Google Maps API key not found. Please add 'googleMapsAPIKey' to your local.properties file.")
-}
+def env = { String key -> System.getenv(key) ?: localProperties.getProperty(key) }
+def mapsApiKey = env('MAPS_API_KEY') ?: ''
+def keystorePath = env('KEYSTORE_FILE')
+def hasReleaseKey = keystorePath && file(keystorePath).exists()
 
 android {
-
+    namespace 'app.simple.positional'
     compileSdk = 36
 
     defaultConfig {
-        applicationId "app.simple.positional"
-        minSdkVersion 24
-        //noinspection OldTargetApi
-        targetSdkVersion 36
-        versionCode 20260512
-        versionName "v2026.05.12"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        applicationId 'app.simple.positional'
+        minSdk = 24
+        targetSdk = 36
+        versionCode = (env('VERSION_CODE') ?: '20260512') as int
+        versionName = env('VERSION_NAME') ?: 'v2026.05.12'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary = true
-
-        resValue "string", "googleMapsAPIKey", googleMapsAPIKey
-        resValue "string", "thisAppLicensingKey", thisAppLicensingKey
-        resValue "string", "versionName", versionName
+        manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
+        resValue 'string', 'versionName', versionName
 
         ksp {
-            arg("room.schemaLocation", "$projectDir/databases/schemas")
+            arg('room.schemaLocation', "$projectDir/databases/schemas")
         }
     }
 
-    bundle {
-        language {
-            enableSplit = false
+    signingConfigs {
+        if (hasReleaseKey) {
+            release {
+                storeFile file(keystorePath)
+                storePassword env('STORE_PASSWORD')
+                keyAlias env('KEY_ALIAS')
+                keyPassword env('KEY_PASSWORD')
+            }
         }
     }
 
@@ -57,12 +48,19 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseKey) {
+                signingConfig signingConfigs.release
+            }
         }
-
         debug {
-            applicationIdSuffix ".debug"
-            versionNameSuffix "_debug"
+            applicationIdSuffix '.debug'
+            versionNameSuffix '_debug'
         }
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     compileOptions {
@@ -73,61 +71,40 @@ android {
 
     kotlin {
         compilerOptions {
-            jvmTarget = "JVM_21"
+            jvmTarget = 'JVM_21'
         }
     }
 
-    namespace 'app.simple.positional'
-
     buildFeatures {
-        aidl true
         buildConfig true
-        viewBinding false
         resValues true
     }
 }
 
 dependencies {
-
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
-    // Tests
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
-
-    // AndroidX
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.core:core-ktx:1.18.0'
     implementation 'androidx.fragment:fragment-ktx:1.8.9'
-    //noinspection GradleDependency
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-
-    // Kotlin
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
-    // Google Services and Default android libs
     implementation 'com.google.android.gms:play-services-location:21.3.0'
     implementation 'com.google.android.gms:play-services-maps:20.0.0'
-    implementation 'com.google.android.material:material:1.13.0'
-    implementation 'com.google.maps.android:android-maps-utils:4.3.0'
-    implementation 'com.google.android.play:app-update-ktx:2.1.0'
+    implementation 'com.google.android.material:material:1.14.0'
 
-    // Third Party
     implementation 'org.shredzone.commons:commons-suncalc:3.11'
     implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
     implementation 'com.github.vipulasri:timelineview:1.2.2'
 
-    // Room components
-    implementation "androidx.room:room-ktx:2.8.4"
-    ksp "androidx.room:room-compiler:2.8.4"
-    androidTestImplementation "androidx.room:room-testing:2.8.4"
+    implementation 'androidx.room:room-ktx:2.8.4'
+    ksp 'androidx.room:room-compiler:2.8.4'
 
-    // Leak Canary -- debugImplementation because LeakCanary should only run in debug builds.
-    // debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.5'
+    testImplementation 'junit:junit:4.13.2'
 }

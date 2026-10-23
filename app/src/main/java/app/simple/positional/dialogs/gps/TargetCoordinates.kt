@@ -21,7 +21,6 @@ import app.simple.positional.util.ViewUtils.gone
 import app.simple.positional.util.ViewUtils.visible
 
 class TargetCoordinates : CustomDialogFragment() {
-
     private lateinit var latitude: EditText
     private lateinit var longitude: EditText
     private lateinit var search: DynamicRippleImageButton

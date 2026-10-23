@@ -8,7 +8,6 @@ import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.ConditionUtils.isNull
 
 class WebPageViewerActivity : BaseActivity() {
-
     private var source: String = "null"
 
     override fun onCreate(savedInstanceState: Bundle?) {

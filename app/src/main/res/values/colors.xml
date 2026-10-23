@@ -12,11 +12,9 @@
     <color name="rippleColor">#9FDADADA</color>
     <color name="editTextBackground">#F6F6F6</color>
 
-    <!-- Bottom Bar Color -->
     <color name="iconRegular">#9A9A9A</color>
     <color name="indicator">#F3F3F3</color>
 
-    <!-- Bottom Bar Icon Colors -->
     <color name="time_bb_color">#cb4335</color>
     <color name="compass_bb_color">#76448a</color>
     <color name="direction_bb_color">#1f618d</color>
@@ -26,16 +24,12 @@
     <color name="level_bb_color">#a04000</color>
     <color name="settings_bb_color">#616a6b</color>
 
-    <color name="notification_icon_color">#D60044</color>
 
     <color name="clock_needle_stroke_color">#FFFFFF</color>
     <color name="clock_needle_fill_color">#202020</color>
     <color name="clock_element_fill">#464646</color>
     <color name="clock_face_color">#fff</color>
 
-    <!-- Graph -->
-
-    <!-- Speedometer -->
     <color name="speedometer_needle_start">#C30C00</color>
     <color name="speedometer_needle_end">#F88000</color>
     <color name="speedometer_start">@color/speedometer_needle_start</color>
@@ -43,7 +37,6 @@
     <color name="speedometer_dial">#191919</color>
     <color name="speedometer_number">#353535</color>
 
-    <!-- Switch -->
     <color name="switch_off">#EAEAEA</color>
 
     // Pin Color

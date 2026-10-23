@@ -2,19 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto">
-
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the "MyLocation" functionality.
-    -->
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -74,37 +66,17 @@
         android:theme="@style/Positional"
         android:windowSoftInputMode="adjustPan"
         tools:ignore="AllowBackup,LockedOrientationActivity">
-
         <meta-data
             android:name="open_source"
-            android:value="true" /> <!-- Set to true to indicate the app is open source -->
+            android:value="true" />
 
         <meta-data
             android:name="open_source_license"
-            android:value="GNU GENERAL PUBLIC LICENSE Version 3" /> <!-- License of your app -->
+            android:value="GNU GENERAL PUBLIC LICENSE Version 3" />
 
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_place_notification" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. See README(https://goo.gl/6BKBk7) for more. -->
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/notification_icon_color" />
-
-        <!-- Activity Aliases -->
+            android:value="${MAPS_API_KEY}" />
 
         <activity-alias
             android:name=".activities.alias.IconOneAlias"
@@ -113,7 +85,6 @@
             android:icon="@mipmap/ic_launcher_default"
             android:roundIcon="@mipmap/ic_launcher_default_round"
             android:targetActivity=".activities.main.LauncherActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -311,8 +282,6 @@
                 android:resource="@xml/shortcuts" />
         </activity-alias>
 
-        <!-- Activities -->
-
         <activity
             android:name=".activities.main.LauncherActivity"
             android:colorMode="wideColorGamut"
@@ -385,8 +354,6 @@
             android:name=".activities.subactivity.DirectionsActivity"
             android:exported="true" />
 
-        <!-- Services -->
-
         <service
             android:name=".services.LocationService"
             android:enabled="true"
@@ -440,14 +407,11 @@
             android:label="@string/clock"
             android:stopWithTask="false" />
 
-        <!-- Widgets -->
-
         <receiver
             android:name=".widgets.ClockWidget4x4"
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -462,7 +426,6 @@
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -477,7 +440,6 @@
             android:exported="false"
             android:icon="@drawable/ic_access_time"
             android:label="@string/clock">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -492,7 +454,6 @@
             android:exported="false"
             android:icon="@drawable/ic_sunrise"
             android:label="@string/sun_time">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -507,7 +468,6 @@
             android:exported="false"
             android:icon="@drawable/ic_sunrise"
             android:label="@string/sun_time">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -522,7 +482,6 @@
             android:exported="false"
             android:icon="@drawable/ic_moon_phase"
             android:label="@string/moon_illumination">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -537,7 +496,6 @@
             android:exported="false"
             android:icon="@drawable/ic_twilight"
             android:label="@string/twilight">
-
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

@@ -16,9 +16,6 @@ object CompassBloom {
             R.drawable.compass_bloom_08
     )
 
-    /**
-     * Reserved
-     */
     var compassBloomTextColor = intArrayOf(
             Color.parseColor("#FFf88806"),
             Color.parseColor("#FFD80000"),

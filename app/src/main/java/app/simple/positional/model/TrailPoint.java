@@ -3,54 +3,29 @@ package app.simple.positional.model;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
 import java.util.Objects;
 
 @Entity(tableName = "trail_data")
 public class TrailPoint {
-
-    /**
-     * Latitude of the trail
-     */
     @ColumnInfo(name = "lat")
     double latitude;
 
-    /**
-     * Longitude of the trail
-     */
     @ColumnInfo(name = "lng")
     double longitude;
 
-    /**
-     * Time of when this trail marker is added
-     */
     @PrimaryKey
     @ColumnInfo(name = "time_added")
     long timeAdded;
 
-
-    /**
-     * Use {@link app.simple.positional.constants.TrailIcons} to fetch
-     * icon drawable resource ID
-     */
     @ColumnInfo(name = "icon_position")
     int iconPosition;
 
-    /**
-     * Notes related to current trail mark
-     */
     @ColumnInfo(name = "note")
     String note;
 
-    /**
-     * Name of the current location marked
-     */
     @ColumnInfo(name = "name")
     String name;
 
-    /**
-     * Accuracy of the marker's location
-     */
     @ColumnInfo(name = "accuracy")
     float accuracy;
 

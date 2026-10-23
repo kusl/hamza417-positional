@@ -100,7 +100,7 @@ class LocationParameters : CustomBottomSheetDialogFragment() {
                         @Suppress("DEPRECATION")
                         with(geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)) {
                             if (this != null && this.isNotEmpty()) {
-                                this[0].getAddressLine(0) //"$city, $state, $country, $postalCode, $knownName"
+                                this[0].getAddressLine(0)
                             } else {
                                 getString(R.string.not_available)
                             }

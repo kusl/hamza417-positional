@@ -1,18 +1,15 @@
 package app.simple.positional.adapters.bottombar;
 
 import android.content.Context;
-
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
-
 import app.simple.positional.R;
 import app.simple.positional.constants.LocationPins;
 import app.simple.positional.model.BottomBar;
 import app.simple.positional.ui.panels.Measure;
 
 public class BottomBarItems {
-
     public static final String CLOCK = "clock";
     public static final String COMPASS = "compass";
     public static final String DIRECTION = "direction";

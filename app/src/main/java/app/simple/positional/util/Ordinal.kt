@@ -13,12 +13,4 @@ object Ordinal {
 
         return messageFormat.format(testArgs)
     }
-
-    private fun ordinal(i: Int): String {
-        val suffixes = arrayOf("th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th")
-        return when (i % 100) {
-            11, 12, 13 -> i.toString() + "th"
-            else -> StringBuilder().append(i).append(suffixes[i % 10]).toString()
-        }
-    }
 }

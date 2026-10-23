@@ -47,7 +47,6 @@ import kotlinx.coroutines.withContext
 
 class TrailMaps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, attributeSet),
     SensorEventListener {
-
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)
     private var readingsAlpha = 0.03f
@@ -394,7 +393,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet) : CustomMaps(conte
 
             val bounds = builder.build()
 
-            //BOUND_PADDING is an int to specify padding of bound.. try 100.
             if (animate) {
                 googleMap!!.animateCamera(CameraUpdateFactory
                     .newLatLngBounds(bounds, 250))

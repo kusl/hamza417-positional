@@ -3,7 +3,6 @@ package app.simple.positional.decorations.ripple;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
-
 import androidx.core.content.res.ResourcesCompat;
 
 import app.simple.positional.R;

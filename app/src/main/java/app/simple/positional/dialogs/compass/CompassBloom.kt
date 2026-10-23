@@ -14,7 +14,6 @@ import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.util.LocaleHelper
 
 class CompassBloom : CustomBottomSheetDialogFragment() {
-
     private lateinit var viewPager: ViewPager
     private lateinit var textView: TextView
 
@@ -40,7 +39,6 @@ class CompassBloom : CustomBottomSheetDialogFragment() {
 
         viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                /* no-op */
             }
 
             override fun onPageSelected(position: Int) {

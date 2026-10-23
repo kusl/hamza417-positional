@@ -9,12 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.SystemClock;
-
 import app.simple.positional.services.ClockWidgetService4x4;
 import app.simple.positional.util.PermissionUtils;
 
 public class ClockWidget4x4 extends AppWidgetProvider {
-
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);

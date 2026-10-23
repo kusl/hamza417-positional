@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
 open class ScopedFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
-
     protected var isLandscapeOrientation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {

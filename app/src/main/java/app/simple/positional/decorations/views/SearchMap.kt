@@ -14,7 +14,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 
 class SearchMap(context: Context, attrs: AttributeSet) : CustomMaps(context, attrs) {
-
     internal var callbacks: (latLng: LatLng) -> Unit = {}
 
     init {

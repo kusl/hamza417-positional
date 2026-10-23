@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Panels -->
     <string name="clock">Uhrzeit</string>
     <string name="compass">Kompass</string>
     <string name="gps_location">Standort</string>
     <string name="level">Wasserwaage</string>
     <string name="settings">Einstellungen</string>
-    <!-- Info Headers -->
+
     <string name="clock_info">Zeitinformation</string>
     <string name="compass_info">Kompassinformationen</string>
     <string name="gps_info">GPS Informationen</string>
-    <!-- Clock Information Headers-->
+
     <string name="local_time">Ortszeit</string>
     <string name="utc_time">UTC-Zeit</string>
     <string name="sun_position">Sonnenposition</string>
@@ -20,15 +19,15 @@
     <string name="moon_time">Mondzeit</string>
     <string name="moon_illumination">Mondausleuchtung</string>
     <string name="moon_dates">Monddatum</string>
-    <!-- GPS Information Headers -->
+
     <string name="gps_provider">Anbieter</string>
     <string name="gps_movement">Bewegung</string>
     <string name="gps_coordinates">Koordinaten</string>
     <string name="gps_address">Adresse</string>
-    <!--Compass Information Header -->
+
     <string name="compass_accuracy">Genauigkeit</string>
     <string name="compass_field">Magnetfeld</string>
-    <!-- Clock Information Items-->
+
     <string name="local_timezone">Zeitzone:</string>
     <string name="local_time_24hr">24h Zeit:</string>
     <string name="local_time_12hr">12h Zeit:</string>
@@ -63,7 +62,7 @@
     <string name="moon_new_moon">Neumond:</string>
     <string name="moon_first_quarter">Erstes Viertel:</string>
     <string name="moon_last_quarter">Letztes Viertel:</string>
-    <!-- Compass information items -->
+
     <string name="magnetometer">Magnetometer</string>
     <string name="accelerometer">Beschleunigungssensor</string>
     <string name="accelerometer_accuracy">Beschleunigungssensor:</string>
@@ -71,7 +70,7 @@
     <string name="compass_inclination">Neigungswinkel:</string>
     <string name="compass_declination">Neigungswinkel:</string>
     <string name="compass_field_strength">Feldstärke:</string>
-    <!-- GPS Information Panel -->
+
     <string name="gps_status">Status:</string>
     <string name="gps_source">Quelle:</string>
     <string name="gps_accuracy">Genauigkeit:</string>
@@ -83,15 +82,15 @@
     <string name="gps_speed">Geschwindigkeit:</string>
     <string name="gps_latitude">Breite:</string>
     <string name="gps_longitude">Länge:</string>
-    <!-- Sensor Accuracy -->
+
     <string name="sensor_accuracy_unreliable">Unzuverlässig</string>
     <string name="sensor_accuracy_low">Niedrig</string>
     <string name="sensor_accuracy_medium">Mittel</string>
     <string name="sensor_accuracy_high">Hoch</string>
-    <!-- GPS Source Status -->
+
     <string name="gps_enabled">Aktiviert</string>
     <string name="gps_disabled">Deaktiviert</string>
-    <!-- Units -->
+
     <string name="meter">m</string>
     <string name="kilometer">km</string>
     <string name="feet">ft</string>
@@ -100,7 +99,7 @@
     <string name="miles_hour">mi/h</string>
     <string name="milliseconds">ms</string>
     <string name="seconds">s</string>
-    <!-- Alert -->
+
     <string name="info_copied">In Zwischenablage kopiert</string>
     <string name="info_error">Info konnte nicht kopiert werden!</string>
     <string name="invalid_coordinates">Ungültige Koordinaten</string>
@@ -112,12 +111,12 @@
     <string name="location_not_saved">Konnte nicht gespeichert werden!</string>
     <string name="no_update">Kein Update verfügbar</string>
     <string name="location_not_available">Standort ist noch nicht verfügbar</string>
-    <!-- Settings Categories -->
+
     <string name="appearance">Darstellung</string>
     <string name="configuration">Einstellungen</string>
     <string name="about">Info</string>
     <string name="contribute">Beitragen</string>
-    <!-- Settings Heading -->
+
     <string name="theme">Stil</string>
     <string name="icon">Symbol</string>
     <string name="corner_radius">Eckenradius</string>
@@ -131,7 +130,7 @@
     <string name="app_version">App Version</string>
     <string name="found_an_issue">Ein Problem gefunden?</string>
     <string name="translate">Übersetzung</string>
-    <!-- Settings Description -->
+
     <string name="theme_follow_system">Systemeinstellungen folgen</string>
     <string name="theme_day">Hell</string>
     <string name="theme_night">Dunkel</string>
@@ -142,30 +141,30 @@
     <string name="desc_legal">Haftungsausschluss, Datenschutzrichtlinien und Nutzungsbedingungen der App lesen</string>
     <string name="desc_git">Anwendungsrepository öffnen</string>
     <string name="desc_translate">Hilf bei der Übersetzung der App in deine Muttersprache</string>
-    <!-- Clock Menu -->
+
     <string name="needles">Nadel</string>
     <string name="motion_type">Bewegungsart</string>
     <string name="time_format">12-Stunden-Format verwenden</string>
     <string name="motion_type_smooth">Sanft</string>
     <string name="motion_type_tick">Anticken</string>
-    <!-- Compass Menu -->
+
     <string name="bloom">Erblühen</string>
     <string name="bloom_skins">Nadeldekoration wählen</string>
     <string name="show_code">Code anzeigen</string>
-    <!-- GPS Menu -->
+
     <string name="labels">Labels</string>
     <string name="buildings">Gebäude</string>
     <string name="traffic">Verkehr</string>
     <string name="satellite_mode">Satellitenmodus</string>
     <string name="high_contrast_mode">Karte mit hohem Kontrast</string>
-    <!-- Settings Menus -->
+
     <string name="unit_metric">Metrisch</string>
     <string name="unit_imperial">US-Maße</string>
-    <!-- Specified Coordinates Menu -->
+
     <string name="specified_hint_header">Ort eingeben</string>
     <string name="specified_hint_latitude">Breitengrad (±90)</string>
     <string name="specified_hint_longitude">Längengrad (±180)</string>
-    <!-- Info -->
+
     <string name="compass_calibration_notice">Wenn die Genauigkeit Ihres Kompasssensors niedrig ist, bewegen Sie Ihr Gerät entlang der Linie einer 8 zum Kalibrieren.</string>
     <string name="specified_location_notice">Untenstehende Informationen werden für bestimmte Standortkoordinaten aktualisiert.</string>
     <string name="show_again">Erneut anzeigen</string>
@@ -176,27 +175,27 @@
     <string name="auto_system_default_language">Auto (System-Standard)</string>
     <string name="location_permission_denied">"Standortberechtigung abgelehnt!"</string>
     <string name="no_location_permission_alert">Einige Funktionen funktionieren ohne Standortberechtigung möglicherweise nicht</string>
-    <!-- Button Text -->
+
     <string name="button_cancel">Abbrechen</string>
     <string name="button_set">Anwenden</string>
     <string name="button_close">Schließen</string>
     <string name="button_grant">Erlauben</string>
     <string name="button_reset">Wiederherstellen</string>
-    <!-- Button Descriptions -->
+
     <string name="clock_options">Uhrenmenü</string>
     <string name="compass_options">Kompassmenü</string>
     <string name="gps_options">GPS-Menü</string>
     <string name="gps_reset_location">Standort zurücksetzen</string>
     <string name="delete_all">Alles löschen</string>
     <string name="open_specified_location_documentation">Beschreibung gespeicherter Orte öffnen</string>
-    <!-- Legal Menu -->
+
     <string name="disclaimer">Haftungsausschluss</string>
     <string name="privacy_policy">Datenschutzerklärung</string>
     <string name="terms_of_use">Nutzungsbedingungen</string>
     <string name="permissions">Berechtigungen</string>
     <string name="credits">Mitwirkende</string>
     <string name="internet_uses">Internetnutzung</string>
-    <!-- Moon Illumination -->
+
     <string name="waning">abnehmend</string>
     <string name="waning_gibbous">abnehmend (drittes Viertel)</string>
     <string name="waning_crescent">abnehmend (letztes Viertel)</string>
@@ -207,7 +206,7 @@
     <string name="new_moon">Neumond</string>
     <string name="third_quarter">drittes Viertel</string>
     <string name="first_quarter">erstes Viertel</string>
-    <!-- Directions -->
+
     <string name="north">Norden</string>
     <string name="north_west">Nordwesten</string>
     <string name="west">Westen</string>
@@ -224,17 +223,17 @@
     <string name="south_east_SE">SO</string>
     <string name="east_E">O</string>
     <string name="north_east_NE">NO</string>
-    <!-- Graph -->
+
     <string name="location_details">Standortdetails</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Durchschnitt:</string>
-    <!-- UTM -->
+
     <string name="utm_zone">Zone:</string>
     <string name="utm_easting">Rechtswert:</string>
     <string name="utm_northing">Hochwert:</string>
     <string name="utm_meridian">Zentraler Meridian:</string>
-    <!-- Location Provider -->
+
     <string name="desc_android_location_provider">Die standardmäßige Standort-API von Android, die sehr genau ist, aber jeweils nur einen Standortanbieter zulässt und bei Standortanfragen in Gebäuden die Genauigkeit beeinträchtigen kann, erfordert einen leistungsstarken GPS-Sensor, um den Standort schnell zu aktualisieren.</string>
     <string name="desc_fused_location_provider">Die Fused Location API von Google, die Standortdaten von verschiedenen Standortanbietern triangulliert und das Ergebnis an eine Reihe von Orten verteilt. Kann unterschiedliche Ergebnisse liefern, aber weniger Batterie verbrauchen.</string>
     <string name="desc_location_provider_note">Hinweis: Die Verwendung der APIs kann abhängig von verschiedenen Faktoren unterschiedliche Ergebnisse liefern und keine von ihnen ist ein Beweis für die Genauigkeit untereinander. Testen Sie die APIs und lassen Sie die ausgewählten welche in Ihrer Region am besten funktionieren.</string>

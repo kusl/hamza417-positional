@@ -2,11 +2,9 @@ package app.simple.positional.singleton
 
 import android.content.Context
 import android.content.SharedPreferences
-import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.ConditionUtils.isNull
 
 object SharedPreferences {
-
     const val preferences = "Preferences"
     private var sharedPreferences: SharedPreferences? = null
 
@@ -16,14 +14,6 @@ object SharedPreferences {
         }
     }
 
-    /**
-     * Singleton to hold reference of SharedPreference.
-     * Call [init] first before making a instance request
-     *
-     * @see init
-     * @throws NullPointerException if the [init] is not called
-     * prior to accessing the [sharedPreferences] instance
-     */
     fun getSharedPreferences(): SharedPreferences {
         return sharedPreferences ?: throw NullPointerException()
     }
@@ -33,12 +23,6 @@ object SharedPreferences {
             context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
         } else {
             sharedPreferences!!
-        }
-    }
-
-    fun clearSharedPreferences() {
-        if (sharedPreferences.isNotNull()) {
-            getSharedPreferences().edit().clear().apply()
         }
     }
 }

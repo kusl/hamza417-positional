@@ -14,9 +14,7 @@ import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.util.PermissionUtils.hasNotificationPermission
 import app.simple.positional.util.PermissionUtils.isIgnoringBatteryOptimizations
 
-
 class ClockWidgetActivity : BaseActivity() {
-
     private lateinit var grantBattery: DynamicRippleButton
     private lateinit var grantNotification: DynamicRippleButton
 

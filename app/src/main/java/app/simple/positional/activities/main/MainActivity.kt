@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.TextView
@@ -26,8 +25,6 @@ import app.simple.positional.callbacks.BottomSheetSlide
 import app.simple.positional.callbacks.PanelsCallback
 import app.simple.positional.callbacks.PermissionCallbacks
 import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.popup.PopupLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
 import app.simple.positional.decorations.transformers.DepthTransformer
 import app.simple.positional.dialogs.app.Panels.Companion.showPanelsDialog
 import app.simple.positional.extensions.activity.BaseActivity
@@ -61,7 +58,6 @@ class MainActivity : BaseActivity(),
     BottomSheetSlide,
     android.content.SharedPreferences.OnSharedPreferenceChangeListener,
     OnMapsSdkInitializedCallback {
-
     private val defaultPermissionRequestCode = 123
     private lateinit var bottomBar: ViewPager2
     private lateinit var bottomBarContainer: DynamicCornerLinearLayout
@@ -83,19 +79,6 @@ class MainActivity : BaseActivity(),
         label = findViewById(R.id.label)
 
         bottomBarAdapter = BottomBarAdapter(BottomBarItems.getBottomBarItems(baseContext)) {
-//            PopupFragments(bottomBarContainer) { _, tag, position ->
-//                bottomBar.setCurrentItem(position, true)
-//                openFragment(tag)
-//                FragmentPreferences.setCurrentPage(position)
-//                FragmentPreferences.setCurrentTag(tag)
-//            }.setOnDismissListener {
-//                bottomBarContainer.animate()
-//                        .alpha(1f)
-//                        .setInterpolator(DecelerateInterpolator())
-//                        .setDuration(500)
-//                        .start()
-//            }
-
             supportFragmentManager.showPanelsDialog(PanelsCallback { _, string, position ->
                 bottomBar.setCurrentItem(position, true)
                 openFragment(string!!)
@@ -105,7 +88,6 @@ class MainActivity : BaseActivity(),
         }
 
         label.setOnClickListener {
-            // hideBottomBarMenuAndShowPopup()
         }
 
         bottomBarAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.ALLOW
@@ -186,68 +168,6 @@ class MainActivity : BaseActivity(),
         bottomBarContainer.viewTreeObserver.removeOnGlobalLayoutListener(bottomBarContainerGlobalLayoutListener)
 
         super.onDestroy()
-    }
-
-    @Suppress("unused")
-    private fun layOutPopupData() {
-        popupContainer = LayoutInflater.from(baseContext)
-                .inflate(R.layout.popup_fragments, PopupLinearLayout(baseContext), true)
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.clock).setOnClickListener {
-            bottomBar.setCurrentItem(0, true)
-            openFragment(BottomBarItems.CLOCK)
-            FragmentPreferences.setCurrentPage(0)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[0].tag)
-            showBottomBarMenu()
-        }
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.compass).setOnClickListener {
-            bottomBar.setCurrentItem(1, true)
-            openFragment(BottomBarItems.COMPASS)
-            FragmentPreferences.setCurrentPage(1)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[1].tag)
-            showBottomBarMenu()
-        }
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.direction).setOnClickListener {
-            bottomBar.setCurrentItem(2, true)
-            openFragment(BottomBarItems.DIRECTION)
-            FragmentPreferences.setCurrentPage(2)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[2].tag)
-            showBottomBarMenu()
-        }
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.location).setOnClickListener {
-            bottomBar.setCurrentItem(3, true)
-            openFragment(BottomBarItems.LOCATION)
-            FragmentPreferences.setCurrentPage(3)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[3].tag)
-            showBottomBarMenu()
-        }
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.trail).setOnClickListener {
-            bottomBar.setCurrentItem(4, true)
-            openFragment(BottomBarItems.TRAIL)
-            FragmentPreferences.setCurrentPage(4)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[4].tag)
-            showBottomBarMenu()
-        }
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.level).setOnClickListener {
-            bottomBar.setCurrentItem(5, true)
-            openFragment(BottomBarItems.LEVEL)
-            FragmentPreferences.setCurrentPage(5)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[5].tag)
-            showBottomBarMenu()
-        }
-
-        popupContainer.findViewById<DynamicRippleTextView>(R.id.settings).setOnClickListener {
-            bottomBar.setCurrentItem(6, true)
-            openFragment(BottomBarItems.SETTINGS)
-            FragmentPreferences.setCurrentPage(6)
-            FragmentPreferences.setCurrentTag(BottomBarItems.getBottomBarItems(baseContext)[6].tag)
-            showBottomBarMenu()
-        }
     }
 
     private fun showBottomBarMenu() {

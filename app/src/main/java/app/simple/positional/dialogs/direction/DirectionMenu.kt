@@ -15,7 +15,6 @@ import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.preferences.GPSPreferences
 
 class DirectionMenu : CustomBottomSheetDialogFragment() {
-
     private lateinit var gimbalLock: SwitchView
     private lateinit var mapsTarget: SwitchView
     private lateinit var directionTargets: DynamicRippleTextView

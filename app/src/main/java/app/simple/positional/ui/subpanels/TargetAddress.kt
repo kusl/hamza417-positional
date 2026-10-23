@@ -14,7 +14,6 @@ import app.simple.positional.util.StatusBarHeight
 import app.simple.positional.viewmodels.viewmodel.AddressViewModel
 
 class TargetAddress : ScopedFragment() {
-
     private lateinit var searchView: SearchView
     private lateinit var recyclerView: CustomRecyclerView
 

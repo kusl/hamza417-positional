@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class AddressViewModel(application: Application) : AndroidViewModel(application) {
-
     val coordinates: MutableLiveData<Pair<Double, Double>> = MutableLiveData()
     val address: MutableLiveData<MutableList<Address>> = MutableLiveData()
 

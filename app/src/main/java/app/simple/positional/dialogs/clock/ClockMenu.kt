@@ -13,7 +13,6 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.ClockPreferences
 
 class ClockMenu : CustomBottomSheetDialogFragment() {
-
     private lateinit var motionType: DynamicRippleTextView
     private lateinit var defaultTimeFormatSwitch: SwitchView
     private lateinit var secondsPrecisionSwitchView: SwitchView

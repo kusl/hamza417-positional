@@ -62,7 +62,6 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.IsoFields
 
 class Time : ScopedFragment() {
-
     private lateinit var hour: PhysicalRotationImageView
     private lateinit var minutes: PhysicalRotationImageView
     private lateinit var seconds: PhysicalRotationImageView
@@ -313,7 +312,6 @@ class Time : ScopedFragment() {
 
     private fun calculateAndUpdateData(latitude: Double, longitude: Double, altitude: Double) {
         viewLifecycleOwner.lifecycleScope.launch {
-
             var sunTimeData: Spanned
             var moonTimeData: Spanned
             var twilightData: Spanned
@@ -325,9 +323,6 @@ class Time : ScopedFragment() {
             var moonPhase: Double?
             var sunAzimuth: Double?
             var moonAzimuth: Double?
-//            var sunMoonCalculator: SunMoonCalculator?
-//            var moonBitmap: Bitmap?
-//            var size = moonPhaseGraphics.width
 
             withContext(Dispatchers.Default) {
                 val pattern: DateTimeFormatter = if (ClockPreferences.getDefaultClockTimeFormat()) {
@@ -361,7 +356,6 @@ class Time : ScopedFragment() {
                 twilightData =
                     with(SunTimes.compute().timezone(timezone).on(Instant.now()).latitude(latitude).longitude(longitude).elevation(altitude)) {
                         fromHtml(
-                            // Morning (before sunrise)
                             "<h3><b>${getString(R.string.twilight_morning)}</b></h3>" +
                             "<b>${getString(R.string.twilight_astronomical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.ASTRONOMICAL).execute().rise)} $ARROW ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().rise)}<br>" +
                             "<b>${getString(R.string.twilight_nautical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().rise)} $ARROW ${pattern.format(twilight(SunTimes.Twilight.CIVIL).execute().rise)}<br>" +
@@ -372,7 +366,6 @@ class Time : ScopedFragment() {
                             "<b>${getString(R.string.twilight_visual_lower)}</b> ${pattern.format(twilight(SunTimes.Twilight.VISUAL_LOWER).execute().rise)}<br>" +
                             "<b>${getString(R.string.twilight_golden_hour)}</b> ${pattern.format(twilight(GOLDEN_HOUR_MORNING_START).execute().rise)} $ARROW ${pattern.format(twilight(SunTimes.Twilight.GOLDEN_HOUR).execute().rise)}<br>" +
                             "<br>" +
-                            // Evening (after sunset)
                             "<h3>${getString(R.string.twilight_evening)}</h3>" +
                             "<b>${getString(R.string.twilight_golden_hour)}</b> ${pattern.format(twilight(SunTimes.Twilight.GOLDEN_HOUR).execute().set)} $ARROW ${pattern.format(twilight(GOLDEN_HOUR_EVENING_END).execute().set)}<br>" +
                             "<b>${getString(R.string.twilight_visual_lower)}</b> ${pattern.format(twilight(SunTimes.Twilight.VISUAL_LOWER).execute().set)}<br>" +
@@ -384,9 +377,6 @@ class Time : ScopedFragment() {
                             "<b>${getString(R.string.twilight_astronomical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().set)} $ARROW ${pattern.format(twilight(SunTimes.Twilight.ASTRONOMICAL).execute().set)}<br>"
                         )
                     }
-
-
-
 
                 sunPositionData =
                     with(SunPosition.compute().timezone(timezone).on(Instant.now()).at(latitude, longitude).elevation(altitude).execute()) {
@@ -423,36 +413,28 @@ class Time : ScopedFragment() {
                         moonPhase = phase
 
                         fromHtml(buildString {
-                            // Moon Fraction
                             append("<b>${getString(R.string.moon_fraction)}</b> ${round(fraction, 2)}")
                             append("<br>")
-                            // Moon Angle
                             append("<b>${getString(R.string.moon_angle)}</b> ${round(angle, 2)}°")
                             append("<br>")
-                            // Moon Angle State
                             append("<b>${getString(R.string.moon_angle_state)}</b> ${if (angle < 0) getString(R.string.waxing) else getString(R.string.waning)}")
                             append("<br>")
-                            // Moon Phase
                             append("<b>${getString(R.string.moon_phase)}</b> ${getMoonPhase(requireContext(), phase)}")
                             append("<br>")
-                            // Moon Phase Angle
                             append("<b>${getString(R.string.moon_phase_angle)}</b> ${round(phase, 2)}°")
                             append("<br>")
-                            // Moon Elongation
                             if (MainPreferences.isMetric()) {
                                 append("<b>${getString(R.string.elongation)}</b> ${String.format("%.3E", elongation)} ${getString(R.string.kilometer)}")
                             } else {
                                 append("<b>${getString(R.string.elongation)}</b> ${String.format("%.3E", elongation.toMiles())} ${getString(R.string.miles)}")
                             }
                             append("<br>")
-                            // Moon Radius
                             if (MainPreferences.isMetric()) {
                                 append("<b>${getString(R.string.radius)}</b> ${String.format("%.3E", radius)} ${getString(R.string.kilometer)}")
                             } else {
                                 append("<b>${getString(R.string.radius)}</b> ${String.format("%.3E", radius.toMiles())} ${getString(R.string.miles)}")
                             }
                             append("<br>")
-                            // Crescent Width
                             if (MainPreferences.isMetric()) {
                                 append("<b>${getString(R.string.crescent_width)}</b> ${String.format("%.3E", crescentWidth)} ${getString(R.string.kilometer)}")
                             } else {
@@ -468,11 +450,6 @@ class Time : ScopedFragment() {
                                  "<b>${getString(R.string.moon_first_quarter)}</b> ${formatMoonDate(phase(MoonPhase.Phase.FIRST_QUARTER).execute().time)}<br>" +
                                  "<b>${getString(R.string.moon_last_quarter)}</b> ${formatMoonDate(phase(MoonPhase.Phase.LAST_QUARTER).execute().time)}<br>")
                     }
-
-                // Unreliable!!!
-                // sunMoonCalculator= SunMoonCalculator(getCurrentTimeData(), latitude, longitude, altitude.toInt())
-                // sunMoonCalculator!!.calcSunAndMoon()
-                // moonBitmap = DrawMoonBitmap.getLunarPhaseBitmap(sunMoonCalculator!!.moonPhase, sunMoonCalculator!!.moon!!.illuminationPhase, sunMoonCalculator!!, latitude, LocationExtension.isHemisphereNorth(latitude))
             }
 
             try {
@@ -486,8 +463,6 @@ class Time : ScopedFragment() {
                 sunPosition.setSunAzimuth(sunAzimuth ?: 0.0)
                 sunPosition.setMoonDrawable(moonAzimuth!!, moonPhase!!)
                 sunPosition.invalidate()
-                //this@Clock.moonPhaseGraphics.rotation = (moonPosition.parallacticAngle - moonIllumination.angle).toFloat()
-                //this@Clock.moonPhaseGraphics.setImageBitmap(moonBitmap)
                 this@Time.moonDatesData.text = moonDatesData
             } catch (ignored: NullPointerException) {
             } catch (ignored: UninitializedPropertyAccessException) {

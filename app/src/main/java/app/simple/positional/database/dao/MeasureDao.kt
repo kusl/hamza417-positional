@@ -10,7 +10,6 @@ import app.simple.positional.model.Measure
 
 @Dao
 interface MeasureDao {
-
     @Query("SELECT * FROM measures ORDER BY date_added COLLATE nocase DESC")
     fun getAllMeasures(): MutableList<Measure>
 
@@ -28,5 +27,4 @@ interface MeasureDao {
 
     @Query("DELETE FROM measures")
     fun nukeTable()
-
 }

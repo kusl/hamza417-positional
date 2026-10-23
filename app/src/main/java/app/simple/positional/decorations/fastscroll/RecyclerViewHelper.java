@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 class RecyclerViewHelper implements FastScroller.ViewHelper {
-
     @NonNull
     private final RecyclerView mView;
     @Nullable
@@ -26,7 +24,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         mView = view;
         mPopupTextProvider = popupTextProvider;
     }
-    
+
     @Override
     public void addOnPreDrawListener(@NonNull Runnable onPreDraw) {
         mView.addItemDecoration(new RecyclerView.ItemDecoration() {
@@ -37,7 +35,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
             }
         });
     }
-    
+
     @Override
     public void addOnScrollChangedListener(@NonNull Runnable onScrollChanged) {
         mView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -47,7 +45,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
             }
         });
     }
-    
+
     @Override
     public void addOnTouchEventListener(@NonNull Predicate <MotionEvent> onTouchEvent) {
         mView.addOnItemTouchListener(new RecyclerView.SimpleOnItemTouchListener() {
@@ -56,7 +54,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
                     @NonNull MotionEvent event) {
                 return onTouchEvent.test(event);
             }
-            
+
             @Override
             public void onTouchEvent(@NonNull RecyclerView recyclerView,
                     @NonNull MotionEvent event) {
@@ -64,7 +62,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
             }
         });
     }
-    
+
     @Override
     public int getScrollRange() {
         int itemCount = getItemCount();
@@ -77,7 +75,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         }
         return mView.getPaddingTop() + itemCount * itemHeight + mView.getPaddingBottom();
     }
-    
+
     @Override
     public int getScrollOffset() {
         int firstItemPosition = getFirstItemPosition();
@@ -88,19 +86,17 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         int firstItemTop = getFirstItemOffset();
         return mView.getPaddingTop() + firstItemPosition * itemHeight - firstItemTop;
     }
-    
+
     @Override
     public void scrollTo(int offset) {
-        // Stop any scroll in progress for RecyclerView.
         mView.stopScroll();
         offset -= mView.getPaddingTop();
         int itemHeight = getItemHeight();
-        // firstItemPosition should be non-negative even if paddingTop is greater than item height.
         int firstItemPosition = Math.max(0, offset / itemHeight);
         int firstItemTop = firstItemPosition * itemHeight - offset;
         scrollToPositionWithOffset(firstItemPosition, firstItemTop);
     }
-    
+
     @Nullable
     @Override
     public String getPopupText() {
@@ -120,7 +116,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         }
         return popupTextProvider.getPopupText(position);
     }
-    
+
     private int getItemCount() {
         LinearLayoutManager linearLayoutManager = getVerticalLinearLayoutManager();
         if (linearLayoutManager == null) {
@@ -136,7 +132,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         }
         return itemCount;
     }
-    
+
     private int getItemHeight() {
         if (mView.getChildCount() == 0) {
             return 0;
@@ -145,7 +141,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         mView.getDecoratedBoundsWithMargins(itemView, mTempRect);
         return mTempRect.height();
     }
-    
+
     private int getFirstItemPosition() {
         int position = getFirstItemAdapterPosition();
         LinearLayoutManager linearLayoutManager = getVerticalLinearLayoutManager();
@@ -158,7 +154,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         }
         return position;
     }
-    
+
     private int getFirstItemAdapterPosition() {
         if (mView.getChildCount() == 0) {
             return RecyclerView.NO_POSITION;
@@ -170,7 +166,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         }
         return linearLayoutManager.getPosition(itemView);
     }
-    
+
     private int getFirstItemOffset() {
         if (mView.getChildCount() == 0) {
             return RecyclerView.NO_POSITION;
@@ -179,7 +175,7 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
         mView.getDecoratedBoundsWithMargins(itemView, mTempRect);
         return mTempRect.top;
     }
-    
+
     private void scrollToPositionWithOffset(int position, int offset) {
         LinearLayoutManager linearLayoutManager = getVerticalLinearLayoutManager();
         if (linearLayoutManager == null) {
@@ -189,11 +185,10 @@ class RecyclerViewHelper implements FastScroller.ViewHelper {
             GridLayoutManager gridLayoutManager = (GridLayoutManager) linearLayoutManager;
             position *= gridLayoutManager.getSpanCount();
         }
-        // LinearLayoutManager actually takes offset from paddingTop instead of top of RecyclerView.
         offset -= mView.getPaddingTop();
         linearLayoutManager.scrollToPositionWithOffset(position, offset);
     }
-    
+
     @Nullable
     private LinearLayoutManager getVerticalLinearLayoutManager() {
         RecyclerView.LayoutManager layoutManager = mView.getLayoutManager();

@@ -57,7 +57,6 @@ import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 class Compass : ScopedFragment(), SensorEventListener {
-
     private var handler = Handler(Looper.getMainLooper())
     private var objectAnimator: ObjectAnimator? = null
     private var calibrationDialog: CompassCalibration? = null
@@ -279,7 +278,7 @@ class Compass : ScopedFragment(), SensorEventListener {
         }
 
         run {
-            if (BuildConfig.DEBUG.invert()) { // ANR on debug builds
+            if (BuildConfig.DEBUG.invert()) {
                 accelerometerX.text = fromHtml("<b>X:</b> ${round(accelerometerReadings[0].toDouble(), 3)}")
                 accelerometerY.text = fromHtml("<b>Y:</b> ${round(accelerometerReadings[1].toDouble(), 3)}")
                 accelerometerZ.text = fromHtml("<b>Z:</b> ${round(accelerometerReadings[2].toDouble(), 3)}")
@@ -406,7 +405,6 @@ class Compass : ScopedFragment(), SensorEventListener {
     }
 
     private inner class MyOnTouchListener : View.OnTouchListener {
-
         @SuppressLint("ClickableViewAccessibility")
         override fun onTouch(v: View?, event: MotionEvent): Boolean {
             when (event.action) {
@@ -421,7 +419,7 @@ class Compass : ScopedFragment(), SensorEventListener {
                     flowerThree.clearAnimation()
                     flowerFour.clearAnimation()
                     handler.removeCallbacks(compassDialAnimationRunnable)
-                    lastDialAngle = dial.rotation //if (dial.rotation < -180) abs(dial.rotation) else dial.rotation
+                    lastDialAngle = dial.rotation
                     startAngle = getAngle(event.x.toDouble(), event.y.toDouble(), dialContainer.width.toFloat(), dialContainer.height.toFloat())
                     return true
                 }

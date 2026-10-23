@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 class SunTimeWidget : AppWidgetProvider() {
-
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         onWidgetUpdate(context)
         super.onUpdate(context, appWidgetManager, appWidgetIds)
@@ -37,7 +36,6 @@ class SunTimeWidget : AppWidgetProvider() {
 
     private fun onWidgetUpdate(context: Context) {
         CoroutineScope(Dispatchers.Default).launch {
-
             SharedPreferences.init(context)
 
             val latitude = if (MainPreferences.isCustomCoordinate()) {

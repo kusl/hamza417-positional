@@ -11,17 +11,8 @@ import app.simple.positional.sparkline.extensions.cubicTo
 import kotlin.math.ceil
 import kotlin.math.min
 
-/**
- * SparkLineLayout simple and lightweight for drawing sparkline\graph
- * without axes.
- */
-
 class SparkLineLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
     : View(context, attrs, defStyleAttr) {
-
-    /*
-     Default vars
-     */
     companion object DefaultAttrs {
         private val SPARKLINE_COLOR = Color.parseColor("#222222")
         private val SPARKLINE_SECOND_COLOR = Color.parseColor("#222222")
@@ -40,9 +31,6 @@ class SparkLineLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         private const val SPLIT_LINE_RATIO = 0.5F
     }
 
-    /*
-    Attrs
-     */
     private var sparkLineColor: Int = SPARKLINE_COLOR
     private var sparkLineSecondColor: Int = SPARKLINE_SECOND_COLOR
     private var sparkLineThickness: Float = SPARKLINE_THICKNESS
@@ -59,31 +47,19 @@ class SparkLineLayout @JvmOverloads constructor(context: Context, attrs: Attribu
     private var lineSplitRightColor = LINE_SPLIT_RIGHT_COLOR
     private var isGradientLine = IS_GRADIENT_LINE
 
-    /*
-    Paint
-     */
     private var paintSparkLine: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var paintMarker: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var paintMarkerStroke: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var paintLineLeft: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var paintLineRight: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    /*
-    Path
-     */
     private var pathSparkLine: Path = Path()
     private var pathLineLeft: Path = Path()
     private var pathLineRight: Path = Path()
 
-    /*
-    Data
-     */
     private var inputData: ArrayList<Float> = arrayListOf()
     private var data: ArrayList<Float> = arrayListOf()
 
-    /*
-    Local vars
-     */
     private var dataMax: Float = 0f
     private var dataMin: Float = 0f
     private var xStep: Float = 0F
@@ -167,14 +143,12 @@ class SparkLineLayout @JvmOverloads constructor(context: Context, attrs: Attribu
             styledAttrs.recycle()
         }
 
-
         if (isInEditMode) {
             setData(
                     arrayListOf(
                             298F, 46F, 87F, 178F, 446F, 1167F, 1855F, 1543F, 662F, 1583F
                     )
             )
-
         }
     }
 
@@ -345,7 +319,6 @@ class SparkLineLayout @JvmOverloads constructor(context: Context, attrs: Attribu
         pathLineLeft.moveTo(xStart, measuredHeight - heightPadding - (data.first() - dataMin) * yStep)
         xStart += xStep
         for (index in 1 until data.size) {
-
             val prevVal: Float = getPrevVal(index)
             val nextVal: Float = getNextVal(index)
             val prevD = getPrevD(xStart, index, prevVal)

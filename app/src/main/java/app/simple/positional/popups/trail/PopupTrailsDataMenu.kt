@@ -9,7 +9,6 @@ import app.simple.positional.decorations.popup.BasePopupWindow
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 
 class PopupTrailsDataMenu(anchor: View) : BasePopupWindow() {
-
     private lateinit var popupTrailsCallbacks: PopupTrailsCallbacks
 
     init {

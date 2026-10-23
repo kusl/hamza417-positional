@@ -11,7 +11,6 @@ import app.simple.positional.adapters.settings.AdapterIcons
 import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 
 class Icons : CustomBottomSheetDialogFragment() {
-
     private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

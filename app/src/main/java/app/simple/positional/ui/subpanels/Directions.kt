@@ -23,9 +23,7 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.viewmodels.viewmodel.DirectionsViewModel
 import com.google.android.material.card.MaterialCardView
 
-
 class Directions : ScopedFragment() {
-
     private lateinit var recyclerView: CustomRecyclerView
     private lateinit var add: MaterialCardView
     private val directionsViewModel: DirectionsViewModel by viewModels()
@@ -87,7 +85,6 @@ class Directions : ScopedFragment() {
                 }
 
                 override fun onDirectionLongPressed(directionModel: DirectionModel) {
-
                 }
 
                 override fun onMenuPressed(directionModel: DirectionModel, view: View) {

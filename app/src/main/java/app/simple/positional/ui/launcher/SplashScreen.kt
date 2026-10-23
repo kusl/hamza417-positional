@@ -32,7 +32,6 @@ import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 
 @SuppressLint("CustomSplashScreen")
 class SplashScreen : Fragment() {
-
     private lateinit var launcherBackground: ImageView
     private lateinit var touchIndicator: ImageView
     private lateinit var icon: ImageView
@@ -110,17 +109,13 @@ class SplashScreen : Fragment() {
                     touchIndicator.x = event.x - touchIndicator.width / 2
                     touchIndicator.y = event.y - touchIndicator.height / 2
                     touchIndicator.animate().scaleX(1.2f).scaleY(1.2f).alpha(1.0f).setInterpolator(DecelerateInterpolator()).start()
-                    //icon.animate().translationX((event.x - DisplayMetrics().widthPixels / 2) / 50F).translationY(event.y / 50F).setInterpolator(DecelerateInterpolator()).start()
                 }
                 MotionEvent.ACTION_MOVE -> {
                     touchIndicator.x = event.x - touchIndicator.width / 2f
                     touchIndicator.y = event.y - touchIndicator.height / 2f
-                    //icon.translationX = (event.x - DisplayMetrics().widthPixels / 2) / 30F
-                    //icon.translationY = event.y / 30F
                 }
                 MotionEvent.ACTION_UP -> {
                     touchIndicator.animate().scaleX(0.5f).scaleY(0.5f).alpha(0f).start()
-                    //icon.animate().translationX(0F).translationY(0F).setInterpolator(DecelerateInterpolator()).start()
                     runPostDelayed(1000)
                 }
             }
@@ -131,16 +126,6 @@ class SplashScreen : Fragment() {
 
     private fun runPostDelayed(delay: Long) {
         handler.postDelayed({
-            /*
-             * [isActivityFinishing] will check if the activity is alive or not
-             * It is possible that the app could have been launched by accident and user might want
-             * to close it immediately, in such cases leaving the [Handler.postDelayed] in queue will
-             * explicitly execute the action in the background even if the activity is closed
-             * and this will run the [MainActivity] and we don't want that.
-             *
-             * @see Handler.removeCallbacks
-             * @see Handler.removeCallbacksAndMessages
-             */
             if (requireActivity().isActivityFinishing()) return@postDelayed
             runIntent()
         }, delay)

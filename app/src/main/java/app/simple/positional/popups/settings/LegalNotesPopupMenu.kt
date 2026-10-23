@@ -2,25 +2,15 @@ package app.simple.positional.popups.settings
 
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupWindow
 import app.simple.positional.R
 import app.simple.positional.decorations.popup.BasePopupWindow
 import app.simple.positional.decorations.popup.PopupMenuCallback
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 
-/**
- * A customised version of popup menu that uses [PopupWindow]
- * created to replace ugly material popup menu which does not
- * provide any customizable flexibility. This on the other hand
- * uses custom layout, background, animations and also dims entire
- * window when appears. It is highly recommended to use this
- * and ditch popup menu entirely.
- */
 class LegalNotesPopupMenu(contentView: View,
         viewGroup: ViewGroup,
         xOff: Float,
         yOff: Float) : BasePopupWindow() {
-
     lateinit var popupMenuCallback: PopupMenuCallback
 
     init {

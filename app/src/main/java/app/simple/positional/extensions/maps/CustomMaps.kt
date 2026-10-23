@@ -30,13 +30,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
-import kotlin.math.pow
 
 open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, attrs),
     OnMapReadyCallback,
     SharedPreferences.OnSharedPreferenceChangeListener,
     CoroutineScope {
-
     protected var windowManager: WindowManager
     val viewHandler = Handler(Looper.getMainLooper())
     open var onTouch: ((event: MotionEvent, b: Boolean) -> Unit)? = null
@@ -69,22 +67,15 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
         windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         viewHandler.postDelayed(fun() {
-            // This prevents the lag when fragment is switched
             this.alpha = 0F
             getMapAsync(this)
         }, 500)
     }
 
-    // -------------------------------------------------------------------------------------------------------- //
-
     override fun onMapReady(p0: GoogleMap) {
         googleMap = p0
         customCameraAnimator = CustomCameraAnimator(googleMap!!)
 
-        /**
-         * Workaround for flashing of view when map is
-         * Initialized
-         */
         this.animate().alpha(1F).setDuration(500).start()
 
         googleMap?.uiSettings?.isCompassEnabled = false
@@ -107,7 +98,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -116,8 +106,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
             return this
         }
     }
-
-    // -------------------------------------------------------------------------------------------------------- //
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -135,8 +123,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
         getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
         removeCallbacks { }
     }
-
-    // -------------------------------------------------------------------------------------------------------- //
 
     open fun getCamera(): CameraPosition? {
         return googleMap?.cameraPosition
@@ -167,7 +153,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
                         R.raw.map_high_contrast_non_labelled
                     }
                 ))
-
             } else {
                 googleMap?.setMapStyle(MapStyleOptions.loadRawResourceStyle(context,
                     when (this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
@@ -212,13 +197,9 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
         customCameraAnimator?.animateCamera(latLng, zoom, tilt, bearing, duration)
     }
 
-    // -------------------------------------------------------------------------------------------------------- //
-
     internal fun isCameraWithinBounds(latLng: LatLng): Boolean {
         return googleMap?.projection?.visibleRegion?.latLngBounds?.contains(latLng)!!
     }
-
-    // -------------------------------------------------------------------------------------------------------- //
 
     fun setOnMapsCallbackListener(mapsCallbacks: MapsCallbacks) {
         this.mapsCallbacks = mapsCallbacks
@@ -261,26 +242,6 @@ open class CustomMaps(context: Context, attrs: AttributeSet) : MapView(context, 
 
         fun cancel() {
             animator?.cancel()
-        }
-
-        private fun easeInOutQuad(t: Float): Float {
-            return if (t < 0.5f) {
-                2 * t * t
-            } else {
-                -1 + (4 - 2 * t) * t
-            }
-        }
-
-        private fun easeInOutCubic(t: Float): Float {
-            return if (t < 0.5) {
-                4 * t * t * t
-            } else {
-                (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
-            }
-        }
-
-        private fun easeOutQuint(t: Float): Float {
-            return 1 - (1 - t).toDouble().pow(5.0).toFloat()
         }
     }
 

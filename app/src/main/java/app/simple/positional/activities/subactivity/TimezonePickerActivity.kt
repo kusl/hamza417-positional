@@ -7,7 +7,6 @@ import app.simple.positional.ui.subpanels.TimeZones
 import app.simple.positional.util.ConditionUtils.isNull
 
 class TimezonePickerActivity : BaseActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sub)

@@ -1,25 +1,13 @@
 package app.simple.positional.ui.subpanels
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import app.simple.positional.R
 import app.simple.positional.decorations.fastscroll.FastScrollWebView
 import app.simple.positional.decorations.fastscroll.FastScrollerBuilder
 import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.util.ConditionUtils.isNull
-import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.net.URL
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 class HtmlViewer : ScopedFragment() {
 
@@ -31,65 +19,35 @@ class HtmlViewer : ScopedFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         webView = view.findViewById(R.id.web_view)
-
         FastScrollerBuilder(webView).useMd2Style().build()
 
-        if (this.arguments != null && savedInstanceState.isNull()) {
-            when (this.requireArguments().getString("source")) {
-                getString(R.string.privacy_policy) -> {
-                    webView.loadUrl("file:///android_asset/html/privacy_policy.html")
-                }
-                getString(R.string.disclaimer) -> {
-                    webView.loadUrl("file:///android_asset/html/disclaimer.html")
-                }
-                getString(R.string.terms_of_use) -> {
-                    webView.loadUrl("file:///android_asset/html/terms_and_conditions.html")
-                }
-                "Custom Coordinates Help" -> {
-                    webView.loadUrl("file:///android_asset/html/custom_coordinates_help.html")
-                }
-                getString(R.string.permissions) -> {
-                    webView.loadUrl("file:///android_asset/html/required_permissions.html")
-                }
-                getString(R.string.credits) -> {
-                    webView.loadUrl("file:///android_asset/html/credits.html")
-                }
-                "license_failed" -> {
-                    webView.loadUrl("file:///android_asset/html/license_failed.html")
-                }
-                "Found Issue" -> {
-                    webView.loadUrl("file:///android_asset/html/found_issue.html")
-                }
-                "Buy" -> {
-                    webView.loadUrl("file:///android_asset/html/buy_full.html")
-                }
-                "translator" -> {
-                    webView.loadUrl("file:///android_asset/html/translators.html")
-                }
-                "Change Logs" -> {
-                    webView.loadUrl("file:///android_asset/html/local_changelogs.html")
-                }
-                getString(R.string.internet_uses) -> {
-                    webView.loadUrl("file:///android_asset/html/internet_uses.html")
-                }
-                getString(R.string.physical_properties) -> {
-                    webView.loadUrl("file:///android_asset/html/physical_properties.html")
-                }
-                "Media Keys" -> {
-                    webView.loadUrl("file:///android_asset/html/media_keys.html")
-                }
-                "trail_help" -> {
-                    webView.loadUrl("file:///android_asset/html/trail_help.html")
-                }
-                "null" -> {
-                    webView.loadUrl("file:///android_asset/html/null.html")
-                }
-            }
-        } else {
-            webView.restoreState(savedInstanceState!!)
+        if (savedInstanceState != null) {
+            webView.restoreState(savedInstanceState)
+            return
         }
+
+        pageFor(arguments?.getString("source"))?.let {
+            webView.loadUrl("file:///android_asset/html/$it.html")
+        }
+    }
+
+    private fun pageFor(source: String?): String? = when (source) {
+        getString(R.string.privacy_policy) -> "privacy_policy"
+        getString(R.string.disclaimer) -> "disclaimer"
+        getString(R.string.terms_of_use) -> "terms_and_conditions"
+        getString(R.string.permissions) -> "required_permissions"
+        getString(R.string.credits) -> "credits"
+        getString(R.string.internet_uses) -> "internet_uses"
+        getString(R.string.physical_properties) -> "physical_properties"
+        "Custom Coordinates Help" -> "custom_coordinates_help"
+        "Found Issue" -> "found_issue"
+        "translator" -> "translators"
+        "Change Logs" -> "local_changelogs"
+        "Media Keys" -> "media_keys"
+        "trail_help" -> "trail_help"
+        "null" -> "null"
+        else -> null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -97,59 +55,10 @@ class HtmlViewer : ScopedFragment() {
         super.onSaveInstanceState(outState)
     }
 
-    private suspend fun downloadTranslationStatus() {
-        try {
-            if (isNetworkAvailable(requireContext())) {
-                withContext(Dispatchers.IO) {
-                    runCatching {
-                        val url =
-                                "https://raw.githubusercontent.com/Hamza417/Positional/master/app/src/main/assets/html/translators.html"
-                        URL(url).openStream().use { input ->
-                            cleanUpOldFiles(File("${context?.cacheDir}/translation.html"), 0)
-
-                            if (!File("${context?.cacheDir}/translation.html").exists()) {
-                                FileOutputStream(File("${context?.cacheDir}/translation.html")).use { output ->
-                                    input.copyTo(output)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                webView.loadUrl(
-                        Uri.fromFile(File("${requireContext().cacheDir}/translation.html"))
-                                .toString()
-                )
-
-            } else {
-                Toast.makeText(
-                        requireContext(),
-                        R.string.internet_connection_alert,
-                        Toast.LENGTH_SHORT
-                ).show()
-
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-            }
-        } catch (e: FileNotFoundException) {
-            Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    @Suppress("SameParameterValue")
-    private fun cleanUpOldFiles(file: File, expirationPeriod: Long) {
-        // Granularity = DAYS;
-        val desiredLifespan: Long = TimeUnit.DAYS.toMillis(expirationPeriod)
-        if (Date().time - file.lastModified() > desiredLifespan) {
-            file.delete()
-        }
-    }
-
     companion object {
         fun newInstance(string: String): HtmlViewer {
-            val args = Bundle()
-            args.putString("source", string)
             val fragment = HtmlViewer()
-            fragment.arguments = args
+            fragment.arguments = Bundle().apply { putString("source", string) }
             return fragment
         }
     }

@@ -7,15 +7,12 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.util.Consumer;
-
 import app.simple.positional.R;
 import app.simple.positional.util.ViewUtils;
 
 public class PopupStyles {
-    
     private PopupStyles() {
     }
 

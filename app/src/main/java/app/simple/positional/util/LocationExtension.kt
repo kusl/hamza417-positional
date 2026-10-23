@@ -10,12 +10,6 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 object LocationExtension {
-
-    /**
-     * Checks if location is turned on in the device.
-     *
-     * @return true if on else false
-     */
     fun getLocationStatus(context: Context): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
@@ -34,16 +28,7 @@ object LocationExtension {
         return latitude >= -90 && latitude <= 90
     }
 
-    fun isHemisphereNorth(latitude: Double): Boolean {
-        return latitude >= 0
-    }
-
-    fun isHemisphereSouth(latitude: Double): Boolean {
-        return latitude < 0
-    }
-
     fun measureDisplacement(list: List<TrailPoint>): Float {
-
         val result = floatArrayOf(0f)
         var distance = 0F
 
@@ -64,9 +49,6 @@ object LocationExtension {
         return distance
     }
 
-    /**
-     * Calculated distance in meters
-     */
     fun measureDisplacement(list: Array<LatLng>): Float {
         val result = floatArrayOf(0f)
         var distance = 0F

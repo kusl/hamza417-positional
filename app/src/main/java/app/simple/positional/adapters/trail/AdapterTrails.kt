@@ -19,7 +19,6 @@ import app.simple.positional.util.TimeFormatter.formatDate
 
 class AdapterTrails(private val list: ArrayList<TrailEntry>) :
     RecyclerView.Adapter<VerticalListViewHolder>() {
-
     private lateinit var adapterTrailsCallback: AdapterTrailsCallback
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {
@@ -58,7 +57,6 @@ class AdapterTrails(private val list: ArrayList<TrailEntry>) :
                 holder.container.setOnClickListener {
                     adapterTrailsCallback.onTrailClicked(list[position].trailName)
                 }
-
             }
             is Header -> {
                 holder.total.text = HtmlHelper.fromHtml("<b>${holder.itemView.context.getString(R.string.total)}</b> ${list.size}")

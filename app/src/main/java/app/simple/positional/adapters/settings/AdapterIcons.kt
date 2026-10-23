@@ -15,7 +15,6 @@ import app.simple.positional.util.ViewUtils.invisible
 import app.simple.positional.util.ViewUtils.visible
 
 class AdapterIcons : RecyclerView.Adapter<AdapterIcons.Holder>() {
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         return Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_icons, parent, false))
     }

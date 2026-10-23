@@ -20,7 +20,6 @@ object NetworkCheck {
                 else -> false
             }
         }
-        // For below 29 api
         else {
             val netInfo = connectivityManager.activeNetworkInfo
             return netInfo != null && netInfo.isConnectedOrConnecting

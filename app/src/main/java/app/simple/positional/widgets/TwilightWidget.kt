@@ -22,7 +22,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 class TwilightWidget : AppWidgetProvider() {
-
     override fun onUpdate(context: Context?, appWidgetManager: AppWidgetManager?, appWidgetIds: IntArray?) {
         context?.updateWidget()
         super.onUpdate(context, appWidgetManager, appWidgetIds)

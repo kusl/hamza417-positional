@@ -14,7 +14,6 @@ import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.PermissionUtils
 
 class LocationService : Service(), LocationListener {
-
     private var locationManager: LocationManager? = null
     private var handler = Handler(Looper.getMainLooper())
     private var delay: Long = 1000
@@ -47,7 +46,6 @@ class LocationService : Service(), LocationListener {
         }
     }
 
-    // only for API < 29
     @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
         Intent().also { intent ->

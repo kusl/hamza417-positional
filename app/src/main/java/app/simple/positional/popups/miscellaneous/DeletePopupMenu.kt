@@ -9,7 +9,6 @@ import app.simple.positional.decorations.popup.BasePopupWindow
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 
 class DeletePopupMenu(anchor: View, onDeleted: () -> Unit) : BasePopupWindow() {
-
     init {
         val contentView = LayoutInflater.from(anchor.context).inflate(R.layout.popup_delete_confirmation,
                 DynamicCornerLinearLayout(anchor.context))

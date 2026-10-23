@@ -15,7 +15,6 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.GPSPreferences
 
 class PinCustomization : CustomBottomSheetDialogFragment() {
-
     private lateinit var opacity: SeekBar
     private lateinit var size: SeekBar
     private lateinit var pins: ViewPager
@@ -62,11 +61,9 @@ class PinCustomization : CustomBottomSheetDialogFragment() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                /* no-op */
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                /* no-op */
             }
         })
 
@@ -84,21 +81,17 @@ class PinCustomization : CustomBottomSheetDialogFragment() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                /* no-op */
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                /* no-op */
             }
         })
 
         pins.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-
             }
 
             override fun onPageSelected(position: Int) {
-
             }
 
             override fun onPageScrollStateChanged(state: Int) {

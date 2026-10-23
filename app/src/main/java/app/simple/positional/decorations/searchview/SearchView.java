@@ -15,11 +15,9 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
-
 import app.simple.positional.R;
 import app.simple.positional.decorations.corners.DynamicCornerLinearLayout;
 import app.simple.positional.decorations.ripple.DynamicRippleImageButton;
@@ -27,17 +25,16 @@ import app.simple.positional.preferences.SearchPreferences;
 import app.simple.positional.util.ViewUtils;
 
 public class SearchView extends DynamicCornerLinearLayout {
-    
     private EditText editText;
     private SearchViewEventListener searchViewEventListener;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    
+
     public SearchView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         initViews();
         setProperties();
     }
-    
+
     private void setProperties() {
         setElevation(30F);
         setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.toolbarBackground)));
@@ -46,27 +43,25 @@ public class SearchView extends DynamicCornerLinearLayout {
         setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         ViewUtils.INSTANCE.addShadow(this);
     }
-    
+
     @SuppressLint ("ClickableViewAccessibility")
     private void initViews() {
-        
         View view = LayoutInflater.from(getContext()).inflate(R.layout.search_view, this, true);
-        
+
         editText = view.findViewById(R.id.search_view_text_input_layout);
         DynamicRippleImageButton clear = view.findViewById(R.id.search_clear);
-        
+
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                /* no-op */
             }
-            
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (searchViewEventListener != null) {
                     searchViewEventListener.onSearchTextChanged(s.toString(), count);
                 }
-    
+
                 if (count > 0) {
                     clear.animate().alpha(1F)
                             .scaleX(1F)
@@ -74,7 +69,7 @@ public class SearchView extends DynamicCornerLinearLayout {
                             .setInterpolator(new LinearOutSlowInInterpolator())
                             .setDuration(getResources().getInteger(R.integer.animation_duration))
                             .start();
-        
+
                     clear.setClickable(true);
                 }
                 else {
@@ -84,35 +79,33 @@ public class SearchView extends DynamicCornerLinearLayout {
                             .setInterpolator(new AccelerateInterpolator())
                             .setDuration(getResources().getInteger(R.integer.animation_duration))
                             .start();
-        
+
                     clear.setClickable(false);
                 }
-    
+
                 SearchPreferences.INSTANCE.setLastSearchKeyword(s.toString());
             }
-    
+
             @Override
             public void afterTextChanged(Editable s) {
-                /* no-op */
             }
         });
-    
+
         clear.setOnClickListener(v -> {
-            //handler.post(clearText);
             editText.getText().clear();
         });
     }
-    
+
     public void setKeywords(String string) {
         editText.setText(string);
     }
-    
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         editText.clearAnimation();
     }
-    
+
     private final Runnable clearText = new Runnable() {
         @Override
         public void run() {
@@ -129,7 +122,7 @@ public class SearchView extends DynamicCornerLinearLayout {
             }
         }
     };
-    
+
     public void animateElevation(float elevation) {
         if (getElevation() == elevation) {
             return;
@@ -140,7 +133,7 @@ public class SearchView extends DynamicCornerLinearLayout {
         valueAnimator.addUpdateListener(animation -> setElevation((float) animation.getAnimatedValue()));
         valueAnimator.start();
     }
-    
+
     public void setSearchViewEventListener(SearchViewEventListener searchViewEventListener) {
         this.searchViewEventListener = searchViewEventListener;
     }

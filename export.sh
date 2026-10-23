@@ -7,9 +7,9 @@ cd "$REPO_ROOT"
 
 OUTPUT_DIR="docs/llm"
 OUTPUT_FILE="$OUTPUT_DIR/dump.txt"
-EXCLUDE='^(docs/llm/|gradlew$|gradlew\.bat$|gradle/wrapper/)'
+SKIP='^(docs/llm/|gradlew$|gradlew\.bat$|gradle/wrapper/|screenshots/|LICENSE$|CODE_OF_CONDUCT\.md$|app/src/[^/]+/res/(drawable[^/]*|mipmap[^/]*|font|raw)/|app/src/main/res/values-[^/]+/strings\.xml$|app/src/main/assets/(html|css|fonts|svg)/|app/databases/schemas/)'
 
-mapfile -t FILES < <(git ls-files --cached --others --exclude-standard | grep -Ev "$EXCLUDE" | sort -u)
+mapfile -t FILES < <(git ls-files --cached --others --exclude-standard | grep -Ev '^docs/llm/' | sort -u)
 
 mkdir -p "$OUTPUT_DIR"
 TMP_FILE="$(mktemp "$OUTPUT_DIR/.dump.XXXXXX")"
@@ -21,27 +21,32 @@ trap 'rm -f "$TMP_FILE"' EXIT
     echo "Branch:    $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo none)"
     echo "Commit:    $(git log -1 --pretty='%h %ci %s' 2>/dev/null || echo none)"
     echo "Remote:    $(git remote get-url origin 2>/dev/null || echo none)"
-    echo "Excluded:  $EXCLUDE"
     echo
     echo "## STATUS"
     git status --short | grep -v ' docs/llm/' || true
     echo
-    echo "## FILES (${#FILES[@]})"
-    printf '%s\n' "${FILES[@]}"
+    echo "## TREE (${#FILES[@]} files)"
+    printf '%s\n' "${FILES[@]}" | awk -F/ '{
+        path = ""
+        for (i = 1; i < NF; i++) {
+            path = path $i "/"
+            if (!(path in seen)) { seen[path] = 1; printf "%*s%s/\n", (i - 1) * 2, "", $i }
+        }
+        printf "%*s%s\n", (NF - 1) * 2, "", $NF
+    }'
     for f in "${FILES[@]}"; do
         [[ -f "$f" ]] || continue
+        [[ "$f" =~ $SKIP ]] && continue
+        [[ ! -s "$f" ]] || grep -Iq . "$f" || continue
         echo
         echo "################################################################################"
-        echo "# FILE: $f ($(wc -c < "$f") bytes)"
+        echo "# FILE: $f"
         echo "################################################################################"
-        if [[ ! -s "$f" ]] || grep -Iq . "$f"; then
-            cat "$f"
-            [[ -z "$(tail -c1 "$f")" ]] || echo
-        else
-            echo "[binary omitted]"
-        fi
+        cat "$f"
+        [[ -z "$(tail -c1 "$f")" ]] || echo
     done
 } > "$TMP_FILE"
 
-cat "$TMP_FILE"
 mv -f "$TMP_FILE" "$OUTPUT_FILE"
+trap - EXIT
+echo "$OUTPUT_FILE: $(wc -c < "$OUTPUT_FILE") bytes"

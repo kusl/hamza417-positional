@@ -10,12 +10,6 @@ import app.simple.positional.R
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 
 object ViewUtils {
-    /**
-     * Dim the background when PopupWindow shows
-     * Should be called from showAsDropDown function
-     * because this is when container's parent is
-     * initialized
-     */
     fun dimBehind(contentView: View) {
         val container = contentView.rootView
         val windowManager = contentView.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -25,14 +19,6 @@ object ViewUtils {
         windowManager.updateViewLayout(container, layoutParams)
     }
 
-    // @RequiresApi(28)
-    /**
-     * Adds outline shadows to the view using the accent color
-     * of the app
-     *
-     * @param contentView [View] that needs to be elevated with colored
-     *                    shadow
-     */
     fun addShadow(contentView: View) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
             contentView.outlineAmbientShadowColor = contentView.context.resolveAttrColor(R.attr.colorAppAccent)
@@ -40,19 +26,11 @@ object ViewUtils {
         }
     }
 
-    /**
-     * Makes the view go away
-     */
     fun View.gone() {
         clearAnimation()
         visibility = View.GONE
     }
 
-    /**
-     * Makes the view go away
-     *
-     * @param animate adds animation to the process
-     */
     fun View.gone(animate: Boolean) {
         clearAnimation()
 
@@ -65,7 +43,6 @@ object ViewUtils {
                 .setDuration(this.resources.getInteger(R.integer.animation_duration).toLong())
                 .setListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
-                        /* no-op */
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
@@ -73,11 +50,9 @@ object ViewUtils {
                     }
 
                     override fun onAnimationCancel(animation: Animator) {
-                        /* no-op */
                     }
 
                     override fun onAnimationRepeat(animation: Animator) {
-                        /* no-op */
                     }
                 })
                 .start()
@@ -86,11 +61,6 @@ object ViewUtils {
         }
     }
 
-    /**
-     * Makes the view go away
-     *
-     * @param animate adds animation to the process
-     */
     fun View.invisible(animate: Boolean) {
         clearAnimation()
 
@@ -103,7 +73,6 @@ object ViewUtils {
                 .setDuration(this.resources.getInteger(R.integer.animation_duration).toLong())
                 .setListener(object : Animator.AnimatorListener {
                     override fun onAnimationStart(animation: Animator) {
-                            /* no-op */
                         }
 
                         override fun onAnimationEnd(animation: Animator) {
@@ -111,11 +80,9 @@ object ViewUtils {
                         }
 
                         override fun onAnimationCancel(animation: Animator) {
-                            /* no-op */
                         }
 
                         override fun onAnimationRepeat(animation: Animator) {
-                            /* no-op */
                         }
                     })
                     .start()
@@ -124,11 +91,6 @@ object ViewUtils {
         }
     }
 
-    /**
-     * Makes the view come back
-     *
-     * @param animate adds animation to the process
-     */
     fun View.visible(animate: Boolean) {
         clearAnimation()
 
@@ -145,25 +107,18 @@ object ViewUtils {
                         }
 
                         override fun onAnimationEnd(animation: Animator) {
-                            /* no-op */
                         }
 
                         override fun onAnimationCancel(animation: Animator) {
-                            /* no-op */
                         }
 
                         override fun onAnimationRepeat(animation: Animator) {
-                            /* no-op */
                         }
                     })
                     .start()
         } else {
             this.visibility = View.VISIBLE
         }
-    }
-
-    fun View.isNotVisible(): Boolean {
-        return visibility == View.INVISIBLE || visibility == View.GONE
     }
 
     fun View.setVisibility(visibility: Boolean) {

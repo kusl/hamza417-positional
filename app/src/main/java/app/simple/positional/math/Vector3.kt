@@ -3,7 +3,6 @@ package app.simple.positional.math
 import kotlin.math.sqrt
 
 data class Vector3(val x: Float, val y: Float, val z: Float) {
-
     private val array = floatArrayOf(x, y, z)
 
     fun cross(other: Vector3): Vector3 {

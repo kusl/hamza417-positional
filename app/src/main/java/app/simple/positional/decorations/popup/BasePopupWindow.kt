@@ -7,16 +7,7 @@ import app.simple.positional.R
 import app.simple.positional.util.ViewUtils
 import app.simple.positional.util.ViewUtils.dimBehind
 
-/**
- * A customised version of popup menu that uses [PopupWindow]
- * created to replace ugly material popup menu which does not
- * provide any customizable flexibility. This on the other hand
- * uses custom layout, background, animations and also dims entire
- * window when appears. It is highly recommended to use this
- * and ditch popup menu entirely.
- */
 open class BasePopupWindow : PopupWindow() {
-
     fun init(contentView: View, view: View, xOff: Float, yOff: Float) {
         setContentView(contentView)
         init()
@@ -34,7 +25,6 @@ open class BasePopupWindow : PopupWindow() {
         init()
         showAsDropDown(view, width / factor * -1, 0, gravity)
     }
-
 
     private fun init() {
         contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)

@@ -10,7 +10,6 @@ import app.simple.positional.decorations.views.CustomRadioButton
 import app.simple.positional.preferences.ClockPreferences
 
 class ClockMotionType : CustomBottomSheetDialogFragment() {
-
     private lateinit var smooth: CustomRadioButton
     private lateinit var tick: CustomRadioButton
     private lateinit var oscillate: CustomRadioButton

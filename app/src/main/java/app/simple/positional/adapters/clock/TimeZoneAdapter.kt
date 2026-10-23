@@ -28,7 +28,6 @@ import java.util.*
 class TimeZoneAdapter(var timeZones: MutableList<Pair<String, String>>, var searchText: String) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>(),
         PopupTextProvider {
-
     lateinit var context: Context
     private var currentSelectedTimezone = ""
 
@@ -41,7 +40,6 @@ class TimeZoneAdapter(var timeZones: MutableList<Pair<String, String>>, var sear
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is Holder) {
-
             holder.timeZone.text = timeZones[position].first
             holder.offset.text = timeZones[position].second
 

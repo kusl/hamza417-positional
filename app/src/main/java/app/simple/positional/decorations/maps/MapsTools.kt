@@ -18,7 +18,6 @@ import app.simple.positional.util.ViewUtils.gone
 import app.simple.positional.util.ViewUtils.visible
 
 class MapsTools : DynamicCornerLinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
-
     private lateinit var align: DynamicRippleImageButton
     private lateinit var location: LocationButton
     private lateinit var target: DynamicRippleImageButton

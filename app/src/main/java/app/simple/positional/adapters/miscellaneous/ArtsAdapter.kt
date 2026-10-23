@@ -22,7 +22,6 @@ import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import com.google.android.material.card.MaterialCardView
 
 class ArtsAdapter : RecyclerView.Adapter<ArtsAdapter.Holder>() {
-
     private val radius = MainPreferences.getCornerRadius()
     private val list = intArrayOf(*vectorBackground, *vectorBackgroundNight)
     private val colors = arrayOf(*vectorColors, *vectorNightColors)

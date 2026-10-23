@@ -12,7 +12,6 @@ import app.simple.positional.decorations.viewholders.VerticalListViewHolder
 import app.simple.positional.util.DMSConverter
 
 class AdapterTargetAddress(private val addresses: MutableList<Address>) : RecyclerView.Adapter<AdapterTargetAddress.Holder>() {
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         return Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_address, parent, false))
     }

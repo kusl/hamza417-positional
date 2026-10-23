@@ -11,13 +11,7 @@ import app.simple.positional.decorations.fastscroll.FastScrollerBuilder
 import app.simple.positional.decorations.viewholders.VerticalListViewHolder
 import app.simple.positional.util.StatusBarHeight
 
-/**
- * Custom recycler view with nice layout animation and
- * smooth overscroll effect and various states retention
- * with fast scroller
- */
 class CustomRecyclerView(context: Context, attrs: AttributeSet?) : RecyclerView(context, attrs) {
-
     private var fastScroll = true
 
     init {
@@ -37,7 +31,6 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet?) : RecyclerView(
 
         this.edgeEffectFactory = object : RecyclerView.EdgeEffectFactory() {
             override fun createEdgeEffect(recyclerView: RecyclerView, direction: Int): EdgeEffect {
-
                 return object : EdgeEffect(recyclerView.context) {
                     override fun onPull(deltaDistance: Float) {
                         super.onPull(deltaDistance)
@@ -50,10 +43,6 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet?) : RecyclerView(
                     }
 
                     private fun handlePull(deltaDistance: Float) {
-                        /**
-                         * This is called on every touch event while the list is scrolled with a finger.
-                         * simply update the view properties without animation.
-                         */
                         val sign = if (direction == DIRECTION_BOTTOM) -1 else 1
                         val rotationDelta = sign * deltaDistance * VerticalListViewHolder.overScrollRotationMagnitude
                         val translationYDelta = sign * recyclerView.width * deltaDistance * VerticalListViewHolder.overScrollTranslationMagnitude
@@ -68,10 +57,6 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet?) : RecyclerView(
 
                     override fun onRelease() {
                         super.onRelease()
-                        /**
-                         * The finger is lifted. This is when we should start the animations to bring
-                         * the view property values back to their resting states.
-                         */
                         recyclerView.forEachVisibleHolder { holder: VerticalListViewHolder ->
                             holder.rotation.start()
                             holder.translationY.start()
@@ -82,9 +67,6 @@ class CustomRecyclerView(context: Context, attrs: AttributeSet?) : RecyclerView(
                         super.onAbsorb(velocity)
                         val sign = if (direction == DIRECTION_BOTTOM) -1 else 1
 
-                        /**
-                         * The list has reached the edge on fling
-                         */
                         val translationVelocity = sign * velocity * VerticalListViewHolder.flingTranslationMagnitude
                         recyclerView.forEachVisibleHolder { holder: VerticalListViewHolder ->
                             holder.translationY

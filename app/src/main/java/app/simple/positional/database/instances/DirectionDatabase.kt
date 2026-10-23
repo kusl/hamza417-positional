@@ -9,7 +9,6 @@ import app.simple.positional.model.DirectionModel
 
 @Database(entities = [DirectionModel::class], exportSchema = true, version = 1)
 abstract class DirectionDatabase : RoomDatabase() {
-
     abstract fun directionDao(): DirectionDao?
 
     companion object {

@@ -16,7 +16,6 @@ import app.simple.positional.preferences.CompassPreferences.setDirectionCode
 import app.simple.positional.preferences.CompassPreferences.setFlowerBloom
 
 class CompassMenu : CustomBottomSheetDialogFragment() {
-
     private lateinit var toggleFlower: SwitchView
     private lateinit var toggleCode: SwitchView
     private lateinit var toggleGimbalLock: SwitchView

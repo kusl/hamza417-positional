@@ -21,7 +21,6 @@ import app.simple.positional.util.ViewUtils.visible
 import app.simple.positional.singleton.SharedPreferences as PositionalSingletonSharedPreferences
 
 class MeasureTools : DynamicCornerLinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
-
     private lateinit var align: DynamicRippleImageButton
     private lateinit var location: LocationButton
     private lateinit var wrap: DynamicRippleImageButton

@@ -29,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CoordinatesExpansion : CustomBottomSheetDialogFragment() {
-
     private lateinit var locationViewModel: LocationViewModel
     private val handler = Handler(Looper.getMainLooper())
 

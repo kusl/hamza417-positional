@@ -13,7 +13,6 @@
             <path
                 android:pathData="m330.603,195.327c0,60.119 48.736,108.853 108.855,108.853l0,-0c60.119,-0 108.852,-48.735 108.852,-108.853l0,-0c0,-60.117 -48.733,-108.853 -108.852,-108.853l0,-0c-60.119,-0 -108.855,48.736 -108.855,108.853"
                 android:strokeColor="#00000000">
-                <!-- This panel is used to create the moon arc -->
                 <aapt:attr name="android:fillColor">
                     <gradient
                         android:centerX="440.19803"

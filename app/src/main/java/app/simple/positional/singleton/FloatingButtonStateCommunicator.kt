@@ -1,7 +1,6 @@
 package app.simple.positional.singleton
 
 object FloatingButtonStateCommunicator {
-
     private const val TAG = "FloatingButtonStateCommunicator"
 
     private var floatingButtonCurrentSize = 0
@@ -9,10 +8,6 @@ object FloatingButtonStateCommunicator {
 
     fun setFloatingButtonSize(size: Int) {
         floatingButtonCurrentSize = size
-    }
-
-    fun getFloatingButtonSize(): Int {
-        return floatingButtonCurrentSize
     }
 
     fun addFloatingButtonStateCallbacks(callback: FloatingButtonStateCallbacks) {

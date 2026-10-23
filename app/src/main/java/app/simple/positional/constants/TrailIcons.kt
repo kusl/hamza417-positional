@@ -3,9 +3,6 @@ package app.simple.positional.constants
 import app.simple.positional.R
 
 object TrailIcons {
-    /**
-     * Do not change these icons' positions
-     */
     val icons = arrayListOf(
             R.drawable.ic_flag,
             R.drawable.ic_cabin,

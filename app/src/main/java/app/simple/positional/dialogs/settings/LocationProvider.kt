@@ -10,7 +10,6 @@ import app.simple.positional.decorations.views.CustomRadioButton
 import app.simple.positional.preferences.MainPreferences
 
 class LocationProvider : CustomBottomSheetDialogFragment() {
-
     private lateinit var androidRadioButton: CustomRadioButton
     private lateinit var fusedRadioButton: CustomRadioButton
 
@@ -24,7 +23,6 @@ class LocationProvider : CustomBottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
         setButton(MainPreferences.getLocationProvider())
 
         androidRadioButton.setOnClickListener {

@@ -9,30 +9,29 @@ import com.google.android.gms.maps.model.LatLng
 import kotlin.math.abs
 
 object DMSConverter {
-
     private const val DD_DDDDDD_PLACES = 6
 
     fun getFormattedCoordinates(location: Location, context: Context): Array<String> {
         return when (MainPreferences.getCoordinatesFormat()) {
-            0 -> { // DD
+            0 -> {
                 arrayOf(
                         latitudeAsDD(location.latitude),
                         longitudeAsDD(location.longitude)
                 )
             }
-            1 -> { // DDM
+            1 -> {
                 arrayOf(
                         latitudeAsDM(location.latitude, context),
                         longitudeAsDM(location.longitude, context)
                 )
             }
-            2 -> { // DMS
+            2 -> {
                 arrayOf(
                         latitudeAsDMS(location.latitude, context),
                         longitudeAsDMS(location.longitude, context)
                 )
             }
-            else -> { // DD
+            else -> {
                 arrayOf(
                         latitudeAsDD(location.latitude),
                         longitudeAsDD(location.longitude)
@@ -43,25 +42,25 @@ object DMSConverter {
 
     fun getFormattedCoordinates(latLng: LatLng, context: Context): Array<String> {
         return when (MainPreferences.getCoordinatesFormat()) {
-            0 -> { // DD
+            0 -> {
                 arrayOf(
                         latitudeAsDD(latLng.latitude),
                         longitudeAsDD(latLng.longitude)
                 )
             }
-            1 -> { // DDM
+            1 -> {
                 arrayOf(
                         latitudeAsDM(latLng.latitude, context),
                         longitudeAsDM(latLng.longitude, context)
                 )
             }
-            2 -> { // DMS
+            2 -> {
                 arrayOf(
                         latitudeAsDMS(latLng.latitude, context),
                         longitudeAsDMS(latLng.longitude, context)
                 )
             }
-            else -> { // DD
+            else -> {
                 arrayOf(
                         latitudeAsDD(latLng.latitude),
                         longitudeAsDD(latLng.longitude)
@@ -72,16 +71,16 @@ object DMSConverter {
 
     fun getFormattedLatitude(latitude: Double, context: Context): String {
         return when (MainPreferences.getCoordinatesFormat()) {
-            0 -> { // DD
+            0 -> {
                 latitudeAsDD(latitude)
             }
-            1 -> { // DDM
+            1 -> {
                 latitudeAsDM(latitude, context)
             }
-            2 -> { // DMS
+            2 -> {
                 latitudeAsDMS(latitude, context)
             }
-            else -> { // DD
+            else -> {
                 latitudeAsDD(latitude)
             }
         }
@@ -89,16 +88,16 @@ object DMSConverter {
 
     fun getFormattedLongitude(longitude: Double, context: Context): String {
         return when (MainPreferences.getCoordinatesFormat()) {
-            0 -> { // DD
+            0 -> {
                 longitudeAsDD(longitude)
             }
-            1 -> { // DDM
+            1 -> {
                 longitudeAsDM(longitude, context)
             }
-            2 -> { // DMS
+            2 -> {
                 longitudeAsDMS(longitude, context)
             }
-            else -> { // DD
+            else -> {
                 longitudeAsDD(longitude)
             }
         }

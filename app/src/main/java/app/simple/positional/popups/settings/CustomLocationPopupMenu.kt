@@ -8,7 +8,6 @@ import app.simple.positional.decorations.ripple.DynamicRippleImageButton
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 
 class CustomLocationPopupMenu(contentView: View, view: DynamicRippleImageButton) : BasePopupWindow() {
-
     private lateinit var popupMenuCallback: PopupMenuCallback
 
     init {

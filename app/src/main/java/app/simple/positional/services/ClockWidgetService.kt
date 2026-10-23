@@ -45,7 +45,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener {
-
     private var isScreenOn = true
     private val imageSize = 500
     private val serviceChannelId = "widget_channel"
@@ -66,7 +65,6 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-
         isScreenOn = (getSystemService(Context.DISPLAY_SERVICE) as DisplayManager)
                 .displays[0].state == Display.STATE_ON
 
@@ -102,9 +100,6 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
 
                         Intent.ACTION_SCREEN_OFF -> {
                             isScreenOn = false
-                            // Leave the service running in the foreground
-                            // because Android 14 is killing the service when
-                            // the screen is off
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                                 Log.d("ClockWidgetService", "Screen is off, we're on Android 14+")
                             } else {
@@ -133,9 +128,6 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
     private val clockWidgetRunnable = object : Runnable {
         override fun run() {
             CoroutineScope(Dispatchers.Default).launch {
-                /**
-                 * Make sure shared preferences are initialized
-                 */
                 SharedPreferences.init(applicationContext)
 
                 if (contextThemeWrapper.isNull()) {
@@ -245,9 +237,6 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
         return serviceChannelId
     }
 
-    /**
-     * Removes all handler callbacks
-     */
     private fun removeCallbacks() {
         handler.removeCallbacks(clockWidgetRunnable)
         handler.removeCallbacksAndMessages(null)
@@ -361,7 +350,6 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
         }
     }
 
-
     override fun onSharedPreferenceChanged(sharedPreferences: android.content.SharedPreferences?, key: String?) {
         when (key) {
             MainPreferences.accentColor -> {
@@ -370,19 +358,10 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
         }
     }
 
-    /**
-     * Starts any runnable that were removed from the queue
-     * This function will remove any other pending callbacks
-     * before posting and new one to make sure same
-     * callback does not get posted multiple times
-     */
     private fun postCallbacks() {
         removeCallbacks()
         handler.post(clockWidgetRunnable)
     }
 
-    /**
-     * Post data to all subclasses
-     */
     abstract fun onDataGenerated(clockModel: ClockModel)
 }

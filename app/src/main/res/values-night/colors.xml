@@ -12,7 +12,6 @@
     <color name="rippleColor">#515151</color>
     <color name="editTextBackground">#3C3C3C</color>
 
-    <!-- Bottom Bar Color -->
     <color name="iconRegular">#808080</color>
     <color name="indicator">#3A3A3A</color>
 
@@ -23,7 +22,6 @@
     <color name="clock_element_fill">#E1E1E1</color>
     <color name="clock_face_color">#404040</color>
 
-    <!-- Speedometer -->
     <color name="speedometer_needle_start">#FF1000</color>
     <color name="speedometer_needle_end">#FF8400</color>
     <color name="speedometer_dial">#FFFFFF</color>

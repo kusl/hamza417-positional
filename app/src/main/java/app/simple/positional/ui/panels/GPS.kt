@@ -91,7 +91,6 @@ import java.io.IOException
 import java.util.Locale
 
 class GPS : ScopedFragment() {
-
     private lateinit var expandUp: ImageView
     private lateinit var crossHair: ImageView
     private lateinit var scrollView: NestedScrollView
@@ -397,15 +396,12 @@ class GPS : ScopedFragment() {
                     }
 
                     BottomSheetBehavior.STATE_HALF_EXPANDED -> {
-                        /* no-op */
                     }
 
                     BottomSheetBehavior.STATE_HIDDEN -> {
-                        /* no-op */
                     }
 
                     BottomSheetBehavior.STATE_SETTLING -> {
-                        /* no-op */
                     }
                 }
             }
@@ -616,11 +612,6 @@ class GPS : ScopedFragment() {
 
             override fun onTargetUpdated(target: LatLng?, current: LatLng?, speed: Float) {
                 kotlin.runCatching {
-                    /**
-                     * Not needed to call here, the viewmodel
-                     * will update the required information itself
-                     */
-                    // locationViewModel.targetData(target!!, current!!, speed)
                 }
             }
         })
@@ -740,7 +731,7 @@ class GPS : ScopedFragment() {
                         @Suppress("DEPRECATION")
                         with(geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)) {
                             if (!this.isNullOrEmpty()) {
-                                this[0].getAddressLine(0) //"$city, $state, $country, $postalCode, $knownName"
+                                this[0].getAddressLine(0)
                             } else {
                                 getString(R.string.not_available)
                             }
@@ -802,18 +793,11 @@ class GPS : ScopedFragment() {
     }
 
     private fun backPressed(value: Boolean) {
-        /**
-         * @see Time.backPressed
-         */
         backPress?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(value) {
             override fun handleOnBackPressed() {
                 if (bottomSheetInfoPanel?.state == BottomSheetBehavior.STATE_EXPANDED) {
                     bottomSheetInfoPanel?.state = BottomSheetBehavior.STATE_COLLAPSED
                 }
-                /**
-                 * Remove this callback as soon as it's been called
-                 * to prevent any further registering
-                 */
                 remove()
             }
         })

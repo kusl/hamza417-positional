@@ -16,7 +16,6 @@ import app.simple.positional.model.BottomBar
 import app.simple.positional.util.StatusBarHeight
 
 class Panels : CustomBottomSheetDialogFragment() {
-
     private lateinit var recyclerView: RecyclerView
     private var panelsCallback: PanelsCallback? = null
     private var bottomBarItems: ArrayList<BottomBar>? = null

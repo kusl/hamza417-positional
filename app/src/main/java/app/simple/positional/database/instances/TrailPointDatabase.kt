@@ -9,7 +9,6 @@ import app.simple.positional.model.TrailPoint
 
 @Database(entities = [TrailPoint::class], exportSchema = true, version = 3)
 abstract class TrailPointDatabase : RoomDatabase() {
-
     abstract fun trailDataDao(): TrailPointDao?
 
     companion object {

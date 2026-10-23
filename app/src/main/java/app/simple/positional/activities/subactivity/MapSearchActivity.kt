@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 class MapSearchActivity : BaseActivity() {
-
     private lateinit var map: SearchMap
     private lateinit var latitude: TextView
     private lateinit var longitude: TextView

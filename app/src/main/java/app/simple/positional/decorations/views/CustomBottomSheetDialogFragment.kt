@@ -12,7 +12,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 open class CustomBottomSheetDialogFragment : BottomSheetDialogFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_FRAME, R.style.CustomBottomSheetDialogTheme)
@@ -24,38 +23,19 @@ open class CustomBottomSheetDialogFragment : BottomSheetDialogFragment(), Shared
         dialog?.window?.setDimAmount(0.3f)
 
         dialog?.setOnShowListener { dialog ->
-            /**
-             * In a previous life I used this method to get handles to the positive and negative buttons
-             * of a dialog in order to change their Typeface. Good ol' days.
-             */
             val sheetDialog = dialog as BottomSheetDialog
 
-            /**
-             * This is gotten directly from the source of BottomSheetDialog
-             * in the wrapInBottomSheet() method
-             */
             val bottomSheet = sheetDialog.findViewById<View>(design_bottom_sheet) as FrameLayout
 
-            /**
-             *  Right here!
-             *  Make sure the dialog pops up being fully expanded
-             */
             BottomSheetBehavior.from(bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
 
-            /**
-             * Also make sure the dialog doesn't half close when we don't want
-             * it to be, so we close them
-             */
             BottomSheetBehavior.from(bottomSheet).addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                        // dismiss()
-                        /* no-op */
                     }
                 }
 
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
-
                 }
             })
         }
@@ -72,6 +52,5 @@ open class CustomBottomSheetDialogFragment : BottomSheetDialogFragment(), Shared
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        /* no-op */
     }
 }

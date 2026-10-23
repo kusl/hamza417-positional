@@ -21,7 +21,6 @@ import app.simple.positional.util.ParcelUtils.parcelable
 import com.google.android.gms.maps.model.LatLng
 
 class AddMarker : CustomDialogFragment() {
-
     private lateinit var nameInputEditText: EditText
     private lateinit var noteInputEditText: EditText
     private lateinit var icon: DynamicRippleImageButton

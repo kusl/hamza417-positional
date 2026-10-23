@@ -10,11 +10,9 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.MainPreferences
 
 class CoordinatesFormat : CustomBottomSheetDialogFragment() {
-
     private lateinit var dd: RadioButton
     private lateinit var ddm: RadioButton
     private lateinit var dms: RadioButton
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.dialog_coordinates_format, container, false)

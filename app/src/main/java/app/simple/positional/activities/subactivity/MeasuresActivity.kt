@@ -6,7 +6,6 @@ import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.ui.subpanels.Measures
 
 class MeasuresActivity : BaseActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sub)

@@ -17,7 +17,6 @@ import app.simple.positional.util.TimeFormatter.formatDate
 import com.google.android.gms.maps.model.LatLng
 
 class AdapterDirections constructor(val list: MutableList<DirectionModel>) : RecyclerView.Adapter<VerticalListViewHolder>() {
-
     private var adapterDirectionsCallbacks: AdapterDirectionsCallbacks? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {

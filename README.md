@@ -1,151 +1,97 @@
-![banner](https://github.com/Hamza417/Positional/blob/master/screenshots/banner.png?raw=false)
+# Positional
 
-## What's This ?
+![banner](screenshots/banner.png)
 
-**Positional** is a location based app that utilizes the device's GPS and fetches various details of
-the current latitude and longitude data like Altitude, Speed, Address and similar other information
-and show it in easily understandable format to the user. Alongside this main functionality of being
-a location app, Positional also provides a separate panel for **Compass** and **Clock**, and they
-serve their own purpose as their name suggests.
+A location, compass, clock, level, trail and measurement toolkit for Android. This is a community fork of [Hamza417/Positional](https://github.com/Hamza417/Positional), distributed only through GitHub Releases. It is not published on Google Play.
 
-**Compass** provides info related to direction and **Clock** fetches the time related information
-based on the current location and time zone and also sun's information like Sunset, Sunrise,
-Twilight and a good deal of other info.
-
-On top of all the core functionality Positional is a highly polished app and provides another layer
-of flexibility to customize the app as per liking including skins for Clock and Compass faces,
-colors, and many other features that should have been there.
-
-## Download
-
-![API](https://img.shields.io/badge/API-24%2B-%23138D75?style=flat&logo=android)
-
-[![Purchase Here](https://img.shields.io/badge/Purchase-Play%20Store-2E86C1?style=flat&logo=google%20play)](https://play.google.com/store/apps/details?id=app.simple.positional)
-
-## Stats
-
-[![Release](https://img.shields.io/github/v/release/Hamza417/Positional?color=212F3D&label=Release)](https://github.com/Hamza417/Positional/releases)
-![Status](https://img.shields.io/badge/Status-Stable-orange)
-![Size](https://img.shields.io/github/repo-size/Hamza417/Positional?color=teal&label=Repo%20Size&logo=github)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/Hamza417/Positional/blob/master/LICENSE) [![Crowdin](https://badges.crowdin.net/positional/localized.svg)](https://crowdin.com/project/positional)
-[![Telegram Group](https://img.shields.io/badge/Telegram%20Group-blue?logo=telegram)](https://t.me/pstnl)
-
-## Featured
-- [Top Android Apps! (May 2023) - Sam Beckman](https://youtu.be/g6pMQAFfd3Q?t=489)
-- [These 6 Android Apps Are a MUST TRY - Jun 2023 - mobiscrub](https://youtu.be/1APiynfp0ZM?t=294)
-- [The Best Free and Open Source Apps in 2024! - Sam Beckman](https://youtu.be/Oar9pkc7BSc?t=88)
-
-## Screenshots
-
-### Splash Screens
-Pin style is subject to user preferences.
-
-| ![01](screenshots/01.png) | ![02](screenshots/02.png) | ![03](screenshots/03.png) | ![04](screenshots/04.png) |
-|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
-|           0x01            |           0x02            |           0x03            |           0x04            |
-
-### Time Panel
-
-| ![01](screenshots/05.png) | ![02](screenshots/06.png) | ![03](screenshots/07.png) | 
-|:-------------------------:|:-------------------------:|:-------------------------:|
-|           0x01            |           0x02            |           0x03            |
-
-| ![01](screenshots/08.png) | ![02](screenshots/09.png) | 
-|:-------------------------:|:-------------------------:|
-|           0x04            |           0x05            | 
-
-### Compass Panel
-
-| ![04](screenshots/10.png) | ![05](screenshots/18.png) | ![06](screenshots/19.png) | ![07](screenshots/11.png) |
-|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
-|           0x01            |           0x02            |           0x03            |           0x04            |
-
-### Map Panel
-
-| ![07](screenshots/12.png) | ![08](screenshots/13.png) | 
-|:-------------------------:|:-------------------------:|
-|           0x01            |           0x02            |
-
-### Trail Panel
-
-| ![09](screenshots/14.png) | ![10](screenshots/15.png) |
-|:-------------------------:|:-------------------------:|
-|           0x01            |            0x2            |
-
-### Level and Preferences Panel
-
-| ![11](screenshots/16.png) | ![12](screenshots/17.png) |
-|:-------------------------:|:-------------------------:|
-|           0x01            |           0x02            |
+[![Build](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml/badge.svg)](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/kusl/hamza417-positional)](https://github.com/kusl/hamza417-positional/releases/latest)
+![API](https://img.shields.io/badge/API-24%2B-138D75?logo=android)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ## Features
 
-* Easy to use</br>
-* Smooth, with fluid animations</br>
-* Minimal UI</br>
-* Many Accent Colors<br/>
-* Customizable with various options to choose from</br>
-* Magnetic Compass</br>
-* Compass Sensor Speed</br>
-* Compass physics properties<br/>
-* Compass manual rotation
-* Compass bloom
-* Gimbal lock
-* Minimal Map (with and without labels)</br>
-* Google Maps Support<br/>
-* Dark mode for maps<br/>
-* High contrast map<br/>
-* Satellite map<br/>
-* Many pin styles for the whole app<br/>
-* Media keys support for map<br/>
-* Target location mode
-* Displacement information
-* GPS information</br>
-* Speedometer</br>
-* Altitude</br>
-* Distance<br/>
-* Displacement<br/>
-* Address of the current location<br/>
-* UTM, MGRS coordinate formatting<br/>
-* DMS coordinates support<br/>
-* Movement direction<br/>
-* Clock</br>
-* Clock motion types (both linear and inertia induced motion)</br>
-* Clock needle styles<br/>
-* Custom timezone support<br/>
-* UTC and Local Time references</br>
-* Sun Position/Location<br/>
-* Sun Azimuth<br/>
-* Sun Distance and Sun Altitude<br/>
-* Sunset and Sunrise time<br/>
-* Astronomical, Nautical, Civil twilight<br/>
-* Moon Position/Location</br>
-* Moonrise and Moonset time<br/>
-* Moon Altitude<br/>
-* Moon Phases<br/>
-* Moon Angle and Fraction<br/>
-* Moon states (Waning and Waxing)<br/>
-* Upcoming moon dates i.e. New Moon, Full Moon, Third and First Quarter<br/>
-* Moon Illumination</br>
-* Dark Mode</br>
-* Level </br>
-* Custom location mode for manually fetching information of any part of the world<br/>
-* Sun time widgets
-* Sun time widget with splash arts
-* Clock widget
-* Moon phase widget
-* Completely Ad-Free
+- **GPS**: coordinates (DD, DM, DMS, UTM), altitude, speed, accuracy, address, map with custom pins.
+- **Compass**: magnetic azimuth, skins, calibration help.
+- **Clock**: local and time zone time, sun and moon position, rise, set and twilight times.
+- **Level**: bubble level from the accelerometer.
+- **Trail**: record and review paths with markers.
+- **Measure** and **Direction**: distances between points and bearings to targets.
+- Home screen widgets for clock, sun time, moon phase and twilight.
 
-### Translation
-You can also contribute into translating the app in your native language
-on [Crowdin](https://crowdin.com/project/positional/).
+## Install
 
-## License
+1. Download the latest APK from [Releases](https://github.com/kusl/hamza417-positional/releases/latest), or
+2. Add `https://github.com/kusl/hamza417-positional` to [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
 
-**Positional** Copyright © 2023 - Hamza Rizwan
+Android 7.0 (API 24) or newer is supported. Silent background updates through Obtainium require Android 12 or newer; older versions get an install prompt.
 
-**Positional** is released as open source software under
-the [GPL v3](https://opensource.org/licenses/gpl-3.0.html)
-license, see the [LICENSE](./LICENSE) file in the project root for the full license text.
+The release is signed with this fork's own key. It cannot be installed over the Play Store build of Positional; uninstall that first.
 
-[1]: http://www.inf.ufrgs.br
+## Differences from upstream
+
+- No Google Play licensing check, in-app update prompt or rating prompt.
+- Release builds come from CI on every push to `master`.
+- Dead code, unused resources and source comments removed.
+- Unit tests for the math and utility code.
+
+The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
+
+## Building
+
+Requirements: JDK 21 and the Android SDK (compile SDK 36).
+
+```sh
+./gradlew testDebugUnitTest assembleDebug
+```
+
+Optional `local.properties` keys (environment variables of the same name take precedence):
+
+| Key | Purpose |
+|---|---|
+| `MAPS_API_KEY` | Google Maps API key |
+| `KEYSTORE_FILE` | Path to the release keystore |
+| `STORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` | Release signing |
+| `VERSION_CODE`, `VERSION_NAME` | Override the app version |
+
+`./gradlew assembleRelease` produces an unsigned APK when no keystore is configured.
+
+## CI and releases
+
+`.github/workflows/build.yml` runs on every push and pull request:
+
+1. Unit tests and a debug build.
+2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
+
+Required repository secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
+
+To create the keystore secret:
+
+```sh
+base64 -w0 release.keystore
+```
+
+Dependabot opens weekly update PRs for Gradle dependencies and GitHub Actions.
+
+## Project layout
+
+```
+app/src/main/java/app/simple/positional/
+  activities/   entry points and sub screens
+  ui/           panel fragments (GPS, compass, clock, level, trail, measure, direction, settings)
+  decorations/  custom views, map wrappers, fast scroller
+  database/     Room entities, DAOs and databases
+  services/     location and clock widget services
+  widgets/      app widget providers
+  math/         vectors, quaternions, angles, unit conversion
+  util/         formatting and Android helpers
+app/src/test/   JVM unit tests
+```
+
+`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file and includes the contents of source, build and config files only.
+
+## Credits and license
+
+Original app by [Hamza Rizwan (Hamza417)](https://github.com/Hamza417/Positional). Translations come from the upstream Crowdin project.
+
+Licensed under the [GNU GPL v3](LICENSE). See [PRIVACY.md](PRIVACY.md) for the privacy policy.

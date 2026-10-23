@@ -6,11 +6,9 @@ import android.os.IBinder
 import android.widget.RemoteViews
 import app.simple.positional.R
 import app.simple.positional.model.ClockModel
-import app.simple.positional.widgets.ClockWidget2x2
 import app.simple.positional.widgets.ClockWidget3x3
 
 class ClockWidgetService3x3 : ClockWidgetService() {
-
     override fun onBind(intent: Intent): IBinder? {
         return null
     }

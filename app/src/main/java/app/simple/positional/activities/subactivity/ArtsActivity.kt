@@ -9,7 +9,6 @@ import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.MainPreferences
 
 class ArtsActivity : BaseActivity() {
-
     private lateinit var viewPager2: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +23,6 @@ class ArtsActivity : BaseActivity() {
 
         viewPager2.adapter = ArtsAdapter()
         viewPager2.offscreenPageLimit = 3
-        // viewPager2.setPageTransformer(DepthTransformer())
         viewPager2.setCurrentItem(MainPreferences.getCurrentArt(), false)
 
         viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {

@@ -42,7 +42,6 @@ import com.google.android.gms.maps.model.LatLng
 import kotlin.math.abs
 
 class Direction : ScopedFragment(), SensorEventListener {
-
     private lateinit var direction: PhysicalRotationImageView
     private lateinit var dial: PhysicalRotationImageView
     private lateinit var degrees: TextView

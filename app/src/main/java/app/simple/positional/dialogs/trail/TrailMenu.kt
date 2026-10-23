@@ -15,7 +15,6 @@ import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.preferences.TrailPreferences
 
 class TrailMenu : CustomBottomSheetDialogFragment() {
-
     private lateinit var toggleLabel: SwitchView
     private lateinit var toggleSatellite: SwitchView
     private lateinit var toggleHighContrast: SwitchView
@@ -123,10 +122,6 @@ class TrailMenu : CustomBottomSheetDialogFragment() {
             startActivity(intent)
         }
 
-        /**
-         * Calling this here because adding click event listeners
-         * resets the [View.isClickable] state to true
-         */
         if (toggleSatellite.isChecked) {
             satelliteOverrides(0.4F, isChecked = true)
         }

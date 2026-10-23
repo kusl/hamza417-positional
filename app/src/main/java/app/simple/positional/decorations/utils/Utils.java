@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.RadioButton;
-
 import com.google.android.material.animation.ArgbEvaluatorCompat;
 
 public class Utils {
@@ -20,7 +19,7 @@ public class Utils {
         valueAnimator.addUpdateListener(animation -> view.setBackgroundTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
         valueAnimator.start();
     }
-    
+
     public static void animateBackground(int endColor, ViewGroup view) {
         view.clearAnimation();
         ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
@@ -31,7 +30,7 @@ public class Utils {
         valueAnimator.addUpdateListener(animation -> view.setBackgroundTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
         valueAnimator.start();
     }
-    
+
     public static void animateTint(int endColor, RadioButton view) {
         view.clearAnimation();
         ValueAnimator valueAnimator = ValueAnimator.ofObject(new ArgbEvaluatorCompat(),
@@ -42,7 +41,7 @@ public class Utils {
         valueAnimator.addUpdateListener(animation -> view.setButtonTintList(ColorStateList.valueOf((int) animation.getAnimatedValue())));
         valueAnimator.start();
     }
-    
+
     public static void animateElevation(Float elevation, RadioButton button) {
         button.clearAnimation();
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(button.getElevation(), elevation);

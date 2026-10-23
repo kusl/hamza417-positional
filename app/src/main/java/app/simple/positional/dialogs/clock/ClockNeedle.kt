@@ -14,7 +14,6 @@ import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.util.LocaleHelper
 
 class ClockNeedle : CustomBottomSheetDialogFragment() {
-
     private lateinit var needleSkin: ViewPager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -36,7 +35,6 @@ class ClockNeedle : CustomBottomSheetDialogFragment() {
 
         needleSkin.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                /* no-op */
             }
 
             override fun onPageSelected(position: Int) {

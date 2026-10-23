@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Panels -->
     <string name="clock">وقت</string>
     <string name="compass">کمپاس</string>
     <string name="gps_location">مقام</string>
     <string name="level">سطح</string>
     <string name="settings">ملاحظہ کریں</string>
-    <!-- Info Headers -->
+
     <string name="clock_info">وقت کی معلومات</string>
     <string name="compass_info">کمپاس کی معلومات</string>
     <string name="gps_info">مقام کی معلومات</string>
-    <!-- Clock Information Headers-->
+
     <string name="local_time">مقامی وقت</string>
     <string name="utc_time">آفاقی مربوط وقت</string>
     <string name="sun_position">سورج کی پوزیشن</string>
@@ -20,15 +19,15 @@
     <string name="moon_time">چاند کا وقت</string>
     <string name="moon_illumination">چاند کی روشنی</string>
     <string name="moon_dates">چاند کی تاریخیں</string>
-    <!-- GPS Information Headers -->
+
     <string name="gps_provider">ذریعہ</string>
     <string name="gps_movement">حرکت</string>
     <string name="gps_coordinates">نقاط</string>
     <string name="gps_address">پتہ</string>
-    <!--Compass Information Header -->
+
     <string name="compass_accuracy">قطعیت</string>
     <string name="compass_field">مقناطیسی میدان</string>
-    <!-- Clock Information Items-->
+
     <string name="local_timezone">ٹائم زون:</string>
     <string name="local_time_24hr">وقت 24 گھنٹے:</string>
     <string name="local_time_12hr">وقت 12 گھنٹے:</string>
@@ -63,7 +62,7 @@
     <string name="moon_new_moon">نیا چاند:</string>
     <string name="moon_first_quarter">پہلا کوارٹر:</string>
     <string name="moon_last_quarter">آخری کوارٹر:</string>
-    <!-- Compass information items -->
+
     <string name="magnetometer">میگنیٹومیٹر</string>
     <string name="accelerometer">ایکسلرومیٹر</string>
     <string name="accelerometer_accuracy">ایکسیلیومیٹر:</string>
@@ -71,7 +70,7 @@
     <string name="compass_inclination">جھکاو:</string>
     <string name="compass_declination">تخفیف:</string>
     <string name="compass_field_strength">میدان کی طاقت:</string>
-    <!-- GPS Information Panel -->
+
     <string name="gps_status">حالت:</string>
     <string name="gps_source">ذریعہ:</string>
     <string name="gps_accuracy">قطعیت:</string>
@@ -83,15 +82,15 @@
     <string name="gps_speed">رفتار:</string>
     <string name="gps_latitude">طول:</string>
     <string name="gps_longitude">طول البلد:</string>
-    <!-- Sensor Accuracy -->
+
     <string name="sensor_accuracy_unreliable">ناقابل اعتبار</string>
     <string name="sensor_accuracy_low">کم</string>
     <string name="sensor_accuracy_medium">متوسط</string>
     <string name="sensor_accuracy_high">اعلی</string>
-    <!-- GPS Source Status -->
+
     <string name="gps_enabled">فعال</string>
     <string name="gps_disabled">بند</string>
-    <!-- Units -->
+
     <string name="meter">م</string>
     <string name="kilometer">کلومیٹر</string>
     <string name="feet">فوٹ</string>
@@ -100,7 +99,7 @@
     <string name="miles_hour">میل فی گھنٹہ</string>
     <string name="milliseconds">ملی سیکنڈ</string>
     <string name="seconds">سیکنڈ</string>
-    <!-- Alert -->
+
     <string name="info_copied">کلپ بورڈ میں کاپی ہو گیا ہے</string>
     <string name="info_error">کاپی نہیں ہوسکی!!</string>
     <string name="invalid_coordinates">غلط نقاط</string>
@@ -112,12 +111,12 @@
     <string name="location_not_saved">محفوظ نہیں ہو سکتا!</string>
     <string name="no_update">کوئی اپ ڈیٹ دستیاب نہیں ہے</string>
     <string name="location_not_available">مقام ابھی دستیاب نہیں ہے</string>
-    <!-- Settings Categories -->
+
     <string name="appearance">ظہور</string>
     <string name="configuration">تشکیل</string>
     <string name="about">ایپ کے بارے میں</string>
     <string name="contribute">حصہ ڈالیں</string>
-    <!-- Settings Heading -->
+
     <string name="theme">تھیم</string>
     <string name="icon">آئیکن</string>
     <string name="corner_radius">کارنر رداس</string>
@@ -131,7 +130,7 @@
     <string name="app_version">ایپ ورژن</string>
     <string name="found_an_issue">ایک مسئلہ ملا؟</string>
     <string name="translate">ترجمہ کریں</string>
-    <!-- Settings Description -->
+
     <string name="theme_follow_system">سسٹم پر عمل کریں</string>
     <string name="theme_day">روشنی</string>
     <string name="theme_night">اندھیرا</string>
@@ -142,30 +141,30 @@
     <string name="desc_legal">ایپ کی دستبرداری ، رازداری کی پالیسی اور استعمال کی شرائط پڑھیں</string>
     <string name="desc_git">ایپ کا ذخیرہ کھولیں</string>
     <string name="desc_translate">اپنی مادری زبان میں ایپ کا ترجمہ کرنے میں مدد کریں</string>
-    <!-- Clock Menu -->
+
     <string name="needles">سوئی</string>
     <string name="motion_type">حرکت کی قسم</string>
     <string name="time_format">12 گھنٹے کا فارمیٹ استعمال کریں</string>
     <string name="motion_type_smooth">ہموار</string>
     <string name="motion_type_tick">روک روک کر</string>
-    <!-- Compass Menu -->
+
     <string name="bloom">پھول</string>
     <string name="bloom_skins">پھول کی تھیم</string>
     <string name="show_code">صرف کوڈ دکھائیں</string>
-    <!-- GPS Menu -->
+
     <string name="labels">لیبل</string>
     <string name="buildings">عمارتیں</string>
     <string name="traffic">ٹریفک</string>
     <string name="satellite_mode">سیٹلائٹ وضع</string>
     <string name="high_contrast_mode">اعلی کنٹراسٹ نقشہ</string>
-    <!-- Settings Menus -->
+
     <string name="unit_metric">میٹرک</string>
     <string name="unit_imperial">امپیریل</string>
-    <!-- Specified Coordinates Menu -->
+
     <string name="specified_hint_header">مقام کا ڈیٹا درج کریں</string>
     <string name="specified_hint_latitude">طول بلد (90±)</string>
     <string name="specified_hint_longitude">طول البلد (180±)</string>
-    <!-- Info -->
+
     <string name="compass_calibration_notice">اگر آپ کے آلے کے کمپاس سینسر کی درستگی کم ہے تو ، سینسر کیلیبریٹ کرنے کے لیے اپنے آلے کو آٹھ سمت میں منتقل کریں۔</string>
     <string name="specified_location_notice">ذیل میں دکھائی گئی معلومات کو مخصوص مقام کوآرڈینیٹ کیلئے تازہ کاری کی جارہی ہے۔</string>
     <string name="show_again">دوبارہ دکھائیں</string>
@@ -176,27 +175,27 @@
     <string name="auto_system_default_language">آٹو (سسٹم ڈیفالٹ)</string>
     <string name="location_permission_denied">"مقام کی اجازت سے انکار!"</string>
     <string name="no_location_permission_alert">کچھ خصوصیات مقام کی اجازت کے بغیر کام نہیں کرسکتی ہیں۔</string>
-    <!-- Button Text -->
+
     <string name="button_cancel">منسوخ کریں</string>
     <string name="button_set">سیٹ کریں</string>
     <string name="button_close">بند کریں</string>
     <string name="button_grant">عطا</string>
     <string name="button_reset">ری سیٹ کریں</string>
-    <!-- Button Descriptions -->
+
     <string name="clock_options">گھڑی مینو</string>
     <string name="compass_options">کمپاس مینو</string>
     <string name="gps_options">GPS مینو</string>
     <string name="gps_reset_location">مقام کو دوبارہ ترتیب دیںمقام کو دوبارہ ترتیب دیں</string>
     <string name="delete_all">تمام حذف کریں</string>
     <string name="open_specified_location_documentation">مخصوص مقام کی دستاویزات کو کھولیں</string>
-    <!-- Legal Menu -->
+
     <string name="disclaimer">دستبرداری</string>
     <string name="privacy_policy">رازداری کی پالیسی</string>
     <string name="terms_of_use">استعمال کی شرائط</string>
     <string name="permissions">اجازت</string>
     <string name="credits">کریڈٹ</string>
     <string name="internet_uses">انٹرنیٹ کے استعمال</string>
-    <!-- Moon Illumination -->
+
     <string name="waning">وانگ</string>
     <string name="waning_gibbous">وانگ گبائوس</string>
     <string name="waning_crescent">وانگ کریسنٹ</string>
@@ -207,7 +206,7 @@
     <string name="new_moon">نیا چاند</string>
     <string name="third_quarter">تیسرا چوتھائی</string>
     <string name="first_quarter">پہلا چوتھائی</string>
-    <!-- Directions -->
+
     <string name="north">شمال</string>
     <string name="north_west">شمال مغرب</string>
     <string name="west">مغرب</string>
@@ -224,17 +223,17 @@
     <string name="south_east_SE">ج مش</string>
     <string name="east_E">مش</string>
     <string name="north_east_NE">ش۔مش</string>
-    <!-- Graph -->
+
     <string name="location_details">مقام کی تفصیلات</string>
     <string name="min">کم سے کم:</string>
     <string name="max">زیادہ سے زیادہ:</string>
     <string name="avg">اوسط:</string>
-    <!-- UTM -->
+
     <string name="utm_zone">زون:</string>
     <string name="utm_easting">مشرق:</string>
     <string name="utm_northing">شمالی:</string>
     <string name="utm_meridian">وسطی میریڈیئن:</string>
-    <!-- Location Provider -->
+
     <string name="desc_android_location_provider">ڈیفالٹ اینڈروئیڈ کا لوکیشن API ، انتہائی درست لیکن ایک وقت میں صرف ایک مقام فراہم کرنے والے تک محدود ہے اور اندرونی مقام کی درخواستیں اس کی درستگی کو متاثر کرسکتی ہیں ، مقام کو جلدی سے اپ ڈیٹ کرنے کیلئے ایک طاقتور GPS سینسر کی ضرورت ہوتی ہے۔</string>
     <string name="desc_fused_location_provider">گوگل کا فیوزڈ لوکیشن API جو مختلف مقام فراہم کرنے والے سے محل وقوع کے ڈیٹا کو مثلث بناتا ہے اور اس کا نتیجہ مقامات کی ایک سیریز میں اوسط سے نکالتا ہے۔ مختلف نتائج دے سکتے ہیں لیکن بیٹری کم استعمال کرتی ہے۔</string>
     <string name="desc_location_provider_note">نوٹ: کسی بھی API کا استعمال مختلف عوامل پر انحصار کرتے ہوئے مختلف نتائج دے سکتا ہے اور ان میں سے کوئی بھی ایک دوسرے کے لئے درستگی کا ثبوت نہیں ہے ، APIs کی جانچ کریں اور منتخب کردہ کو منتخب کریں جو آپ کے علاقے میں بہترین کام کرتا ہے۔</string>

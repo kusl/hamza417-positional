@@ -2,10 +2,8 @@ package app.simple.positional.ui.panels
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -16,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
@@ -32,7 +29,6 @@ import app.simple.positional.decorations.padding.PaddingAwareNestedScrollView
 import app.simple.positional.decorations.popup.PopupLinearLayout
 import app.simple.positional.decorations.popup.PopupMenuCallback
 import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
 import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 import app.simple.positional.decorations.switchview.SwitchView
@@ -50,19 +46,12 @@ import app.simple.positional.util.LocaleHelper.localeList
 import app.simple.positional.util.PermissionUtils
 import app.simple.positional.util.ViewUtils.gone
 import app.simple.positional.util.ViewUtils.visible
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.appupdate.AppUpdateOptions
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
 
 class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
-
     private var xOff = 0F
     private var yOff = 0F
 
     private lateinit var scrollView: PaddingAwareNestedScrollView
-    private lateinit var hideRate: DynamicRippleImageButton
-    private lateinit var rate: DynamicCornerLinearLayout
     private lateinit var permission: DynamicCornerLinearLayout
     private lateinit var unit: DynamicRippleLinearLayout
     private lateinit var locationProvider: DynamicRippleLinearLayout
@@ -81,7 +70,6 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
     private lateinit var coordinatesFormatContainer: DynamicRippleLinearLayout
     private lateinit var coordinatesFormat: TextView
     private lateinit var inure: DynamicRippleConstraintLayout
-
 
     private lateinit var toggleKeepScreenOn: SwitchView
     private lateinit var toggleCustomLocation: SwitchView
@@ -123,8 +111,6 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
 
         scrollView = view.findViewById(R.id.settings_scroll_view)
-        hideRate = view.findViewById(R.id.rate_hide)
-        rate = view.findViewById(R.id.rate_layout)
         permission = view.findViewById(R.id.permission_layout)
         unit = view.findViewById(R.id.settings_units)
         locationProvider = view.findViewById(R.id.settings_location_provider)
@@ -168,12 +154,6 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
             setCurrentThemeValue(4)
         } else {
             setCurrentThemeValue(AppCompatDelegate.getDefaultNightMode())
-        }
-
-        if (MainPreferences.getLaunchCount() > 3) {
-            if (MainPreferences.getShowRatingDialog()) {
-                rate.visible(false)
-            }
         }
 
         permissionNotification()
@@ -247,24 +227,7 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
         }
 
         appVersion.setOnClickListener {
-            val appUpdateManager = AppUpdateManagerFactory.create(requireContext())
-            val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
-            appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-                when {
-                    appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) -> {
-                        appUpdateManager.startUpdateFlow(appUpdateInfo, requireActivity(), AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE))
-                    }
-
-                    appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE -> {
-                        Toast.makeText(requireContext(), R.string.no_update, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            appUpdateInfoTask.addOnFailureListener {
-                Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_LONG).show()
-            }
+            openUrl(RELEASES_URL)
         }
 
         legalNotes.setOnTouchListener { _, event ->
@@ -286,9 +249,7 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
         }
 
         github.setOnClickListener {
-            val uri: Uri = "https://github.com/Hamza417/Positional".toUri()
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
+            openUrl(REPOSITORY_URL)
         }
 
         translate.setOnClickListener {
@@ -304,15 +265,11 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
         }
 
         telegramGroup.setOnClickListener {
-            val uri: Uri = "https://t.me/pstnl".toUri()
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
+            openUrl("https://t.me/pstnl")
         }
 
         myOtherApps.setOnClickListener {
-            val uri: Uri = "https://play.google.com/store/apps/dev?id=9002962740272949113".toUri()
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            startActivity(intent)
+            openUrl(UPSTREAM_AUTHOR_URL)
         }
 
         toggleSkipSplashScreen.setOnCheckedChangeListener { isChecked ->
@@ -326,15 +283,6 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
         skipSplashScreenContainer.setOnLongClickListener {
             startActivity(Intent(requireContext(), ArtsActivity::class.java))
             true
-        }
-
-        rate.setOnClickListener {
-            openAppRating()
-        }
-
-        hideRate.setOnClickListener {
-            rate.gone()
-            MainPreferences.setShowRatingDialog(false)
         }
 
         permission.setOnClickListener {
@@ -354,9 +302,7 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
         }
 
         inure.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = INURE_PLAY_STORE_URL.toUri()
-            startActivity(intent)
+            openUrl(INURE_URL)
         }
     }
 
@@ -375,7 +321,7 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
                 AppCompatDelegate.MODE_NIGHT_YES -> getString(R.string.theme_night)
                 AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> getString(R.string.theme_follow_system)
                 4 -> getString(R.string.theme_auto)
-                else -> "Unknown Theme Selected!!" // Unreachable
+                else -> ""
             }
         } catch (e: NullPointerException) {
             e.printStackTrace()
@@ -399,66 +345,12 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
             0 -> getString(R.string.dd_dddddd)
             1 -> getString(R.string.dd_mm_mmm)
             2 -> getString(R.string.dd_mm_ss_sss)
-            else -> "Unknown Format Selected!!" // Unreachable
+            else -> ""
         }
     }
 
-    private fun openAppRating() {
-        /**
-         * you can also use BuildConfig.APPLICATION_ID
-         */
-        val appId: String = requireContext().packageName
-        val rateIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$appId".toUri())
-        var marketFound = false
-
-        /**
-         * find all applications able to handle our rateIntent
-         */
-        val otherApps: List<ResolveInfo> = requireContext().packageManager.queryIntentActivities(rateIntent, 0)
-
-        for (otherApp in otherApps) {
-            /**
-             * look for Google Play application
-             */
-            if (otherApp.activityInfo.applicationInfo.packageName == "com.android.vending") {
-                val otherAppActivity = otherApp.activityInfo
-                val componentName = ComponentName(otherAppActivity.applicationInfo.packageName, otherAppActivity.name)
-
-                /**
-                 * make sure it does NOT open in the stack of your activity
-                 */
-                rateIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                /**
-                 * task re -parenting if needed
-                 */
-                rateIntent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
-
-                /**
-                 * if the Google Play was already open in a search result
-                 * this make sure it still go to the app page you requested
-                 */
-                rateIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-
-                /**
-                 * this make sure only the Google Play app is allowed to
-                 * intercept the intent
-                 */
-                rateIntent.component = componentName
-                requireContext().startActivity(rateIntent)
-                marketFound = true
-
-                break
-            }
-        }
-
-        /**
-         * if GP not present on device, open web browser
-         */
-        if (!marketFound) {
-            val webIntent = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$appId".toUri())
-            requireContext().startActivity(webIntent)
-        }
+    private fun openUrl(url: String) {
+        runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
     }
 
     override fun isCoordinatesSet(boolean: Boolean) {
@@ -518,6 +410,9 @@ class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
             return fragment
         }
 
-        private const val INURE_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=app.simple.inure.play"
+        private const val REPOSITORY_URL = "https://github.com/kusl/hamza417-positional"
+        private const val RELEASES_URL = "$REPOSITORY_URL/releases"
+        private const val UPSTREAM_AUTHOR_URL = "https://github.com/Hamza417"
+        private const val INURE_URL = "https://github.com/Hamza417/Inure"
     }
 }

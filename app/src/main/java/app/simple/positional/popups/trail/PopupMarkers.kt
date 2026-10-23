@@ -12,7 +12,6 @@ import app.simple.positional.decorations.views.CustomRecyclerView
 import app.simple.positional.util.ViewUtils
 
 class PopupMarkers(view: View, x: Float, y: Float) : PopupWindow() {
-
     private lateinit var popupMarkersCallbacks: PopupMarkersCallbacks
 
     init {

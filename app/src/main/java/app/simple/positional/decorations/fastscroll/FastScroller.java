@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroupOverlay;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -23,10 +22,9 @@ import androidx.core.util.Consumer;
 import app.simple.positional.R;
 
 public class FastScroller {
-    
     private final int mMinTouchTargetSize;
     private final int mTouchSlop;
-    
+
     @NonNull
     private final ViewGroup mView;
     @NonNull
@@ -35,53 +33,52 @@ public class FastScroller {
     private Rect mUserPadding;
     @NonNull
     private final AnimationHelper mAnimationHelper;
-    
+
     private final int mTrackWidth;
     private final int mThumbWidth;
     private final int mThumbHeight;
-    
+
     @NonNull
     private final View mTrackView;
     @NonNull
     private final View mThumbView;
     @NonNull
     private final TextView mPopupView;
-    
+
     private boolean mScrollbarEnabled;
     private int mThumbOffset;
-    
+
     private float mDownX;
     private float mDownY;
     private float mLastY;
     private float mDragStartY;
     private int mDragStartThumbOffset;
     private boolean mDragging;
-    
+
     @NonNull
     private final Runnable mAutoHideScrollbarRunnable = this :: autoHideScrollbar;
-    
+
     @NonNull
     private final Rect mTempRect = new Rect();
-    
+
     public FastScroller(@NonNull ViewGroup view, @NonNull ViewHelper viewHelper,
             @Nullable Rect padding, @NonNull Drawable trackDrawable,
             @NonNull Drawable thumbDrawable, @NonNull Consumer <TextView> popupStyle,
             @NonNull AnimationHelper animationHelper) {
-        
         mMinTouchTargetSize = view.getResources().getDimensionPixelSize(
                 R.dimen.afs_min_touch_target_size);
         Context context = view.getContext();
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-        
+
         mView = view;
         mViewHelper = viewHelper;
         mUserPadding = padding;
         mAnimationHelper = animationHelper;
-        
+
         mTrackWidth = trackDrawable.getIntrinsicWidth();
         mThumbWidth = thumbDrawable.getIntrinsicWidth();
         mThumbHeight = thumbDrawable.getIntrinsicHeight();
-        
+
         mTrackView = new View(context);
         mTrackView.setBackground(trackDrawable);
         mThumbView = new View(context);
@@ -90,20 +87,20 @@ public class FastScroller {
         mPopupView.setLayoutParams(new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         popupStyle.accept(mPopupView);
-        
+
         ViewGroupOverlay overlay = mView.getOverlay();
         overlay.add(mTrackView);
         overlay.add(mThumbView);
         overlay.add(mPopupView);
-        
+
         postAutoHideScrollbar();
         mPopupView.setAlpha(0);
-        
+
         mViewHelper.addOnPreDrawListener(this :: onPreDraw);
         mViewHelper.addOnScrollChangedListener(this :: onScrollChanged);
         mViewHelper.addOnTouchEventListener(this :: onTouchEvent);
     }
-    
+
     public void setPadding(int left, int top, int right, int bottom) {
         if (mUserPadding != null && mUserPadding.left == left && mUserPadding.top == top
                 && mUserPadding.right == right && mUserPadding.bottom == bottom) {
@@ -115,7 +112,7 @@ public class FastScroller {
         mUserPadding.set(left, top, right, bottom);
         mView.invalidate();
     }
-    
+
     public void setPadding(@Nullable Rect padding) {
         if (Objects.equals(mUserPadding, padding)) {
             return;
@@ -131,7 +128,7 @@ public class FastScroller {
         }
         mView.invalidate();
     }
-    
+
     @NonNull
     private Rect getPadding() {
         if (mUserPadding != null) {
@@ -143,9 +140,8 @@ public class FastScroller {
         }
         return mTempRect;
     }
-    
+
     private void onPreDraw() {
-        
         updateScrollbarState();
         mTrackView.setVisibility(mScrollbarEnabled ? View.VISIBLE : View.INVISIBLE);
         mThumbView.setVisibility(mScrollbarEnabled ? View.VISIBLE : View.INVISIBLE);
@@ -153,16 +149,16 @@ public class FastScroller {
             mPopupView.setVisibility(View.INVISIBLE);
             return;
         }
-        
+
         int layoutDirection = mView.getLayoutDirection();
         mTrackView.setLayoutDirection(layoutDirection);
         mThumbView.setLayoutDirection(layoutDirection);
         mPopupView.setLayoutDirection(layoutDirection);
-        
+
         boolean isLayoutRtl = layoutDirection == View.LAYOUT_DIRECTION_RTL;
         int viewWidth = mView.getWidth();
         int viewHeight = mView.getHeight();
-        
+
         Rect padding = getPadding();
         int trackLeft = isLayoutRtl ? padding.left : viewWidth - padding.right - mTrackWidth;
         layoutView(mTrackView, trackLeft, padding.top, trackLeft + mTrackWidth,
@@ -171,7 +167,7 @@ public class FastScroller {
         int thumbTop = padding.top + mThumbOffset;
         layoutView(mThumbView, thumbLeft, thumbTop, thumbLeft + mThumbWidth,
                 thumbTop + mThumbHeight);
-        
+
         String popupText = mViewHelper.getPopupText();
         boolean hasPopup = !TextUtils.isEmpty(popupText);
         mPopupView.setVisibility(hasPopup ? View.VISIBLE : View.INVISIBLE);
@@ -225,47 +221,45 @@ public class FastScroller {
                     popupTop + popupHeight);
         }
     }
-    
+
     private void updateScrollbarState() {
         int scrollOffsetRange = getScrollOffsetRange();
         mScrollbarEnabled = scrollOffsetRange > 0;
         mThumbOffset = mScrollbarEnabled ? (int) ((long) getThumbOffsetRange()
                 * mViewHelper.getScrollOffset() / scrollOffsetRange) : 0;
     }
-    
+
     private void layoutView(@NonNull View view, int left, int top, int right, int bottom) {
         int scrollX = mView.getScrollX();
         int scrollY = mView.getScrollY();
         view.layout(scrollX + left, scrollY + top, scrollX + right, scrollY + bottom);
     }
-    
+
     private void onScrollChanged() {
-        
         updateScrollbarState();
         if (!mScrollbarEnabled) {
             return;
         }
-        
+
         mAnimationHelper.showScrollbar(mTrackView, mThumbView);
         postAutoHideScrollbar();
     }
-    
+
     private boolean onTouchEvent(@NonNull MotionEvent event) {
-        
         if (!mScrollbarEnabled) {
             return false;
         }
-        
+
         float eventX = event.getX();
         float eventY = event.getY();
         Rect padding = getPadding();
-    
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                
+
                 mDownX = eventX;
                 mDownY = eventY;
-                
+
                 if (mTrackView.getAlpha() > 0 && isInView(mTrackView, eventX, eventY)) {
                     mDragStartY = eventY;
                     if (isInViewTouchTarget(mThumbView, eventX, eventY)) {
@@ -277,7 +271,7 @@ public class FastScroller {
                     }
                     setDragging(true);
                 }
-                
+
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (!mDragging && isInViewTouchTarget(mTrackView, mDownX, mDownY)
@@ -291,10 +285,10 @@ public class FastScroller {
                         mDragStartThumbOffset = (int) (eventY - padding.top - mThumbHeight / 2f);
                         scrollToThumbOffset(mDragStartThumbOffset);
                     }
-                    
+
                     setDragging(true);
                 }
-    
+
                 if (mDragging) {
                     int thumbOffset = mDragStartThumbOffset + (int) (eventY - mDragStartY);
                     scrollToThumbOffset(thumbOffset);
@@ -305,22 +299,21 @@ public class FastScroller {
                 setDragging(false);
                 break;
             default: {
-                // no-op
             }
         }
-        
+
         mLastY = eventY;
-        
+
         return mDragging;
     }
-    
+
     private boolean isInView(@NonNull View view, float x, float y) {
         int scrollX = mView.getScrollX();
         int scrollY = mView.getScrollY();
         return x >= view.getLeft() - scrollX && x < view.getRight() - scrollX
                 && y >= view.getTop() - scrollY && y < view.getBottom() - scrollY;
     }
-    
+
     private boolean isInViewTouchTarget(@NonNull View view, float x, float y) {
         int scrollX = mView.getScrollX();
         int scrollY = mView.getScrollY();
@@ -329,7 +322,7 @@ public class FastScroller {
                 && isInTouchTarget(y, view.getTop() - scrollY, view.getBottom() - scrollY,
                 mView.getHeight());
     }
-    
+
     private boolean isInTouchTarget(float position, int viewStart, int viewEnd, int parentEnd) {
         int viewSize = viewEnd - viewStart;
         if (viewSize >= mMinTouchTargetSize) {
@@ -349,37 +342,36 @@ public class FastScroller {
         }
         return position >= touchTargetStart && position < touchTargetEnd;
     }
-    
+
     private void scrollToThumbOffset(int thumbOffset) {
         int thumbOffsetRange = getThumbOffsetRange();
         thumbOffset = MathUtils.clamp(thumbOffset, 0, thumbOffsetRange);
         int scrollOffset = (int) ((long) getScrollOffsetRange() * thumbOffset / thumbOffsetRange);
         mViewHelper.scrollTo(scrollOffset);
     }
-    
+
     private int getScrollOffsetRange() {
         return mViewHelper.getScrollRange() - mView.getHeight();
     }
-    
+
     private int getThumbOffsetRange() {
         Rect padding = getPadding();
         return mView.getHeight() - padding.top - padding.bottom - mThumbHeight;
     }
-    
+
     private void setDragging(boolean dragging) {
-        
         if (mDragging == dragging) {
             return;
         }
         mDragging = dragging;
-        
+
         if (mDragging) {
             mView.getParent().requestDisallowInterceptTouchEvent(true);
         }
-        
+
         mTrackView.setPressed(mDragging);
         mThumbView.setPressed(mDragging);
-        
+
         if (mDragging) {
             cancelAutoHideScrollbar();
             mAnimationHelper.showScrollbar(mTrackView, mThumbView);
@@ -390,7 +382,7 @@ public class FastScroller {
             mAnimationHelper.hidePopup(mPopupView);
         }
     }
-    
+
     private void postAutoHideScrollbar() {
         cancelAutoHideScrollbar();
         if (mAnimationHelper.isScrollbarAutoHideEnabled()) {
@@ -398,48 +390,48 @@ public class FastScroller {
                     mAnimationHelper.getScrollbarAutoHideDelayMillis());
         }
     }
-    
+
     private void autoHideScrollbar() {
         if (mDragging) {
             return;
         }
         mAnimationHelper.hideScrollbar(mTrackView, mThumbView);
     }
-    
+
     private void cancelAutoHideScrollbar() {
         mView.removeCallbacks(mAutoHideScrollbarRunnable);
     }
-    
+
     public interface ViewHelper {
         void addOnPreDrawListener(@NonNull Runnable onPreDraw);
-        
+
         void addOnScrollChangedListener(@NonNull Runnable onScrollChanged);
-        
+
         void addOnTouchEventListener(@NonNull Predicate <MotionEvent> onTouchEvent);
-        
+
         int getScrollRange();
-        
+
         int getScrollOffset();
-        
+
         void scrollTo(int offset);
-        
+
         @Nullable
         default String getPopupText() {
             return null;
         }
     }
-    
+
     public interface AnimationHelper {
         void showScrollbar(@NonNull View trackView, @NonNull View thumbView);
-        
+
         void hideScrollbar(@NonNull View trackView, @NonNull View thumbView);
-        
+
         boolean isScrollbarAutoHideEnabled();
-        
+
         int getScrollbarAutoHideDelayMillis();
-        
+
         void showPopup(@NonNull View popupView);
-        
+
         void hidePopup(@NonNull View popupView);
     }
 }

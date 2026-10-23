@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 class TimeZones : ScopedFragment() {
-
     private lateinit var timeZoneAdapter: TimeZoneAdapter
     private lateinit var recyclerView: CustomRecyclerView
     private lateinit var searchView: SearchView
@@ -61,7 +60,6 @@ class TimeZones : ScopedFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         timeZoneAdapter = TimeZoneAdapter(timeZones, SearchPreferences.getLastSearchKeyword())
-        //recyclerView.scrollToPosition(ClockPreferences.getTimezoneSelectedPosition())
 
         searchView.setSearchViewEventListener { keywords, count ->
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {

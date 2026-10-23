@@ -13,7 +13,6 @@ import app.simple.positional.decorations.views.CustomWebView
 import app.simple.positional.preferences.MainPreferences.setShowPermissionDialog
 
 class Permission : CustomBottomSheetDialogFragment() {
-
     private var permissionCallbacks: PermissionCallbacks? = null
     private lateinit var grant: DynamicRippleButton
     private lateinit var close: DynamicRippleButton

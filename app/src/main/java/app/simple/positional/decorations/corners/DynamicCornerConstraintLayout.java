@@ -2,15 +2,12 @@ package app.simple.positional.decorations.corners;
 
 import android.content.Context;
 import android.util.AttributeSet;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-
 import app.simple.positional.decorations.utils.LayoutBackground;
 
 public class DynamicCornerConstraintLayout extends ConstraintLayout {
-
     public DynamicCornerConstraintLayout(@NonNull Context context) {
         super(context);
         init(context, null);

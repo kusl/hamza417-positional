@@ -21,7 +21,6 @@ import app.simple.positional.util.ViewUtils.visible
 
 class AdapterMeasures(private val list: ArrayList<Measure>) :
     RecyclerView.Adapter<VerticalListViewHolder>() {
-
     private lateinit var adapterMeasuresCallback: AdapterMeasuresCallback
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {

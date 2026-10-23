@@ -17,7 +17,6 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 
 class TrailToolbar : DynamicCornerLinearLayout {
-
     private lateinit var trails: DynamicRippleImageButton
     private lateinit var menu: DynamicRippleImageButton
     private lateinit var add: DynamicRippleImageButton
@@ -50,13 +49,11 @@ class TrailToolbar : DynamicCornerLinearLayout {
 
         setPadding(resources.getDimensionPixelSize(R.dimen.toolbar_padding).div(2))
 
-        // Set margin
         post {
             val params = layoutParams as MarginLayoutParams
             params.setMargins(paddingLeft, StatusBarHeight.getStatusBarHeight(resources) + paddingTop, paddingRight, paddingBottom)
             layoutParams = params
 
-            // set wrap content width
             layoutParams.width = LayoutParams.MATCH_PARENT
         }
 

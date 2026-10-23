@@ -6,9 +6,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 
 class TrailDataFactory : ViewModelProvider.Factory {
-
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        @Suppress("UNCHECKED_CAST") // Cast is checked
+        @Suppress("UNCHECKED_CAST")
         when (modelClass) {
             TrailDataViewModel::class.java -> {
                 return TrailDataViewModel(checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])) as T

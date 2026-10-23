@@ -12,7 +12,6 @@ public class ClockModel {
     String date;
 
     public ClockModel() {
-
     }
 
     public ClockModel(Bitmap hour, Bitmap minute, Bitmap second, Bitmap face, Bitmap trail, Bitmap dayNight, String date) {

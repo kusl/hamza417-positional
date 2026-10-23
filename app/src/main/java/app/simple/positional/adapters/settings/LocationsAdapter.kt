@@ -15,7 +15,6 @@ import app.simple.positional.util.DMSConverter
 import com.google.android.material.card.MaterialCardView
 
 class LocationsAdapter : RecyclerView.Adapter<LocationsAdapter.Holder>() {
-
     private var locations: MutableList<Locations> = arrayListOf()
     private var locationsAdapterCallback: LocationsCallback? = null
 
@@ -57,12 +56,6 @@ class LocationsAdapter : RecyclerView.Adapter<LocationsAdapter.Holder>() {
         notifyItemInserted(0)
     }
 
-    fun clearList() {
-        for (i in locations.indices) {
-            removeItem(0)
-        }
-    }
-
     fun removeItem(position: Int): Locations {
         val p0 = locations[position]
         locations.removeAt(position)
@@ -83,7 +76,6 @@ class LocationsAdapter : RecyclerView.Adapter<LocationsAdapter.Holder>() {
 
         init {
             container.radius = radius.toFloat()
-            // ViewUtils.addShadow(container)
         }
     }
 

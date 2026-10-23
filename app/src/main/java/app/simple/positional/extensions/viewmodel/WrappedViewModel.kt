@@ -9,7 +9,6 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ContextUtils
 
 open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
-
     init {
         app.simple.positional.singleton.SharedPreferences.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
@@ -18,10 +17,6 @@ open class WrappedViewModel(application: Application) : AndroidViewModel(applica
         return ContextUtils.updateLocale(getApplication<Application>().applicationContext, MainPreferences.getAppLanguage()!!)
     }
 
-    /**
-     * Unsure about this so I am currently leaving it here,
-     * Will study it later
-     */
     open fun getString(resourceID: Int): String {
         return getContext().getString(resourceID)
     }
@@ -31,7 +26,6 @@ open class WrappedViewModel(application: Application) : AndroidViewModel(applica
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-
     }
 
     override fun onCleared() {

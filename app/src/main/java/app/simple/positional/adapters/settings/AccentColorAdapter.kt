@@ -24,7 +24,6 @@ import app.simple.positional.util.HtmlHelper
 import java.util.Arrays
 
 class AccentColorAdapter(private val list: ArrayList<Pair<Int, String>>) : RecyclerView.Adapter<VerticalListViewHolder>() {
-
     private lateinit var palettesAdapterCallbacks: PalettesAdapterCallbacks
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {
@@ -42,7 +41,6 @@ class AccentColorAdapter(private val list: ArrayList<Pair<Int, String>>) : Recyc
     }
 
     override fun onBindViewHolder(holder: VerticalListViewHolder, position_: Int) {
-
         val position = position_ - 1
 
         if (holder is Holder) {
@@ -88,7 +86,7 @@ class AccentColorAdapter(private val list: ArrayList<Pair<Int, String>>) : Recyc
     }
 
     override fun getItemCount(): Int {
-        return 23 + 1 // Extra 1 is Header
+        return 23 + 1
     }
 
     override fun getItemViewType(position: Int): Int {

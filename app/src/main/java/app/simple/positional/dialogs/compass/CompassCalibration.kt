@@ -15,7 +15,6 @@ import app.simple.positional.decorations.views.CustomDialogFragment
 import app.simple.positional.util.HtmlHelper.fromHtml
 
 class CompassCalibration : CustomDialogFragment(), SensorEventListener {
-
     private lateinit var sensorManager: SensorManager
     private lateinit var sensorAccelerometer: Sensor
     private lateinit var sensorMagneticField: Sensor
@@ -57,7 +56,6 @@ class CompassCalibration : CustomDialogFragment(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        /* no-op */
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {

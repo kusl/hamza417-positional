@@ -3,11 +3,7 @@ package app.simple.positional.preferences
 import app.simple.positional.decorations.views.PhysicalRotationImageView
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
-/**
- * Only preference related to Compass
- */
 object CompassPreferences {
-
     const val direction_code = "direction_code"
     const val flowerBloom = "flower"
     const val flowerBloomTheme = "flower_theme"
@@ -17,8 +13,6 @@ object CompassPreferences {
     const val usePhysicalProperties = "use_physical_properties"
     const val useGimbalLock = "use_gimbal_lock"
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setDirectionCode(value: Boolean) {
         getSharedPreferences().edit().putBoolean(direction_code, value).apply()
     }
@@ -26,8 +20,6 @@ object CompassPreferences {
     fun getDirectionCode(): Boolean {
         return getSharedPreferences().getBoolean(direction_code, true)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setFlowerBloom(value: Boolean) {
         getSharedPreferences().edit().putBoolean(flowerBloom, value).apply()
@@ -37,8 +29,6 @@ object CompassPreferences {
         return getSharedPreferences().getBoolean(flowerBloom, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setFlowerBloom(value: Int) {
         getSharedPreferences().edit().putInt(flowerBloomTheme, value).apply()
     }
@@ -46,8 +36,6 @@ object CompassPreferences {
     fun getFlowerBloomTheme(): Int {
         return getSharedPreferences().getInt(flowerBloomTheme, 0)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setDampingCoefficient(value: Float) {
         getSharedPreferences().edit().putFloat(dampingCoefficient, value).apply()
@@ -57,8 +45,6 @@ object CompassPreferences {
         return getSharedPreferences().getFloat(dampingCoefficient, PhysicalRotationImageView.ALPHA_DEFAULT)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setRotationalInertia(value: Float) {
         getSharedPreferences().edit().putFloat(rotationalInertia, value).apply()
     }
@@ -66,8 +52,6 @@ object CompassPreferences {
     fun getRotationalInertia(): Float {
         return getSharedPreferences().getFloat(rotationalInertia, PhysicalRotationImageView.INERTIA_MOMENT_DEFAULT)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setMagneticCoefficient(value: Float) {
         getSharedPreferences().edit().putFloat(magneticCoefficient, value).apply()
@@ -77,8 +61,6 @@ object CompassPreferences {
         return getSharedPreferences().getFloat(magneticCoefficient, PhysicalRotationImageView.MB_DEFAULT)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setUsePhysicalProperties(value: Boolean) {
         getSharedPreferences().edit().putBoolean(usePhysicalProperties, value).apply()
     }
@@ -86,8 +68,6 @@ object CompassPreferences {
     fun isUsingPhysicalProperties(): Boolean {
         return getSharedPreferences().getBoolean(usePhysicalProperties, true)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setUseGimbalLock(value: Boolean) {
         getSharedPreferences().edit().putBoolean(useGimbalLock, value).apply()

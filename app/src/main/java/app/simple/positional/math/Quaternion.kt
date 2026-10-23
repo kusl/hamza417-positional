@@ -1,7 +1,6 @@
 package app.simple.positional.math
 
 data class Quaternion(val x: Float, val y: Float, val z: Float, val w: Float) {
-
     private val arr = floatArrayOf(x, y, z, w)
 
     fun toFloatArray(): FloatArray {

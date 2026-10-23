@@ -13,7 +13,6 @@ import app.simple.positional.decorations.views.CustomDialogFragment
 import app.simple.positional.util.ViewUtils.setVisibility
 
 class MeasureAdd : CustomDialogFragment() {
-
     private lateinit var name: EditText
     private lateinit var note: EditText
     private lateinit var save: DynamicRippleButton

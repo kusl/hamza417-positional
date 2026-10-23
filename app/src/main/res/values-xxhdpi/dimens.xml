@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Clock -->
     <dimen name="clock_needle_dimensions">220dp</dimen>
     <dimen name="clock_image_dimensions">260dp</dimen>
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">300dp</dimen>
 
-    <!-- Information Panel -->
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_item_line_spacing">10dp</dimen>
@@ -17,7 +15,6 @@
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <!-- Dialog Menus -->
     <dimen name="options_text_margin_start">10dp</dimen>
     <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
@@ -27,11 +24,9 @@
     <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
-    <!-- Top Bar -->
     <dimen name="top_bar_text_size">31sp</dimen>
     <dimen name="app_button_size">40dp</dimen>
 
-    <!-- Compass -->
     <dimen name="compass_dial">300dp</dimen>
     <dimen name="compass_degrees_text_size">44sp</dimen>
     <dimen name="degree_indicator_margin_top">40dp</dimen>
@@ -39,16 +34,13 @@
     <dimen name="compass_bloom_dimension">180dp</dimen>
     <dimen name="compass_direction_text_size">36sp</dimen>
 
-    <!-- Level -->
     <dimen name="level_indicator">125dp</dimen>
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <!-- Settings -->
     <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">14sp</dimen>
 
-    <!-- Miscellaneous/Main Base Activity -->
     <dimen name="bottom_nav_height">60dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>

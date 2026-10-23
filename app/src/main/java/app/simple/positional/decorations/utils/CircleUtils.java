@@ -4,25 +4,15 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.location.Location;
 import android.view.animation.DecelerateInterpolator;
-
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
-
 import app.simple.positional.decorations.interpolators.LatLngInterpolator;
 
 public class CircleUtils {
-
     static final int duration = 1000;
 
-    /**
-     * Method to animate circle to destination location
-     *
-     * @param location destination location
-     * @param circle   circle to be animated
-     * @return value animator
-     */
     public static ValueAnimator animateCircle(Location location, Circle circle) {
         if (circle != null) {
             LatLng startPosition = circle.getCenter();
@@ -76,7 +66,7 @@ public class CircleUtils {
         float normalizeEnd = end - start;
         float normalizedEndAbs = (normalizeEnd + 360) % 360;
 
-        float direction = (normalizedEndAbs > 180) ? -1 : 1; // -1 = anticlockwise, 1 = clockwise
+        float direction = (normalizedEndAbs > 180) ? -1 : 1;
         float rotation;
         if (direction > 0) {
             rotation = normalizedEndAbs;

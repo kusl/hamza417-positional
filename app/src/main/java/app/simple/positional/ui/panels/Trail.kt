@@ -59,7 +59,6 @@ import kotlinx.coroutines.withContext
 import java.util.*
 
 class Trail : ScopedFragment() {
-
     private lateinit var toolbar: TrailToolbar
     private lateinit var tools: TrailTools
     private lateinit var recyclerView: RecyclerView
@@ -320,7 +319,6 @@ class Trail : ScopedFragment() {
                 TrailMenu.newInstance()
                     .show(childFragmentManager, "trail_menu")
             }
-
         })
 
         maps?.setOnMapsCallbackListener(object : MapsCallbacks {
@@ -510,18 +508,11 @@ class Trail : ScopedFragment() {
     }
 
     private fun backPressed(value: Boolean) {
-        /**
-         * @see Time.backPressed
-         */
         backPress?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(value) {
             override fun handleOnBackPressed() {
                 if (bottomSheetPanel?.state == BottomSheetBehavior.STATE_EXPANDED) {
                     bottomSheetPanel?.state = BottomSheetBehavior.STATE_COLLAPSED
                 }
-                /**
-                 * Remove this callback as soon as it's been called
-                 * to prevent any further registering
-                 */
                 remove()
             }
         })

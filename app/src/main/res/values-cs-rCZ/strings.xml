@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Panels -->
     <string name="clock">Čas</string>
     <string name="compass">Kompas</string>
     <string name="gps_location">Umístění</string>
     <string name="level">Vodováha</string>
     <string name="settings">Nastavení</string>
-    <!-- Info Headers -->
+
     <string name="clock_info">Informace o čase</string>
     <string name="compass_info">Informace o kompasu</string>
     <string name="gps_info">Informace GPS</string>
-    <!-- Clock Information Headers-->
+
     <string name="local_time">Místní čas</string>
     <string name="utc_time">UTC čas</string>
     <string name="sun_position">Pozice slunce</string>
@@ -20,15 +19,15 @@
     <string name="moon_time">Čas měsíce</string>
     <string name="moon_illumination">Osvětlení měsíce</string>
     <string name="moon_dates">Data měsíce</string>
-    <!-- GPS Information Headers -->
+
     <string name="gps_provider">Poskytovatel</string>
     <string name="gps_movement">Pohyb</string>
     <string name="gps_coordinates">Souřadnice</string>
     <string name="gps_address">Adresa</string>
-    <!--Compass Information Header -->
+
     <string name="compass_accuracy">Přesnost</string>
     <string name="compass_field">Magnetické pole</string>
-    <!-- Clock Information Items-->
+
     <string name="local_timezone">Časové pásmo:</string>
     <string name="local_time_24hr">Čas 24H:</string>
     <string name="local_time_12hr">Čas 12H:</string>
@@ -63,7 +62,7 @@
     <string name="moon_new_moon">Nový měsíc:</string>
     <string name="moon_first_quarter">První čtvrť:</string>
     <string name="moon_last_quarter">Poslední čtvrť:</string>
-    <!-- Compass information items -->
+
     <string name="magnetometer">Magnetometr</string>
     <string name="accelerometer">Akcelerometr</string>
     <string name="accelerometer_accuracy">Akcelerometr:</string>
@@ -71,7 +70,7 @@
     <string name="compass_inclination">Inklinace:</string>
     <string name="compass_declination">Deklinace:</string>
     <string name="compass_field_strength">Intenzita pole:</string>
-    <!-- GPS Information Panel -->
+
     <string name="gps_status">Stav:</string>
     <string name="gps_source">Zdroj:</string>
     <string name="gps_accuracy">Přesnost:</string>
@@ -83,15 +82,15 @@
     <string name="gps_speed">Rychlost:</string>
     <string name="gps_latitude">Zeměpisná šířka:</string>
     <string name="gps_longitude">Zeměpisná délka:</string>
-    <!-- Sensor Accuracy -->
+
     <string name="sensor_accuracy_unreliable">Nespolehlivý</string>
     <string name="sensor_accuracy_low">Nízký</string>
     <string name="sensor_accuracy_medium">Střední</string>
     <string name="sensor_accuracy_high">Vysoký</string>
-    <!-- GPS Source Status -->
+
     <string name="gps_enabled">Zapnuto</string>
     <string name="gps_disabled">Vypnuto</string>
-    <!-- Units -->
+
     <string name="meter">m</string>
     <string name="kilometer">km</string>
     <string name="feet">ft</string>
@@ -100,7 +99,7 @@
     <string name="miles_hour">mph</string>
     <string name="milliseconds">ms</string>
     <string name="seconds">s</string>
-    <!-- Alert -->
+
     <string name="info_copied">Zkopírováno do schránky</string>
     <string name="info_error">Informace nelze zkopírovat!!</string>
     <string name="invalid_coordinates">Neplatné souřadnice</string>
@@ -112,12 +111,12 @@
     <string name="location_not_saved">Nelze uložit!</string>
     <string name="no_update">Nejsou k dispozici žádné aktualizace</string>
     <string name="location_not_available">Poloha ještě není k dispozici</string>
-    <!-- Settings Categories -->
+
     <string name="appearance">Vzhled</string>
     <string name="configuration">Konfigurace</string>
     <string name="about">O programu</string>
     <string name="contribute">Zapojte se</string>
-    <!-- Settings Heading -->
+
     <string name="theme">Motiv</string>
     <string name="icon">Ikona</string>
     <string name="corner_radius">Zaoblení rohů</string>
@@ -131,7 +130,7 @@
     <string name="app_version">Verze aplikace</string>
     <string name="found_an_issue">Našel jsi problém?</string>
     <string name="translate">Překlad</string>
-    <!-- Settings Description -->
+
     <string name="theme_follow_system">Podle systému</string>
     <string name="theme_day">Světlý</string>
     <string name="theme_night">Tmavý</string>
@@ -142,30 +141,30 @@
     <string name="desc_legal">Přečtěte si upozornění aplikace, zásady ochrany osobních údajů a podmínky používání</string>
     <string name="desc_git">Otevřít repositář aplikace</string>
     <string name="desc_translate">Pomozte nám přeložit aplikaci do vašeho mateřského jazyka</string>
-    <!-- Clock Menu -->
+
     <string name="needles">Jehla</string>
     <string name="motion_type">Typ pohybu</string>
     <string name="time_format">12hodinový formát</string>
     <string name="motion_type_smooth">Hladký</string>
     <string name="motion_type_tick">Tiky</string>
-    <!-- Compass Menu -->
+
     <string name="bloom">Rozostření</string>
     <string name="bloom_skins">Vzhled rozostření</string>
     <string name="show_code">Zobrazit kód</string>
-    <!-- GPS Menu -->
+
     <string name="labels">Štítky</string>
     <string name="buildings">Budovy</string>
     <string name="traffic">Doprava</string>
     <string name="satellite_mode">Satelitní zobrazení</string>
     <string name="high_contrast_mode">Mapa s vysokým kontrastem</string>
-    <!-- Settings Menus -->
+
     <string name="unit_metric">Metrické jednotky</string>
     <string name="unit_imperial">Imperiální jednotky</string>
-    <!-- Specified Coordinates Menu -->
+
     <string name="specified_hint_header">Zadejte údaje o poloze</string>
     <string name="specified_hint_latitude">Zeměpisná šířka (±90)</string>
     <string name="specified_hint_longitude">Zeměpisná délka (±180)</string>
-    <!-- Info -->
+
     <string name="compass_calibration_notice">Pokud je přesnost senzoru kompasu zařízení nízká, dělejte se zařízením osmičky, aby se senzory zkalibrovaly.</string>
     <string name="specified_location_notice">Níže uvedené informace se aktualizují pro stanovené souřadnice polohy.</string>
     <string name="show_again">Znovu zobrazit</string>
@@ -176,27 +175,27 @@
     <string name="auto_system_default_language">Automaticky (výchozí nastavení)</string>
     <string name="location_permission_denied">"Oprávnění k poloze bylo odepřeno!"</string>
     <string name="no_location_permission_alert">Některé funkce nemusí fungovat bez oprávnění k poloze</string>
-    <!-- Button Text -->
+
     <string name="button_cancel">Zrušit</string>
     <string name="button_set">Nastavit</string>
     <string name="button_close">Zavřít</string>
     <string name="button_grant">Povolit</string>
     <string name="button_reset">Resetovat</string>
-    <!-- Button Descriptions -->
+
     <string name="clock_options">Nabídka hodin</string>
     <string name="compass_options">Nabídka kompasu</string>
     <string name="gps_options">GPS nabídka</string>
     <string name="gps_reset_location">Resetovat polohu</string>
     <string name="delete_all">Smazat vše</string>
     <string name="open_specified_location_documentation">Otevřít specifikovanou dokumentaci polohy</string>
-    <!-- Legal Menu -->
+
     <string name="disclaimer">Upozornění</string>
     <string name="privacy_policy">Ochrana osobních údajů</string>
     <string name="terms_of_use">Podmínky používání</string>
     <string name="permissions">Oprávnění</string>
     <string name="credits">Kredity</string>
     <string name="internet_uses">Využití internetu</string>
-    <!-- Moon Illumination -->
+
     <string name="waning">Klesající</string>
     <string name="waning_gibbous">Klesající Konvexní</string>
     <string name="waning_crescent">Klesající Půlměsíc</string>
@@ -207,7 +206,7 @@
     <string name="new_moon">Nový měsíc</string>
     <string name="third_quarter">Třetí čtvrť</string>
     <string name="first_quarter">První čtvrť</string>
-    <!-- Directions -->
+
     <string name="north">Sever</string>
     <string name="north_west">Severozápad</string>
     <string name="west">Západ</string>
@@ -224,17 +223,17 @@
     <string name="south_east_SE">JV</string>
     <string name="east_E">V</string>
     <string name="north_east_NE">SV</string>
-    <!-- Graph -->
+
     <string name="location_details">Podrobnosti o umístění</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Průměr:</string>
-    <!-- UTM -->
+
     <string name="utm_zone">Zóna:</string>
     <string name="utm_easting">Východ:</string>
     <string name="utm_northing">Severní:</string>
     <string name="utm_meridian">Střední meridián:</string>
-    <!-- Location Provider -->
+
     <string name="desc_android_location_provider">Výchozí API lokalizace Androidu, velmi přesná, ale je omezena pouze na jednoho poskytovatele lokalizace v jednu chvíli a požadavky na lokaci uvnitř budovy mohou ovlivnit jeho přesnost, vyžaduje silný GPS senzor pro rychlou aktualizaci polohy.</string>
     <string name="desc_fused_location_provider">Google Fused Location API, které trianguluje data o poloze od různých poskytovatelů lokalizace a průměrně vyústí v řadu lokalit. Můžeš poskytovat různé výsledky, ale používá méně baterie.</string>
     <string name="desc_location_provider_note">Poznámka: Použití kteréhokoli z API může poskytnout různé výsledky v závislosti na různých faktorech a žádný z nich není důkazem přesnosti pro sebe. otestujte API a udržujte vybraný API, který funguje nejlépe ve vašem regionu.</string>

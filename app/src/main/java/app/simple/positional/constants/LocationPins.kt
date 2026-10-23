@@ -19,29 +19,29 @@ object LocationPins {
     )
 
     private val circleFillColor = intArrayOf(
-            Color.parseColor("#4D1B9CFF"), // 01
-            Color.parseColor("#4D5f0b95"), // 02
-            Color.parseColor("#4DFF8859"), // 03
-            Color.parseColor("#4D4c9acc"), // 04
-            Color.parseColor("#4Ded765e"), // 05
-            Color.parseColor("#4DEB2A2E"), // 06
-            Color.parseColor("#4D943b5e"), // 07
-            Color.parseColor("#4D8B3B94"), // 08
-            Color.parseColor("#4Df38630"), // 09
-            Color.parseColor("#4DFF695B"), // 10
+            Color.parseColor("#4D1B9CFF"),
+            Color.parseColor("#4D5f0b95"),
+            Color.parseColor("#4DFF8859"),
+            Color.parseColor("#4D4c9acc"),
+            Color.parseColor("#4Ded765e"),
+            Color.parseColor("#4DEB2A2E"),
+            Color.parseColor("#4D943b5e"),
+            Color.parseColor("#4D8B3B94"),
+            Color.parseColor("#4Df38630"),
+            Color.parseColor("#4DFF695B"),
     )
 
     private val circleStrokeColor = intArrayOf(
-            Color.parseColor("#1B9CFF"), // 01
-            Color.parseColor("#5f0b95"), // 02
-            Color.parseColor("#FF8859"), // 03
-            Color.parseColor("#4c9acc"), // 04
-            Color.parseColor("#ed765e"), // 05
-            Color.parseColor("#EB2A2E"), // 06
-            Color.parseColor("#943b5e"), // 07
-            Color.parseColor("#8B3B94"), // 08
-            Color.parseColor("#f38630"), // 09
-            Color.parseColor("#FF695B"), // 10
+            Color.parseColor("#1B9CFF"),
+            Color.parseColor("#5f0b95"),
+            Color.parseColor("#FF8859"),
+            Color.parseColor("#4c9acc"),
+            Color.parseColor("#ed765e"),
+            Color.parseColor("#EB2A2E"),
+            Color.parseColor("#943b5e"),
+            Color.parseColor("#8B3B94"),
+            Color.parseColor("#f38630"),
+            Color.parseColor("#FF695B"),
     )
 
     fun getLocationPin(): Int {

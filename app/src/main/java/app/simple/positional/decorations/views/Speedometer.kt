@@ -20,36 +20,18 @@ import app.simple.positional.util.BitmapHelper.toBitmap
 import app.simple.positional.util.ImageLoader.loadImage
 import com.google.android.material.animation.ArgbEvaluatorCompat
 
-/**
- * Shows a gauge/dial for the speed
- */
 class Speedometer constructor(context: Context, attrs: AttributeSet? = null) : FrameLayout(context, attrs) {
-
-    /**
-     * Make these values public before setting them programmatically
-     */
     private var lastColor = Color.parseColor("#363636")
     private var isGradientNeedle = false
     private var firstGradientColor = 0
     private var colorfulNeedle = false
     private var whichImage = -1
 
-    /**
-     * [needleAngleCompensator] compensates the missing portion of
-     * the speedometer gauge and the assigned value should be
-     * strictly 0, 60, 120 and 180
-     */
     private var needleAngleCompensator = 0F
 
-    /**
-     * Views
-     */
     private val needle: ImageView
     private val dial: ImageView
 
-    /**
-     * Animation objects
-     */
     private var objectAnimator: ObjectAnimator? = null
     private var colorAnimation: ValueAnimator? = null
     private var springAnimation: SpringAnimation? = null
@@ -128,11 +110,6 @@ class Speedometer constructor(context: Context, attrs: AttributeSet? = null) : F
         }
     }
 
-    /**
-     * Status: Not in use
-     *
-     * Animates the needle color as the speed increases or decreases
-     */
     private fun animateColorChange(value: Float) {
         colorAnimation = ValueAnimator.ofObject(ArgbEvaluatorCompat(), lastColor, SpeedometerConstants.getSpeedometerColor(value / 2.0))
         colorAnimation!!.duration = 1000L
@@ -154,42 +131,11 @@ class Speedometer constructor(context: Context, attrs: AttributeSet? = null) : F
         colorAnimation!!.start()
     }
 
-    /**
-     * This function will lock the value if it exceeds 600 km/h or 1200°
-     * or compensates the values according to the gauge's nature using
-     * the [needleAngleCompensator] variable
-     *
-     * the multiplication of the two is only for converting the speed
-     * into angle for the needle
-     *
-     * Check this vector graphic to see the gauge's structure and why
-     * the multiplication is necessary
-     *
-     * @see R.drawable.speedometer_dial_normal_range
-     * @return [Float]
-     */
-    private fun Float.reifyNeedleAngle(): Float {
-        return if (this >= 1200F) {
-            1200F
-        } else {
-            if (this > 300F) {
-                this + needleAngleCompensator
-            } else {
-                this
-            }
-        }
-    }
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         clear()
     }
 
-    /**
-     * Clears the references and animation of the objects.
-     * It is recommended to call this in onDestroy or before
-     * a view is being recycled
-     */
     fun clear() {
         objectAnimator?.cancel()
         colorAnimation?.cancel()

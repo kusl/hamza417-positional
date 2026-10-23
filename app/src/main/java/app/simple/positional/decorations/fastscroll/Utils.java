@@ -3,7 +3,6 @@ package app.simple.positional.decorations.fastscroll;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-
 import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -16,7 +15,7 @@ class Utils {
         ColorStateList colorStateList = getColorStateListFromAttrRes(attrRes, context);
         return colorStateList != null ? colorStateList.getDefaultColor() : 0;
     }
-    
+
     @Nullable
     public static ColorStateList getColorStateListFromAttrRes(@AttrRes int attrRes, @NonNull Context context) {
         TypedArray a = context.obtainStyledAttributes(new int[] {attrRes});

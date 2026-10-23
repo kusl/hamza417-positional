@@ -19,7 +19,6 @@ import app.simple.positional.decorations.views.PhysicalRotationImageView
 import app.simple.positional.preferences.CompassPreferences
 
 class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
-
     private lateinit var dampingCoefficient: SeekBar
     private lateinit var rotationalInertia: SeekBar
     private lateinit var magneticCoefficient: SeekBar
@@ -64,11 +63,9 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                /* no-op */
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                /* no-op */
             }
         })
 
@@ -78,11 +75,9 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                /* no-op */
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                /* no-op */
             }
         })
 
@@ -92,11 +87,9 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                /* no-op */
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                /* no-op */
             }
         })
 

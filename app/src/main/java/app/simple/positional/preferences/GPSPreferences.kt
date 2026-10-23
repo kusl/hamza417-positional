@@ -3,11 +3,7 @@ package app.simple.positional.preferences
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import org.jetbrains.annotations.NotNull
 
-/**
- * Only preferences related to GPS panel
- */
 object GPSPreferences {
-
     private const val mapZoom = "map_zoom_value"
     private const val mapTilt = "map_tilt_value"
     private const val mapBearing = "map_bearing_value"
@@ -32,8 +28,6 @@ object GPSPreferences {
     const val isTargetMarkerMode = "target_marker_mode"
     const val trafficMode = "traffic_on_maps"
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun isLabelOn(): Boolean {
         return getSharedPreferences().getBoolean(GPSLabelMode, true)
     }
@@ -41,8 +35,6 @@ object GPSPreferences {
     fun setLabelMode(@NotNull value: Boolean) {
         getSharedPreferences().edit().putBoolean(GPSLabelMode, value).apply()
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun isToolsGravityLeft(): Boolean {
         return getSharedPreferences().getBoolean(toolsGravity, false)
@@ -52,8 +44,6 @@ object GPSPreferences {
         getSharedPreferences().edit().putBoolean(toolsGravity, value).apply()
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun isCompassRotation(): Boolean {
         return getSharedPreferences().getBoolean(compassRotation, false)
     }
@@ -61,8 +51,6 @@ object GPSPreferences {
     fun setCompassRotation(@NotNull value: Boolean) {
         getSharedPreferences().edit().putBoolean(compassRotation, value).apply()
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun isSatelliteOn(): Boolean {
         return getSharedPreferences().getBoolean(GPSSatellite, false)
@@ -72,8 +60,6 @@ object GPSPreferences {
         getSharedPreferences().edit().putBoolean(GPSSatellite, value).apply()
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setHighContrastMap(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(highContrastMap, boolean).apply()
     }
@@ -81,8 +67,6 @@ object GPSPreferences {
     fun getHighContrastMap(): Boolean {
         return getSharedPreferences().getBoolean(highContrastMap, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setShowBuildingsOnMap(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(showBuilding, boolean).apply()
@@ -92,8 +76,6 @@ object GPSPreferences {
         return getSharedPreferences().getBoolean(showBuilding, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setMapZoom(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapZoom, value).apply()
     }
@@ -101,8 +83,6 @@ object GPSPreferences {
     fun getMapZoom(): Float {
         return getSharedPreferences().getFloat(mapZoom, 15F)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setMapTilt(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapTilt, value).apply()
@@ -112,8 +92,6 @@ object GPSPreferences {
         return getSharedPreferences().getFloat(mapTilt, 15F)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setMapBearing(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapBearing, value).apply()
     }
@@ -121,8 +99,6 @@ object GPSPreferences {
     fun getMapBearing(): Float {
         return getSharedPreferences().getFloat(mapBearing, 15F)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setUseVolumeKeys(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(useVolumeKeys, boolean).apply()
@@ -132,8 +108,6 @@ object GPSPreferences {
         return getSharedPreferences().getBoolean(useVolumeKeys, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setBearingRotation(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(useBearingRotation, boolean).apply()
     }
@@ -141,8 +115,6 @@ object GPSPreferences {
     fun isBearingRotation(): Boolean {
         return getSharedPreferences().getBoolean(useBearingRotation, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setNorthOnly(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(isNorthOnly, boolean).apply()
@@ -152,8 +124,6 @@ object GPSPreferences {
         return getSharedPreferences().getBoolean(isNorthOnly, true)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setPinSize(value: Int) {
         getSharedPreferences().edit().putInt(pinSize, value).apply()
     }
@@ -161,8 +131,6 @@ object GPSPreferences {
     fun getPinSize(): Int {
         return getSharedPreferences().getInt(pinSize, 4)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setPinOpacity(value: Int) {
         getSharedPreferences().edit().putInt(pinOpacity, value).apply()
@@ -172,8 +140,6 @@ object GPSPreferences {
         return getSharedPreferences().getInt(pinOpacity, 255)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setPinSkin(value: Int) {
         getSharedPreferences().edit().putInt(pinSkin, value).apply()
     }
@@ -181,8 +147,6 @@ object GPSPreferences {
     fun getPinSkin(): Int {
         return getSharedPreferences().getInt(pinSkin, 0)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun setTargetMarkerLatitude(@NotNull value: Float) {
         getSharedPreferences().edit().putFloat(mapTargetMarkerLatitude, value).apply()
@@ -214,8 +178,6 @@ object GPSPreferences {
         )
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setTargetMarker(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(mapTargetMarker, boolean).apply()
     }
@@ -224,8 +186,6 @@ object GPSPreferences {
         return getSharedPreferences().getBoolean(mapTargetMarker, false)
     }
 
-    //--------------------------------------------------------------------------------------------------//
-
     fun setTargetMarkerMode(boolean: Boolean) {
         getSharedPreferences().edit().putBoolean(isTargetMarkerMode, boolean).apply()
     }
@@ -233,8 +193,6 @@ object GPSPreferences {
     fun isTargetMarkerMode(): Boolean {
         return getSharedPreferences().getBoolean(isTargetMarkerMode, false)
     }
-
-    //--------------------------------------------------------------------------------------------------//
 
     fun isTrafficShown(): Boolean {
         return getSharedPreferences().getBoolean(trafficMode, false)

@@ -11,7 +11,6 @@ import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.util.ViewUtils
 
 class PopupLocationMenu(anchor: View, x: Float, y: Float) : PopupWindow() {
-
     private var mapsCallbacks: MapsCallbacks? = null
     private val target: DynamicRippleTextView
     private val navigate: DynamicRippleTextView

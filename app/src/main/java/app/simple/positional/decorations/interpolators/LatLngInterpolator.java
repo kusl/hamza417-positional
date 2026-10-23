@@ -3,7 +3,6 @@ package app.simple.positional.decorations.interpolators;
 import com.google.android.gms.maps.model.LatLng;
 
 public interface LatLngInterpolator {
-
     LatLng interpolate(float fraction, LatLng a, LatLng b);
 
     class LinearFixed implements LatLngInterpolator {
@@ -12,7 +11,6 @@ public interface LatLngInterpolator {
             double lat = (b.latitude - a.latitude) * fraction + a.latitude;
             double lngDelta = b.longitude - a.longitude;
 
-            // Take the shortest path across the 180th meridian.
             if (Math.abs(lngDelta) > 180) {
                 lngDelta -= Math.signum(lngDelta) * 360;
             }

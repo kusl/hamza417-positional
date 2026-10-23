@@ -11,7 +11,6 @@ import app.simple.positional.R
 import app.simple.positional.constants.LocationPins
 
 class PinSkinAdapter(context: Context) : PagerAdapter() {
-
     private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
 
     override fun getCount(): Int {

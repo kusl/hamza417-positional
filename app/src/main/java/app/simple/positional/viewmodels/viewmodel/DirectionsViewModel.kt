@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class DirectionsViewModel(application: Application) : WrappedViewModel(application) {
-
     private val directions: MutableLiveData<MutableList<DirectionModel>> by lazy {
         MutableLiveData<MutableList<DirectionModel>>().also {
             loadDirections()

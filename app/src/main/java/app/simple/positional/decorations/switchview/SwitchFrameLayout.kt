@@ -16,7 +16,6 @@ open class SwitchFrameLayout @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
     init {
-
         layoutParams = LayoutParams(context.resources.getDimensionPixelSize(R.dimen.switch_width), ViewGroup.LayoutParams.WRAP_CONTENT)
         setPadding(context.resources.getDimensionPixelSize(R.dimen.switch_padding))
 

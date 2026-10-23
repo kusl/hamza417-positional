@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MeasureViewModel(application: Application) : WrappedViewModel(application) {
-
     private val measureEntries: MutableLiveData<ArrayList<Measure>> by lazy {
         MutableLiveData<ArrayList<Measure>>().also {
             loadMeasureEntries()

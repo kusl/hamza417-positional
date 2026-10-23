@@ -12,7 +12,6 @@ import app.simple.positional.model.Measure
 @Database(entities = [Measure::class], exportSchema = true, version = 1)
 @TypeConverters(MeasurePointConverter::class)
 abstract class MeasureDatabase : RoomDatabase() {
-
     abstract fun measureDao(): MeasureDao?
 
     companion object {

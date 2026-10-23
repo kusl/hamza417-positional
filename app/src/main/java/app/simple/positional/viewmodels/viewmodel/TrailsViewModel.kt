@@ -15,7 +15,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class TrailsViewModel(application: Application) : AndroidViewModel(application) {
-
     val trails: MutableLiveData<ArrayList<TrailEntry>> by lazy {
         MutableLiveData<ArrayList<TrailEntry>>().also {
             loadTrails()
@@ -28,7 +27,6 @@ class TrailsViewModel(application: Application) : AndroidViewModel(application) 
 
     fun loadTrails() {
         viewModelScope.launch(Dispatchers.IO) {
-
             delay(500)
 
             val database = Room.databaseBuilder(getApplication<Application>().applicationContext,

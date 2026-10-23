@@ -13,7 +13,6 @@ import app.simple.positional.R
 import app.simple.positional.util.StatusBarHeight
 
 open class CustomDialogFragment : DialogFragment() {
-
     private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +34,6 @@ open class CustomDialogFragment : DialogFragment() {
         window.attributes.gravity = Gravity.CENTER
         window.attributes.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
 
-        // TODO - fixe dialog height
         window.attributes.width = getWindowWidth()
     }
 

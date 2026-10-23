@@ -3,25 +3,16 @@ package app.simple.positional.decorations.utils;
 import android.animation.ValueAnimator;
 import android.location.Location;
 import android.view.animation.DecelerateInterpolator;
-
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
-
 import java.util.Arrays;
 
 import app.simple.positional.decorations.interpolators.LatLngInterpolator;
 
 public class MarkerUtils {
-    /**
-     * Method to animate marker to destination location
-     *
-     * @param location destination location (must contain bearing attribute, to ensure
-     *                 marker rotation will work correctly)
-     * @param marker   marker to be animated
-     */
     public static ValueAnimator animateMarker(Location location, Marker marker) {
         if (marker != null) {
             LatLng startPosition = marker.getPosition();
@@ -57,14 +48,6 @@ public class MarkerUtils {
         return null;
     }
 
-    /**
-     * Method to animate marker to destination location
-     *
-     * @param location destination location (must contain bearing attribute, to ensure
-     *                 marker rotation will work correctly)
-     * @param marker   marker to be animated
-     * @return @link ValueAnimator
-     */
     public static ValueAnimator animateMarker(Location location, Marker marker, float rotation, boolean isCompassRotation) {
         if (marker != null) {
             LatLng startPosition = marker.getPosition();
@@ -96,10 +79,10 @@ public class MarkerUtils {
     }
 
     private static float computeRotation(float fraction, float start, float end) {
-        float normalizeEnd = end - start; // rotate start to 0
+        float normalizeEnd = end - start;
         float normalizedEndAbs = (normalizeEnd + 360) % 360;
 
-        float direction = (normalizedEndAbs > 180) ? -1 : 1; // -1 = anticlockwise, 1 = clockwise
+        float direction = (normalizedEndAbs > 180) ? -1 : 1;
         float rotation;
         if (direction > 0) {
             rotation = normalizedEndAbs;
