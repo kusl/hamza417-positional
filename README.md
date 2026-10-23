@@ -39,7 +39,7 @@ The map panels use the Google Maps SDK and Google Play services location. Withou
 
 ## Building
 
-Requirements: JDK 21 and the Android SDK (compile SDK 36).
+Requirements: JDK 21 and the Android SDK (compile and target SDK 37, Android Gradle Plugin 9.2+).
 
 ```sh
 ./gradlew testDebugUnitTest assembleDebug
@@ -71,7 +71,7 @@ To create the keystore secret:
 base64 -w0 release.keystore
 ```
 
-Dependabot opens weekly update PRs for Gradle dependencies and GitHub Actions.
+Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper and GitHub Actions. Some AndroidX releases require a newer `compileSdk`; when a Dependabot PR fails at `checkDebugAarMetadata`, raise `compileSdk` in `app/build.gradle` first.
 
 ## Project layout
 
@@ -86,9 +86,10 @@ app/src/main/java/app/simple/positional/
   math/         vectors, quaternions, angles, unit conversion
   util/         formatting and Android helpers
 app/src/test/   JVM unit tests
+docs/llm/       LLM context files (tracked in git, excluded from the dump)
 ```
 
-`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file and includes the contents of source, build and config files only.
+`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file except `docs/llm/` and includes the contents of source, build and config files only.
 
 ## Credits and license
 
