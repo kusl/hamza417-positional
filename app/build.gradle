@@ -86,13 +86,12 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
-    implementation 'androidx.appcompat:appcompat:1.8.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+    implementation 'androidx.activity:activity-ktx:1.10.1'
     implementation 'androidx.core:core-ktx:1.19.1'
-    implementation 'androidx.fragment:fragment-ktx:1.9.1'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.10.0'
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
     implementation platform('androidx.compose:compose-bom:2026.09.00')
@@ -102,7 +101,6 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-location:21.4.0'
     implementation 'com.google.android.gms:play-services-maps:20.1.0'
-    implementation 'com.google.android.material:material:1.14.0'
 
     implementation 'org.shredzone.commons:commons-suncalc:3.11'
     implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'

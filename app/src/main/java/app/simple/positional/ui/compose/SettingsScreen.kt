@@ -1,7 +1,6 @@
 package app.simple.positional.ui.compose
 
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -40,12 +39,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
+import app.simple.positional.util.NightMode
 import app.simple.positional.util.LocaleHelper
 
 @Immutable
 data class SettingsState(
     val hasLocationPermission: Boolean = true,
-    val themeMode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+    val themeMode: Int = NightMode.FOLLOW_SYSTEM,
     val isMetric: Boolean = true,
     val coordinatesFormat: Int = 0,
     val locationProvider: String = SettingsLabels.PROVIDER_ANDROID,
@@ -100,9 +100,9 @@ object SettingsLabels {
     )
 
     val themeModes = listOf(
-        AppCompatDelegate.MODE_NIGHT_NO,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        NightMode.NO,
+        NightMode.YES,
+        NightMode.FOLLOW_SYSTEM,
         THEME_AUTO,
     )
 
@@ -112,9 +112,9 @@ object SettingsLabels {
 
     @StringRes
     fun theme(mode: Int): Int? = when (mode) {
-        AppCompatDelegate.MODE_NIGHT_NO -> R.string.theme_day
-        AppCompatDelegate.MODE_NIGHT_YES -> R.string.theme_night
-        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> R.string.theme_follow_system
+        NightMode.NO -> R.string.theme_day
+        NightMode.YES -> R.string.theme_night
+        NightMode.FOLLOW_SYSTEM -> R.string.theme_follow_system
         THEME_AUTO -> R.string.theme_auto
         else -> null
     }

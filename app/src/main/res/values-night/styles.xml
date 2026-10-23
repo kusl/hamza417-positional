@@ -1,11 +1,9 @@
 <resources>
-    <style name="Positional" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimaryDark">@android:color/transparent</item>
+    <style name="Positional" parent="android:Theme.Material.NoActionBar">
         <item name="colorAppAccent">@color/positional</item>
         <item name="colorAppAccentLight">@color/positional_light</item>
-
-        <item name="android:statusBarColor">@color/toolbarBackground</item>
-        <item name="rippleColor">@color/rippleColor</item>
+        <item name="android:windowBackground">@color/mainBackground</item>
+        <item name="android:colorAccent">?attr/colorAppAccent</item>
         <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
     </style>
 </resources>

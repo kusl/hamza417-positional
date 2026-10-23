@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.AndroidViewModel
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ContextUtils
 
 open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
@@ -14,7 +13,7 @@ open class WrappedViewModel(application: Application) : AndroidViewModel(applica
     }
 
     open fun getContext(): Context {
-        return ContextUtils.updateLocale(getApplication<Application>().applicationContext, MainPreferences.getAppLanguage()!!)
+        return ContextUtils.wrap(getApplication<Application>().applicationContext, ContextUtils.language(), applyNightMode = false)
     }
 
     open fun getString(resourceID: Int): String {

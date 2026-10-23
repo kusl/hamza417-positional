@@ -1,6 +1,6 @@
 package app.simple.positional.ui.compose
 
-import androidx.appcompat.app.AppCompatDelegate
+import app.simple.positional.util.NightMode
 import app.simple.positional.R
 import app.simple.positional.util.LocaleHelper
 import org.junit.Assert.assertEquals
@@ -11,9 +11,9 @@ import org.junit.Test
 class SettingsLabelsTest {
     @Test
     fun themeLabels() {
-        assertEquals(R.string.theme_day, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_NO))
-        assertEquals(R.string.theme_night, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_YES))
-        assertEquals(R.string.theme_follow_system, SettingsLabels.theme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+        assertEquals(R.string.theme_day, SettingsLabels.theme(NightMode.NO))
+        assertEquals(R.string.theme_night, SettingsLabels.theme(NightMode.YES))
+        assertEquals(R.string.theme_follow_system, SettingsLabels.theme(NightMode.FOLLOW_SYSTEM))
         assertEquals(R.string.theme_auto, SettingsLabels.theme(SettingsLabels.THEME_AUTO))
         assertNull(SettingsLabels.theme(99))
     }

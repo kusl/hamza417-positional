@@ -9,7 +9,6 @@
     <color name="textPrimary">#FFFFFF</color>
     <color name="dividerColor">#BDBDBD</color>
     <color name="toolbarBackground">#191919</color>
-    <color name="rippleColor">#515151</color>
 
     <color name="iconRegular">#808080</color>
     <color name="indicator">#3A3A3A</color>

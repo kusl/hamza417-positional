@@ -25,12 +25,10 @@
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_primary_text_size">16sp</dimen>
     <dimen name="settings_secondary_text_size">14sp</dimen>
 
     <dimen name="bottom_nav_height">60dp</dimen>
     <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">175dp</dimen>
-    <dimen name="touch_indicator_size">100dp</dimen>
 </resources>

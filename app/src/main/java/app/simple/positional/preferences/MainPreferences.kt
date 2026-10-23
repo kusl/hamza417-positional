@@ -2,7 +2,7 @@ package app.simple.positional.preferences
 
 import android.annotation.SuppressLint
 import androidx.annotation.IntRange
-import androidx.appcompat.app.AppCompatDelegate
+import app.simple.positional.util.NightMode
 import app.simple.positional.BuildConfig
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
@@ -51,7 +51,7 @@ object MainPreferences {
     }
 
     fun getTheme(): Int {
-        return getSharedPreferences().getInt(theme, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        return getSharedPreferences().getInt(theme, NightMode.FOLLOW_SYSTEM)
     }
 
     fun setDayNight(value: Boolean) {

@@ -2,31 +2,28 @@ package app.simple.positional.activities.main
 
 import android.content.Intent
 import android.os.Bundle
-import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PanelCatalog
-import app.simple.positional.ui.launcher.SplashScreen
+import app.simple.positional.ui.compose.SplashScreen
+import app.simple.positional.ui.compose.setPositionalContent
 
 class LauncherActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setShortcutScreen()
-        setContentView(R.layout.activity_launcher)
-
         if (MainPreferences.getSkipSplashScreen()) {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            intent.action = this.intent.action
-            startActivity(intent)
-            finish()
-        } else if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .setCustomAnimations(R.anim.dialog_in, R.anim.dialog_out)
-                .replace(R.id.launcher_act, SplashScreen.newInstance(), "launcher")
-                .commit()
+            openMain()
+        } else {
+            setPositionalContent { SplashScreen(::openMain) }
         }
+    }
+
+    private fun openMain() {
+        if (isFinishing || isDestroyed) return
+        startActivity(Intent(this, MainActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).setAction(intent.action))
+        finish()
     }
 
     private fun setShortcutScreen() {

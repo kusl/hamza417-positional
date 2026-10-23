@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -29,7 +28,6 @@ import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.compose.SettingsState
 import app.simple.positional.util.AppIcons
 import app.simple.positional.util.PermissionUtils
-import app.simple.positional.util.ThemeSetter
 
 class Settings(activity: ComponentActivity) : PanelController(activity), SettingsActions {
     private var state by mutableStateOf(SettingsState())
@@ -65,7 +63,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     private fun refresh() {
         state = SettingsState(
             hasLocationPermission = PermissionUtils.checkPermission(activity),
-            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else AppCompatDelegate.getDefaultNightMode(),
+            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else MainPreferences.getTheme(),
             isMetric = MainPreferences.isMetric(),
             coordinatesFormat = MainPreferences.getCoordinatesFormat(),
             locationProvider = MainPreferences.getLocationProvider(),
@@ -86,8 +84,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     override fun setThemeMode(mode: Int) {
         MainPreferences.setDayNight(mode == SettingsLabels.THEME_AUTO)
         if (mode != SettingsLabels.THEME_AUTO) MainPreferences.setTheme(mode)
-        ThemeSetter.setAppTheme(mode)
-        refresh()
+        activity.recreate()
     }
 
     override fun openAccent() = startActivity(Intent(activity, AccentColorsActivity::class.java))

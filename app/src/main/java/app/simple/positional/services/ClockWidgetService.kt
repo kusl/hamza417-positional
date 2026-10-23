@@ -20,7 +20,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.Display
 import androidx.annotation.RequiresApi
-import androidx.appcompat.view.ContextThemeWrapper
+import android.view.ContextThemeWrapper
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
