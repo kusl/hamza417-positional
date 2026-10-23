@@ -6,8 +6,6 @@
     <string name="level">سطح</string>
     <string name="settings">ملاحظہ کریں</string>
 
-    <string name="clock_info">وقت کی معلومات</string>
-    <string name="compass_info">کمپاس کی معلومات</string>
     <string name="gps_info">مقام کی معلومات</string>
 
     <string name="local_time">مقامی وقت</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">دوپہر:</string>
     <string name="sun_sunset">غروب آفتاب:</string>
     <string name="sun_nadir">نادر:</string>
-    <string name="twilight_astronomical_dawn">فلکیات طلوع فجر:</string>
-    <string name="twilight_nautical_dawn">سمندری صبح:</string>
-    <string name="twilight_civil_dawn">سول فجر:</string>
     <string name="twilight_civil_dusk">سول شام:</string>
     <string name="twilight_nautical_dusk">سمندری شام:</string>
     <string name="twilight_astronomical_dusk">فلکیاتی شام:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">موجودہ مقام کے لئے کوئی پتہ نہیں ملا</string>
     <string name="location_saved">کامیابی سے محفوظ کیا گیا</string>
     <string name="location_not_saved">محفوظ نہیں ہو سکتا!</string>
-    <string name="no_update">کوئی اپ ڈیٹ دستیاب نہیں ہے</string>
     <string name="location_not_available">مقام ابھی دستیاب نہیں ہے</string>
 
     <string name="appearance">ظہور</string>
     <string name="configuration">تشکیل</string>
     <string name="about">ایپ کے بارے میں</string>
-    <string name="contribute">حصہ ڈالیں</string>
 
     <string name="theme">تھیم</string>
     <string name="icon">آئیکن</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">قانونی نوٹ</string>
     <string name="app_version">ایپ ورژن</string>
     <string name="found_an_issue">ایک مسئلہ ملا؟</string>
-    <string name="translate">ترجمہ کریں</string>
 
     <string name="theme_follow_system">سسٹم پر عمل کریں</string>
     <string name="theme_day">روشنی</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">ایپ کے مرئی ہونے کے دوران آلے کو آف کرنے سے روکتا ہے</string>
     <string name="desc_legal">ایپ کی دستبرداری ، رازداری کی پالیسی اور استعمال کی شرائط پڑھیں</string>
     <string name="desc_git">ایپ کا ذخیرہ کھولیں</string>
-    <string name="desc_translate">اپنی مادری زبان میں ایپ کا ترجمہ کرنے میں مدد کریں</string>
 
     <string name="needles">سوئی</string>
     <string name="motion_type">حرکت کی قسم</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">ذیل میں دکھائی گئی معلومات کو مخصوص مقام کوآرڈینیٹ کیلئے تازہ کاری کی جارہی ہے۔</string>
     <string name="show_again">دوبارہ دکھائیں</string>
     <string name="search_timezone">ٹائم زونز تلاش کریں</string>
-    <string name="verifying_license">تصدیق لائسنس</string>
-    <string name="license_successful">کامیاب :)</string>
-    <string name="license_failed">لائسنس کی توثیق ناکام</string>
     <string name="auto_system_default_language">آٹو (سسٹم ڈیفالٹ)</string>
     <string name="location_permission_denied">"مقام کی اجازت سے انکار!"</string>
     <string name="no_location_permission_alert">کچھ خصوصیات مقام کی اجازت کے بغیر کام نہیں کرسکتی ہیں۔</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">نقشہ پر دکھائیں</string>
     <string name="copy">نقل کریں</string>
     <string name="trail_data_accuracy">مقام کے %1$s %2$s کے اندر۔</string>
-    <string name="rate_text">آپ اس ایپ سے کتنے مطمئن ہیں؟ پلے سٹور پر ایپ کی درجہ بندی کے لیے یہاں کلک کریں۔</string>
     <string name="target">ہدف</string>
-    <string name="my_developer_profile">میرا ڈیولپر پروفائل</string>
     <string name="eta_seconds">%1$s سیکنڈ</string>
     <string name="eta_minutes">%1$s منٹ</string>
     <string name="eta_hours">%1$s hours %2$s minutes</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">منزل سے نقل مکانی:</string>
     <string name="direction">سمت</string>
     <string name="targets">اہداف</string>
-    <string name="direction_info">سمت کی معلومات</string>
     <string name="use_maps_target">Maps کا ہدف استعمال کریں۔</string>
     <string name="using_maps_target">نقشہ جات کا ہدف استعمال کرنا</string>
     <string name="edit">تدوین کریں</string>
@@ -301,8 +286,6 @@
     <string name="mechanical">مکینیکل</string>
     <string name="app_coordinates_format">کوآرڈینیٹ فارمیٹ</string>
     <string name="share">بانٹیں</string>
-    <string name="telegram_group">ٹیلیگرام گروپ</string>
-    <string name="buy_full_desc">مکمل ورژن خریدیں اور ایپ کی پوری صلاحیت کو غیر مقفل کریں۔</string>
     <string name="notification_permission_desc">گھڑی ویجیٹ سروس کو مستقل طور پر چلانے کے لیے اطلاع تک رسائی درکار ہے۔</string>
     <string name="true_altitude">حقیقی اونچائی</string>
     <string name="elongation">لمبائی</string>

@@ -6,8 +6,6 @@
     <string name="level">Nivel</string>
     <string name="settings">Setări</string>
 
-    <string name="clock_info">Informatii timp</string>
-    <string name="compass_info">Informații busolă</string>
     <string name="gps_info">Informaţii GPS</string>
 
     <string name="local_time">Ora locală</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">Amiază:</string>
     <string name="sun_sunset">Apus:</string>
     <string name="sun_nadir">Nadir:</string>
-    <string name="twilight_astronomical_dawn">Crepuscul astronomic:</string>
-    <string name="twilight_nautical_dawn">Crepuscul nautic:</string>
-    <string name="twilight_civil_dawn">Crepuscul civil:</string>
     <string name="twilight_civil_dusk">Amurg civil:</string>
     <string name="twilight_nautical_dusk">Amurg nautic:</string>
     <string name="twilight_astronomical_dusk">Amurg astronomic:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">Nu s-a găsit nicio adresă pentru locația curentă</string>
     <string name="location_saved">Salvat cu succes</string>
     <string name="location_not_saved">Nu a putut fi salvat!</string>
-    <string name="no_update">Nicio actualizare disponibilă</string>
     <string name="location_not_available">Locația nu este încă disponibilă</string>
 
     <string name="appearance">Aspect</string>
     <string name="configuration">Configurare</string>
     <string name="about">Despre</string>
-    <string name="contribute">Contribuiți</string>
 
     <string name="theme">Temă</string>
     <string name="icon">Pictogramă</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">Note legale</string>
     <string name="app_version">Versiune aplicație</string>
     <string name="found_an_issue">Ați găsit o problemă?</string>
-    <string name="translate">Traducere</string>
 
     <string name="theme_follow_system">Sistem</string>
     <string name="theme_day">Luminoasă</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">Împiedică dispozitivul să intre în repaos în timp ce aplicația este vizibilă</string>
     <string name="desc_legal">Citiți declarațiile aplicației, Politica de confidențialitate și Termenii de utilizare</string>
     <string name="desc_git">Deschide repozitoriul aplicației</string>
-    <string name="desc_translate">Ajutați la traducerea aplicației în limba dvs. nativă</string>
 
     <string name="needles">Ace</string>
     <string name="motion_type">Tip mișcare</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">Informațiile prezentate mai jos sunt actualizate pentru coordonatele locației specificate.</string>
     <string name="show_again">Arată din nou</string>
     <string name="search_timezone">Căutare fus orar</string>
-    <string name="verifying_license">Verificare licență</string>
-    <string name="license_successful">Reușit :)</string>
-    <string name="license_failed">Verificare licență eșuată</string>
     <string name="auto_system_default_language">Automat (implicit sistem)</string>
     <string name="location_permission_denied">"Permisiune locație refuzată!"</string>
     <string name="no_location_permission_alert">Unele caracteristici pot să nu funcționeze fără permisiunea de localizare</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">Afişare pe hartă</string>
     <string name="copy">Copiere</string>
     <string name="trail_data_accuracy">În %1$s %2$s din locație</string>
-    <string name="rate_text">Cât de mulțumit(ă) sunteți de această aplicație? Faceți clic aici pentru a evalua aplicația în Magazin Play.</string>
     <string name="target">Țintă</string>
-    <string name="my_developer_profile">Profilul meu de dezvoltator</string>
     <string name="eta_seconds">%1$s secunde</string>
     <string name="eta_minutes">%1$s minute</string>
     <string name="eta_hours">%1$s ore %2$s minute</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">Deplasare de la destinație:</string>
     <string name="direction">Direcție</string>
     <string name="targets">Obiective</string>
-    <string name="direction_info">Informații de orientare</string>
     <string name="use_maps_target">Folosind obiectivul hărților</string>
     <string name="using_maps_target">Folosind obiectivul hărților</string>
     <string name="edit">Editare</string>
@@ -301,6 +286,4 @@
     <string name="mechanical">Mecanice</string>
     <string name="app_coordinates_format">Formatul coordonatelor</string>
     <string name="share">Distribuie</string>
-    <string name="telegram_group">Grup Telegram</string>
-    <string name="buy_full_desc">Cumpără versiunea completă și deblochează întregul potențial al aplicației.</string>
 </resources>

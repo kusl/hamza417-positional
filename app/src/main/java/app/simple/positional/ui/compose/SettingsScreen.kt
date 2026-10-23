@@ -53,35 +53,42 @@ data class SettingsState(
     val isCustomLocation: Boolean = false,
     val keepScreenOn: Boolean = false,
     val skipSplashScreen: Boolean = false,
+    val iconIndex: Int = 0,
+    val cornerRadius: Int = SettingsLabels.CORNER_DEFAULT,
     val versionName: String = "",
 )
 
 interface SettingsActions {
     fun requestPermission()
-    fun openTheme()
+    fun setThemeMode(mode: Int)
     fun openAccent()
-    fun openIcons()
-    fun openCorners()
+    fun setIcon(index: Int)
+    fun setCornerRadius(value: Int)
     fun setSkipSplashScreen(enabled: Boolean)
     fun openArts()
-    fun openUnits()
-    fun openCoordinatesFormat()
-    fun openLocationProvider()
+    fun setMetric(metric: Boolean)
+    fun setCoordinatesFormat(format: Int)
+    fun setLocationProvider(provider: String)
     fun openCustomLocations()
     fun setCustomLocation(enabled: Boolean)
     fun setKeepScreenOn(enabled: Boolean)
-    fun openLanguages()
+    fun setLanguage(code: String)
     fun openLegal(@StringRes page: Int)
     fun openReleases()
     fun openRepository()
     fun openIssues()
 }
 
+internal enum class SettingsDialog { THEME, ICON, CORNERS, UNITS, COORDINATES, PROVIDER, LANGUAGE }
+
 object SettingsLabels {
     const val THEME_AUTO = 4
     const val PROVIDER_ANDROID = "android"
     const val PROVIDER_FUSED = "fused"
     const val LANGUAGE_DEFAULT = "default"
+    const val CORNER_MIN = 25
+    const val CORNER_MAX = 400
+    const val CORNER_DEFAULT = 150
 
     val legalPages = listOf(
         R.string.disclaimer,
@@ -91,6 +98,17 @@ object SettingsLabels {
         R.string.credits,
         R.string.internet_uses,
     )
+
+    val themeModes = listOf(
+        AppCompatDelegate.MODE_NIGHT_NO,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        THEME_AUTO,
+    )
+
+    val coordinateFormats = listOf(0, 1, 2)
+
+    val providers = listOf(PROVIDER_ANDROID, PROVIDER_FUSED)
 
     @StringRes
     fun theme(mode: Int): Int? = when (mode) {
@@ -112,10 +130,23 @@ object SettingsLabels {
         else -> null
     }
 
-    fun locationProvider(provider: String): String = when (provider) {
-        PROVIDER_ANDROID -> "Android Location Provider"
-        PROVIDER_FUSED -> "Fused Location Provider"
-        else -> ""
+    @StringRes
+    fun locationProvider(provider: String): Int? = when (provider) {
+        PROVIDER_ANDROID -> R.string.android_location_provider
+        PROVIDER_FUSED -> R.string.fused_location_provider
+        else -> null
+    }
+
+    @StringRes
+    fun locationProviderDescription(provider: String): Int? = when (provider) {
+        PROVIDER_ANDROID -> R.string.desc_android_location_provider
+        PROVIDER_FUSED -> R.string.desc_fused_location_provider
+        else -> null
+    }
+
+    fun languages(): List<Pair<String, String?>> {
+        val (defaults, named) = LocaleHelper.localeList.partition { it.localeCode == LANGUAGE_DEFAULT }
+        return defaults.map { it.localeCode to null } + named.sortedBy { it.language }.map { it.localeCode to it.language }
     }
 
     fun languageName(code: String): String? =
@@ -125,6 +156,7 @@ object SettingsLabels {
 @Composable
 fun SettingsScreen(state: SettingsState, actions: SettingsActions, topInset: Int) {
     val top = with(LocalDensity.current) { topInset.toDp() }
+    var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             Modifier
@@ -137,11 +169,12 @@ fun SettingsScreen(state: SettingsState, actions: SettingsActions, topInset: Int
                 modifier = Modifier.padding(horizontal = 26.dp, vertical = 16.dp),
             )
             if (!state.hasLocationPermission) PermissionBanner(actions::requestPermission)
-            AppearanceSection(state, actions)
-            ConfigurationSection(state, actions)
+            AppearanceSection(state, actions) { dialog = it }
+            ConfigurationSection(state, actions) { dialog = it }
             AboutSection(state, actions)
         }
     }
+    dialog?.let { current -> SettingsDialogHost(current, state, actions) { dialog = null } }
 }
 
 @Composable
@@ -168,14 +201,14 @@ private fun PermissionBanner(onClick: () -> Unit) {
 }
 
 @Composable
-private fun AppearanceSection(state: SettingsState, actions: SettingsActions) {
+private fun AppearanceSection(state: SettingsState, actions: SettingsActions, show: (SettingsDialog) -> Unit) {
     PreferenceCategory(stringResource(R.string.appearance)) {
         PreferenceItem(
             title = stringResource(R.string.theme),
             summary = SettingsLabels.theme(state.themeMode)?.let { stringResource(it) },
-            onClick = actions::openTheme,
+            onClick = { show(SettingsDialog.THEME) },
         )
-        PreferenceItem(title = stringResource(R.string.icon), onClick = actions::openIcons)
+        PreferenceItem(title = stringResource(R.string.icon), onClick = { show(SettingsDialog.ICON) })
         PreferenceItem(
             title = stringResource(R.string.accent_colors),
             trailing = {
@@ -188,7 +221,7 @@ private fun AppearanceSection(state: SettingsState, actions: SettingsActions) {
             },
             onClick = actions::openAccent,
         )
-        PreferenceItem(title = stringResource(R.string.corner_radius), onClick = actions::openCorners)
+        PreferenceItem(title = stringResource(R.string.corner_radius), onClick = { show(SettingsDialog.CORNERS) })
         SwitchPreference(
             title = stringResource(R.string.skip_splash_screen),
             summary = stringResource(R.string.desc_skip_splash_Screen),
@@ -200,22 +233,22 @@ private fun AppearanceSection(state: SettingsState, actions: SettingsActions) {
 }
 
 @Composable
-private fun ConfigurationSection(state: SettingsState, actions: SettingsActions) {
+private fun ConfigurationSection(state: SettingsState, actions: SettingsActions, show: (SettingsDialog) -> Unit) {
     PreferenceCategory(stringResource(R.string.configuration)) {
         PreferenceItem(
             title = stringResource(R.string.units),
             summary = stringResource(SettingsLabels.unit(state.isMetric)),
-            onClick = actions::openUnits,
+            onClick = { show(SettingsDialog.UNITS) },
         )
         PreferenceItem(
             title = stringResource(R.string.app_coordinates_format),
             summary = SettingsLabels.coordinatesFormat(state.coordinatesFormat)?.let { stringResource(it) },
-            onClick = actions::openCoordinatesFormat,
+            onClick = { show(SettingsDialog.COORDINATES) },
         )
         PreferenceItem(
             title = stringResource(R.string.location_provider),
-            summary = SettingsLabels.locationProvider(state.locationProvider),
-            onClick = actions::openLocationProvider,
+            summary = SettingsLabels.locationProvider(state.locationProvider)?.let { stringResource(it) },
+            onClick = { show(SettingsDialog.PROVIDER) },
         )
         PreferenceItem(
             title = stringResource(R.string.specified_location),
@@ -232,7 +265,7 @@ private fun ConfigurationSection(state: SettingsState, actions: SettingsActions)
         PreferenceItem(
             title = stringResource(R.string.language),
             summary = SettingsLabels.languageName(state.language) ?: stringResource(R.string.auto_system_default_language),
-            onClick = actions::openLanguages,
+            onClick = { show(SettingsDialog.LANGUAGE) },
         )
     }
 }

@@ -6,8 +6,6 @@
     <string name="level">Ниво</string>
     <string name="settings">Настройки</string>
 
-    <string name="clock_info">Информация относно времето</string>
-    <string name="compass_info">Информация за компаса</string>
     <string name="gps_info">GPS Инфо</string>
 
     <string name="local_time">Местно време</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">Пладне:</string>
     <string name="sun_sunset">Залез:</string>
     <string name="sun_nadir">Надир:</string>
-    <string name="twilight_astronomical_dawn">Астрономическо зазоряване:</string>
-    <string name="twilight_nautical_dawn">Зазоряване на морското равнище:</string>
-    <string name="twilight_civil_dawn">Разсъмване:</string>
     <string name="twilight_civil_dusk">Зазоряване:</string>
     <string name="twilight_nautical_dusk">Морски здрач:</string>
     <string name="twilight_astronomical_dusk">Астрономически здрач:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">Не са открити адреси за вашето местоположение</string>
     <string name="location_saved">Запазено успешно</string>
     <string name="location_not_saved">Не може да бъде запазено!</string>
-    <string name="no_update">Няма нови актуализации</string>
     <string name="location_not_available">Местоположението все още не е налично</string>
 
     <string name="appearance">Външен вид</string>
     <string name="configuration">Конфигурация</string>
     <string name="about">Относно приложението</string>
-    <string name="contribute">Допринасяне</string>
 
     <string name="theme">Тема</string>
     <string name="icon">Икона</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">Правни бележки</string>
     <string name="app_version">Версия на приложението</string>
     <string name="found_an_issue">Намерихте проблем?</string>
-    <string name="translate">Превод</string>
 
     <string name="theme_follow_system">Следвай системната тема</string>
     <string name="theme_day">Светла</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">Предотвратяване заспиването на устройството, докато се използва приложението</string>
     <string name="desc_legal">Прочетете Отказ от отговорност, Политика за поверителност и Условия за използване на приложението</string>
     <string name="desc_git">Отворете хранилището на приложението</string>
-    <string name="desc_translate">Помогнете за превода на приложението на вашия роден език</string>
 
     <string name="needles">Стрелки</string>
     <string name="motion_type">Тип на движението</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">Информацията, показана по-долу, се актуализира за посочените координати на местоположението.</string>
     <string name="show_again">Покажи отново</string>
     <string name="search_timezone">Търси часова зона</string>
-    <string name="verifying_license">Проверка на лиценза</string>
-    <string name="license_successful">Успешно :)</string>
-    <string name="license_failed">Проверката на лиценза не бе успешна</string>
     <string name="auto_system_default_language">Автоматично (по подразбиране)</string>
     <string name="location_permission_denied">"Разрешение за местоположение бе отказано!"</string>
     <string name="no_location_permission_alert">Някои функции може да не работят без разрешение за местоположение</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">Покажи на картата</string>
     <string name="copy">Копирай</string>
     <string name="trail_data_accuracy">В рамките на %1$s %2$s от местоположението</string>
-    <string name="rate_text">Доколко сте доволни от това приложение? Щракнете тук, за да оцените приложението в Play Store.</string>
     <string name="target">Цел</string>
-    <string name="my_developer_profile">Моят профил на програмист</string>
     <string name="eta_seconds">%1$s секунди</string>
     <string name="eta_minutes">%1$s минути</string>
     <string name="eta_hours">%1$s часове %2$s минути</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">Преместване от цел:</string>
     <string name="direction">Посока</string>
     <string name="targets">Цели</string>
-    <string name="direction_info">Информация за посоката</string>
     <string name="use_maps_target">Използвайте Target на Maps</string>
     <string name="using_maps_target">Използвате Target на Maps</string>
     <string name="edit">Редактиране</string>
@@ -301,14 +286,11 @@
     <string name="mechanical">Механика</string>
     <string name="app_coordinates_format">Формат на координати</string>
     <string name="share">Сподели</string>
-    <string name="telegram_group">Телеграм група</string>
-    <string name="buy_full_desc">Купете пълната версия и отключете пълния потенциал на приложението.</string>
     <string name="notification_permission_desc">Необходим е достъп до известията, за да работи постоянно услугата за приспособление за часовник.</string>
     <string name="true_altitude">Реална надморска височина</string>
     <string name="elongation">Удължение</string>
     <string name="radius">Радиус</string>
     <string name="crescent_width">Ширина на полумесец</string>
-    <string name="other_apps">Други приложения</string>
     <string name="measure">Измерване</string>
     <string name="name">Име</string>
     <string name="saved_measures">Запазени измервания</string>

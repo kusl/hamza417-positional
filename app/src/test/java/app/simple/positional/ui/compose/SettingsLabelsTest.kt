@@ -2,7 +2,9 @@ package app.simple.positional.ui.compose
 
 import androidx.appcompat.app.AppCompatDelegate
 import app.simple.positional.R
+import app.simple.positional.util.LocaleHelper
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -32,9 +34,29 @@ class SettingsLabelsTest {
 
     @Test
     fun locationProviderLabels() {
-        assertEquals("Android Location Provider", SettingsLabels.locationProvider(SettingsLabels.PROVIDER_ANDROID))
-        assertEquals("Fused Location Provider", SettingsLabels.locationProvider(SettingsLabels.PROVIDER_FUSED))
-        assertEquals("", SettingsLabels.locationProvider("other"))
+        assertEquals(R.string.android_location_provider, SettingsLabels.locationProvider(SettingsLabels.PROVIDER_ANDROID))
+        assertEquals(R.string.fused_location_provider, SettingsLabels.locationProvider(SettingsLabels.PROVIDER_FUSED))
+        assertNull(SettingsLabels.locationProvider("other"))
+        assertEquals(R.string.desc_fused_location_provider, SettingsLabels.locationProviderDescription(SettingsLabels.PROVIDER_FUSED))
+    }
+
+    @Test
+    fun everyChoiceHasALabel() {
+        SettingsLabels.themeModes.forEach { assertNotNull(SettingsLabels.theme(it)) }
+        SettingsLabels.coordinateFormats.forEach { assertNotNull(SettingsLabels.coordinatesFormat(it)) }
+        SettingsLabels.providers.forEach {
+            assertNotNull(SettingsLabels.locationProvider(it))
+            assertNotNull(SettingsLabels.locationProviderDescription(it))
+        }
+    }
+
+    @Test
+    fun languagesStartWithDefaultThenSortByName() {
+        val languages = SettingsLabels.languages()
+        assertEquals(SettingsLabels.LANGUAGE_DEFAULT to null, languages.first())
+        val names = languages.drop(1).map { it.second!! }
+        assertEquals(names.sorted(), names)
+        assertEquals(LocaleHelper.localeList.size, languages.size)
     }
 
     @Test

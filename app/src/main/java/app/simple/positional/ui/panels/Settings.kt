@@ -24,13 +24,6 @@ import app.simple.positional.activities.subactivity.AccentColorsActivity
 import app.simple.positional.activities.subactivity.ArtsActivity
 import app.simple.positional.activities.subactivity.CustomLocationsActivity
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
-import app.simple.positional.dialogs.settings.CoordinatesFormat
-import app.simple.positional.dialogs.settings.Icons
-import app.simple.positional.dialogs.settings.Locales
-import app.simple.positional.dialogs.settings.LocationProvider
-import app.simple.positional.dialogs.settings.RoundedCorners
-import app.simple.positional.dialogs.settings.Theme
-import app.simple.positional.dialogs.settings.Units
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PositionalTheme
@@ -38,8 +31,10 @@ import app.simple.positional.ui.compose.SettingsActions
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.compose.SettingsState
+import app.simple.positional.util.AppIcons
 import app.simple.positional.util.PermissionUtils
 import app.simple.positional.util.StatusBarHeight
+import app.simple.positional.util.ThemeSetter
 
 class Settings : ScopedFragment(), SettingsActions {
     private var state by mutableStateOf(SettingsState())
@@ -96,6 +91,8 @@ class Settings : ScopedFragment(), SettingsActions {
             isCustomLocation = MainPreferences.isCustomCoordinate(),
             keepScreenOn = MainPreferences.isScreenOn(),
             skipSplashScreen = MainPreferences.getSkipSplashScreen(),
+            iconIndex = AppIcons.current(requireContext()),
+            cornerRadius = MainPreferences.getCornerRadius() * 5,
             versionName = BuildConfig.VERSION_NAME,
         )
     }
@@ -104,23 +101,35 @@ class Settings : ScopedFragment(), SettingsActions {
         permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
     }
 
-    override fun openTheme() = Theme().show(parentFragmentManager, "theme")
+    override fun setThemeMode(mode: Int) {
+        MainPreferences.setDayNight(mode == SettingsLabels.THEME_AUTO)
+        if (mode != SettingsLabels.THEME_AUTO) MainPreferences.setTheme(mode)
+        ThemeSetter.setAppTheme(mode)
+        refresh()
+    }
 
     override fun openAccent() = startActivity(Intent(requireContext(), AccentColorsActivity::class.java))
 
-    override fun openIcons() = Icons.newInstance().show(childFragmentManager, "app_icons")
+    override fun setIcon(index: Int) {
+        AppIcons.select(requireContext(), index)
+        refresh()
+    }
 
-    override fun openCorners() = RoundedCorners.newInstance().show(parentFragmentManager, "rounded_corners")
+    override fun setCornerRadius(value: Int) {
+        if (value == MainPreferences.getCornerRadius() * 5) return
+        MainPreferences.setCornerRadius(value)
+        requireActivity().recreate()
+    }
 
     override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
 
     override fun openArts() = startActivity(Intent(requireContext(), ArtsActivity::class.java))
 
-    override fun openUnits() = Units().show(parentFragmentManager, "units")
+    override fun setMetric(metric: Boolean) = MainPreferences.setUnit(metric)
 
-    override fun openCoordinatesFormat() = CoordinatesFormat.newInstance().show(childFragmentManager, "coordinates_format")
+    override fun setCoordinatesFormat(format: Int) = MainPreferences.setCoordinatesFormat(format)
 
-    override fun openLocationProvider() = LocationProvider.newInstance().show(childFragmentManager, "location_provider")
+    override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
 
     override fun openCustomLocations() = startActivity(Intent(requireContext(), CustomLocationsActivity::class.java))
 
@@ -137,7 +146,11 @@ class Settings : ScopedFragment(), SettingsActions {
         }
     }
 
-    override fun openLanguages() = Locales().newInstance().show(childFragmentManager, "locales")
+    override fun setLanguage(code: String) {
+        if (code == MainPreferences.getAppLanguage()) return
+        MainPreferences.setAppLanguage(code)
+        requireActivity().recreate()
+    }
 
     override fun openLegal(page: Int) {
         startActivity(Intent(requireContext(), WebPageViewerActivity::class.java).putExtra("source", getString(page)))

@@ -9,7 +9,7 @@ OUTPUT_DIR="docs/llm"
 OUTPUT_FILE="$OUTPUT_DIR/dump.txt"
 SKIP='^(docs/llm/|gradlew$|gradlew\.bat$|gradle/wrapper/|screenshots/|LICENSE$|CODE_OF_CONDUCT\.md$|app/src/[^/]+/res/(drawable[^/]*|mipmap[^/]*|font|raw)/|app/src/main/res/values-[^/]+/strings\.xml$|app/src/main/assets/(html|css|fonts|svg)/|app/databases/schemas/)'
 
-mapfile -t FILES < <(git ls-files --cached --others --exclude-standard | grep -Ev '^docs/llm/' | sort -u)
+mapfile -t FILES < <(git ls-files --cached --others --exclude-standard | grep -Ev '^docs/llm/' | LC_ALL=C sort -u)
 
 mkdir -p "$OUTPUT_DIR"
 TMP_FILE="$(mktemp "$OUTPUT_DIR/.dump.XXXXXX")"
@@ -27,12 +27,15 @@ trap 'rm -f "$TMP_FILE"' EXIT
     echo
     echo "## TREE (${#FILES[@]} files)"
     printf '%s\n' "${FILES[@]}" | awk -F/ '{
-        path = ""
+        same = 1
         for (i = 1; i < NF; i++) {
-            path = path $i "/"
-            if (!(path in seen)) { seen[path] = 1; printf "%*s%s/\n", (i - 1) * 2, "", $i }
+            if (same && prev[i] == $i) continue
+            same = 0
+            printf "%*s%s/\n", (i - 1) * 2, "", $i
         }
         printf "%*s%s\n", (NF - 1) * 2, "", $NF
+        for (i = 1; i < NF; i++) prev[i] = $i
+        for (i = NF; i in prev; i++) delete prev[i]
     }'
     for f in "${FILES[@]}"; do
         [[ -f "$f" ]] || continue

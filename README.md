@@ -38,23 +38,25 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - No links to upstream chat groups, developer profiles or other apps.
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities and UI state mapping.
+- Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons and settings state.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments through `ComposeView`. Shared theme and components live in `ui/compose/`.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments through `ComposeView`. Shared theme, components and dialogs live in `ui/compose/`.
 
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Compose toolchain, theme, preference components, Settings | Done |
-| 2 | Legal pages and leftover strings cleanup | Next |
-| 3 | Settings dialogs and bottom sheets | Planned |
-| 4 | List screens (trails, measures, directions, locations, time zones) | Planned |
-| 5 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
-| 6 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
-| 7 | Widgets on Glance | Planned |
+| 1 | Compose toolchain, theme, preference components, Settings screen | Done |
+| 2 | Fork-owned legal pages, upstream contacts and unused resources removed | Done |
+| 3 | Settings dialogs (theme, icon, corners, units, coordinates, provider, language) | Done |
+| 4 | Accent colors, custom locations and other sub screens | Next |
+| 5 | List screens (trails, measures, directions, time zones) | Planned |
+| 6 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
+| 7 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 8 | Widgets on Glance | Planned |
 
 ## Building
 
@@ -95,7 +97,7 @@ Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper a
 ```
 app/src/main/java/app/simple/positional/
   activities/   entry points and sub screens
-  ui/compose/   Compose theme, shared components and screens
+  ui/compose/   Compose theme, shared components, dialogs and screens
   ui/           panel fragments
   decorations/  legacy custom views, map wrappers, fast scroller
   database/     Room entities, DAOs and databases

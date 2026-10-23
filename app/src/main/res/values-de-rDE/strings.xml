@@ -6,8 +6,6 @@
     <string name="level">Wasserwaage</string>
     <string name="settings">Einstellungen</string>
 
-    <string name="clock_info">Zeitinformation</string>
-    <string name="compass_info">Kompassinformationen</string>
     <string name="gps_info">GPS Informationen</string>
 
     <string name="local_time">Ortszeit</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">Mittag:</string>
     <string name="sun_sunset">Sonnenuntergang:</string>
     <string name="sun_nadir">Nadir:</string>
-    <string name="twilight_astronomical_dawn">Astronomische Morgendämmerung:</string>
-    <string name="twilight_nautical_dawn">Nautische Morgendämmerung:</string>
-    <string name="twilight_civil_dawn">Bürgerliche Morgendämmerung:</string>
     <string name="twilight_civil_dusk">Bürgerliche Abenddämmerung:</string>
     <string name="twilight_nautical_dusk">Nautische Abenddämmerung:</string>
     <string name="twilight_astronomical_dusk">Astronomische Abenddämmerung:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">Keine Adresse für aktuellen Standort gefunden</string>
     <string name="location_saved">Erfolgreich gespeichert</string>
     <string name="location_not_saved">Konnte nicht gespeichert werden!</string>
-    <string name="no_update">Kein Update verfügbar</string>
     <string name="location_not_available">Standort ist noch nicht verfügbar</string>
 
     <string name="appearance">Darstellung</string>
     <string name="configuration">Einstellungen</string>
     <string name="about">Info</string>
-    <string name="contribute">Beitragen</string>
 
     <string name="theme">Stil</string>
     <string name="icon">Symbol</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">Rechtliche Hinweise</string>
     <string name="app_version">App Version</string>
     <string name="found_an_issue">Ein Problem gefunden?</string>
-    <string name="translate">Übersetzung</string>
 
     <string name="theme_follow_system">Systemeinstellungen folgen</string>
     <string name="theme_day">Hell</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">Bildschirm eingeschaltet lassen wenn App im Vordergrund</string>
     <string name="desc_legal">Haftungsausschluss, Datenschutzrichtlinien und Nutzungsbedingungen der App lesen</string>
     <string name="desc_git">Anwendungsrepository öffnen</string>
-    <string name="desc_translate">Hilf bei der Übersetzung der App in deine Muttersprache</string>
 
     <string name="needles">Nadel</string>
     <string name="motion_type">Bewegungsart</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">Untenstehende Informationen werden für bestimmte Standortkoordinaten aktualisiert.</string>
     <string name="show_again">Erneut anzeigen</string>
     <string name="search_timezone">Zeitzonen durchsuchen</string>
-    <string name="verifying_license">Lizenz wird überprüft</string>
-    <string name="license_successful">Erfolgreich :)</string>
-    <string name="license_failed">Lizenzprüfung fehlgeschlagen</string>
     <string name="auto_system_default_language">Auto (System-Standard)</string>
     <string name="location_permission_denied">"Standortberechtigung abgelehnt!"</string>
     <string name="no_location_permission_alert">Einige Funktionen funktionieren ohne Standortberechtigung möglicherweise nicht</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">Auf Karte anzeigen</string>
     <string name="copy">Kopieren</string>
     <string name="trail_data_accuracy">Innerhalb von %1$s %2$s des Standorts</string>
-    <string name="rate_text">Wie zufrieden sind Sie mit dieser App? Klicken Sie hier, um die App im Play Store zu bewerten.</string>
     <string name="target">Ziel</string>
-    <string name="my_developer_profile">Mein Entwicklerprofil</string>
     <string name="eta_seconds">%1$s Sekunden</string>
     <string name="eta_minutes">%1$s Minuten</string>
     <string name="eta_hours">%1$s Stunden %2$s Minuten</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">Verschiebung vom Ziel:</string>
     <string name="direction">Routenplanung</string>
     <string name="targets">Ziele</string>
-    <string name="direction_info">Richtungsinformationen</string>
     <string name="use_maps_target">Verwenden Sie das Kartenziel</string>
     <string name="using_maps_target">Verwendung des Ziels von Maps</string>
     <string name="edit">Bearbeiten</string>
@@ -301,6 +286,4 @@
     <string name="mechanical">Mechaniker</string>
     <string name="app_coordinates_format">Koordinatenformat</string>
     <string name="share">Teilen</string>
-    <string name="telegram_group">Telegram Gruppe</string>
-    <string name="buy_full_desc">Kaufen Sie die Vollversion und erschließen Sie das volle Potenzial der App.</string>
 </resources>

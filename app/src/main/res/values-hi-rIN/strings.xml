@@ -6,8 +6,6 @@
     <string name="level">स्तर</string>
     <string name="settings">सेटिंग्स</string>
 
-    <string name="clock_info">समय की जानकारी</string>
-    <string name="compass_info">दिक्सूचक की जानकारी</string>
     <string name="gps_info">स्थिति सूचना</string>
 
     <string name="local_time">स्थानीय समय</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">दोपहर:</string>
     <string name="sun_sunset">सूर्यास्त:</string>
     <string name="sun_nadir">पतन:</string>
-    <string name="twilight_astronomical_dawn">खगोलीय सुबह:</string>
-    <string name="twilight_nautical_dawn">समुद्री सुबह:</string>
-    <string name="twilight_civil_dawn">नागरिक सुबह:</string>
     <string name="twilight_civil_dusk">नागरिक शाम:</string>
     <string name="twilight_nautical_dusk">समुद्री शाम:</string>
     <string name="twilight_astronomical_dusk">खगोलीय शाम:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">वर्तमान स्थान के लिए कोई पता नहीं मिला</string>
     <string name="location_saved">सफलतापूर्वक सहेजा गया।</string>
     <string name="location_not_saved">सहेजा नहीं जा सका</string>
-    <string name="no_update">कोई अद्यतन उपलब्ध नहीं है</string>
     <string name="location_not_available">स्थान उपलब्ध नहीं है</string>
 
     <string name="appearance">दिखावट</string>
     <string name="configuration">विन्यास</string>
     <string name="about">विवरण</string>
-    <string name="contribute">योगदान दें</string>
 
     <string name="theme">थीम</string>
     <string name="icon">आइकॉन</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">कानूनी नोट्स</string>
     <string name="app_version">ऐप का वर्श़न</string>
     <string name="found_an_issue">एक मुद्दा मिला?</string>
-    <string name="translate">अनुवाद करें</string>
 
     <string name="theme_follow_system">सिस्टम का पालन करें</string>
     <string name="theme_day">उजाला</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">ऐप दिखाई देने पर डिवाइस को सोने से रोकता है</string>
     <string name="desc_legal">ऐप की अस्वीकृति, गोपनीयता नीति और उपयोग की शर्तें पढ़ें</string>
     <string name="desc_git">ऐप का रिपॉजिटरी खोलें</string>
-    <string name="desc_translate">अपनी मूल भाषा में एप्लिकेशन का अनुवाद करने में सहायता करें I</string>
 
     <string name="needles">कांटा</string>
     <string name="motion_type">मोशन टाइप</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">नीचे दी गई जानकारी निर्दिष्ट स्थान निर्देशांक के लिए अपडेट की जा रही है|</string>
     <string name="show_again">फिर से दिखाएँ</string>
     <string name="search_timezone">समय क्षेत्र खोजें</string>
-    <string name="verifying_license">लाइसेंस का सत्यापन</string>
-    <string name="license_successful">सफल :)</string>
-    <string name="license_failed">लाइसेंस सत्यापन विफल रहा</string>
     <string name="auto_system_default_language">ऑटो (सिस्टम डिफ़ॉल्ट)</string>
     <string name="location_permission_denied">"स्थान अनुमति अस्वीकृत!"</string>
     <string name="no_location_permission_alert">कुछ सुविधाएं बिना स्थान की अनुमति के काम नहीं कर सकती हैं|</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">नक्शे पर दिखाएँ</string>
     <string name="copy">कॉपी करें</string>
     <string name="trail_data_accuracy">स्थान के %1$s %2$s के भीतर</string>
-    <string name="rate_text">आप इस ऐप से कितने संतुष्ट हैं? Play Store पर ऐप को रेट करने के लिए यहां क्लिक करें।</string>
     <string name="target">लक्ष्य</string>
-    <string name="my_developer_profile">डेवलपर प्रोफ़ाइल</string>
     <string name="eta_seconds">%1$s सेकंड</string>
     <string name="eta_minutes">%1$s मिनट</string>
     <string name="eta_hours">%1$s घंटे %2$s मिनट</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">गंतव्य से विस्थापन:</string>
     <string name="direction">दिशा</string>
     <string name="targets">लक्ष्य</string>
-    <string name="direction_info">दिशा सूचना</string>
     <string name="use_maps_target">मानचित्र के लक्ष्य का उपयोग करें</string>
     <string name="using_maps_target">मानचित्र के लक्ष्य का उपयोग करना</string>
     <string name="edit">ऐडिट</string>
@@ -301,8 +286,6 @@
     <string name="mechanical">यांत्रिक</string>
     <string name="app_coordinates_format">निर्देशांक प्रारूप</string>
     <string name="share">शेयर करें</string>
-    <string name="telegram_group">टेलीग्राम ग्रुप</string>
-    <string name="buy_full_desc">पूर्ण संस्करण खरीदें और ऐप की पूरी क्षमता को अनलॉक करें।</string>
     <string name="notification_permission_desc">क्लॉक विजेट सेवा को लगातार चलाने के लिए अधिसूचना पहुंच की आवश्यकता होती है।</string>
     <string name="true_altitude">सच्ची ऊंचाई</string>
     <string name="elongation">बढ़ाव</string>

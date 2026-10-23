@@ -6,8 +6,6 @@
     <string name="level">水平儀</string>
     <string name="settings">設定</string>
 
-    <string name="clock_info">時間資訊</string>
-    <string name="compass_info">指南針資訊</string>
     <string name="gps_info">GPS 資訊</string>
 
     <string name="local_time">當地時間</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">正午:</string>
     <string name="sun_sunset">日落:</string>
     <string name="sun_nadir">天底:</string>
-    <string name="twilight_astronomical_dawn">天文黎明:</string>
-    <string name="twilight_nautical_dawn">航海黎明:</string>
-    <string name="twilight_civil_dawn">民用黎明:</string>
     <string name="twilight_civil_dusk">民用黃昏:</string>
     <string name="twilight_nautical_dusk">航海黃昏:</string>
     <string name="twilight_astronomical_dusk">天文黃昏:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">目前位置找不到地址</string>
     <string name="location_saved">儲存成功</string>
     <string name="location_not_saved">無法儲存！</string>
-    <string name="no_update">沒有可用的更新</string>
     <string name="location_not_available">位置尚無法使用</string>
 
     <string name="appearance">外觀</string>
     <string name="configuration">組態</string>
     <string name="about">關於</string>
-    <string name="contribute">參與</string>
 
     <string name="theme">主題</string>
     <string name="icon">圖示</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">法律聲明</string>
     <string name="app_version">應用程式版本</string>
     <string name="found_an_issue">發現問題？</string>
-    <string name="translate">翻譯</string>
 
     <string name="theme_follow_system">跟隨系統</string>
     <string name="theme_day">淺色</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">防止裝置在應用程式可見時進入睡眠</string>
     <string name="desc_legal">閱讀應用程式的免責聲明、隱私權政策和使用條款</string>
     <string name="desc_git">開啟應用程式存放庫</string>
-    <string name="desc_translate">協助將這個應用程式翻譯為您的母語</string>
 
     <string name="needles">指針</string>
     <string name="motion_type">動作類型</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">下面顯示的資訊正在為指定的位置座標進行更新。</string>
     <string name="show_again">再次顯示</string>
     <string name="search_timezone">搜尋時區</string>
-    <string name="verifying_license">正在驗證授權</string>
-    <string name="license_successful">成功 :)</string>
-    <string name="license_failed">授權驗證失敗</string>
     <string name="auto_system_default_language">自動 (系統預設)</string>
     <string name="location_permission_denied">"位置權限遭拒！"</string>
     <string name="no_location_permission_alert">沒有位置權限，有些功能可能無法運作</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">在地圖上顯示</string>
     <string name="copy">複製</string>
     <string name="trail_data_accuracy">在 %1$s %2$s 位置內</string>
-    <string name="rate_text">您對這個應用程式的滿意度如何？按一下這裡去 Play 商店為其評分。</string>
     <string name="target">目標</string>
-    <string name="my_developer_profile">我的開發人員設定檔</string>
     <string name="eta_seconds">%1$s 秒</string>
     <string name="eta_minutes">%1$s 分鐘</string>
     <string name="eta_hours">%1$s 小時 %2$s 分鐘</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">從目的置換:</string>
     <string name="direction">方向</string>
     <string name="targets">目標</string>
-    <string name="direction_info">方向資訊</string>
     <string name="use_maps_target">使用地圖目標</string>
     <string name="using_maps_target">正在使用地圖目標</string>
     <string name="edit">編輯</string>
@@ -301,14 +286,11 @@
     <string name="mechanical">機械</string>
     <string name="app_coordinates_format">座標格式</string>
     <string name="share">分享</string>
-    <string name="telegram_group">Telegram 群組</string>
-    <string name="buy_full_desc">購買完整版本並釋放應用程式的全部潛力。</string>
     <string name="notification_permission_desc">通知存取需要持續執行時鐘小工具服務。</string>
     <string name="true_altitude">真實海拔</string>
     <string name="elongation">距角</string>
     <string name="radius">半徑</string>
     <string name="crescent_width">新月寬</string>
-    <string name="other_apps">其他應用程式</string>
     <string name="measure">測量</string>
     <string name="name">名稱</string>
 </resources>

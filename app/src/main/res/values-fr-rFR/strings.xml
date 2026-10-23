@@ -6,8 +6,6 @@
     <string name="level">Niveau</string>
     <string name="settings">Paramètres</string>
 
-    <string name="clock_info">Information temps</string>
-    <string name="compass_info">Informations sur la boussole</string>
     <string name="gps_info">Information de Lieu</string>
 
     <string name="local_time">Temps local</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">Le midi:</string>
     <string name="sun_sunset">Coucher de soleil:</string>
     <string name="sun_nadir">Nadir:</string>
-    <string name="twilight_astronomical_dawn">Aube astronomique:</string>
-    <string name="twilight_nautical_dawn">Aube nautique:</string>
-    <string name="twilight_civil_dawn">Aube civile:</string>
     <string name="twilight_civil_dusk">Crépuscule civile:</string>
     <string name="twilight_nautical_dusk">Crépuscule nautique:</string>
     <string name="twilight_astronomical_dusk">Crépuscule astronomique:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">Aucune adresse trouvée pour l\'emplacement actuel</string>
     <string name="location_saved">Sauvegardé avec succès</string>
     <string name="location_not_saved">N’aie pas pu être sauvé!</string>
-    <string name="no_update">Aucune mise à jour disponible</string>
     <string name="location_not_available">L\'emplacement n\'est pas encore disponible</string>
 
     <string name="appearance">Apparence</string>
     <string name="configuration">Configuration</string>
     <string name="about">Sur</string>
-    <string name="contribute">Contribuer</string>
 
     <string name="theme">Thème</string>
     <string name="icon">Icône</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">Notes légales</string>
     <string name="app_version">Version de l\'application</string>
     <string name="found_an_issue">Vous avez trouvé un problème?</string>
-    <string name="translate">Traduction</string>
 
     <string name="theme_follow_system">Suivre le système</string>
     <string name="theme_day">Légère</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">Empêche l\'appareil de se mettre en veille tant que l\'application est visible</string>
     <string name="desc_legal">Lisez la clause de non-responsabilité, la politique de confidentialité et les conditions d\'utilisation de l\'application</string>
     <string name="desc_git">Ouvrir le dépôt de l\'application</string>
-    <string name="desc_translate">Aidez-moi à traduire l\'application dans votre langue</string>
 
     <string name="needles">Aiguille</string>
     <string name="motion_type">Type de mouvement</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">Les informations indiquées ci-dessous sont en cours de mise à jour pour les coordonnées de l\'emplacement spécifié.</string>
     <string name="show_again">Montre encore une fois</string>
     <string name="search_timezone">Trouver des fuseaux horaires</string>
-    <string name="verifying_license">Vérification de la Licence</string>
-    <string name="license_successful">Succès :)</string>
-    <string name="license_failed">Échec de la vérification de la licence</string>
     <string name="auto_system_default_language">Auto (Défaut système)</string>
     <string name="location_permission_denied">"Autorisation de localisation refusée!"</string>
     <string name="no_location_permission_alert">Certaines fonctionnalités peuvent ne pas fonctionner sans autorisation de localisation</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">Afficher sur la carte</string>
     <string name="copy">Copie</string>
     <string name="trail_data_accuracy">Dans %1$s %2$s de l\'emplacement</string>
-    <string name="rate_text">Êtes-vous satisfait de cette application ? Cliquez ici pour évaluer l\'application sur le Play Store.</string>
     <string name="target">Cible</string>
-    <string name="my_developer_profile">Mon Profil de Développeur</string>
     <string name="eta_seconds">%1$s secondes</string>
     <string name="eta_minutes">%1$s minutes</string>
     <string name="eta_hours">%1$s heures %2$s minutes</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">Déplacement de Distance :</string>
     <string name="direction">Direction</string>
     <string name="targets">Cibles</string>
-    <string name="direction_info">Informations sur la direction</string>
     <string name="use_maps_target">Utiliser la cible des cartes</string>
     <string name="using_maps_target">Utiliser la cible des cartes</string>
     <string name="edit">Modifier</string>
@@ -301,8 +286,6 @@
     <string name="mechanical">Mechanical</string>
     <string name="app_coordinates_format">Format des coordonnées</string>
     <string name="share">Partager</string>
-    <string name="telegram_group">Groupe Telegram</string>
-    <string name="buy_full_desc">Achetez la version complète et débloquez tout le potentiel de l\'application.</string>
     <string name="notification_permission_desc">L\'accès aux notifications est nécessaire pour exécuter de façon permanente le service de widget horloge.</string>
     <string name="true_altitude">Altitude réelle</string>
     <string name="elongation">Élongation</string>

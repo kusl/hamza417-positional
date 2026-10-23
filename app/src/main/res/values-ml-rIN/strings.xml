@@ -6,8 +6,6 @@
     <string name="level">വിതാദർശിനി</string>
     <string name="settings">ക്രമീകരണങ്ങൾ</string>
 
-    <string name="clock_info">സമയം സംബന്ധിച്ച വിവരം</string>
-    <string name="compass_info">ദിശ സംബന്ധിച്ച വിവരം</string>
     <string name="gps_info">ലൊക്കേഷൻ സംബന്ധിച്ച വിവരം</string>
 
     <string name="local_time">പ്രാദേശിക സമയം</string>
@@ -44,9 +42,6 @@
     <string name="sun_noon">മദ്ധ്യാഹ്നം:</string>
     <string name="sun_sunset">സൂര്യാസ്തമയം:</string>
     <string name="sun_nadir">ഏറ്റവും താഴ്ന്ന നില:</string>
-    <string name="twilight_astronomical_dawn">ജ്യോതിശാസ്ത്ര പ്രഭാതം:</string>
-    <string name="twilight_nautical_dawn">സമുദ്രപര പ്രഭാതം:</string>
-    <string name="twilight_civil_dawn">ആഭ്യന്തര പ്രഭാതം:</string>
     <string name="twilight_civil_dusk">ആഭ്യന്തര സന്ധ്യ:</string>
     <string name="twilight_nautical_dusk">സമുദ്രപര സന്ധ്യ:</string>
     <string name="twilight_astronomical_dusk">ജ്യോതിശാസ്ത്ര സന്ധ്യ:</string>
@@ -109,13 +104,11 @@
     <string name="no_address_found">ലൊക്കേഷന്റെ മേൽവിലാസം ലഭ്യമല്ല</string>
     <string name="location_saved">വിജയകരമായി സേവ് ചെയ്യപ്പെട്ടു</string>
     <string name="location_not_saved">ലൊക്കേഷൻ മാറ്റങ്ങൾ പരിരക്ഷിക്കാൻ സാധിച്ചില്ല!</string>
-    <string name="no_update">പുതിയ അപ്ഡേറ്റുകൾ ലഭ്യമല്ല</string>
     <string name="location_not_available">ലൊക്കേഷൻ ലഭ്യമല്ല</string>
 
     <string name="appearance">ബാഹ്യരൂപം</string>
     <string name="configuration">ക്രമീകരണം</string>
     <string name="about">സംബന്ധിച്ച്</string>
-    <string name="contribute">സഹായസഹകരണം</string>
 
     <string name="theme">ആപ്പിന്റെ ദൃശ്യരൂപം</string>
     <string name="icon">ഐക്കൺ</string>
@@ -129,7 +122,6 @@
     <string name="legal_notes">നിയമപരമായ കുറിപ്പുകൾ</string>
     <string name="app_version">ആപ്പ് വേർഷൻ</string>
     <string name="found_an_issue">പ്രശ്നങ്ങൾ?</string>
-    <string name="translate">വിവർത്തനം</string>
 
     <string name="theme_follow_system">ഫോണിന്റെ ദൃശ്യരൂപത്തിൽ തന്നെ തുടരുക</string>
     <string name="theme_day">ലൈറ്റ്</string>
@@ -140,7 +132,6 @@
     <string name="desc_screen_on">ആപ്പ് പ്രവർത്തന നിരതമായിരിക്കുമ്പോൾ സ്മാർട്ട് ഫോൺ നിഷ്ക്രിയമാകാതെ സൂക്ഷിക്കുക</string>
     <string name="desc_legal">ആപ്പിന്റെ നിരാകരണം, സ്വകാര്യതാ നയം, ഉപയോഗ നിബന്ധനകൾ എന്നിവ വായിക്കുക</string>
     <string name="desc_git">ആപ്പിന്റെ ശേഖരം തുറക്കുക</string>
-    <string name="desc_translate">നിങ്ങളുടെ ഭാഷയിലേക്ക് ഈ ആപ്പിനെ വിവർത്തനം ചെയ്യാൻ സഹായിക്കുക</string>
 
     <string name="needles">നീഡിൽ</string>
     <string name="motion_type">ചലന തരം</string>
@@ -169,9 +160,6 @@
     <string name="specified_location_notice">താഴെ കൊടുക്കുന്ന വിവരങ്ങൾ നിങ്ങൾ നൽകിയിരിക്കുന്ന അക്ഷാംശ-രേഖാംശ രേഖകളോട് അനുബന്ധമായി അപ്ഡേറ്റ് ചെയ്യുന്നു.</string>
     <string name="show_again">വീണ്ടും കാണിക്കുക</string>
     <string name="search_timezone">വിവിധ ടൈം സോണുകൾ തിരയുക</string>
-    <string name="verifying_license">ലൈസൻസ് വേരിഫൈ ചെയ്യുന്നു</string>
-    <string name="license_successful">വിജയകരം :)</string>
-    <string name="license_failed">ലൈസൻസ് വേരിഫിക്കേഷൻ പരാജിതമായിരിക്കുന്നു</string>
     <string name="auto_system_default_language">സാധാരണം (സിസ്റ്റം)</string>
     <string name="location_permission_denied">"ലൊക്കേഷൻ അറിയുന്നതിനുള്ള അധികാരം നിഷേധിച്ചിരിക്കുന്നു!"</string>
     <string name="no_location_permission_alert">ലൊക്കേഷൻ അറിയുന്നതിനുള്ള അധികാരം ലഭ്യമല്ലെങ്കിൽ ആപ്പിന്റെ ചില പ്രവർത്തനങ്ങൾ ലഭ്യമായിരിക്കില്ല</string>
@@ -277,9 +265,7 @@
     <string name="show_on_map">മാപ്പിൽ കാണുക</string>
     <string name="copy">കോപ്പി</string>
     <string name="trail_data_accuracy">%1$s %2$s എന്ന ലൊക്കേഷനിൽ</string>
-    <string name="rate_text">നിങ്ങൾക്ക് ഈ ആപ്പ് ഇഷ്ടമായോ? ഇവിടെ ക്ലിക്ക് ചെയ്ത് പ്ലേ സ്റ്റോറിൽ ആപ്പിന് റേറ്റിംഗ് നൽകൂ.</string>
     <string name="target">ലക്ഷ്യം</string>
-    <string name="my_developer_profile">ഡെവലപ്പർ</string>
     <string name="eta_seconds">%1$s സെക്കന്റുകൾ</string>
     <string name="eta_minutes">%1$s മിനിറ്റുകൾ</string>
     <string name="eta_hours">%1$s മണിക്കൂർ %2$s മിനിറ്റുകൾ</string>
@@ -289,7 +275,6 @@
     <string name="gps_displacement_from_dest">ഡെസ്റ്റിൽ നിന്നുള്ള വ്യത്യാസം:</string>
     <string name="direction">ദിശ</string>
     <string name="targets">ലക്ഷ്യങ്ങൾ</string>
-    <string name="direction_info">ദിശാ വിവരങ്ങൾ</string>
     <string name="use_maps_target">മാപ്പിന്റെ ലക്ഷ്യം ഉപയോഗിക്കുക</string>
     <string name="using_maps_target">മാപ്പിന്റെ ലക്ഷ്യം ഉപയോഗിക്കുന്നു</string>
     <string name="edit">തിരുത്തുക</string>
@@ -301,14 +286,11 @@
     <string name="mechanical">യാന്ത്രികം</string>
     <string name="app_coordinates_format">സൂചികകളുടെ ഫോർമാറ്റ്</string>
     <string name="share">പങ്കുവയ്ക്കുക</string>
-    <string name="telegram_group">ടെലഗ്രാം ഗ്രൂപ്പ്</string>
-    <string name="buy_full_desc">ആപ്പ് അൺലോക്ക് ചെയ്തുകൊണ്ട് ആപ്പിന്റെ മുഴുവൻ പ്രവർത്തനവും ജനങ്ങൾക്കു ലഭ്യമാക്കുക.</string>
     <string name="notification_permission_desc">ഘടികാര വിഡ്ജറ്റിന്റെ പ്രവർത്തനം സുഗമമായി മുന്നോട്ടു പോകുവാൻ നോട്ടിഫിക്കേഷൻ അക്സസ് നൽകുക.</string>
     <string name="true_altitude">യഥാർത്ഥ ഉയരം</string>
     <string name="elongation">ഇ ലോ ങ്ങേ ഷൻ </string>
     <string name="radius">ആരം</string>
     <string name="crescent_width">ക്രസന്റ് വീതി</string>
-    <string name="other_apps">മറ്റ് ആപ്പുകൾ</string>
     <string name="measure">കണക്കുകൂട്ടുക</string>
     <string name="name">പേര്</string>
     <string name="saved_measures">സേവ് ചെയ്യപ്പെട്ട കണക്കുകൂട്ടലുകൾ</string>

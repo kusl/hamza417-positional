@@ -1,97 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset='utf-8'>
-    <meta content='width=device-width' name='viewport'>
+    <meta charset="utf-8">
+    <meta content="width=device-width" name="viewport">
     <link href="file:///android_asset/css/html_decoration.css" rel="stylesheet">
 </head>
-
 <body>
 
 <h1>Required Permissions</h1>
 
-<p>
-    This app uses location information to calculate all the information shown in this app,
-    does not collect any usage data, and does not sell any user's information to any third
-    party. These are the permissions the app only uses to show meaningful information to the
-    user.
-</p>
+<p>Positional uses your location only to show information on your device. It does not collect usage data and does not share or sell any information.</p>
 
-<br>
+<h2>Requested permissions</h2>
 
-<h2>Compulsory Permissions</h2>
+<h3>ACCESS_FINE_LOCATION</h3>
+<p>Reads precise location from GPS and other providers.</p>
 
-<p>
-    These permissions are required for the application's most of the features and functions. Not
-    granting them will break some of the features albeit the application will continue to work.
-</p>
+<h3>ACCESS_COARSE_LOCATION</h3>
+<p>Shows an approximate location until a precise fix is available.</p>
 
-<h3>
-    <li>ACCESS_FINE_LOCATION</li>
-</h3>
+<h3>POST_NOTIFICATIONS</h3>
+<p>Shows the notification required while a location service runs in the foreground.</p>
 
-<p>
-    It is required to run the GPS of the device and fetch the possibly accurate location details,
-    this app uses the default device's location APIs and permission is required to utilize those.
-</p>
+<h2>Automatic permissions</h2>
 
-<h3>
-    <li>ACCESS_COARSE_LOCATION</li>
-</h3>
+<h3>INTERNET</h3>
+<p>Loads map tiles and converts between coordinates and addresses.</p>
 
-<p>
-    Used to show a precise location data in case GPS is unavailable or until available.
-</p>
+<h3>ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE</h3>
+<p>Checks whether a network is available before loading maps or addresses.</p>
 
-<br>
-
-<br>
-
-<h2>Automatic Permissions</h2>
-
-<p>
-    These permissions are granted automatically by the system.
-</p>
-
-<h3>
-    <li>INTERNET</li>
-</h3>
-
-<p>
-    Used to fetch the address of the given location, load map and fetch latitude and longitude using
-    the address in specified location.
-</p>
-
-<h3>
-    <li>ACCESS_WIFI_STATE</li>
-</h3>
-
-<p>
-    Used to check if WiFi connectivity is available.
-</p>
-
-<h3>
-    <li>ACCESS_NETWORK_STATE</li>
-</h3>
-
-<p>
-    Used to check if network is available and is connected.
-</p>
-
-<h3>
-    <li>CHECK_LICENSE</li>
-</h3>
-
-<p>
-    Utilized only by the full version of the app. Allows the app to verify its integrity.
-</p>
-
-<h3>
-    <li>FOREGROUND_SERVICES</li>
-</h3>
-
-<p>
-    Allows the app to run a service to fetch location information.
-</p>
+<h3>FOREGROUND_SERVICE and FOREGROUND_SERVICE_SPECIAL_USE</h3>
+<p>Keeps location updates running while a trail or measurement is being recorded.</p>
 
 </body>
+</html>

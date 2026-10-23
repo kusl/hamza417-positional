@@ -8,7 +8,6 @@
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_item_line_spacing">10dp</dimen>
-    <dimen name="peek_height">150dp</dimen>
     <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
@@ -46,6 +45,5 @@
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">175dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="license_text_size">26sp</dimen>
     <dimen name="popup_text_size">16sp</dimen>
 </resources>
