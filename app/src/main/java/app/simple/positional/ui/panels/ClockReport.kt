@@ -14,6 +14,8 @@ import app.simple.positional.util.Direction
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.MoonAngle
 import app.simple.positional.util.MoonTimeFormatter.formatMoonDate
+import app.simple.positional.util.Twilight
+import app.simple.positional.util.TwilightSpan
 import app.simple.positional.util.Ordinal.toOrdinal
 import org.shredzone.commons.suncalc.MoonIllumination
 import org.shredzone.commons.suncalc.MoonPhase
@@ -69,16 +71,9 @@ class ClockReport(private val context: Context) {
         fun distance(kilometers: Double) =
             if (metric) "${"%.3E".format(kilometers)} ${text(R.string.kilometer)}" else "${"%.3E".format(kilometers.toMiles())} ${text(R.string.miles)}"
 
-        fun sunTimes() = SunTimes.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude).elevation(altitude)
-        val sun = sunTimes().execute()
-        val twilight = listOf(
-            SunTimes.Twilight.ASTRONOMICAL, SunTimes.Twilight.NAUTICAL, SunTimes.Twilight.CIVIL,
-            SunTimes.Twilight.NIGHT_HOUR, SunTimes.Twilight.BLUE_HOUR, SunTimes.Twilight.HORIZON,
-            SunTimes.Twilight.VISUAL, SunTimes.Twilight.VISUAL_LOWER, SunTimes.Twilight.GOLDEN_HOUR,
-        ).associateWith { sunTimes().twilight(it).execute() }
-        val golden = sunTimes().twilight(GOLDEN_HOUR_EDGE).execute()
-        fun rise(t: SunTimes.Twilight) = twilight.getValue(t).rise
-        fun set(t: SunTimes.Twilight) = twilight.getValue(t).set
+        val sun = SunTimes.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude).elevation(altitude).execute()
+        val day = Twilight.compute(latitude, longitude, timezone, now, altitude)
+        fun rows(spans: List<TwilightSpan>) = spans.map { InfoRow(text(it.phase.label), if (it.range) range(it.start, it.end) else time(it.start)) }
 
         val sunPosition = SunPosition.compute().timezone(timezone).on(now).at(latitude, longitude).elevation(altitude).execute()
         val moonPosition = MoonPosition.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude).elevation(altitude).execute()
@@ -98,26 +93,8 @@ class ClockReport(private val context: Context) {
                 InfoRow(text(R.string.sun_noon), time(sun.noon)),
                 InfoRow(text(R.string.sun_nadir), time(sun.nadir)),
             ),
-            twilight = listOf(
-                InfoRow(text(R.string.twilight_morning)),
-                InfoRow(text(R.string.twilight_astronomical_dusk), range(rise(SunTimes.Twilight.ASTRONOMICAL), rise(SunTimes.Twilight.NAUTICAL))),
-                InfoRow(text(R.string.twilight_nautical_dusk), range(rise(SunTimes.Twilight.NAUTICAL), rise(SunTimes.Twilight.CIVIL))),
-                InfoRow(text(R.string.twilight_blue_hour), range(rise(SunTimes.Twilight.NIGHT_HOUR), rise(SunTimes.Twilight.BLUE_HOUR))),
-                InfoRow(text(R.string.twilight_civil_dusk), range(rise(SunTimes.Twilight.CIVIL), rise(SunTimes.Twilight.HORIZON))),
-                InfoRow(text(R.string.twilight_visual), time(rise(SunTimes.Twilight.VISUAL))),
-                InfoRow(text(R.string.twilight_horizon), time(rise(SunTimes.Twilight.HORIZON))),
-                InfoRow(text(R.string.twilight_visual_lower), time(rise(SunTimes.Twilight.VISUAL_LOWER))),
-                InfoRow(text(R.string.twilight_golden_hour), range(golden.rise, rise(SunTimes.Twilight.GOLDEN_HOUR))),
-                InfoRow(text(R.string.twilight_evening)),
-                InfoRow(text(R.string.twilight_golden_hour), range(set(SunTimes.Twilight.GOLDEN_HOUR), golden.set)),
-                InfoRow(text(R.string.twilight_visual_lower), time(set(SunTimes.Twilight.VISUAL_LOWER))),
-                InfoRow(text(R.string.twilight_horizon), time(set(SunTimes.Twilight.HORIZON))),
-                InfoRow(text(R.string.twilight_visual), time(set(SunTimes.Twilight.VISUAL))),
-                InfoRow(text(R.string.twilight_civil_dusk), range(set(SunTimes.Twilight.HORIZON), set(SunTimes.Twilight.CIVIL))),
-                InfoRow(text(R.string.twilight_blue_hour), range(set(SunTimes.Twilight.BLUE_HOUR), set(SunTimes.Twilight.NIGHT_HOUR))),
-                InfoRow(text(R.string.twilight_nautical_dusk), range(set(SunTimes.Twilight.CIVIL), set(SunTimes.Twilight.NAUTICAL))),
-                InfoRow(text(R.string.twilight_astronomical_dusk), range(set(SunTimes.Twilight.NAUTICAL), set(SunTimes.Twilight.ASTRONOMICAL))),
-            ),
+            twilight = listOf(InfoRow(text(R.string.twilight_morning))) + rows(day.morning) +
+                InfoRow(text(R.string.twilight_evening)) + rows(day.evening),
             moonPosition = listOf(
                 InfoRow(text(R.string.moon_azimuth), direction(moonPosition.azimuth)),
                 InfoRow(text(R.string.moon_altitude), degrees(moonPosition.altitude)),
@@ -158,9 +135,5 @@ class ClockReport(private val context: Context) {
             seconds -> "HH:mm:ss"
             else -> "HH:mm"
         }
-    }
-
-    private companion object {
-        const val GOLDEN_HOUR_EDGE = -4.0
     }
 }

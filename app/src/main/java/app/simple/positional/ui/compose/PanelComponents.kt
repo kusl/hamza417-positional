@@ -5,7 +5,6 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import androidx.annotation.DimenRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -62,15 +61,8 @@ fun PanelToolbar(title: String, topInset: Dp, divider: Boolean = true, actions: 
 
 @Composable
 fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
-        if (graphic != null) {
-            Image(
-                graphic,
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(R.dimen.info_graphics_dimension)).align(Alignment.CenterEnd),
-            )
-        }
-        Column(Modifier.fillMaxWidth()) {
+    Row(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
             Text(
                 title,
                 fontFamily = PositionalFonts.light,
@@ -94,6 +86,13 @@ fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null, mo
                     modifier = Modifier.padding(top = if (row.value.isEmpty()) 8.dp else 0.dp),
                 )
             }
+        }
+        if (graphic != null) {
+            Image(
+                graphic,
+                contentDescription = null,
+                modifier = Modifier.padding(start = 12.dp).size(dimensionResource(R.dimen.info_graphics_dimension)),
+            )
         }
     }
 }

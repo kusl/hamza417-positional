@@ -17,7 +17,7 @@ A location, compass, clock, level, trail and measurement toolkit for Android. Co
 - **Level**: bubble level from the accelerometer.
 - **Trail**: record and review paths with markers.
 - **Measure** and **Direction**: distances between points and bearings to targets.
-- Home screen widgets for clock, sun time, moon phase and twilight.
+- Home screen widgets for clock, sun time, moon phase and twilight (Glance, hourly refresh).
 
 ## Install
 
@@ -39,7 +39,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -67,8 +67,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 8i | AppCompat, Material Components, fragments, ConstraintLayout and legacy support libraries removed: activities extend `ComponentActivity` with `enableEdgeToEdge`, day/night is applied through a configuration override (`NightMode`), splash and clock widget setup are Compose screens | Done |
 | 8j | Sub screens (accent colours, arts, time zones, saved measures, trails and directions, custom locations, map search, help pages) are Navigation Compose destinations inside `MainActivity`; the panel lifecycle follows its destination so sensors and maps pause while a sub screen is open; nine activities removed | Done |
 | 9a | Moon phase and sun time widgets on Glance (same receivers, so placed widgets keep working); location updates delivered through an in-process `LocationBus` instead of the deprecated `LocalBroadcastManager` | Done |
-| 9b | Twilight and sun time art widgets on Glance | Next |
-| 9c | Clock widgets without a per-second foreground service | Planned |
+| 9b | Twilight and sun time art widgets on Glance with shared widget parts; twilight times computed once in `Twilight` for the clock panel and widget; twilight and sun art widgets refresh hourly; info section graphics no longer overlap text | Done |
+| 9c | Clock widgets without a per-second foreground service | Next |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
 ## Building

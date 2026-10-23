@@ -10,7 +10,6 @@
     <dimen name="info_graphics_dimension">120dp</dimen>
 
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
 
@@ -25,13 +24,9 @@
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_secondary_text_size">14sp</dimen>
-
     <dimen name="bottom_nav_height">60dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>

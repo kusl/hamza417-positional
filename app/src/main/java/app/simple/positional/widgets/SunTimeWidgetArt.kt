@@ -1,93 +1,52 @@
 package app.simple.positional.widgets
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.padding
 import app.simple.positional.R
 import app.simple.positional.constants.LauncherBackground
-import app.simple.positional.constants.LocationPins
-import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import app.simple.positional.util.LocaleHelper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.shredzone.commons.suncalc.SunTimes
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
-class SunTimeWidgetArt : AppWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        onWidgetUpdate(context)
+class SunTimeWidgetArt : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = SunTimeArtGlance()
+}
 
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-    }
-
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
-
-        onWidgetUpdate(context)
-    }
-
-    private fun onWidgetUpdate(context: Context) {
-        CoroutineScope(Dispatchers.Default).launch {
-            SharedPreferences.init(context)
-
-            val latitude = if (MainPreferences.isCustomCoordinate()) {
-                getSharedPreferences().getFloat(MainPreferences.latitude, 0.0F).toDouble()
-            } else {
-                getSharedPreferences().getFloat(MainPreferences.lastLatitude, 0.0F).toDouble()
-            }
-
-            val longitude = if (MainPreferences.isCustomCoordinate()) {
-                getSharedPreferences().getFloat(MainPreferences.longitude, 0.0F).toDouble()
-            } else {
-                getSharedPreferences().getFloat(MainPreferences.lastLongitude, 0.0F).toDouble()
-            }
-
-            val pattern: DateTimeFormatter = if (ClockPreferences.getDefaultClockTimeFormat()) {
-                DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
-            } else {
-                DateTimeFormatter.ofPattern("HH:mm")
-            }
-
-            val sunTimes = SunTimes.compute().timezone(Calendar.getInstance().timeZone.id).on(Instant.now()).latitude(latitude).longitude(longitude).execute()
-            val sunRise = pattern.format(sunTimes.rise)
-            val sunNoon = pattern.format(sunTimes.noon)
-            val sunSet = pattern.format(sunTimes.set)
-            val sunNadir = pattern.format(sunTimes.nadir)
-
-            val updateTime = context.getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
-
-            withContext(Dispatchers.Main) {
-                val views = RemoteViews(context.packageName, R.layout.widget_suntime_art)
-                views.setTextViewText(R.id.widget_sunrise, sunRise)
-                views.setTextViewText(R.id.widget_sun_noon, sunNoon)
-                views.setTextViewText(R.id.widget_sunset, sunSet)
-                views.setTextViewText(R.id.widget_sun_nadir, sunNadir)
-
-                views.setTextViewText(R.id.widget_suntime_heading, updateTime)
-
-                views.setImageViewResource(R.id.widget_suntime_art,
-                        LauncherBackground.vectorBackground[LauncherBackground.vectorBackground.indices.random()])
-
-                if (MainPreferences.isCustomCoordinate()) {
-                    views.setImageViewResource(R.id.widget_suntime_icon, R.drawable.ic_place_custom)
-                } else {
-                    views.setImageViewResource(R.id.widget_suntime_icon, LocationPins.locationsPins[GPSPreferences.getPinSkin()])
+class SunTimeArtGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        SharedPreferences.init(context)
+        val pattern = WidgetSky.pattern()
+        val times = withContext(Dispatchers.Default) { WidgetSky.sunTimes(pattern) }
+        val pin = WidgetSky.pin()
+        val title = context.getString(R.string.app_name)
+        val updated = WidgetSky.updated(context, pattern)
+        val art = LauncherBackground.vectorBackground.random()
+        provideContent {
+            Box(
+                GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).cornerRadius(20.dp),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                Image(ImageProvider(art), contentDescription = null, modifier = GlanceModifier.fillMaxWidth(), contentScale = ContentScale.Fit)
+                Column(GlanceModifier.fillMaxSize().padding(10.dp)) {
+                    WidgetHeader(pin, title, updated)
+                    SunTimesRow(times, GlanceModifier.fillMaxWidth().padding(top = 10.dp))
                 }
-
-                val componentName = ComponentName(context, SunTimeWidgetArt::class.java)
-                val manager = AppWidgetManager.getInstance(context)
-                manager.updateAppWidget(componentName, views)
             }
         }
     }
