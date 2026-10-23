@@ -218,8 +218,40 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.240s
 user	0m0.526s
 sys	0m0.744s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-04-04-01
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/decorations/views/PhysicalRotationImageView.java app/src/main/java/app/simple/positional/decorations/views/SunPosition.java app/src/main/java/app/simple/positional/decorations/views/VerticalTextView.java app/src/main/java/app/simple/positional/math/Euler.kt app/src/main/java/app/simple/positional/math/Quaternion.kt app/src/main/java/app/simple/positional/math/QuaternionMath.kt app/src/main/java/app/simple/positional/math/Vector3Utils.kt app/src/main/java/app/simple/positional/util/DisplayRefreshRate.kt app/src/main/java/app/simple/positional/util/StringUtils.kt app/src/main/res/drawable/ic_coordinate_route.xml app/src/main/res/layout-land/fragment_clock.xml app/src/main/res/layout-land/fragment_compass.xml app/src/main/res/layout-land/fragment_direction.xml app/src/main/res/layout-land/fragment_level.xml app/src/main/res/layout/fragment_clock.xml app/src/main/res/layout/fragment_compass.xml app/src/main/res/layout/fragment_direction.xml app/src/main/res/layout/fragment_level.xml app/src/main/res/layout/generic_compass_rose.xml app/src/main/res/layout/info_panel_clock.xml app/src/main/res/layout/info_panel_compass.xml app/src/main/res/layout/info_panel_direction.xml app/src/main/res/layout/toolbar_clock.xml app/src/main/res/layout/toolbar_level.xml app/src/test/java/app/simple/positional/math/QuaternionTest.kt
+rm 'app/src/main/java/app/simple/positional/decorations/views/PhysicalRotationImageView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/SunPosition.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/VerticalTextView.java'
+rm 'app/src/main/java/app/simple/positional/math/Euler.kt'
+rm 'app/src/main/java/app/simple/positional/math/Quaternion.kt'
+rm 'app/src/main/java/app/simple/positional/math/QuaternionMath.kt'
+rm 'app/src/main/java/app/simple/positional/math/Vector3Utils.kt'
+rm 'app/src/main/java/app/simple/positional/util/DisplayRefreshRate.kt'
+rm 'app/src/main/java/app/simple/positional/util/StringUtils.kt'
+rm 'app/src/main/res/drawable/ic_coordinate_route.xml'
+rm 'app/src/main/res/layout-land/fragment_clock.xml'
+rm 'app/src/main/res/layout-land/fragment_compass.xml'
+rm 'app/src/main/res/layout-land/fragment_direction.xml'
+rm 'app/src/main/res/layout-land/fragment_level.xml'
+rm 'app/src/main/res/layout/fragment_clock.xml'
+rm 'app/src/main/res/layout/fragment_compass.xml'
+rm 'app/src/main/res/layout/fragment_direction.xml'
+rm 'app/src/main/res/layout/fragment_level.xml'
+rm 'app/src/main/res/layout/generic_compass_rose.xml'
+rm 'app/src/main/res/layout/info_panel_clock.xml'
+rm 'app/src/main/res/layout/info_panel_compass.xml'
+rm 'app/src/main/res/layout/info_panel_direction.xml'
+rm 'app/src/main/res/layout/toolbar_clock.xml'
+rm 'app/src/main/res/layout/toolbar_level.xml'
+rm 'app/src/test/java/app/simple/positional/math/QuaternionTest.kt'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-04-04-23
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.306s
+user	0m0.559s
+sys	0m0.733s
 kushal@fedora:~/src/kotlin/positional$ 
-
-
-
 
