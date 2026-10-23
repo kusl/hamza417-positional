@@ -1499,3 +1499,118 @@ Claude finished the response
 
 
 please continue with the next phase 
+
+Claude
+/
+Ran 20 commands, shared files
+The phase 8c archive was never extracted: master has the 8c git rm deletions but none of its new or changed files. So BottomBarItems.java still points at Measure.TAG, and the 8c deletions removed classes that GPS, Trail, Measure, Compass, Time and Direction still use. The CI run for 60941f69 will fail. positional-phase8c-8d.tar.gz contains all of 8c plus the new 8d work, built on the commit just before 8c, so extracting it at the repo root fixes master. As before, I couldn’t compile here, so CI is the real check.
+
+Phase 8d:
+
+Dialog host: a new DialogHost holds the panel dialogs, and the panels’ Compose views draw it alongside the panel menus.
+Error dialogs: the sensor error and Play-services error are now a Compose MessageDialog.
+Clock motion type: it now uses the existing Compose choice dialog.
+New measure / new trail: both reuse the Compose name-and-note dialog. New trail still remembers an unfinished name and note between openings and rejects duplicate trail names.
+New marker: same dialog, now with an inline row of marker icons. This replaces the popup marker grid.
+Deleted: 5 dialog fragments, the marker popup and its adapter, 2 unused view classes, 7 layouts, 2 animations, 1 style and 1 colour.
+New test: DialogHostTest.
+README: updated. What’s left of phase 8 is now 8e, the remaining dialogs, which is next. The single activity with Navigation Compose and dropping the AppCompat themes moved to 8f.
+Steps:
+
+Extract positional-phase8c-8d.tar.gz at the repo root.
+Run this (it lists only files that still exist on master):
+sh
+git rm app/src/main/java/app/simple/positional/adapters/trail/AdapterPopupMarkers.kt app/src/main/java/app/simple/positional/decorations/popup/PopupLinearLayout.java app/src/main/java/app/simple/positional/decorations/views/CustomRadioButton.java app/src/main/java/app/simple/positional/dialogs/app/ErrorDialog.kt app/src/main/java/app/simple/positional/dialogs/clock/ClockMotionType.kt app/src/main/java/app/simple/positional/dialogs/measure/MeasureAdd.kt app/src/main/java/app/simple/positional/dialogs/trail/AddMarker.kt app/src/main/java/app/simple/positional/dialogs/trail/AddTrail.kt app/src/main/java/app/simple/positional/popups/trail/PopupMarkers.kt app/src/main/res/anim/marker_grid_anim.xml app/src/main/res/anim/marker_grid_controller.xml app/src/main/res/layout/adapter_popup_markers.xml app/src/main/res/layout/dialog_clock_motion_type.xml app/src/main/res/layout/dialog_error.xml app/src/main/res/layout/dialog_measure_add.xml app/src/main/res/layout/dialog_on_trail_add.xml app/src/main/res/layout/dialog_trail_name.xml app/src/main/res/layout/popup_trail_markers.xml
+Check with git status that MenuSheet.kt, PanelMenus.kt and DialogHost.kt show as new files before committing.
+
+Positional phase8c 8d.tar
+GZ 
+Please continue with the next phase 
+I have updated the dump and pushed all the files to github.
+
+Ran 25 commands, shared files
+Phase 8e is in positional-phase8e.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8c and 8d) passed CI. I still can’t compile here, so the next CI run is the real check for 8e.
+
+Dialogs now in Compose:
+
+Clock needle and bloom skin pickers: swipe pages with a “3/10”-style counter; the choice saves when the swipe settles.
+Pin customization: pin pager, size and opacity sliders, and a reset button.
+Compass physical properties: an on/off switch, three sliders, reset and help. As before, a slider at 0 saves 0.1.
+Compass calibration: it no longer registers its own sensors. It shows the accuracy the compass or direction panel already reads, so nothing extra runs while it is open.
+Target coordinates: latitude and longitude fields, with the save button enabled only for valid coordinates. The search button still opens map search and fills in the result.
+Removed:
+
+The permission dialog was never shown anywhere, so it and its callback interface are gone. MainActivity keeps its permission request as a private method.
+The old switch view, the three pager adapters and the base dialog class those dialogs used.
+Thirteen layouts, four drawables and the dimensions and strings only they used.
+New test: PhysicsValueTest, for the 0 → 0.1 rule.
+
+README: phase 8 is now split further:
+
+Phase	Scope
+8f (next)	Location parameters, location and coordinate details, and the panel switcher
+8g	Single activity with Navigation Compose, dropping the AppCompat themes
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/adapters/clock/ClockNeedleSkinsAdapter.kt app/src/main/java/app/simple/positional/adapters/compass/BloomSkinAdapter.kt app/src/main/java/app/simple/positional/adapters/maps/PinSkinAdapter.kt app/src/main/java/app/simple/positional/callbacks/PermissionCallbacks.kt app/src/main/java/app/simple/positional/decorations/switchview/SwitchCallbacks.java app/src/main/java/app/simple/positional/decorations/switchview/SwitchFrameLayout.kt app/src/main/java/app/simple/positional/decorations/switchview/SwitchView.kt app/src/main/java/app/simple/positional/decorations/views/CustomDialogFragment.kt app/src/main/java/app/simple/positional/dialogs/app/Permission.kt app/src/main/java/app/simple/positional/dialogs/clock/ClockNeedle.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassBloom.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassCalibration.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassPhysicalProperties.kt app/src/main/java/app/simple/positional/dialogs/gps/PinCustomization.kt app/src/main/java/app/simple/positional/dialogs/gps/TargetCoordinates.kt app/src/main/res/drawable/seek_bar.xml app/src/main/res/drawable/switch_thumb.xml app/src/main/res/drawable/text_cursor.xml app/src/main/res/drawable/text_field.xml app/src/main/res/layout-land/dialog_pin_customization.xml app/src/main/res/layout/adapter_bloom_skin.xml app/src/main/res/layout/adapter_clock_needle.xml app/src/main/res/layout/adapter_pins.xml app/src/main/res/layout/dialog_clock_needle_skins.xml app/src/main/res/layout/dialog_compass_bloom.xml app/src/main/res/layout/dialog_compass_calibration.xml app/src/main/res/layout/dialog_compass_physical_properties.xml app/src/main/res/layout/dialog_permission_info.xml app/src/main/res/layout/dialog_pin_customization.xml app/src/main/res/layout/dialog_target_location.xml app/src/main/res/layout/switch_view.xml
+
+Positional phase8e.tar
+GZ 
+please continue with the next phase
+
+Ran 20 commands, shared files
+Replacing sparkline charts with Compose Canvas to simplify the codebase.
+Tracking a shared list mutation in graph data handling.
+Now write the helpers and the VM edit.
+Building composable dialogs for displaying location details.
+Cleaning up redundant null checks and reviewing state producer usage.
+Setting up GPS accuracy tracking in the app.
+Debugging non-local returns inside Kotlin's let function.
+Removing unused UI components and styleable entries from the codebase.
+Cleaning up unused layout attributes and resources.
+Tracking down unused imports in CustomLocationsActivity.
+Trimming unused code and stripping files to essentials.
+Cleaning up unused drawables, dimens, and dependencies.
+Tracing dependencies on the animation code elsewhere.
+Checking rounding logic for precise decimal calculations.
+Checking for leftover references after removing location code.
+Presented file
+Phase 8f is in positional-phase8f.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8e) passed CI. I can’t compile here, so the next CI run is the real check for 8f.
+
+Dialogs now in Compose:
+
+Location summary (the GPS toolbar pin button and the clock panel’s location button): time zone, latitude, longitude and address, with a share button. Share uses the same text as the GPS panel’s share, now in one shared helper.
+Location details: accuracy and altitude history drawn as Compose line charts, with min, max and average in metres or feet.
+Coordinate formats: degrees-minutes-seconds, degrees-minutes, decimal degrees, MGRS and UTM, with a copy button.
+Battery fix: the location view model was computing all five coordinate formats, including MGRS and UTM, on every GPS fix even when nothing showed them. They are now computed only while the coordinate dialog is open. The accuracy and altitude history lists are also handed out as copies, so the UI never reads a list while it is being changed.
+
+Removed:
+
+The three dialog fragments and their layouts.
+The old sparkline chart package.
+The fast-scroller package, the custom list view and its list-row helper. Nothing used them after this change.
+Two unused view classes.
+The dynamicanimation dependency.
+Unused styles, styleables, dimensions and strings, in every language.
+TextViewUtils is cut down to the one function still used.
+New tests: SeriesStatsTest and LocationShareTest.
+
+README: updated. The panel switcher moves to 8g, together with the single activity and dropping the AppCompat themes. It lives in MainActivity, which 8g replaces.
+
+Delete these:
+
+sh
+git rm -r app/src/main/java/app/simple/positional/decorations/corners/DynamicCornersNestedScrollView.java app/src/main/java/app/simple/positional/decorations/fastscroll app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleImageButton.java app/src/main/java/app/simple/positional/decorations/viewholders/VerticalListViewHolder.kt app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt app/src/main/java/app/simple/positional/dialogs/app/LocationParameters.kt app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt app/src/main/java/app/simple/positional/dialogs/gps/LocationExpansion.kt app/src/main/java/app/simple/positional/sparkline app/src/main/res/drawable/fs_md2_thumb.xml app/src/main/res/drawable/fs_md2_track.xml app/src/main/res/drawable/fs_thumb.xml app/src/main/res/drawable/ripple_btn.xml app/src/main/res/layout/dialog_custom_location_shortcut.xml app/src/main/res/layout/expansion_dialog_coordinates.xml app/src/main/res/layout/expansion_dialog_location.xml
+
+Positional phase8f.tar
+GZ 
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+
+Claude finished the response
