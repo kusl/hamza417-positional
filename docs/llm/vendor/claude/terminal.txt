@@ -90,4 +90,14 @@ rm 'app/src/main/res/layout/dialog_locales.xml'
 rm 'app/src/main/res/layout/dialog_location_provider.xml'
 rm 'app/src/main/res/layout/dialog_unit_menu.xml'
 rm 'app/src/main/res/layout/popup_fragments.xml'
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.389s
+user	0m0.610s
+sys	0m0.804s
 kushal@fedora:~/src/kotlin/positional$ 
+
+
+
+
+
