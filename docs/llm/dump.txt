@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T08:18:00-04:00
+Generated: 2026-10-23T08:26:08-04:00
 Branch:    master
-Commit:    5ad8d2af 2026-10-23 08:17:51 -0400 add prompt
+Commit:    4eba4154 2026-10-23 08:25:59 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (1009 files)
+## TREE (981 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -158,7 +158,6 @@ app/
                   DynamicRippleButton.java
                   DynamicRippleImageButton.java
                   DynamicRippleLinearLayout.java
-                  DynamicRippleTextView.java
                   Utils.java
                 switchview/
                   SwitchCallbacks.java
@@ -188,29 +187,22 @@ app/
                   Panels.kt
                   Permission.kt
                 clock/
-                  ClockMenu.kt
                   ClockMotionType.kt
                   ClockNeedle.kt
                 compass/
                   CompassBloom.kt
                   CompassCalibration.kt
-                  CompassMenu.kt
                   CompassPhysicalProperties.kt
-                direction/
-                  DirectionMenu.kt
                 gps/
                   CoordinatesExpansion.kt
-                  GPSMenu.kt
                   LocationExpansion.kt
                   PinCustomization.kt
                   TargetCoordinates.kt
                 measure/
                   MeasureAdd.kt
-                  MeasureMenu.kt
                 trail/
                   AddMarker.kt
                   AddTrail.kt
-                  TrailMenu.kt
               extensions/
                 activity/
                   BaseActivity.kt
@@ -434,8 +426,6 @@ app/
           ic_bearing_marker.xml
           ic_bearing_rotation.xml
           ic_bike.xml
-          ic_bloom.xml
-          ic_bloom_skin.xml
           ic_bus.xml
           ic_cabin.xml
           ic_camp.xml
@@ -455,21 +445,16 @@ app/
           ic_cottage.xml
           ic_crosshair.xml
           ic_day.xml
-          ic_direction_code.xml
           ic_direction_indicator.xml
           ic_earth.xml
           ic_expand_up.xml
-          ic_filter_b_and_w.xml
           ic_flag.xml
           ic_flight_land.xml
           ic_flight_takeoff.xml
           ic_full_screen.xml
-          ic_geodesic.xml
-          ic_gimbal_lock.xml
           ic_gps_fixed.xml
           ic_gps_not_fixed.xml
           ic_gps_off.xml
-          ic_help.xml
           ic_help_outline.xml
           ic_hiking.xml
           ic_home.xml
@@ -477,12 +462,10 @@ app/
           ic_icecream.xml
           ic_kayaking.xml
           ic_kitesurfing.xml
-          ic_label.xml
           ic_level.xml
           ic_local_cafe.xml
           ic_menu.xml
           ic_moon_phase.xml
-          ic_motion_type.xml
           ic_mountain.xml
           ic_navigation.xml
           ic_near_me.xml
@@ -509,12 +492,10 @@ app/
           ic_place_custom.xml
           ic_place_historical.xml
           ic_place_notification.xml
-          ic_precision.xml
           ic_reset.xml
           ic_route_changed.xml
           ic_rowing.xml
           ic_sailing.xml
-          ic_satellite.xml
           ic_save.xml
           ic_saved_trails.xml
           ic_search.xml
@@ -526,7 +507,6 @@ app/
           ic_snowmobile.xml
           ic_square.xml
           ic_square_foot.xml
-          ic_square_root.xml
           ic_storefront.xml
           ic_storm.xml
           ic_sunrise.xml
@@ -534,19 +514,16 @@ app/
           ic_swim.xml
           ic_timezone.xml
           ic_touch_indicator.xml
-          ic_traffic.xml
           ic_trail_line.xml
           ic_trail_start.xml
           ic_train.xml
           ic_tree.xml
-          ic_twenty_four_hours.xml
           ic_twilight.xml
           ic_widget_sun_nadir.xml
           ic_widget_sun_noon.xml
           ic_widget_sun_set.xml
           ic_widget_sunrise.xml
           ic_wine_bar.xml
-          ic_zoom_in.xml
           launcher_day_01.xml
           launcher_day_02.xml
           launcher_day_03.xml
@@ -713,25 +690,19 @@ app/
           adapter_panel.xml
           adapter_pins.xml
           adapter_popup_markers.xml
-          dialog_clock_menu.xml
           dialog_clock_motion_type.xml
           dialog_clock_needle_skins.xml
           dialog_compass_bloom.xml
           dialog_compass_calibration.xml
-          dialog_compass_menu.xml
           dialog_compass_physical_properties.xml
           dialog_custom_location_shortcut.xml
-          dialog_direction_menu.xml
           dialog_error.xml
-          dialog_gps_menu.xml
           dialog_measure_add.xml
-          dialog_measure_menu.xml
           dialog_on_trail_add.xml
           dialog_panel_switcher.xml
           dialog_permission_info.xml
           dialog_pin_customization.xml
           dialog_target_location.xml
-          dialog_trail_menu.xml
           dialog_trail_name.xml
           expansion_dialog_coordinates.xml
           expansion_dialog_location.xml
@@ -7671,35 +7642,6 @@ public class DynamicRippleLinearLayout extends LinearLayout {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleTextView.java
-################################################################################
-package app.simple.positional.decorations.ripple;
-
-import android.content.Context;
-import android.graphics.Color;
-import android.util.AttributeSet;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-public class DynamicRippleTextView extends androidx.appcompat.widget.AppCompatTextView {
-    public DynamicRippleTextView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        setBackgroundColor(Color.TRANSPARENT);
-        if (!isInEditMode()) {
-            setBackground(Utils.getRippleDrawable(getContext(), getBackground(), 1.5F));
-        }
-    }
-
-    public DynamicRippleTextView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        setBackgroundColor(Color.TRANSPARENT);
-        if (!isInEditMode()) {
-            setBackground(Utils.getRippleDrawable(getContext(), getBackground(), 1.5F));
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/ripple/Utils.java
 ################################################################################
 package app.simple.positional.decorations.ripple;
@@ -9671,100 +9613,6 @@ class Permission : CustomBottomSheetDialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/clock/ClockMenu.kt
-################################################################################
-package app.simple.positional.dialogs.clock
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.ClockPreferences
-
-class ClockMenu : CustomBottomSheetDialogFragment() {
-    private lateinit var motionType: DynamicRippleTextView
-    private lateinit var defaultTimeFormatSwitch: SwitchView
-    private lateinit var secondsPrecisionSwitchView: SwitchView
-    private lateinit var clock24HourFace: SwitchView
-    private lateinit var defaultTimeFormatContainer: DynamicRippleLinearLayout
-    private lateinit var clock24HourFaceContainer: DynamicRippleLinearLayout
-    private lateinit var secondsPrecisionContainer: DynamicRippleLinearLayout
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_clock_menu, container, false)
-
-        motionType = view.findViewById(R.id.clock_motion_type_text)
-        defaultTimeFormatContainer = view.findViewById(R.id.clock_menu_default_time_format)
-        defaultTimeFormatSwitch = view.findViewById(R.id.toggle_default_time_format)
-        clock24HourFace = view.findViewById(R.id.toggle_24_hours_clock)
-        secondsPrecisionSwitchView = view.findViewById(R.id.toggle_remove_seconds_precision)
-        secondsPrecisionContainer = view.findViewById(R.id.clock_menu_remove_seconds_container)
-        clock24HourFaceContainer = view.findViewById(R.id.clock_menu_24_hours_clock)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        defaultTimeFormatSwitch.isChecked = ClockPreferences.getDefaultClockTimeFormat()
-        secondsPrecisionSwitchView.isChecked = ClockPreferences.isUsingSecondsPrecision()
-        clock24HourFace.isChecked = ClockPreferences.isClockFace24Hour()
-
-        defaultTimeFormatContainer.setOnClickListener {
-            defaultTimeFormatSwitch.invertCheckedStatus()
-        }
-
-        defaultTimeFormatSwitch.setOnCheckedChangeListener { isChecked ->
-            ClockPreferences.setDefaultClockTime(isChecked)
-        }
-
-        clock24HourFace.setOnCheckedChangeListener {
-            ClockPreferences.setClockFaceType(it)
-        }
-
-        secondsPrecisionContainer.setOnClickListener {
-            secondsPrecisionSwitchView.invertCheckedStatus()
-        }
-
-        secondsPrecisionSwitchView.setOnCheckedChangeListener {
-            ClockPreferences.setUseSecondsPrecision(it)
-        }
-
-        clock24HourFaceContainer.setOnClickListener {
-            clock24HourFace.isChecked = !clock24HourFace.isChecked
-        }
-
-        view.findViewById<TextView>(R.id.clock_needle_theme_text).setOnClickListener {
-            ClockNeedle.newInstance().show(parentFragmentManager, "clock_menu")
-            dismiss()
-        }
-
-        motionType.setOnClickListener {
-            ClockMotionType.newInstance().show(parentFragmentManager, "clock_menu")
-            dismiss()
-        }
-    }
-
-    companion object {
-        fun newInstance(): ClockMenu {
-            val args = Bundle()
-            val fragment = ClockMenu()
-            fragment.arguments = args
-            return fragment
-        }
-
-        const val TAG = "clock_menu"
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/dialogs/clock/ClockMotionType.kt
 ################################################################################
 package app.simple.positional.dialogs.clock
@@ -10122,94 +9970,6 @@ class CompassCalibration : CustomDialogFragment(), SensorEventListener {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/compass/CompassMenu.kt
-################################################################################
-package app.simple.positional.dialogs.compass
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.CompassPreferences
-import app.simple.positional.preferences.CompassPreferences.isFlowerBloomOn
-import app.simple.positional.preferences.CompassPreferences.setDirectionCode
-import app.simple.positional.preferences.CompassPreferences.setFlowerBloom
-
-class CompassMenu : CustomBottomSheetDialogFragment() {
-    private lateinit var toggleFlower: SwitchView
-    private lateinit var toggleCode: SwitchView
-    private lateinit var toggleGimbalLock: SwitchView
-    private lateinit var bloomSkins: DynamicRippleTextView
-    private lateinit var bloomSwitchContainer: DynamicRippleLinearLayout
-    private lateinit var codeSwitchContainer: DynamicRippleLinearLayout
-    private lateinit var gimbalLockSwitchContainer: DynamicRippleLinearLayout
-    private lateinit var physicalProperties: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_compass_menu, container, false)
-
-        toggleFlower = view.findViewById(R.id.toggle_flower)
-        toggleCode = view.findViewById(R.id.toggle_code)
-        bloomSkins = view.findViewById(R.id.compass_bloom_skins_text)
-        toggleGimbalLock = view.findViewById(R.id.toggle_gimbal_lock)
-        bloomSwitchContainer = view.findViewById(R.id.bloom_switch_container)
-        codeSwitchContainer = view.findViewById(R.id.compass_menu_show_code)
-        gimbalLockSwitchContainer = view.findViewById(R.id.compass_menu_gimbal_lock)
-        physicalProperties = view.findViewById(R.id.compass_speed)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        toggleCode.isChecked = CompassPreferences.getDirectionCode()
-        toggleFlower.isChecked = isFlowerBloomOn()
-        toggleGimbalLock.isChecked = CompassPreferences.isUsingGimbalLock()
-
-        toggleFlower.setOnCheckedChangeListener { isChecked ->
-            setFlowerBloom(isChecked)
-        }
-
-        bloomSkins.setOnClickListener {
-            CompassBloom().show(parentFragmentManager, "compass_bloom")
-            dismiss()
-        }
-
-        bloomSwitchContainer.setOnClickListener {
-            toggleFlower.isChecked = !toggleFlower.isChecked
-        }
-
-        codeSwitchContainer.setOnClickListener {
-            toggleCode.isChecked = !toggleCode.isChecked
-        }
-
-        toggleCode.setOnCheckedChangeListener { isChecked ->
-            setDirectionCode(isChecked)
-        }
-
-        toggleGimbalLock.setOnCheckedChangeListener {
-            CompassPreferences.setUseGimbalLock(it)
-        }
-
-        gimbalLockSwitchContainer.setOnClickListener {
-            toggleGimbalLock.isChecked = !toggleGimbalLock.isChecked
-        }
-
-        physicalProperties.setOnClickListener {
-            CompassPhysicalProperties().show(parentFragmentManager, "compass_properties")
-            dismiss()
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/dialogs/compass/CompassPhysicalProperties.kt
 ################################################################################
 package app.simple.positional.dialogs.compass
@@ -10354,87 +10114,6 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
         objectAnimator?.interpolator = DecelerateInterpolator()
         objectAnimator?.setAutoCancel(true)
         objectAnimator?.start()
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/direction/DirectionMenu.kt
-################################################################################
-package app.simple.positional.dialogs.direction
-
-import android.content.Intent
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import app.simple.positional.R
-import app.simple.positional.activities.subactivity.DirectionsActivity
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.DirectionPreferences
-import app.simple.positional.preferences.GPSPreferences
-
-class DirectionMenu : CustomBottomSheetDialogFragment() {
-    private lateinit var gimbalLock: SwitchView
-    private lateinit var mapsTarget: SwitchView
-    private lateinit var directionTargets: DynamicRippleTextView
-
-    private lateinit var gimbalLockContainer: DynamicRippleLinearLayout
-    private lateinit var mapsTargetContainer: DynamicRippleLinearLayout
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_direction_menu, container, false)
-
-        gimbalLock = view.findViewById(R.id.toggle_gimbal_lock)
-        mapsTarget = view.findViewById(R.id.toggle_use_target)
-        directionTargets = view.findViewById(R.id.direction_target_list)
-
-        gimbalLockContainer = view.findViewById(R.id.compass_menu_gimbal_lock)
-        mapsTargetContainer = view.findViewById(R.id.direction_menu_use_target)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        gimbalLock.isChecked = DirectionPreferences.isGimbalLock()
-        mapsTarget.isChecked = DirectionPreferences.isUsingMapsTarget()
-
-        gimbalLock.setOnCheckedChangeListener {
-            DirectionPreferences.setGimbalLock(it)
-        }
-
-        mapsTarget.setOnCheckedChangeListener {
-            DirectionPreferences.setUseMapsTarget(it)
-        }
-
-        directionTargets.setOnClickListener {
-            startActivity(Intent(requireActivity(), DirectionsActivity::class.java))
-        }
-
-        gimbalLockContainer.setOnClickListener {
-            gimbalLock.invertCheckedStatus()
-        }
-
-        mapsTargetContainer.setOnClickListener {
-            mapsTarget.invertCheckedStatus()
-        }
-
-        mapsTarget.isClickable = GPSPreferences.isTargetMarkerSet()
-        mapsTargetContainer.isClickable = GPSPreferences.isTargetMarkerSet()
-        mapsTargetContainer.alpha = if (GPSPreferences.isTargetMarkerSet()) 1F else 0.5F
-    }
-
-    companion object {
-        fun newInstance(): DirectionMenu {
-            val args = Bundle()
-            val fragment = DirectionMenu()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }
 
@@ -10644,163 +10323,6 @@ class CoordinatesExpansion : CustomBottomSheetDialogFragment() {
         fun newInstance(): CoordinatesExpansion {
             val args = Bundle()
             val fragment = CoordinatesExpansion()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/gps/GPSMenu.kt
-################################################################################
-package app.simple.positional.dialogs.gps
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import app.simple.positional.R
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
-import app.simple.positional.constants.HtmlPage
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.GPSPreferences
-
-class GPSMenu : CustomBottomSheetDialogFragment() {
-    private lateinit var toggleLabel: SwitchView
-    private lateinit var toggleBuilding: SwitchView
-    private lateinit var toggleTraffic: SwitchView
-    private lateinit var toggleSatellite: SwitchView
-    private lateinit var toggleHighContrast: SwitchView
-    private lateinit var toggleVolumeKeys: SwitchView
-    private lateinit var togglePinCustomization: DynamicRippleTextView
-
-    private lateinit var toggleLabelContainer: DynamicRippleLinearLayout
-    private lateinit var toggleBuildingContainer: DynamicRippleLinearLayout
-    private lateinit var toggleTrafficContainer: DynamicRippleLinearLayout
-    private lateinit var toggleSatelliteContainer: DynamicRippleLinearLayout
-    private lateinit var toggleHighContrastContainer: DynamicRippleLinearLayout
-    private lateinit var toggleVolumeKeysContainer: DynamicRippleLinearLayout
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_gps_menu, container, false)
-
-        toggleLabel = view.findViewById(R.id.toggle_label)
-        toggleBuilding = view.findViewById(R.id.toggle_buildings)
-        toggleTraffic = view.findViewById(R.id.toggle_traffic)
-        toggleSatellite = view.findViewById(R.id.toggle_satellite)
-        toggleHighContrast = view.findViewById(R.id.toggle_high_contrast)
-        toggleVolumeKeys = view.findViewById(R.id.toggle_use_volume_keys)
-        togglePinCustomization = view.findViewById(R.id.gps_pin_customization)
-
-        toggleLabelContainer = view.findViewById(R.id.gps_menu_show_label_container)
-        toggleBuildingContainer = view.findViewById(R.id.gps_menu_show_building_container)
-        toggleTrafficContainer = view.findViewById(R.id.gps_menu_traffic_container)
-        toggleSatelliteContainer = view.findViewById(R.id.gps_menu_satellite_mode_container)
-        toggleHighContrastContainer = view.findViewById(R.id.gps_menu_high_contrast_container)
-        toggleBuildingContainer = view.findViewById(R.id.gps_menu_show_building_container)
-        toggleVolumeKeysContainer = view.findViewById(R.id.gps_menu_volume_keys_container)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        toggleLabel.isChecked = GPSPreferences.isLabelOn()
-        toggleBuilding.isChecked = GPSPreferences.getShowBuildingsOnMap()
-        toggleTraffic.isChecked = GPSPreferences.isTrafficShown()
-        toggleSatellite.isChecked = GPSPreferences.isSatelliteOn()
-        toggleHighContrast.isChecked = GPSPreferences.getHighContrastMap()
-        toggleVolumeKeys.isChecked = GPSPreferences.isUsingVolumeKeys()
-
-        toggleLabel.setOnCheckedChangeListener { isChecked ->
-            GPSPreferences.setLabelMode(isChecked)
-        }
-
-        toggleSatellite.setOnCheckedChangeListener { isChecked ->
-            GPSPreferences.setSatelliteMode(isChecked)
-            if (isChecked) {
-                satelliteOverrides(0.4F, isChecked)
-            } else {
-                satelliteOverrides(1.0F, isChecked)
-            }
-        }
-
-        toggleHighContrast.setOnCheckedChangeListener {
-            GPSPreferences.setHighContrastMap(it)
-        }
-
-        toggleBuilding.setOnCheckedChangeListener {
-            GPSPreferences.setShowBuildingsOnMap(it)
-        }
-
-        toggleTraffic.setOnCheckedChangeListener {
-            GPSPreferences.setTrafficMode(it)
-        }
-
-        toggleVolumeKeys.setOnCheckedChangeListener {
-            GPSPreferences.setUseVolumeKeys(it)
-        }
-
-        togglePinCustomization.setOnClickListener {
-            PinCustomization.newInstance(false)
-                .show(requireActivity().supportFragmentManager, "pin_customization")
-            dismiss()
-        }
-
-        toggleLabelContainer.setOnClickListener {
-            toggleLabel.invertCheckedStatus()
-        }
-
-        toggleSatelliteContainer.setOnClickListener {
-            toggleSatellite.invertCheckedStatus()
-        }
-
-        toggleHighContrastContainer.setOnClickListener {
-            toggleHighContrast.invertCheckedStatus()
-        }
-
-        toggleBuildingContainer.setOnClickListener {
-            toggleBuilding.invertCheckedStatus()
-        }
-
-        toggleTrafficContainer.setOnClickListener {
-            toggleTraffic.invertCheckedStatus()
-        }
-
-        toggleVolumeKeysContainer.setOnClickListener {
-            toggleVolumeKeys.invertCheckedStatus()
-        }
-
-        toggleVolumeKeysContainer.setOnLongClickListener {
-            WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
-            true
-        }
-
-        if (toggleSatellite.isChecked) {
-            satelliteOverrides(0.4F, isChecked = true)
-        }
-    }
-
-    private fun satelliteOverrides(alpha: Float, isChecked: Boolean) {
-        toggleBuilding.isClickable = !isChecked
-        toggleHighContrast.isClickable = !isChecked
-
-        toggleBuildingContainer.animate().alpha(alpha).setInterpolator(DecelerateInterpolator(1.5F)).start()
-        toggleBuildingContainer.isClickable = !isChecked
-
-        toggleHighContrastContainer.animate().alpha(alpha).setInterpolator(DecelerateInterpolator(1.5F)).start()
-        toggleHighContrastContainer.isClickable = !isChecked
-    }
-
-    companion object {
-        fun newInstance(): GPSMenu {
-            val args = Bundle()
-            val fragment = GPSMenu()
             fragment.arguments = args
             return fragment
         }
@@ -11264,106 +10786,6 @@ class MeasureAdd : CustomDialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/measure/MeasureMenu.kt
-################################################################################
-package app.simple.positional.dialogs.measure
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.MeasurePreferences
-
-class MeasureMenu : CustomBottomSheetDialogFragment() {
-    private lateinit var label: SwitchView
-    private lateinit var labelContainer: DynamicRippleLinearLayout
-    private lateinit var building: SwitchView
-    private lateinit var buildingContainer: DynamicRippleLinearLayout
-    private lateinit var satellite: SwitchView
-    private lateinit var satelliteContainer: DynamicRippleLinearLayout
-    private lateinit var highContrast: SwitchView
-    private lateinit var highContrastContainer: DynamicRippleLinearLayout
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_measure_menu, container, false)
-
-        label = view.findViewById(R.id.toggle_label)
-        labelContainer = view.findViewById(R.id.show_label_container)
-        building = view.findViewById(R.id.toggle_buildings)
-        buildingContainer = view.findViewById(R.id.show_building_container)
-        satellite = view.findViewById(R.id.toggle_satellite)
-        satelliteContainer = view.findViewById(R.id.satellite_mode_container)
-        highContrast = view.findViewById(R.id.toggle_high_contrast)
-        highContrastContainer = view.findViewById(R.id.high_contrast_container)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        label.isChecked = MeasurePreferences.isLabelOn()
-        building.isChecked = MeasurePreferences.getShowBuildingsOnMap()
-        satellite.isChecked = MeasurePreferences.isSatelliteOn()
-        highContrast.isChecked = MeasurePreferences.getHighContrastMap()
-
-        labelContainer.setOnClickListener {
-            label.invertCheckedStatus()
-        }
-
-        buildingContainer.setOnClickListener {
-            building.invertCheckedStatus()
-        }
-
-        satelliteContainer.setOnClickListener {
-            satellite.invertCheckedStatus()
-        }
-
-        highContrastContainer.setOnClickListener {
-            highContrast.invertCheckedStatus()
-        }
-
-        label.setOnCheckedChangeListener { isChecked ->
-            MeasurePreferences.setLabelMode(isChecked)
-        }
-
-        building.setOnCheckedChangeListener { isChecked ->
-            MeasurePreferences.setShowBuildingsOnMap(isChecked)
-        }
-
-        satellite.setOnCheckedChangeListener { isChecked ->
-            MeasurePreferences.setSatelliteMode(isChecked)
-        }
-
-        highContrast.setOnCheckedChangeListener { isChecked ->
-            MeasurePreferences.setHighContrastMap(isChecked)
-        }
-    }
-
-    companion object {
-        fun newInstance(): MeasureMenu {
-            val args = Bundle()
-            val fragment = MeasureMenu()
-            fragment.arguments = args
-            return fragment
-        }
-
-        fun Fragment.showMeasureMenu(): MeasureMenu {
-            val measureMenu = newInstance()
-            measureMenu.show(childFragmentManager, TAG)
-            return measureMenu
-        }
-
-        const val TAG = "MeasureMenu"
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/dialogs/trail/AddMarker.kt
 ################################################################################
 package app.simple.positional.dialogs.trail
@@ -11616,157 +11038,6 @@ class AddTrail : CustomDialogFragment() {
         fun newInstance(): AddTrail {
             val args = Bundle()
             val fragment = AddTrail()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/trail/TrailMenu.kt
-################################################################################
-package app.simple.positional.dialogs.trail
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import app.simple.positional.R
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
-import app.simple.positional.constants.HtmlPage
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.TrailPreferences
-
-class TrailMenu : CustomBottomSheetDialogFragment() {
-    private lateinit var toggleLabel: SwitchView
-    private lateinit var toggleSatellite: SwitchView
-    private lateinit var toggleHighContrast: SwitchView
-    private lateinit var toggleBuilding: SwitchView
-    private lateinit var toggleAutoCenter: SwitchView
-    private lateinit var toggleGeodesic: SwitchView
-
-    private lateinit var toggleLabelContainer: DynamicRippleLinearLayout
-    private lateinit var toggleSatelliteContainer: DynamicRippleLinearLayout
-    private lateinit var toggleHighContrastContainer: DynamicRippleLinearLayout
-    private lateinit var toggleBuildingContainer: DynamicRippleLinearLayout
-    private lateinit var toggleAutoCenterContainer: DynamicRippleLinearLayout
-    private lateinit var toggleGeodesicContainer: DynamicRippleLinearLayout
-
-    private lateinit var help: DynamicRippleTextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_trail_menu, container, false)
-
-        toggleLabel = view.findViewById(R.id.toggle_label)
-        toggleSatellite = view.findViewById(R.id.toggle_satellite)
-        toggleHighContrast = view.findViewById(R.id.toggle_high_contrast)
-        toggleBuilding = view.findViewById(R.id.toggle_buildings)
-        toggleAutoCenter = view.findViewById(R.id.toggle_auto_center)
-        toggleGeodesic = view.findViewById(R.id.toggle_geodesic)
-
-        toggleLabelContainer = view.findViewById(R.id.gps_menu_show_label_container)
-        toggleSatelliteContainer = view.findViewById(R.id.gps_menu_satellite_mode_container)
-        toggleHighContrastContainer = view.findViewById(R.id.gps_menu_high_contrast_container)
-        toggleBuildingContainer = view.findViewById(R.id.gps_menu_show_building_container)
-        toggleAutoCenterContainer = view.findViewById(R.id.trail_menu_auto_center_container)
-        toggleGeodesicContainer = view.findViewById(R.id.trail_menu_geodesic_container)
-
-        help = view.findViewById(R.id.trail_menu_help)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        toggleLabel.isChecked = TrailPreferences.isLabelOn()
-        toggleSatellite.isChecked = TrailPreferences.isSatelliteOn()
-        toggleHighContrast.isChecked = TrailPreferences.getHighContrastMap()
-        toggleBuilding.isChecked = TrailPreferences.getShowBuildingsOnMap()
-        toggleAutoCenter.isChecked = TrailPreferences.getMapAutoCenter()
-        toggleGeodesic.isChecked = TrailPreferences.isTrailGeodesic()
-
-        toggleLabel.setOnCheckedChangeListener { isChecked ->
-            TrailPreferences.setLabelMode(isChecked)
-        }
-
-        toggleSatellite.setOnCheckedChangeListener { isChecked ->
-            TrailPreferences.setSatelliteMode(isChecked)
-            if (isChecked) {
-                satelliteOverrides(0.4F, isChecked)
-            } else {
-                satelliteOverrides(1.0F, isChecked)
-            }
-        }
-
-        toggleHighContrast.setOnCheckedChangeListener {
-            TrailPreferences.setHighContrastMap(it)
-        }
-
-        toggleBuilding.setOnCheckedChangeListener {
-            TrailPreferences.setShowBuildingsOnMap(it)
-        }
-
-        toggleAutoCenter.setOnCheckedChangeListener {
-            TrailPreferences.setMapAutoCenter(it)
-        }
-
-        toggleGeodesic.setOnCheckedChangeListener {
-            TrailPreferences.setGeodesic(it)
-        }
-
-        toggleLabelContainer.setOnClickListener {
-            toggleLabel.invertCheckedStatus()
-        }
-
-        toggleSatelliteContainer.setOnClickListener {
-            toggleSatellite.invertCheckedStatus()
-        }
-
-        toggleHighContrastContainer.setOnClickListener {
-            toggleHighContrast.invertCheckedStatus()
-        }
-
-        toggleBuildingContainer.setOnClickListener {
-            toggleBuilding.invertCheckedStatus()
-        }
-
-        toggleAutoCenterContainer.setOnClickListener {
-            toggleAutoCenter.invertCheckedStatus()
-        }
-
-        toggleGeodesicContainer.setOnClickListener {
-            toggleGeodesic.invertCheckedStatus()
-        }
-
-        help.setOnClickListener {
-            WebPageViewerActivity.open(requireContext(), HtmlPage.TRAIL_HELP)
-        }
-
-        if (toggleSatellite.isChecked) {
-            satelliteOverrides(0.4F, isChecked = true)
-        }
-    }
-
-    private fun satelliteOverrides(alpha: Float, isChecked: Boolean) {
-        toggleBuilding.isClickable = !isChecked
-        toggleHighContrast.isClickable = !isChecked
-
-        toggleBuildingContainer.animate().alpha(alpha).setInterpolator(DecelerateInterpolator(1.5F)).start()
-        toggleBuildingContainer.isClickable = !isChecked
-
-        toggleHighContrastContainer.animate().alpha(alpha).setInterpolator(DecelerateInterpolator(1.5F)).start()
-        toggleHighContrastContainer.isClickable = !isChecked
-    }
-
-    companion object {
-        fun newInstance(): TrailMenu {
-            val args = Bundle()
-            val fragment = TrailMenu()
             fragment.arguments = args
             return fragment
         }
@@ -25397,173 +24668,6 @@ class TwilightWidget : AppWidgetProvider() {
     android:layout_height="50dp" />
 
 ################################################################################
-# FILE: app/src/main/res/layout/dialog_clock_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:translationZ="20dp">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleTextView
-            android:id="@+id/clock_needle_theme_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/ripple_btn"
-            android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:gravity="center_vertical"
-            android:padding="@dimen/options_sub_item_padding"
-            android:text="@string/needles"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size"
-            android:drawableStart="@drawable/ic_navigation"
-            android:drawableTint="@color/iconRegular" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleTextView
-            android:id="@+id/clock_motion_type_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/ripple_btn"
-            android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:gravity="center_vertical"
-            android:padding="@dimen/options_sub_item_padding"
-            android:text="@string/motion_type"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size"
-            android:drawableStart="@drawable/ic_motion_type"
-            android:drawableTint="@color/iconRegular" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/clock_menu_24_hours_clock"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_sub_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/twenty_four_hours_clock"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_clock"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_24_hours_clock"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_marginVertical="@dimen/options_sub_item_padding"
-            android:background="@color/dividerColor" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/clock_menu_default_time_format"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_sub_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/time_format"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_twenty_four_hours"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_default_time_format"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/clock_menu_remove_seconds_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_sub_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/seconds_precision"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_precision"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_remove_seconds_precision"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</LinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/dialog_clock_motion_type.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -25869,172 +24973,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/dialog_compass_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:elevation="40dp"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/bloom_switch_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/bloom"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_bloom"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_flower"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleTextView
-            android:id="@+id/compass_bloom_skins_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:gravity="center_vertical"
-            android:padding="@dimen/options_item_padding"
-            android:text="@string/bloom_skins"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size"
-            app:drawableStartCompat="@drawable/ic_bloom_skin"
-            app:drawableTint="@color/iconRegular" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_marginVertical="@dimen/options_sub_item_padding"
-            android:background="@color/dividerColor" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/compass_menu_gimbal_lock"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/gimbal_lock"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_gimbal_lock"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_gimbal_lock"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/compass_menu_show_code"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/show_code"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_direction_code"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_code"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleTextView
-            android:id="@+id/compass_speed"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@drawable/ripple_btn"
-            android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:gravity="center_vertical"
-            android:padding="@dimen/options_item_padding"
-            android:text="@string/physical_properties"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size"
-            app:drawableStartCompat="@drawable/ic_square_root"
-            app:drawableTint="@color/iconRegular" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-
-################################################################################
 # FILE: app/src/main/res/layout/dialog_compass_physical_properties.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -26284,122 +25222,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/dialog_direction_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:elevation="40dp"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleTextView
-            android:id="@+id/direction_target_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:gravity="center_vertical"
-            android:padding="@dimen/options_item_padding"
-            android:text="@string/targets"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size"
-            app:drawableStartCompat="@drawable/ic_near_me"
-            app:drawableTint="@color/iconRegular" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_marginVertical="@dimen/options_sub_item_padding"
-            android:background="@color/dividerColor" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/compass_menu_gimbal_lock"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/gimbal_lock"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_gimbal_lock"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_gimbal_lock"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/direction_menu_use_target"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/use_maps_target"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_crosshair"
-                app:drawableTint="@color/iconRegular" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/toggle_use_target"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-
-################################################################################
 # FILE: app/src/main/res/layout/dialog_error.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -26439,271 +25261,6 @@ class TwilightWidget : AppWidgetProvider() {
             android:textSize="@dimen/options_item_text_size" />
 
     </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_gps_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent">
-
-    <app.simple.positional.decorations.corners.DynamicCornersNestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:elevation="40dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            android:padding="@dimen/options_container_horizontal_padding">
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_show_label_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/labels"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_label"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_label"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_show_building_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/buildings"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_home"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_buildings"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_traffic_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/traffic"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_traffic"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_traffic"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_satellite_mode_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/satellite_mode"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_satellite"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_satellite"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_high_contrast_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/high_contrast_mode"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_filter_b_and_w"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_high_contrast"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_volume_keys_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/use_media_keys"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_zoom_in"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_use_volume_keys"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleTextView
-                android:id="@+id/gps_pin_customization"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:drawableStart="@drawable/ic_place_notification"
-                android:drawableEnd="@drawable/ic_arrow_right"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:drawableTint="@color/iconRegular"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:padding="@dimen/options_item_padding"
-                android:text="@string/customize_pin"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-        </LinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornersNestedScrollView>
 
 </FrameLayout>
 
@@ -26814,177 +25371,6 @@ class TwilightWidget : AppWidgetProvider() {
     </LinearLayout>
 
 </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_measure_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent">
-
-    <app.simple.positional.decorations.corners.DynamicCornersNestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:elevation="40dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            android:padding="@dimen/options_container_horizontal_padding">
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/show_label_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/labels"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_label"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_label"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/show_building_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/buildings"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_home"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_buildings"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/satellite_mode_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/satellite_mode"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_satellite"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_satellite"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/high_contrast_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/high_contrast_mode"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_filter_b_and_w"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_high_contrast"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        </LinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornersNestedScrollView>
-
-</FrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/dialog_on_trail_add.xml
@@ -27464,271 +25850,6 @@ class TwilightWidget : AppWidgetProvider() {
     </LinearLayout>
 
 </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_trail_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent">
-
-    <app.simple.positional.decorations.corners.DynamicCornersNestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:elevation="40dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            android:padding="@dimen/options_container_horizontal_padding">
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_show_label_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/labels"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_label"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_label"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_show_building_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/buildings"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_home"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_buildings"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_satellite_mode_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/satellite_mode"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_satellite"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_satellite"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/gps_menu_high_contrast_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/high_contrast_mode"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_filter_b_and_w"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_high_contrast"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/trail_menu_auto_center_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/auto_center_map"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_gps_fixed"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_auto_center"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-                android:id="@+id/trail_menu_geodesic_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:clickable="true"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:focusable="true"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_item_padding">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:drawablePadding="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/geodesic_trail"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size"
-                    app:drawableStartCompat="@drawable/ic_geodesic"
-                    app:drawableTint="@color/iconRegular" />
-
-                <app.simple.positional.decorations.switchview.SwitchView
-                    android:id="@+id/toggle_geodesic"
-                    android:layout_width="@dimen/switch_width"
-                    android:layout_height="wrap_content" />
-
-            </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:layout_marginVertical="@dimen/options_sub_item_padding"
-                android:background="@color/dividerColor" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleTextView
-                android:id="@+id/trail_menu_help"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:drawableEnd="@drawable/ic_arrow_right"
-                android:drawablePadding="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:padding="@dimen/options_item_padding"
-                android:text="@string/help"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size"
-                app:drawableStartCompat="@drawable/ic_help"
-                app:drawableTint="@color/iconRegular" />
-
-        </LinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornersNestedScrollView>
-
-</FrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/dialog_trail_name.xml
