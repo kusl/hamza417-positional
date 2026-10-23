@@ -45,7 +45,7 @@ The map panels use the Google Maps SDK and Google Play services location. Withou
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in activities through `setPositionalContent`. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -63,7 +63,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
 | 8f | Location summary, location details (Compose `Canvas` sparklines) and coordinate formats dialogs in Compose; coordinate formats computed only while the dialog is open instead of on every fix; sparkline, fast scroller and recycler view decorations removed | Done |
 | 8g | `MainActivity` in Compose: panels hosted with `AndroidFragment`, floating panel switcher (tap for a grid, swipe to step) replaces the view pager bottom bar and panel dialog; permission request through the Activity Result API; all dialog fragments and bottom sheet styles removed | Done |
-| 8h | Panels as plain composables with Navigation Compose, sub screens in the same graph, fragments and AppCompat themes removed | Next |
+| 8h | Panels as plain `PanelController` classes with their own child lifecycle; panel fragments, `ScopedFragment` and the fragment Compose host removed | Done |
+| 8i | Sub screens and splash in a single activity with Navigation Compose, drop fragments and AppCompat themes | Next |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -109,12 +110,13 @@ app/src/main/java/app/simple/positional/
   constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
   sensors/      lifecycle-aware gravity and heading sensors
-  ui/           panel fragments
-  decorations/  legacy custom views, map wrappers, fast scroller
+  ui/panels/    panel controllers
+  extensions/   panel controller base, sensor panel, map lifecycle
+  decorations/  Google Maps view wrappers and marker helpers
   database/     Room entities, DAOs and databases
   services/     location and clock widget services
   widgets/      app widget providers
-  math/         vectors, quaternions, angles, unit conversion
+  math/         vectors, angles, rotation physics, distances, unit conversion
   util/         formatting and Android helpers
 app/src/test/   JVM unit tests
 docs/llm/       LLM context files (tracked, excluded from the dump)

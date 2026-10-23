@@ -1,14 +1,13 @@
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
 import android.hardware.GeomagneticField
 import android.hardware.Sensor
 import android.location.Location
-import android.os.Bundle
 import android.os.SystemClock
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
@@ -16,7 +15,7 @@ import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.PhysicalPropertiesDialog
-import app.simple.positional.extensions.fragment.SensorPanel
+import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.sensors.HeadingSensor
@@ -24,28 +23,24 @@ import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
-class Compass : SensorPanel(), HeadingSensor.Listener {
+class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
-    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var lastReadings = 0L
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        sensor = HeadingSensor(requireActivity(), this)
+    init {
+        sensor = HeadingSensor(activity, this)
         lifecycle.addObserver(sensor)
         applyPreferences()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView(menuSheet, dialogs) { top ->
-            CompassScreen(state, top, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        CompassScreen(state, topInset, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
+    }
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.compass(
@@ -53,15 +48,14 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
                 dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
             },
             onPhysicalProperties = {
-                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES) } }
+                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(activity, HtmlPage.PHYSICAL_PROPERTIES) } }
             },
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    init {
         if (!sensor.isAvailable) showSensorError()
-        ViewModelProvider(requireActivity())[LocationViewModel::class.java].getLocation().observe(viewLifecycleOwner) { showField(it) }
+        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) { showField(it) }
     }
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
@@ -115,7 +109,5 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
             CompassPreferences.usePhysicalProperties,
             CompassPreferences.useGimbalLock,
         )
-
-        fun newInstance() = Compass()
     }
 }

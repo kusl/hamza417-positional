@@ -34,10 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
 import app.simple.positional.util.LocaleHelper
@@ -154,8 +154,7 @@ object SettingsLabels {
 }
 
 @Composable
-fun SettingsScreen(state: SettingsState, actions: SettingsActions, topInset: Int) {
-    val top = with(LocalDensity.current) { topInset.toDp() }
+fun SettingsScreen(state: SettingsState, actions: SettingsActions, top: Dp) {
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(

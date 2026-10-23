@@ -4,20 +4,16 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Bundle
 import android.provider.Settings as AndroidSettings
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.net.toUri
 import app.simple.positional.BuildConfig
 import app.simple.positional.activities.subactivity.AccentColorsActivity
@@ -25,57 +21,42 @@ import app.simple.positional.activities.subactivity.ArtsActivity
 import app.simple.positional.activities.subactivity.CustomLocationsActivity
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.ui.compose.PositionalTheme
 import app.simple.positional.ui.compose.SettingsActions
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.compose.SettingsState
 import app.simple.positional.util.AppIcons
 import app.simple.positional.util.PermissionUtils
-import app.simple.positional.util.StatusBarHeight
 import app.simple.positional.util.ThemeSetter
 
-class Settings : ScopedFragment(), SettingsActions {
+class Settings(activity: ComponentActivity) : PanelController(activity), SettingsActions {
     private var state by mutableStateOf(SettingsState())
-    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     private var appSettingsOpened = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-            if (result.values.any { !it } && !appSettingsOpened) {
-                appSettingsOpened = true
-                startActivity(Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", requireContext().packageName, null)
-                })
-            }
-            refresh()
+    private val permissionLauncher = register(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        if (result.values.any { !it } && !appSettingsOpened) {
+            appSettingsOpened = true
+            startActivity(Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", activity.packageName, null)
+            })
         }
+        refresh()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val topInset = StatusBarHeight.getStatusBarHeight(resources)
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                PositionalTheme {
-                    SettingsScreen(state, this@Settings, topInset)
-                }
-            }
-        }
+    @Composable
+    override fun Content(topInset: Dp) {
+        SettingsScreen(state, this, topInset)
     }
 
     override fun onResume() {
-        super.onResume()
         appSettingsOpened = false
         refresh()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == MainPreferences.accentColor) {
-            requireActivity().recreate()
+            activity.recreate()
         } else {
             refresh()
         }
@@ -83,7 +64,7 @@ class Settings : ScopedFragment(), SettingsActions {
 
     private fun refresh() {
         state = SettingsState(
-            hasLocationPermission = PermissionUtils.checkPermission(requireContext()),
+            hasLocationPermission = PermissionUtils.checkPermission(activity),
             themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else AppCompatDelegate.getDefaultNightMode(),
             isMetric = MainPreferences.isMetric(),
             coordinatesFormat = MainPreferences.getCoordinatesFormat(),
@@ -92,7 +73,7 @@ class Settings : ScopedFragment(), SettingsActions {
             isCustomLocation = MainPreferences.isCustomCoordinate(),
             keepScreenOn = MainPreferences.isScreenOn(),
             skipSplashScreen = MainPreferences.getSkipSplashScreen(),
-            iconIndex = AppIcons.current(requireContext()),
+            iconIndex = AppIcons.current(activity),
             cornerRadius = MainPreferences.getCornerRadius() * 5,
             versionName = BuildConfig.VERSION_NAME,
         )
@@ -109,22 +90,22 @@ class Settings : ScopedFragment(), SettingsActions {
         refresh()
     }
 
-    override fun openAccent() = startActivity(Intent(requireContext(), AccentColorsActivity::class.java))
+    override fun openAccent() = startActivity(Intent(activity, AccentColorsActivity::class.java))
 
     override fun setIcon(index: Int) {
-        AppIcons.select(requireContext(), index)
+        AppIcons.select(activity, index)
         refresh()
     }
 
     override fun setCornerRadius(value: Int) {
         if (value == MainPreferences.getCornerRadius() * 5) return
         MainPreferences.setCornerRadius(value)
-        requireActivity().recreate()
+        activity.recreate()
     }
 
     override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
 
-    override fun openArts() = startActivity(Intent(requireContext(), ArtsActivity::class.java))
+    override fun openArts() = startActivity(Intent(activity, ArtsActivity::class.java))
 
     override fun setMetric(metric: Boolean) = MainPreferences.setUnit(metric)
 
@@ -132,7 +113,7 @@ class Settings : ScopedFragment(), SettingsActions {
 
     override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
 
-    override fun openCustomLocations() = startActivity(Intent(requireContext(), CustomLocationsActivity::class.java))
+    override fun openCustomLocations() = startActivity(Intent(activity, CustomLocationsActivity::class.java))
 
     override fun setCustomLocation(enabled: Boolean) {
         if (enabled) openCustomLocations() else MainPreferences.setCustomCoordinates(false)
@@ -141,20 +122,20 @@ class Settings : ScopedFragment(), SettingsActions {
     override fun setKeepScreenOn(enabled: Boolean) {
         MainPreferences.setScreenOn(enabled)
         if (enabled) {
-            requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
-            requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
     override fun setLanguage(code: String) {
         if (code == MainPreferences.getAppLanguage()) return
         MainPreferences.setAppLanguage(code)
-        requireActivity().recreate()
+        activity.recreate()
     }
 
     override fun openLegal(page: Int) {
-        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(requireContext(), it) }
+        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(activity, it) }
     }
 
     override fun openReleases() = openUrl("$REPOSITORY_URL/releases")
@@ -169,7 +150,5 @@ class Settings : ScopedFragment(), SettingsActions {
 
     companion object {
         private const val REPOSITORY_URL = "https://github.com/kusl/hamza417-positional"
-
-        fun newInstance() = Settings()
     }
 }

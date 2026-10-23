@@ -1,16 +1,15 @@
 package app.simple.positional.ui.panels
 
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.Dp
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +23,7 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.MathExtensions.round
@@ -40,9 +39,6 @@ import app.simple.positional.ui.compose.GpsScreen
 import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
-import app.simple.positional.ui.compose.positionalComposeView
-import app.simple.positional.ui.compose.DialogHost
-import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.MessageDialog
 import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
@@ -64,24 +60,20 @@ import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
+class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, MapsCallbacks {
     private lateinit var state: GpsState
-    private val menuSheet = MenuSheetState()
-    private val dialogs = DialogHost()
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private val search = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val search = register(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
             targetForm.fill(
@@ -96,18 +88,15 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
     private var addressJob: Job? = null
     private var location: Location? = null
-    private var camera: CameraPosition? = null
     private var pressed: LatLng? = null
     private var accuracyRow = InfoRow("")
     private var altitudeRow = InfoRow("")
     private var latencyRow = InfoRow("")
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
+    init {
+        viewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
         state = GpsState(MainPreferences.isCustomCoordinate())
-        camera = savedInstanceState?.parcelable(CAMERA)
-        state.fullScreen = !isLandscapeOrientation && (savedInstanceState?.getBoolean(FULL_SCREEN) ?: consumeFullScreenShortcut())
+        state.fullScreen = !isLandscapeOrientation && consumeFullScreenShortcut()
         readPreferences()
         accuracyRow = InfoRow(getString(R.string.gps_accuracy), PENDING)
         altitudeRow = InfoRow(getString(R.string.gps_altitude), PENDING)
@@ -119,8 +108,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         state.address = PENDING
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        maps = Maps(requireContext()).apply {
+    init {
+        maps = Maps(activity).apply {
             alpha = 0f
             onCreate(null)
             setOnMapsCallbackListener(this@GPS)
@@ -131,15 +120,18 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
                 }
             }
         }
-        return positionalComposeView(menuSheet, dialogs) { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+    @Composable
+    override fun Content(topInset: Dp) {
+        GpsScreen(state, maps, topInset, isLandscapeOrientation, this)
+    }
+
+    init {
+        owner.lifecycle.addObserver(MapLifecycle(maps))
         if (state.fullScreen) bottomBar(visible = false)
 
-        if (!LocationPrompt.checkGooglePlayServices(requireContext())) {
+        if (!LocationPrompt.checkGooglePlayServices(activity)) {
             val message = getString(R.string.play_services_error)
             dialogs.show { MessageDialog(message, dialogs::dismiss) }
         }
@@ -149,32 +141,26 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
         }
 
-        viewModel.getLocation().observe(viewLifecycleOwner, ::onLocation)
-        viewModel.getProvider().observe(viewLifecycleOwner) {
-            state.enabled = getLocationStatus(requireContext())
+        viewModel.getLocation().observe(owner, ::onLocation)
+        viewModel.getProvider().observe(owner) {
+            state.enabled = getLocationStatus(activity)
             state.provider = providerRows(it)
         }
-        viewModel.latency.observe(viewLifecycleOwner) {
+        viewModel.latency.observe(owner) {
             val unit = getString(if (it.second) R.string.seconds else R.string.milliseconds)
             latencyRow = InfoRow(getString(R.string.gps_latency), "${it.first} $unit", it.second && it.first.toDouble() > LATE)
             publishLocationRows()
         }
-        viewModel.targetData.observe(viewLifecycleOwner) { state.target = it.toAnnotatedString() }
-        viewModel.accuracyGraphData.observe(viewLifecycleOwner) { accuracySeries = it.toList() }
-        viewModel.altitudeGraphData.observe(viewLifecycleOwner) { altitudeSeries = it.toList() }
+        viewModel.targetData.observe(owner) { state.target = it.toAnnotatedString() }
+        viewModel.accuracyGraphData.observe(owner) { accuracySeries = it.toList() }
+        viewModel.altitudeGraphData.observe(owner) { altitudeSeries = it.toList() }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onCleared() {
         addressJob?.cancel()
         addressThreshold.reset()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putBoolean(FULL_SCREEN, state.fullScreen)
-        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
-    }
 
     private fun onLocation(location: Location) {
         this.location = location
@@ -188,10 +174,10 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         val altitude = if (metric) location.altitude else location.altitude.toFeet()
         val kmh = location.speed.toDouble().toKiloMetersPerHour()
         val speed = if (metric) kmh else kmh.toMilesPerHour()
-        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(requireContext(), location.bearing.toDouble()) else getString(R.string.not_available)
+        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(activity, location.bearing.toDouble()) else getString(R.string.not_available)
 
         state.fixed = true
-        state.enabled = getLocationStatus(requireContext())
+        state.enabled = getLocationStatus(activity)
         state.provider = providerRows(location.provider?.uppercase(LocaleHelper.getAppLocale()) ?: getString(R.string.not_available))
         accuracyRow = InfoRow(getString(R.string.gps_accuracy), "${round(accuracy, 2)} $length")
         altitudeRow = InfoRow(getString(R.string.gps_altitude), "${round(altitude, 2)} $length")
@@ -213,14 +199,14 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     private fun showCoordinates(latitude: Double, longitude: Double) {
         state.coordinates = listOf(
-            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, requireContext())),
-            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, requireContext())),
+            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, activity)),
+            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, activity)),
         )
         if (!addressThreshold.accept(latitude, longitude)) return
         addressJob?.cancel()
-        addressJob = viewLifecycleOwner.lifecycleScope.launch {
-            state.address = if (isNetworkAvailable(requireContext())) {
-                ReverseGeocoder.addressLine(requireContext(), latitude, longitude) ?: getString(R.string.no_address_found)
+        addressJob = owner.lifecycleScope.launch {
+            state.address = if (isNetworkAvailable(activity)) {
+                ReverseGeocoder.addressLine(activity, latitude, longitude) ?: getString(R.string.no_address_found)
             } else {
                 addressThreshold.reset()
                 getString(R.string.internet_connection_alert)
@@ -229,7 +215,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     private fun providerRows(source: String) = listOf(
-        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(requireContext())) R.string.gps_enabled else R.string.gps_disabled)),
+        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(activity)) R.string.gps_enabled else R.string.gps_disabled)),
         InfoRow(getString(R.string.gps_source), source),
     )
 
@@ -251,18 +237,17 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     private fun consumeFullScreenShortcut(): Boolean {
-        val intent = requireActivity().intent ?: return false
+        val intent = activity.intent ?: return false
         if (intent.action != FULL_SCREEN_ACTION) return false
         intent.action = null
         return true
     }
 
     private fun bottomBar(visible: Boolean) {
-        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
+        (activity as? BottomBarHost)?.showBottomBar(visible)
     }
 
     override fun onMapInitialized() {
-        camera?.let(maps::setCamera)
     }
 
     override fun onMapClicked() {
@@ -279,7 +264,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     override fun menu() = menuSheet.show {
         PanelMenus.gps(onPin = ::pinCustomization) {
-            WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
+            WebPageViewerActivity.open(activity, HtmlPage.MEDIA_KEYS)
         }
     }
 
@@ -298,11 +283,11 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
 
     override fun locate(close: Boolean) {
-        if (getLocationStatus(requireContext())) {
+        if (getLocationStatus(activity)) {
             maps.isMapMovementEnabled = true
             maps.resetCamera(if (close) CLOSE_ZOOM else GPSPreferences.getMapZoom())
         } else {
-            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+            LocationPrompt.displayLocationSettingsRequest(activity)
         }
     }
 
@@ -319,7 +304,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         dialogs.show {
             TargetCoordinatesDialog(
                 targetForm,
-                onSearch = { search.launch(Intent(requireContext(), MapSearchActivity::class.java)) },
+                onSearch = { search.launch(Intent(activity, MapSearchActivity::class.java)) },
                 onDismiss = dialogs::dismiss,
             ) { latitude, longitude ->
                 GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
@@ -357,15 +342,15 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             address = state.address
             date = System.currentTimeMillis()
         }
-        val dao = LocationDatabase.getInstance(requireContext()).locationDao()
-        viewLifecycleOwner.lifecycleScope.launch {
+        val dao = LocationDatabase.getInstance(activity).locationDao()
+        owner.lifecycleScope.launch {
             withContext(NonCancellable) { dao.insertLocation(entry) }
             state.message = R.string.location_saved
         }
     }
 
     override fun copy() {
-        val clipboard = requireContext().getSystemService<ClipboardManager>() ?: return
+        val clipboard = activity.getSystemService<ClipboardManager>() ?: return
         val text = buildString {
             section(getString(R.string.gps_provider), state.provider)
             section(getString(R.string.gps_location), state.location)
@@ -385,7 +370,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     override fun share() {
         val (latitude, longitude) = coordinates()
-        LocationShare.share(requireContext(), latitude, longitude, state.address)
+        LocationShare.share(activity, latitude, longitude, state.address)
     }
 
     override fun locationDetails() = dialogs.show {
@@ -410,7 +395,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     override fun navigatePressed() {
         state.pressed = null
         val latLng = pressed ?: return
-        MapIntents.navigate(requireContext(), latLng.latitude, latLng.longitude)
+        MapIntents.navigate(activity, latLng.latitude, latLng.longitude)
     }
 
     override fun zoom(zoomIn: Boolean) = if (zoomIn) maps.zoomIn() else maps.zoomOut()
@@ -423,8 +408,6 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
 
     companion object {
         private const val PENDING = "-"
-        private const val CAMERA = "camera"
-        private const val FULL_SCREEN = "fullscreen"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
         private const val CLOSE_ZOOM = 18F
         private const val LATE = 5.0
@@ -439,7 +422,5 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             GPSPreferences.isNorthOnly,
             GPSPreferences.useVolumeKeys,
         )
-
-        fun newInstance() = GPS()
     }
 }

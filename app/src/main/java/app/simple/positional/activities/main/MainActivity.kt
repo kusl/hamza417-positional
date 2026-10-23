@@ -19,7 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.core.content.ContextCompat
-import androidx.fragment.compose.AndroidFragment
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.Dp
+import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.extensions.activity.BaseActivity
@@ -60,9 +63,9 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
         super.onCreate(savedInstanceState)
         MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { }
         panel = PanelCatalog.resolve(FragmentPreferences.getCurrentTag())
-        setPositionalContent {
+        setPositionalContent { topInset ->
             Box(Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
-                key(panel) { PanelFragment(panel) }
+                key(panel) { Panel(panel, this@MainActivity, topInset) }
                 PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
             }
         }
@@ -136,16 +139,18 @@ class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPr
 }
 
 @Composable
-private fun PanelFragment(tag: String) {
-    val modifier = Modifier.fillMaxSize()
-    when (tag) {
-        PanelCatalog.CLOCK -> AndroidFragment<Time>(modifier)
-        PanelCatalog.COMPASS -> AndroidFragment<Compass>(modifier)
-        PanelCatalog.DIRECTION -> AndroidFragment<Direction>(modifier)
-        PanelCatalog.TRAIL -> AndroidFragment<Trail>(modifier)
-        PanelCatalog.MEASURE -> AndroidFragment<Measure>(modifier)
-        PanelCatalog.LEVEL -> AndroidFragment<Level>(modifier)
-        PanelCatalog.SETTINGS -> AndroidFragment<Settings>(modifier)
-        else -> AndroidFragment<GPS>(modifier)
-    }
+private fun Panel(tag: String, activity: ComponentActivity, topInset: Dp) {
+    val panel = remember(tag) { createPanel(tag, activity) }
+    panel.Host(topInset)
+}
+
+private fun createPanel(tag: String, activity: ComponentActivity): PanelController = when (tag) {
+    PanelCatalog.CLOCK -> Time(activity)
+    PanelCatalog.COMPASS -> Compass(activity)
+    PanelCatalog.DIRECTION -> Direction(activity)
+    PanelCatalog.TRAIL -> Trail(activity)
+    PanelCatalog.MEASURE -> Measure(activity)
+    PanelCatalog.LEVEL -> Level(activity)
+    PanelCatalog.SETTINGS -> Settings(activity)
+    else -> GPS(activity)
 }
