@@ -1899,3 +1899,79 @@ Claude finished the response
 
 
 please continue with the next phase 
+
+Claude
+/
+Ran 19 commands, shared files
+Reviewing Compose layout code for a UI component.
+Checking Android permission result constants for accuracy.
+Removing unused dialog animation styles and themes.
+Reviewing activity screens and components for potential issues.
+Checking whether removing ViewUtils breaks other usages.
+Presented file
+Phase 8g is in positional-phase8g.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8f) passed CI. I can’t compile here, so the next CI run is the real check for 8g.
+
+Main screen is now Compose:
+
+Panel hosting: MainActivity shows the current panel with AndroidFragment, so the existing panel fragments keep working unchanged. This needs a new dependency, androidx.fragment:fragment-compose. I set it to 1.9.1 to match fragment-ktx, but could not confirm that version exists, so CI will be the first check. The old view-pager bottom bar, its layout and the panel transition animation are gone.
+Panel switcher: a floating accent button at the bottom right replaces the old bottom bar.
+Tapping it opens a grid of all eight panels, each in its own colour.
+Swiping up or down on it steps to the next or previous panel.
+The panel name shows next to the button for about a second after each change.
+Map panels still hide it in full screen.
+Saved panel: saved by tag only, so the panel you last used still opens after the update. Home-screen shortcuts still work. Unknown or old values fall back to the GPS panel.
+Location permission: now requested through the Activity Result API instead of the deprecated callback.
+Location service: start, stop and switching between the Android and fused location sources share one small helper.
+Removed:
+
+The bottom-bar adapter, item list and model, the panel dialog and its adapter, and their callback interfaces.
+The page transformer, three rounded-corner and ripple layout classes, the layout background helper, the base bottom-sheet dialog and the old view helpers.
+The unused bottom-bar visibility preferences, since nothing read them.
+Four layouts, four animations, the bottom-sheet and dialog styles, the rounded-corner styleable and unused dimensions.
+The recyclerview dependency.
+New test: PanelCatalogTest (unknown tags fall back to GPS, swiping wraps around, tags are unique).
+
+README: updated. 8h is next: panels become plain Compose screens with Navigation Compose, the sub screens join the same navigation graph, and fragments and the AppCompat themes go away.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/adapters/app/AdapterPanels.kt app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarAdapter.kt app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarCallbacks.java app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java app/src/main/java/app/simple/positional/callbacks/PanelsCallback.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerFrameLayout.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerLinearLayout.java app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayout.java app/src/main/java/app/simple/positional/decorations/transformers/DepthTransformer.java app/src/main/java/app/simple/positional/decorations/utils/LayoutBackground.java app/src/main/java/app/simple/positional/decorations/views/CustomBottomSheetDialogFragment.kt app/src/main/java/app/simple/positional/dialogs/app/Panels.kt app/src/main/java/app/simple/positional/model/BottomBar.java app/src/main/java/app/simple/positional/preferences/BottomBarPreferences.kt app/src/main/java/app/simple/positional/util/ViewUtils.kt app/src/main/res/anim/bottom_sheet_dialog_in.xml app/src/main/res/anim/bottom_sheet_dialog_out.xml app/src/main/res/anim/grid_list_animation.xml app/src/main/res/anim/grid_list_animation_controller.xml app/src/main/res/layout/activity_main.xml app/src/main/res/layout/adapter_bottom_bar.xml app/src/main/res/layout/adapter_panel.xml app/src/main/res/layout/dialog_panel_switcher.xml
+
+Positional phase8g.tar
+GZ 
+please continue with the next phase
+
+Ran 21 commands, shared files
+Phase 8h is in positional-phase8h.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8g) passed CI. I can’t compile here, so the next CI run is the real check for 8h.
+
+Panels are no longer fragments. Each panel is now a plain class built on a new PanelController base (in extensions/panel/).
+
+Lifecycle: each panel has its own lifecycle that follows the activity while the panel is on screen. When you switch panels, that lifecycle is destroyed. Sensors, map views, location observers and coroutines are already tied to it, so they all stop cleanly without per-panel cleanup code.
+Shared plumbing: the base class holds what every panel used to set up itself: menus, dialogs, string lookups, starting activities, settings-change listening, and results from other screens (search and permission requests).
+SensorPanel moved to the new package and builds on the same base.
+MainActivity creates the selected panel directly, so the fragment-compose dependency is gone again.
+Settings screen: now takes the top inset in dp directly.
+Behaviour change: panels no longer save the map camera or full-screen state across rotation. Each rotation rebuilds the panel, and the map starts from your saved zoom and position as it does on a normal open. The full-screen home-screen shortcut still works.
+
+No new tests. The lifecycle classes need Android’s main thread, which plain JVM unit tests don’t provide.
+
+README: updated, including the project layout. 8i is next: the sub screens and splash move into the single activity with Navigation Compose, and the remaining fragment use and the AppCompat themes go away.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/extensions/fragment/ScopedFragment.kt app/src/main/java/app/simple/positional/extensions/fragment/SensorPanel.kt
+
+Positional phase8h.tar
+GZ 
+
+You’ve used 97% of your session limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+
+Claude finished the response
+
