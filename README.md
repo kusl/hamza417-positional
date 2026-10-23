@@ -39,7 +39,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -62,7 +62,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
 | 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
 | 8f | Location summary, location details (Compose `Canvas` sparklines) and coordinate formats dialogs in Compose; coordinate formats computed only while the dialog is open instead of on every fix; sparkline, fast scroller and recycler view decorations removed | Done |
-| 8g | Panel switcher, single activity with Navigation Compose, drop AppCompat themes | Next |
+| 8g | `MainActivity` in Compose: panels hosted with `AndroidFragment`, floating panel switcher (tap for a grid, swipe to step) replaces the view pager bottom bar and panel dialog; permission request through the Activity Result API; all dialog fragments and bottom sheet styles removed | Done |
+| 8h | Panels as plain composables with Navigation Compose, sub screens in the same graph, fragments and AppCompat themes removed | Next |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 

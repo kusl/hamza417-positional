@@ -3,10 +3,4 @@
     <attr name="colorAppAccent" format="color" />
     <attr name="colorAppAccentLight" format="color" />
     <attr name="colorAccentRipple" format="color" />
-
-    <declare-styleable name="DynamicCornerLayout">
-        <attr name="roundTopCorners" format="boolean" />
-        <attr name="roundBottomCorners" format="boolean" />
-        <attr name="roundAllCorners" format="boolean" />
-    </declare-styleable>
 </resources>

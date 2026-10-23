@@ -1,36 +1,36 @@
 package app.simple.positional.activities.main
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.view.marginEnd
-import androidx.core.view.marginStart
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.core.content.ContextCompat
+import androidx.fragment.compose.AndroidFragment
 import app.simple.positional.R
-import app.simple.positional.adapters.bottombar.BottomBarAdapter
-import app.simple.positional.adapters.bottombar.BottomBarItems
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.callbacks.PanelsCallback
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.transformers.DepthTransformer
-import app.simple.positional.dialogs.app.Panels.Companion.showPanelsDialog
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.preferences.BottomBarPreferences
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.services.FusedLocationService
 import app.simple.positional.services.LocationService
-import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
+import app.simple.positional.ui.compose.PanelCatalog
+import app.simple.positional.ui.compose.PanelSwitcher
+import app.simple.positional.ui.compose.setPositionalContent
 import app.simple.positional.ui.panels.Compass
 import app.simple.positional.ui.panels.Direction
 import app.simple.positional.ui.panels.GPS
@@ -39,326 +39,113 @@ import app.simple.positional.ui.panels.Measure
 import app.simple.positional.ui.panels.Settings
 import app.simple.positional.ui.panels.Time
 import app.simple.positional.ui.panels.Trail
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt.displayLocationSettingsRequest
-import app.simple.positional.util.ViewUtils
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
 import com.google.android.gms.maps.MapsInitializer
-import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
-class MainActivity : BaseActivity(),
-    BottomBarHost,
-    android.content.SharedPreferences.OnSharedPreferenceChangeListener,
-    OnMapsSdkInitializedCallback {
-    private val defaultPermissionRequestCode = 123
-    private lateinit var bottomBar: ViewPager2
-    private lateinit var bottomBarContainer: DynamicCornerLinearLayout
-    private lateinit var label: TextView
-    private lateinit var bottomBarAdapter: BottomBarAdapter
+class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPreferenceChangeListener {
+    private var panel by mutableStateOf(PanelCatalog.LOCATION)
+    private var barVisible by mutableStateOf(true)
 
-    private val handler = Handler(Looper.getMainLooper())
+    private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        if (result.values.any { it }) {
+            showPrompt()
+            startLocation()
+        } else {
+            Toast.makeText(this, R.string.no_location_permission_alert, Toast.LENGTH_LONG).show()
+        }
+    }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MapsInitializer.initialize(baseContext, MapsInitializer.Renderer.LATEST, this)
-        setContentView(R.layout.activity_main)
-
-        bottomBar = findViewById(R.id.bottom_bar)
-        bottomBarContainer = findViewById(R.id.bottom_bar_container)
-        label = findViewById(R.id.label)
-
-        bottomBarAdapter = BottomBarAdapter(BottomBarItems.getBottomBarItems(baseContext)) {
-            supportFragmentManager.showPanelsDialog(PanelsCallback { _, string, position ->
-                bottomBar.setCurrentItem(position, true)
-                openFragment(string!!)
-                FragmentPreferences.setCurrentPage(position)
-                FragmentPreferences.setCurrentTag(string)
-            })
+        MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { }
+        panel = PanelCatalog.resolve(FragmentPreferences.getCurrentTag())
+        setPositionalContent {
+            Box(Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
+                key(panel) { PanelFragment(panel) }
+                PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
+            }
         }
-
-        label.setOnClickListener {
-        }
-
-        bottomBarAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.ALLOW
-
-        ViewUtils.addShadow(bottomBarContainer)
-
-        bottomBar.apply {
-            adapter = bottomBarAdapter
-            orientation = ViewPager2.ORIENTATION_VERTICAL
-            setCurrentItem(FragmentPreferences.getCurrentPage(), false)
-            setPageTransformer(DepthTransformer())
-
-            label.text =
-                BottomBarItems.getBottomBarItems(baseContext)[FragmentPreferences.getCurrentPage()].name
-
-            postDelayed({
-                label.visibility = TextView.GONE
-            }, 1000)
-
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageScrollStateChanged(state: Int) {
-                    super.onPageScrollStateChanged(state)
-                    if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                        val position = bottomBar.currentItem
-                        val name = BottomBarItems.getBottomBarItems(baseContext)[position].tag
-                        FragmentPreferences.setCurrentPage(position)
-                        FragmentPreferences.setCurrentTag(name)
-                        openFragment(name)
-
-                        postDelayed({
-                            label.visibility = TextView.GONE
-                        }, 500)
-                    }
-
-                    if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                        label.visibility = TextView.VISIBLE
-                        label.alpha = 1f
-                    }
-                }
-
-                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                    super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-                    label.text = BottomBarItems.getBottomBarItems(baseContext)[position].name
-                }
-            })
-        }
-
-        checkRunTimePermission()
+        checkLocationPermission()
         MainPreferences.setLaunchCount(MainPreferences.getLaunchCount() + 1)
-
-        if (savedInstanceState.isNull()) {
-            openFragment(FragmentPreferences.getCurrentTag())
-        }
     }
 
     override fun onResume() {
         super.onResume()
-        SharedPreferences.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-        runService()
+        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+        startLocation()
     }
 
     override fun onPause() {
         super.onPause()
-        SharedPreferences.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-        stopService()
+        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        stopLocation()
     }
 
-    override fun onDestroy() {
-        handler.removeCallbacksAndMessages(null)
-
-        super.onDestroy()
+    private fun select(tag: String) {
+        panel = tag
+        barVisible = true
+        FragmentPreferences.setCurrentTag(tag)
     }
 
-    private fun checkRunTimePermission() {
-        if (ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (MainPreferences.getShowPermissionDialog()) {
-                onGrantRequest()
-            } else {
-                Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_LONG).show()
-            }
-        } else {
-            showPrompt()
-        }
+    override fun showBottomBar(visible: Boolean) {
+        barVisible = visible
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == defaultPermissionRequestCode) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showPrompt()
-                runService()
-            } else {
-                Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_LONG).show()
-                Toast.makeText(this, R.string.no_location_permission_alert, Toast.LENGTH_LONG)
-                        .show()
-            }
-        }
+    private fun hasLocationPermission() = locationPermissions.any {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun runService() {
-        try {
-            when (MainPreferences.getLocationProvider()) {
-                "android" -> startService(Intent(applicationContext, LocationService::class.java))
-                "fused" -> startService(
-                    Intent(
-                        applicationContext,
-                        FusedLocationService::class.java
-                    )
-                )
-            }
-        } catch (ignored: IllegalStateException) {
-        }
-    }
-
-    private fun stopService() {
-        try {
-            when (MainPreferences.getLocationProvider()) {
-                "android" -> stopService(Intent(applicationContext, LocationService::class.java))
-                "fused" -> stopService(Intent(applicationContext, FusedLocationService::class.java))
-            }
-        } catch (ignored: IllegalStateException) {
+    private fun checkLocationPermission() {
+        when {
+            hasLocationPermission() -> showPrompt()
+            MainPreferences.getShowPermissionDialog() -> permissions.launch(locationPermissions)
+            else -> Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_LONG).show()
         }
     }
 
     private fun showPrompt() {
-        if (!getLocationStatus(this)) {
-            displayLocationSettingsRequest(this)
-        }
+        if (!getLocationStatus(this)) displayLocationSettingsRequest(this)
     }
 
-    private fun onGrantRequest() {
-        ActivityCompat.requestPermissions(
-            this, arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ), defaultPermissionRequestCode
-        )
+    private fun locationService(provider: String = MainPreferences.getLocationProvider()) =
+        if (provider == FUSED) FusedLocationService::class.java else LocationService::class.java
+
+    private fun startLocation() {
+        runCatching { startService(Intent(applicationContext, locationService())) }
     }
 
-    private fun openFragment(tag: String) {
-        getFragment(tag).let {
-            supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.dialog_in, R.anim.dialog_out)
-                    .replace(R.id.containers, it, tag)
-                    .commit()
-        }
+    private fun stopLocation() {
+        runCatching { stopService(Intent(applicationContext, locationService())) }
     }
 
-    private fun getFragment(name: String): Fragment {
-        when (name) {
-            BottomBarItems.CLOCK -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.CLOCK) as Time?
-                       ?: Time.newInstance()
-            }
-
-            BottomBarItems.COMPASS -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.COMPASS) as Compass?
-                       ?: Compass.newInstance()
-            }
-
-            BottomBarItems.DIRECTION -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.DIRECTION) as Direction?
-                       ?: Direction.newInstance()
-            }
-
-            BottomBarItems.LOCATION -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.LOCATION) as GPS?
-                       ?: GPS.newInstance()
-            }
-
-            BottomBarItems.TRAIL -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.TRAIL) as Trail?
-                       ?: Trail.newInstance()
-            }
-
-            BottomBarItems.MEASURE -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.MEASURE) as Measure?
-                       ?: Measure.newInstance()
-            }
-
-            BottomBarItems.LEVEL -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.LEVEL) as Level?
-                       ?: Level.newInstance()
-            }
-
-            BottomBarItems.SETTINGS -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.SETTINGS) as Settings?
-                       ?: Settings.newInstance()
-            }
-
-            else -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.LOCATION) as GPS?
-                       ?: GPS.newInstance()
-            }
-        }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key != MainPreferences.locationProvider) return
+        val current = MainPreferences.getLocationProvider()
+        runCatching {
+            stopService(Intent(applicationContext, locationService(if (current == FUSED) ANDROID else FUSED)))
+            startService(Intent(applicationContext, locationService(current)))
+        }.onFailure { Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show() }
     }
 
-    override fun showBottomBar(visible: Boolean) {
-        if (visible) {
-            bottomBarContainer.visible(true)
-        } else {
-            bottomBarContainer.gone(true)
-        }
+    private companion object {
+        const val FUSED = "fused"
+        const val ANDROID = "android"
+        val locationPermissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
+}
 
-    override fun onSharedPreferenceChanged(
-        sharedPreferences: android.content.SharedPreferences?,
-        key: String?
-    ) {
-        when (key) {
-            MainPreferences.locationProvider -> {
-                try {
-                    when (MainPreferences.getLocationProvider()) {
-                        "fused" -> {
-                            stopService(Intent(applicationContext, LocationService::class.java))
-                            startService(
-                                Intent(
-                                    applicationContext,
-                                    FusedLocationService::class.java
-                                )
-                            )
-                        }
-
-                        "android" -> {
-                            stopService(
-                                Intent(
-                                    applicationContext,
-                                    FusedLocationService::class.java
-                                )
-                            )
-                            startService(Intent(applicationContext, LocationService::class.java))
-                        }
-                    }
-                } catch (e: IllegalStateException) {
-                    Toast.makeText(applicationContext, e.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            BottomBarPreferences.clockPanel,
-            BottomBarPreferences.compassPanel,
-            BottomBarPreferences.gpsPanel,
-            BottomBarPreferences.trailPanel,
-            BottomBarPreferences.levelPanel,
-            BottomBarPreferences.settingsPanel -> {
-                bottomBarAdapter.setBottomBarItems(
-                    BottomBarItems.getBottomBarItems(
-                        applicationContext
-                    )
-                )
-            }
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat("translation", bottomBar.translationY)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        if (savedInstanceState.isNotNull()) {
-            bottomBar.translationY = savedInstanceState.getFloat("translation")
-        }
-        super.onRestoreInstanceState(savedInstanceState)
-    }
-
-    override fun onMapsSdkInitialized(p0: MapsInitializer.Renderer) {
-        Log.d("Map Initialized", p0.name)
+@Composable
+private fun PanelFragment(tag: String) {
+    val modifier = Modifier.fillMaxSize()
+    when (tag) {
+        PanelCatalog.CLOCK -> AndroidFragment<Time>(modifier)
+        PanelCatalog.COMPASS -> AndroidFragment<Compass>(modifier)
+        PanelCatalog.DIRECTION -> AndroidFragment<Direction>(modifier)
+        PanelCatalog.TRAIL -> AndroidFragment<Trail>(modifier)
+        PanelCatalog.MEASURE -> AndroidFragment<Measure>(modifier)
+        PanelCatalog.LEVEL -> AndroidFragment<Level>(modifier)
+        PanelCatalog.SETTINGS -> AndroidFragment<Settings>(modifier)
+        else -> AndroidFragment<GPS>(modifier)
     }
 }

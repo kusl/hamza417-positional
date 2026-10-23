@@ -33,5 +33,4 @@
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">175dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">16sp</dimen>
 </resources>

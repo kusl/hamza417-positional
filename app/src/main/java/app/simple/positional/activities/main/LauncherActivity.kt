@@ -6,6 +6,7 @@ import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.launcher.SplashScreen
 
 class LauncherActivity : BaseActivity() {
@@ -30,15 +31,10 @@ class LauncherActivity : BaseActivity() {
 
     private fun setShortcutScreen() {
         when (intent.action) {
-            "open_clock" -> setScreenValue(0, "clock")
-            "open_compass" -> setScreenValue(1, "compass")
-            "action_map_panel_full", "open_gps" -> setScreenValue(3, "location")
-            "open_level" -> setScreenValue(5, "level")
+            "open_clock" -> FragmentPreferences.setCurrentTag(PanelCatalog.CLOCK)
+            "open_compass" -> FragmentPreferences.setCurrentTag(PanelCatalog.COMPASS)
+            "action_map_panel_full", "open_gps" -> FragmentPreferences.setCurrentTag(PanelCatalog.LOCATION)
+            "open_level" -> FragmentPreferences.setCurrentTag(PanelCatalog.LEVEL)
         }
-    }
-
-    private fun setScreenValue(value: Int, tag: String) {
-        FragmentPreferences.setCurrentPage(value)
-        FragmentPreferences.setCurrentTag(tag)
     }
 }
