@@ -446,4 +446,47 @@ user	0m0.438s
 sys	0m0.681s
 kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
 2026-10-23-08-45-39
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/adapters/clock/ClockNeedleSkinsAdapter.kt app/src/main/java/app/simple/positional/adapters/compass/BloomSkinAdapter.kt app/src/main/java/app/simple/positional/adapters/maps/PinSkinAdapter.kt app/src/main/java/app/simple/positional/callbacks/PermissionCallbacks.kt app/src/main/java/app/simple/positional/decorations/switchview/SwitchCallbacks.java app/src/main/java/app/simple/positional/decorations/switchview/SwitchFrameLayout.kt app/src/main/java/app/simple/positional/decorations/switchview/SwitchView.kt app/src/main/java/app/simple/positional/decorations/views/CustomDialogFragment.kt app/src/main/java/app/simple/positional/dialogs/app/Permission.kt app/src/main/java/app/simple/positional/dialogs/clock/ClockNeedle.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassBloom.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassCalibration.kt app/src/main/java/app/simple/positional/dialogs/compass/CompassPhysicalProperties.kt app/src/main/java/app/simple/positional/dialogs/gps/PinCustomization.kt app/src/main/java/app/simple/positional/dialogs/gps/TargetCoordinates.kt app/src/main/res/drawable/seek_bar.xml app/src/main/res/drawable/switch_thumb.xml app/src/main/res/drawable/text_cursor.xml app/src/main/res/drawable/text_field.xml app/src/main/res/layout-land/dialog_pin_customization.xml app/src/main/res/layout/adapter_bloom_skin.xml app/src/main/res/layout/adapter_clock_needle.xml app/src/main/res/layout/adapter_pins.xml app/src/main/res/layout/dialog_clock_needle_skins.xml app/src/main/res/layout/dialog_compass_bloom.xml app/src/main/res/layout/dialog_compass_calibration.xml app/src/main/res/layout/dialog_compass_physical_properties.xml app/src/main/res/layout/dialog_permission_info.xml app/src/main/res/layout/dialog_pin_customization.xml app/src/main/res/layout/dialog_target_location.xml app/src/main/res/layout/switch_view.xml
+rm 'app/src/main/java/app/simple/positional/adapters/clock/ClockNeedleSkinsAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/compass/BloomSkinAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/maps/PinSkinAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/callbacks/PermissionCallbacks.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/switchview/SwitchCallbacks.java'
+rm 'app/src/main/java/app/simple/positional/decorations/switchview/SwitchFrameLayout.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/switchview/SwitchView.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/views/CustomDialogFragment.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/app/Permission.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/clock/ClockNeedle.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/compass/CompassBloom.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/compass/CompassCalibration.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/compass/CompassPhysicalProperties.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/gps/PinCustomization.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/gps/TargetCoordinates.kt'
+rm 'app/src/main/res/drawable/seek_bar.xml'
+rm 'app/src/main/res/drawable/switch_thumb.xml'
+rm 'app/src/main/res/drawable/text_cursor.xml'
+rm 'app/src/main/res/drawable/text_field.xml'
+rm 'app/src/main/res/layout-land/dialog_pin_customization.xml'
+rm 'app/src/main/res/layout/adapter_bloom_skin.xml'
+rm 'app/src/main/res/layout/adapter_clock_needle.xml'
+rm 'app/src/main/res/layout/adapter_pins.xml'
+rm 'app/src/main/res/layout/dialog_clock_needle_skins.xml'
+rm 'app/src/main/res/layout/dialog_compass_bloom.xml'
+rm 'app/src/main/res/layout/dialog_compass_calibration.xml'
+rm 'app/src/main/res/layout/dialog_compass_physical_properties.xml'
+rm 'app/src/main/res/layout/dialog_permission_info.xml'
+rm 'app/src/main/res/layout/dialog_pin_customization.xml'
+rm 'app/src/main/res/layout/dialog_target_location.xml'
+rm 'app/src/main/res/layout/switch_view.xml'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-09-21-14
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.051s
+user	0m0.453s
+sys	0m0.594s
 kushal@fedora:~/src/kotlin/positional$ 
+
+
+
+

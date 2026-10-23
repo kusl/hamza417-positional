@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T08:45:36-04:00
+Generated: 2026-10-23T09:21:16-04:00
 Branch:    master
-Commit:    82c97ba5 2026-10-23 08:45:33 -0400 add claude response
+Commit:    0d860078 2026-10-23 09:21:07 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (968 files)
+## TREE (940 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -91,16 +91,9 @@ app/
                   BottomBarAdapter.kt
                   BottomBarCallbacks.java
                   BottomBarItems.java
-                clock/
-                  ClockNeedleSkinsAdapter.kt
-                compass/
-                  BloomSkinAdapter.kt
-                maps/
-                  PinSkinAdapter.kt
               callbacks/
                 BottomBarHost.kt
                 PanelsCallback.java
-                PermissionCallbacks.kt
               constants/
                 ClockSkinsConstants.kt
                 CompassBloom.kt
@@ -155,10 +148,6 @@ app/
                   DynamicRippleImageButton.java
                   DynamicRippleLinearLayout.java
                   Utils.java
-                switchview/
-                  SwitchCallbacks.java
-                  SwitchFrameLayout.kt
-                  SwitchView.kt
                 trails/
                   TrailMaps.kt
                 transformers/
@@ -172,25 +161,15 @@ app/
                   VerticalListViewHolder.kt
                 views/
                   CustomBottomSheetDialogFragment.kt
-                  CustomDialogFragment.kt
                   CustomRecyclerView.kt
                   CustomWebView.kt
               dialogs/
                 app/
                   LocationParameters.kt
                   Panels.kt
-                  Permission.kt
-                clock/
-                  ClockNeedle.kt
-                compass/
-                  CompassBloom.kt
-                  CompassCalibration.kt
-                  CompassPhysicalProperties.kt
                 gps/
                   CoordinatesExpansion.kt
                   LocationExpansion.kt
-                  PinCustomization.kt
-                  TargetCoordinates.kt
               extensions/
                 activity/
                   BaseActivity.kt
@@ -273,6 +252,7 @@ app/
                   MeasureScreen.kt
                   MenuSheet.kt
                   PanelComponents.kt
+                  PanelDialogs.kt
                   PanelMenus.kt
                   PositionalTheme.kt
                   Preferences.kt
@@ -281,6 +261,7 @@ app/
                   SavedListScreen.kt
                   SettingsDialogs.kt
                   SettingsScreen.kt
+                  SkinDialogs.kt
                   Speedometer.kt
                   SunPositionDiagram.kt
                   TimeZoneScreen.kt
@@ -641,16 +622,12 @@ app/
           sc_02_compass.xml
           sc_03_gps.xml
           sc_04_level.xml
-          seek_bar.xml
           seekbar_thumb.xml
           speedometer_dial_high_range.xml
           speedometer_dial_max_range.xml
           speedometer_dial_medium_range.xml
           speedometer_dial_normal_range.xml
           speedometer_needle.xml
-          switch_thumb.xml
-          text_cursor.xml
-          text_field.xml
           widget_clock_preview.xml
         font/
           bold.ttf
@@ -662,7 +639,6 @@ app/
           medium.ttf
           regular.ttf
         layout-land/
-          dialog_pin_customization.xml
           fragment_launcher.xml
         layout-v26/
           widget_suntime.xml
@@ -670,24 +646,13 @@ app/
           activity_clock_widget.xml
           activity_launcher.xml
           activity_main.xml
-          adapter_bloom_skin.xml
           adapter_bottom_bar.xml
-          adapter_clock_needle.xml
           adapter_panel.xml
-          adapter_pins.xml
-          dialog_clock_needle_skins.xml
-          dialog_compass_bloom.xml
-          dialog_compass_calibration.xml
-          dialog_compass_physical_properties.xml
           dialog_custom_location_shortcut.xml
           dialog_panel_switcher.xml
-          dialog_permission_info.xml
-          dialog_pin_customization.xml
-          dialog_target_location.xml
           expansion_dialog_coordinates.xml
           expansion_dialog_location.xml
           fragment_launcher.xml
-          switch_view.xml
           widget_clock.xml
           widget_clock_2x2.xml
           widget_clock_3x3.xml
@@ -1070,6 +1035,7 @@ app/
                   DialogHostTest.kt
                   MapSearchQueryTest.kt
                   MenuSheetStateTest.kt
+                  PhysicsValueTest.kt
                   SettingsLabelsTest.kt
                   SpeedometerDialTest.kt
                   TimeZoneCatalogTest.kt
@@ -1393,8 +1359,9 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8b | Trail and measure map panels in Compose on a shared map scaffold; trail points observed through Room `Flow` with one open database per trail; popup windows, tool views and the timeline library removed | Done |
 | 8c | Panel menus (GPS, trail, measure, compass, clock, direction) as one Compose bottom sheet built from `PanelMenus`; sub dialogs no longer reopen menus while being destroyed | Done |
 | 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
-| 8e | Remaining dialogs (location parameters, coordinates and location details, pins, target coordinates, calibration, skins, panels, permission) in Compose | Next |
-| 8f | Single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
+| 8f | Location parameters, location and coordinate details and the panel switcher in Compose | Next |
+| 8g | Single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -2269,7 +2236,6 @@ import app.simple.positional.adapters.bottombar.BottomBarAdapter
 import app.simple.positional.adapters.bottombar.BottomBarItems
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.callbacks.PanelsCallback
-import app.simple.positional.callbacks.PermissionCallbacks
 import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
 import app.simple.positional.decorations.transformers.DepthTransformer
 import app.simple.positional.dialogs.app.Panels.Companion.showPanelsDialog
@@ -2299,7 +2265,6 @@ import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
 class MainActivity : BaseActivity(),
-    PermissionCallbacks,
     BottomBarHost,
     android.content.SharedPreferences.OnSharedPreferenceChangeListener,
     OnMapsSdkInitializedCallback {
@@ -2473,7 +2438,7 @@ class MainActivity : BaseActivity(),
         }
     }
 
-    override fun onGrantRequest() {
+    private fun onGrantRequest() {
         ActivityCompat.requestPermissions(
             this, arrayOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -3437,148 +3402,6 @@ public class BottomBarItems {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/clock/ClockNeedleSkinsAdapter.kt
-################################################################################
-package app.simple.positional.adapters.clock
-
-import android.content.Context
-import android.os.Parcelable
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.viewpager.widget.PagerAdapter
-import app.simple.positional.R
-import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
-
-class ClockNeedleSkinsAdapter(context: Context) : PagerAdapter() {
-    private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
-
-    override fun getCount(): Int {
-        return clockNeedleSkins.size
-    }
-
-    override fun isViewFromObject(view: View, `object`: Any): Boolean {
-        return view == `object`
-    }
-
-    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-        container.removeView(`object` as View)
-    }
-
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val imageLayout: View = layoutInflater.inflate(R.layout.adapter_clock_needle, container, false)
-
-        imageLayout.findViewById<ImageView>(R.id.adapter_needle_background).setImageResource(R.drawable.clock_face)
-        imageLayout.findViewById<ImageView>(R.id.adapter_needle_hour).setImageResource(clockNeedleSkins[position][0])
-        imageLayout.findViewById<ImageView>(R.id.adapter_needle_minute).setImageResource(clockNeedleSkins[position][1])
-        imageLayout.findViewById<ImageView>(R.id.adapter_needle_second).setImageResource(clockNeedleSkins[position][2])
-
-        container.addView(imageLayout, 0)
-        return imageLayout
-    }
-
-    override fun restoreState(state: Parcelable?, loader: ClassLoader?) {}
-    override fun saveState(): Parcelable? {
-        return null
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/compass/BloomSkinAdapter.kt
-################################################################################
-package app.simple.positional.adapters.compass
-
-import android.content.Context
-import android.os.Parcelable
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.viewpager.widget.PagerAdapter
-import app.simple.positional.R
-import app.simple.positional.constants.CompassBloom.compassBloomRes
-
-class BloomSkinAdapter(context: Context) : PagerAdapter() {
-    private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
-
-    override fun getCount(): Int {
-        return compassBloomRes.size
-    }
-
-    override fun isViewFromObject(view: View, `object`: Any): Boolean {
-        return view == `object`
-    }
-
-    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-        container.removeView(`object` as View)
-    }
-
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val imageLayout: View = layoutInflater.inflate(R.layout.adapter_bloom_skin, container, false)
-
-        imageLayout.findViewById<ImageView>(R.id.adapter_bloom_one).setImageResource(compassBloomRes[position])
-        imageLayout.findViewById<ImageView>(R.id.adapter_bloom_two).setImageResource(compassBloomRes[position])
-        imageLayout.findViewById<ImageView>(R.id.adapter_bloom_three).setImageResource(compassBloomRes[position])
-        imageLayout.findViewById<ImageView>(R.id.adapter_bloom_four).setImageResource(compassBloomRes[position])
-
-        container.addView(imageLayout, 0)
-        return imageLayout
-    }
-
-    override fun restoreState(state: Parcelable?, loader: ClassLoader?) {}
-    override fun saveState(): Parcelable? {
-        return null
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/maps/PinSkinAdapter.kt
-################################################################################
-package app.simple.positional.adapters.maps
-
-import android.content.Context
-import android.os.Parcelable
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.viewpager.widget.PagerAdapter
-import app.simple.positional.R
-import app.simple.positional.constants.LocationPins
-
-class PinSkinAdapter(context: Context) : PagerAdapter() {
-    private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
-
-    override fun getCount(): Int {
-        return LocationPins.locationsPins.size
-    }
-
-    override fun isViewFromObject(view: View, `object`: Any): Boolean {
-        return view == `object`
-    }
-
-    override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
-        container.removeView(`object` as View)
-    }
-
-    override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val imageLayout: View = layoutInflater.inflate(R.layout.adapter_pins, container, false)
-
-        imageLayout.findViewById<ImageView>(R.id.adapter_pin).setImageResource(LocationPins.locationsPins[position])
-
-        container.addView(imageLayout, 0)
-
-        return imageLayout
-    }
-
-    override fun restoreState(state: Parcelable?, loader: ClassLoader?) {}
-    override fun saveState(): Parcelable? {
-        return null
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/callbacks/BottomBarHost.kt
 ################################################################################
 package app.simple.positional.callbacks
@@ -3596,15 +3419,6 @@ import android.view.View;
 
 public interface PanelsCallback {
     void onPanelClick(View view, String string, int position);
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/callbacks/PermissionCallbacks.kt
-################################################################################
-package app.simple.positional.callbacks
-
-interface PermissionCallbacks {
-    fun onGrantRequest()
 }
 
 ################################################################################
@@ -7609,187 +7423,6 @@ public class Utils {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/switchview/SwitchCallbacks.java
-################################################################################
-package app.simple.positional.decorations.switchview;
-
-public interface SwitchCallbacks {
-    void onCheckedChanged(boolean isChecked);
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/switchview/SwitchFrameLayout.kt
-################################################################################
-package app.simple.positional.decorations.switchview
-
-import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.Color
-import android.util.AttributeSet
-import android.view.ViewGroup
-import android.widget.FrameLayout
-import androidx.core.view.setPadding
-import app.simple.positional.R
-import com.google.android.material.shape.CornerFamily
-import com.google.android.material.shape.MaterialShapeDrawable
-import com.google.android.material.shape.ShapeAppearanceModel
-
-open class SwitchFrameLayout @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
-) : FrameLayout(context, attrs, defStyleAttr) {
-    init {
-        layoutParams = LayoutParams(context.resources.getDimensionPixelSize(R.dimen.switch_width), ViewGroup.LayoutParams.WRAP_CONTENT)
-        setPadding(context.resources.getDimensionPixelSize(R.dimen.switch_padding))
-
-        backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-
-        val shapeAppearanceModel = ShapeAppearanceModel()
-                .toBuilder()
-                .setAllCorners(CornerFamily.ROUNDED, 100F)
-                .build()
-
-        background = MaterialShapeDrawable(shapeAppearanceModel)
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/switchview/SwitchView.kt
-################################################################################
-package app.simple.positional.decorations.switchview
-
-import android.animation.ValueAnimator
-import android.annotation.SuppressLint
-import android.content.Context
-import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
-import android.widget.ImageView
-import androidx.core.content.ContextCompat
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
-import app.simple.positional.R
-import app.simple.positional.util.ColorUtils.animateColorChange
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.LocaleHelper.isRTL
-import app.simple.positional.util.ViewUtils
-
-@SuppressLint("ClickableViewAccessibility")
-class SwitchView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
-    : SwitchFrameLayout(context, attrs, defStyleAttr) {
-    private var thumb: ImageView
-    private var switchCallbacks: SwitchCallbacks? = null
-
-    private val tension = 3.5F
-    val w = context.resources.getDimensionPixelOffset(R.dimen.switch_width)
-    val p = context.resources.getDimensionPixelOffset(R.dimen.switch_padding)
-    private val thumbWidth = context.resources.getDimensionPixelOffset(R.dimen.switch_thumb_dimensions)
-
-    var isChecked: Boolean = false
-        set(value) {
-            if (value) {
-                animateChecked()
-            } else {
-                animateUnchecked()
-            }
-            field = value
-        }
-
-    init {
-        val view = LayoutInflater.from(context).inflate(R.layout.switch_view, this, true)
-
-        thumb = view.findViewById(R.id.switch_thumb)
-
-        clipChildren = false
-        clipToPadding = false
-        clipToOutline = false
-
-        ViewUtils.addShadow(this)
-
-        view.setOnClickListener {
-            isChecked = !isChecked
-        }
-
-        requestLayout()
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (isClickable) {
-                    thumb.animate()
-                        .scaleY(1.5F)
-                        .scaleX(1.5F)
-                        .setInterpolator(DecelerateInterpolator(1.5F))
-                        .setDuration(500L)
-                        .start()
-                }
-            }
-            MotionEvent.ACTION_MOVE,
-            MotionEvent.ACTION_UP,
-            -> {
-                thumb.animate()
-                    .scaleY(1.0F)
-                    .scaleX(1.0F)
-                    .setInterpolator(DecelerateInterpolator(1.5F))
-                    .setDuration(500L)
-                    .start()
-            }
-        }
-
-        return super.onTouchEvent(event)
-    }
-
-    private fun animateUnchecked() {
-        thumb.animate()
-            .translationX(if(resources.isRTL()) (w - p * 2 - thumbWidth).toFloat() else 0F)
-            .setInterpolator(OvershootInterpolator(tension))
-            .setDuration(500)
-            .start()
-
-        animateColorChange(ContextCompat.getColor(context, R.color.switch_off))
-        switchCallbacks?.onCheckedChanged(false)
-        animateElevation(0F)
-    }
-
-    private fun animateChecked() {
-        thumb.animate()
-            .translationX(if(resources.isRTL()) 0F else (w - p * 2 - thumbWidth).toFloat())
-            .setInterpolator(OvershootInterpolator(tension))
-            .setDuration(500)
-            .start()
-
-        animateColorChange(context.resolveAttrColor(R.attr.colorAppAccent))
-        switchCallbacks?.onCheckedChanged(true)
-        animateElevation(25F)
-    }
-
-    private fun animateElevation(elevation: Float) {
-        val valueAnimator = ValueAnimator.ofFloat(this.elevation, elevation)
-        valueAnimator.duration = 500L
-        valueAnimator.interpolator = LinearOutSlowInInterpolator()
-        valueAnimator.addUpdateListener {
-            this.elevation = it.animatedValue as Float
-        }
-        valueAnimator.start()
-    }
-
-    fun setOnCheckedChangeListener(switchCallbacks: SwitchCallbacks) {
-        this.switchCallbacks = switchCallbacks
-    }
-
-    override fun onViewRemoved(child: View?) {
-        super.onViewRemoved(child)
-        thumb.clearAnimation()
-    }
-
-    fun invertCheckedStatus() {
-        isChecked = !isChecked
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt
 ################################################################################
 package app.simple.positional.decorations.trails
@@ -8900,83 +8533,6 @@ open class CustomBottomSheetDialogFragment : BottomSheetDialogFragment(), Shared
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/views/CustomDialogFragment.kt
-################################################################################
-package app.simple.positional.decorations.views
-
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.DisplayMetrics
-import android.view.Gravity
-import android.view.View
-import android.view.WindowManager
-import android.widget.FrameLayout
-import androidx.fragment.app.DialogFragment
-import app.simple.positional.R
-import app.simple.positional.util.StatusBarHeight
-
-open class CustomDialogFragment : DialogFragment() {
-    private val handler = Handler(Looper.getMainLooper())
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val window = dialog!!.window ?: return
-        val displayMetrics = DisplayMetrics()
-
-        window.attributes.windowAnimations = R.style.DialogAnimation
-        window.attributes.width = FrameLayout.LayoutParams.MATCH_PARENT
-        @Suppress("deprecation")
-        window.windowManager.defaultDisplay.getMetrics(displayMetrics)
-        window.setDimAmount(DIM_AMOUNT)
-        window.attributes.gravity = Gravity.CENTER
-        window.attributes.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
-
-        window.attributes.width = getWindowWidth()
-    }
-
-    open fun getWindowWidth(): Int {
-        val window = dialog!!.window ?: return 0
-        val displayMetrics = DisplayMetrics()
-
-        @Suppress("deprecation")
-        window.windowManager.defaultDisplay.getMetrics(displayMetrics)
-
-        val widthPercentage = if (StatusBarHeight.isLandscape(requireContext())) {
-            LANDSCAPE_WIDTH
-        } else {
-            PORTRAIT_WIDTH
-        }
-
-        return (displayMetrics.widthPixels * widthPercentage).toInt()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    fun postDelayed(delay: Long, runnable: () -> Unit) {
-        handler.removeCallbacksAndMessages(null)
-        handler.postDelayed({
-            runnable()
-        }, delay)
-    }
-
-    companion object {
-        private const val PORTRAIT_WIDTH = 0.80F
-        private const val LANDSCAPE_WIDTH = 0.60F
-        private const val DIM_AMOUNT = 0.35F
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt
 ################################################################################
 package app.simple.positional.decorations.views
@@ -9356,474 +8912,6 @@ class Panels : CustomBottomSheetDialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/app/Permission.kt
-################################################################################
-package app.simple.positional.dialogs.app
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.CheckBox
-import app.simple.positional.R
-import app.simple.positional.callbacks.PermissionCallbacks
-import app.simple.positional.decorations.ripple.DynamicRippleButton
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.decorations.views.CustomWebView
-import app.simple.positional.preferences.MainPreferences.setShowPermissionDialog
-
-class Permission : CustomBottomSheetDialogFragment() {
-    private var permissionCallbacks: PermissionCallbacks? = null
-    private lateinit var grant: DynamicRippleButton
-    private lateinit var close: DynamicRippleButton
-    private lateinit var showAgain: CheckBox
-    private lateinit var webView: CustomWebView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_permission_info, container, false)
-
-        permissionCallbacks = requireActivity() as PermissionCallbacks
-
-        webView = view.findViewById(R.id.permissions_webview)
-        grant = view.findViewById(R.id.grant)
-        close = view.findViewById(R.id.close)
-        showAgain = view.findViewById(R.id.show_perm_dialog)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        webView.loadUrl("file:///android_asset/html/required_permissions.html")
-
-        grant.setOnClickListener {
-            permissionCallbacks?.onGrantRequest()
-            this.dismiss()
-        }
-
-        close.setOnClickListener {
-            this.dismiss()
-        }
-
-        showAgain.setOnCheckedChangeListener { _, isChecked ->
-            setShowPermissionDialog(isChecked)
-        }
-    }
-
-    companion object {
-        fun newInstance(): Permission {
-            val args = Bundle()
-            val fragment = Permission()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/clock/ClockNeedle.kt
-################################################################################
-package app.simple.positional.dialogs.clock
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.viewpager.widget.ViewPager
-import app.simple.positional.R
-import app.simple.positional.adapters.clock.ClockNeedleSkinsAdapter
-import app.simple.positional.constants.ClockSkinsConstants
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.util.LocaleHelper
-
-class ClockNeedle : CustomBottomSheetDialogFragment() {
-    private lateinit var needleSkin: ViewPager
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_clock_needle_skins, container, false)
-        needleSkin = view.findViewById(R.id.needle_skin)
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        needleSkin.adapter = ClockNeedleSkinsAdapter(requireContext())
-        needleSkin.currentItem = ClockPreferences.getClockNeedleTheme()
-
-        view.findViewById<TextView>(R.id.current_clock_theme).text = String.format(
-                locale = LocaleHelper.getAppLocale(),
-                format = "${needleSkin.currentItem + 1}/${ClockSkinsConstants.clockNeedleSkins.size}"
-        )
-
-        needleSkin.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
-
-            override fun onPageSelected(position: Int) {
-                view.findViewById<TextView>(R.id.current_clock_theme).text = String.format(
-                        locale = LocaleHelper.getAppLocale(),
-                        format = "${position + 1}/${ClockSkinsConstants.clockNeedleSkins.size}"
-                )
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                if (state == ViewPager.SCROLL_STATE_SETTLING) {
-                    ClockPreferences.setClockNeedleTheme(needleSkin.currentItem)
-                }
-            }
-        })
-    }
-
-    companion object {
-        fun newInstance(): ClockNeedle {
-            val args = Bundle()
-            val fragment = ClockNeedle()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/compass/CompassBloom.kt
-################################################################################
-package app.simple.positional.dialogs.compass
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.viewpager.widget.ViewPager
-import app.simple.positional.R
-import app.simple.positional.adapters.compass.BloomSkinAdapter
-import app.simple.positional.constants.CompassBloom
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.CompassPreferences
-import app.simple.positional.util.LocaleHelper
-
-class CompassBloom : CustomBottomSheetDialogFragment() {
-    private lateinit var viewPager: ViewPager
-    private lateinit var textView: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_compass_bloom, container, false)
-
-        viewPager = view.findViewById(R.id.bloom_skin_view_pager)
-        textView = view.findViewById(R.id.current_bloom_theme)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        viewPager.adapter = BloomSkinAdapter(requireContext())
-        viewPager.currentItem = CompassPreferences.getFlowerBloomTheme()
-
-        textView.text = String.format(
-                locale = LocaleHelper.getAppLocale(),
-                format = "${viewPager.currentItem + 1}/${CompassBloom.compassBloomRes.size}"
-        )
-
-        viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
-
-            override fun onPageSelected(position: Int) {
-                textView.text = String.format(
-                        locale = LocaleHelper.getAppLocale(),
-                        format = "${position + 1}/${CompassBloom.compassBloomRes.size}"
-                )
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                if (state == ViewPager.SCROLL_STATE_SETTLING) {
-                    CompassPreferences.setFlowerBloom(viewPager.currentItem)
-                }
-            }
-        })
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/compass/CompassCalibration.kt
-################################################################################
-package app.simple.positional.dialogs.compass
-
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import app.simple.positional.R
-import app.simple.positional.decorations.views.CustomDialogFragment
-import app.simple.positional.util.HtmlHelper.fromHtml
-
-class CompassCalibration : CustomDialogFragment(), SensorEventListener {
-    private lateinit var sensorManager: SensorManager
-    private lateinit var sensorAccelerometer: Sensor
-    private lateinit var sensorMagneticField: Sensor
-
-    private var haveAccelerometerSensor = false
-    private var haveMagnetometerSensor = false
-
-    private lateinit var magAccuracy: TextView
-    private lateinit var accAccuracy: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.dialog_compass_calibration, container, false)
-        magAccuracy = v.findViewById(R.id.mag_accuracy)
-        accAccuracy = v.findViewById(R.id.acc_accuracy)
-
-        sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-        if (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null && sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            sensorMagneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)!!
-            sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
-            haveMagnetometerSensor = true
-            haveAccelerometerSensor = true
-        } else {
-            haveAccelerometerSensor = false
-            haveMagnetometerSensor = false
-        }
-
-        return v
-    }
-
-    override fun onResume() {
-        super.onResume()
-        register()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregister()
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        if (sensor!!.type == Sensor.TYPE_MAGNETIC_FIELD) {
-            magAccuracy.text = when (accuracy) {
-                SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                    fromHtml("<b>${getString(R.string.magnetometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_unreliable)}")
-                }
-                SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                    fromHtml("<b>${getString(R.string.magnetometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_low)}")
-                }
-                SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> {
-                    fromHtml("<b>${getString(R.string.magnetometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_medium)}")
-                }
-                SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
-                    fromHtml("<b>${getString(R.string.magnetometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_high)}")
-                }
-                else -> {
-                    fromHtml("<b>${getString(R.string.magnetometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_unreliable)}")
-                }
-            }
-        }
-
-        if (sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            accAccuracy.text = when (accuracy) {
-                SensorManager.SENSOR_STATUS_UNRELIABLE -> {
-                    fromHtml("<b>${getString(R.string.accelerometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_unreliable)}")
-                }
-                SensorManager.SENSOR_STATUS_ACCURACY_LOW -> {
-                    fromHtml("<b>${getString(R.string.accelerometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_low)}")
-                }
-                SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM -> {
-                    fromHtml("<b>${getString(R.string.accelerometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_medium)}")
-                }
-                SensorManager.SENSOR_STATUS_ACCURACY_HIGH -> {
-                    fromHtml("<b>${getString(R.string.accelerometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_high)}")
-                }
-                else -> {
-                    fromHtml("<b>${getString(R.string.accelerometer_accuracy)}</b> ${getString(R.string.sensor_accuracy_unreliable)}")
-                }
-            }
-        }
-    }
-
-    private fun register() {
-        if (context == null) return
-        if (haveAccelerometerSensor && haveMagnetometerSensor) {
-            sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_GAME)
-            sensorManager.registerListener(this, sensorMagneticField, SensorManager.SENSOR_DELAY_GAME)
-        }
-    }
-
-    private fun unregister() {
-        if (context == null) return
-        if (haveAccelerometerSensor && haveMagnetometerSensor) {
-            sensorManager.unregisterListener(this, sensorAccelerometer)
-            sensorManager.unregisterListener(this, sensorMagneticField)
-        }
-    }
-
-    companion object {
-        fun newInstance(): CompassCalibration {
-            return CompassCalibration()
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/compass/CompassPhysicalProperties.kt
-################################################################################
-package app.simple.positional.dialogs.compass
-
-import android.animation.ObjectAnimator
-import android.content.DialogInterface
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.SeekBar
-import app.simple.positional.R
-import app.simple.positional.activities.subactivity.WebPageViewerActivity
-import app.simple.positional.constants.HtmlPage
-import app.simple.positional.decorations.switchview.SwitchView
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.math.RotationPhysics
-import app.simple.positional.preferences.CompassPreferences
-
-class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
-    private lateinit var dampingCoefficient: SeekBar
-    private lateinit var rotationalInertia: SeekBar
-    private lateinit var magneticCoefficient: SeekBar
-    private lateinit var reset: ImageButton
-    private lateinit var help: ImageButton
-    private lateinit var toggle: SwitchView
-    private lateinit var toggleContainer: LinearLayout
-
-    private var objectAnimator: ObjectAnimator? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_compass_physical_properties, container, false)
-
-        dampingCoefficient = view.findViewById(R.id.compass_damping_coefficient_seekbar)
-        rotationalInertia = view.findViewById(R.id.compass_rotational_inertia_seekbar)
-        magneticCoefficient = view.findViewById(R.id.compass_magnetic_coefficient_seekbar)
-        reset = view.findViewById(R.id.reset_physical_properties)
-        help = view.findViewById(R.id.help_physical_properties)
-        toggle = view.findViewById(R.id.compass_physical_properties)
-        toggleContainer = view.findViewById(R.id.compass_toggle_physical_properties)
-
-        dampingCoefficient.max = 50
-        rotationalInertia.max = 50
-        magneticCoefficient.max = 15000
-
-        dampingCoefficient.progress = CompassPreferences.getDampingCoefficient().toInt()
-        rotationalInertia.progress = CompassPreferences.getRotationalInertia().toInt()
-        magneticCoefficient.progress = CompassPreferences.getMagneticCoefficient().toInt()
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        toggle.isChecked = CompassPreferences.isUsingPhysicalProperties()
-        isChecked(toggle.isChecked)
-
-        dampingCoefficient.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                CompassPreferences.setDampingCoefficient(if (progress == 0) 0.1F else progress.toFloat())
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        rotationalInertia.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                CompassPreferences.setRotationalInertia(if (progress == 0) 0.1F else progress.toFloat())
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        magneticCoefficient.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                CompassPreferences.setMagneticCoefficient(if (progress == 0) 0.1F else progress.toFloat())
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        reset.setOnClickListener {
-            updateSeekbar(dampingCoefficient, RotationPhysics.DAMPING.toInt())
-            updateSeekbar(rotationalInertia, RotationPhysics.INERTIA.toInt())
-            updateSeekbar(magneticCoefficient, RotationPhysics.MAGNETIC.toInt())
-        }
-
-        help.setOnClickListener {
-            WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES)
-        }
-
-        toggleContainer.setOnClickListener {
-            toggle.isChecked = !toggle.isChecked
-        }
-
-        toggle.setOnCheckedChangeListener {
-            CompassPreferences.setUsePhysicalProperties(it)
-            isChecked(it)
-        }
-    }
-
-    private fun isChecked(boolean: Boolean) {
-        rotationalInertia.isEnabled = boolean
-        dampingCoefficient.isEnabled = boolean
-        magneticCoefficient.isEnabled = boolean
-
-        rotationalInertia.animate().alpha(if (boolean) 1F else 0.5F).setInterpolator(DecelerateInterpolator(1.5F)).start()
-        dampingCoefficient.animate().alpha(if (boolean) 1F else 0.5F).setInterpolator(DecelerateInterpolator(1.5F)).start()
-        magneticCoefficient.animate().alpha(if (boolean) 1F else 0.5F).setInterpolator(DecelerateInterpolator(1.5F)).start()
-    }
-
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        objectAnimator?.cancel()
-        dampingCoefficient.clearAnimation()
-        rotationalInertia.clearAnimation()
-        magneticCoefficient.clearAnimation()
-    }
-
-    private fun updateSeekbar(seekBar: SeekBar, value: Int) {
-        objectAnimator = ObjectAnimator.ofInt(seekBar, "progress", seekBar.progress, value)
-        objectAnimator?.duration = 1000L
-        objectAnimator?.interpolator = DecelerateInterpolator()
-        objectAnimator?.setAutoCancel(true)
-        objectAnimator?.start()
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt
 ################################################################################
 package app.simple.positional.dialogs.gps
@@ -10138,268 +9226,6 @@ class LocationExpansion : CustomBottomSheetDialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/gps/PinCustomization.kt
-################################################################################
-package app.simple.positional.dialogs.gps
-
-import android.animation.ObjectAnimator
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
-import android.widget.SeekBar
-import androidx.viewpager.widget.ViewPager
-import app.simple.positional.R
-import app.simple.positional.adapters.maps.PinSkinAdapter
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.preferences.GPSPreferences
-
-class PinCustomization : CustomBottomSheetDialogFragment() {
-    private lateinit var opacity: SeekBar
-    private lateinit var size: SeekBar
-    private lateinit var pins: ViewPager
-    private lateinit var reset: DynamicRippleImageButton
-
-    private var objectAnimator: ObjectAnimator? = null
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_pin_customization, container, false)
-
-        opacity = view.findViewById(R.id.pin_opacity_seekbar)
-        size = view.findViewById(R.id.pin_size_seekbar)
-        pins = view.findViewById(R.id.pins_view_pager)
-        reset = view.findViewById(R.id.reset_pin_customization)
-
-        pins.adapter = PinSkinAdapter(requireContext())
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        opacity.progress = GPSPreferences.getPinOpacity()
-        size.progress = GPSPreferences.getPinSize()
-        pins.currentItem = GPSPreferences.getPinSkin()
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            size.min = 1
-            opacity.min = 10
-        }
-
-        opacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    GPSPreferences.setPinOpacity(progress)
-                } else {
-                    if (progress == 0) {
-                        GPSPreferences.setPinOpacity(10)
-                    } else {
-                        GPSPreferences.setPinOpacity(progress)
-                    }
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        size.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    GPSPreferences.setPinSize(progress)
-                } else {
-                    if (progress == 0) {
-                        GPSPreferences.setPinSize(1)
-                    } else {
-                        GPSPreferences.setPinSize(progress)
-                    }
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-
-        pins.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
-
-            override fun onPageSelected(position: Int) {
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {
-                if (state == ViewPager.SCROLL_STATE_IDLE) {
-                    GPSPreferences.setPinSkin(pins.currentItem)
-                }
-            }
-        })
-
-        reset.setOnClickListener {
-            updateSeekbar(opacity, 255)
-            updateSeekbar(size, 4)
-        }
-    }
-
-    private fun updateSeekbar(seekBar: SeekBar, value: Int) {
-        objectAnimator = ObjectAnimator.ofInt(seekBar, "progress", seekBar.progress, value)
-        objectAnimator?.duration = 1000L
-        objectAnimator?.interpolator = DecelerateInterpolator()
-        objectAnimator?.setAutoCancel(true)
-        objectAnimator?.start()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        objectAnimator?.cancel()
-        opacity.clearAnimation()
-        size.clearAnimation()
-    }
-
-    companion object {
-        fun newInstance() = PinCustomization()
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/gps/TargetCoordinates.kt
-################################################################################
-package app.simple.positional.dialogs.gps
-
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.EditText
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.doOnTextChanged
-import app.simple.positional.R
-import app.simple.positional.activities.subactivity.MapSearchActivity
-import app.simple.positional.decorations.ripple.DynamicRippleButton
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.CustomDialogFragment
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.util.LocationExtension
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
-
-class TargetCoordinates : CustomDialogFragment() {
-    private lateinit var latitude: EditText
-    private lateinit var longitude: EditText
-    private lateinit var search: DynamicRippleImageButton
-    private lateinit var save: DynamicRippleButton
-    private lateinit var cancel: DynamicRippleButton
-
-    private var isValidLatitude = false
-    private var isValidLongitude = false
-
-    private val registerForActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                result.data?.let { intent ->
-                    intent.getStringExtra("address")?.let { _ ->
-                        intent.getDoubleExtra("latitude", 0.0).let { latitude ->
-                            intent.getDoubleExtra("longitude", 0.0).let { longitude ->
-                                this.latitude.setText(latitude.toString())
-                                this.longitude.setText(longitude.toString())
-                            }
-                        }
-                    }
-                }
-            }
-
-            Activity.RESULT_CANCELED -> {
-                Log.d("TargetCoordinates", "Search cancelled")
-            }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_target_location, container, false)
-
-        latitude = view.findViewById(R.id.target_latitude)
-        longitude = view.findViewById(R.id.target_longitude)
-        save = view.findViewById(R.id.save)
-        search = view.findViewById(R.id.search)
-        cancel = view.findViewById(R.id.cancel)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        search.setOnClickListener {
-            registerForActivityResult.launch(Intent(requireContext(), MapSearchActivity::class.java))
-        }
-
-        latitude.doOnTextChanged { text, _, _, _ ->
-            isValidLatitude = kotlin.runCatching {
-                LocationExtension.isValidLatitude(text.toString().toDouble())
-            }.getOrElse {
-                false
-            }
-
-            saveButtonState()
-        }
-
-        longitude.doOnTextChanged { text, _, _, _ ->
-            isValidLongitude = kotlin.runCatching {
-                LocationExtension.isValidLongitude(text.toString().toDouble())
-            }.getOrElse {
-                false
-            }
-
-            saveButtonState()
-        }
-
-        with(GPSPreferences.getTargetMarkerCoordinates()) {
-            latitude.setText(this[0].toString())
-            longitude.setText(this[1].toString())
-        }
-
-        save.setOnClickListener {
-            GPSPreferences.setTargetMarkerLatitude(latitude.text.toString().toFloat())
-            GPSPreferences.setTargetMarkerLongitude(longitude.text.toString().toFloat())
-            GPSPreferences.setTargetMarker(true)
-            dismiss()
-        }
-
-        cancel.setOnClickListener {
-            dismiss()
-        }
-    }
-
-    private fun saveButtonState() {
-        if (isValidLatitude && isValidLongitude) {
-            save.visible(false)
-        } else {
-            save.gone()
-        }
-    }
-
-    companion object {
-        fun newInstance(): TargetCoordinates {
-            val args = Bundle()
-            val fragment = TargetCoordinates()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/extensions/activity/BaseActivity.kt
 ################################################################################
 package app.simple.positional.extensions.activity
@@ -10651,15 +9477,21 @@ open class ScopedFragment : Fragment(), SharedPreferences.OnSharedPreferenceChan
 ################################################################################
 package app.simple.positional.extensions.fragment
 
+import android.hardware.Sensor
 import android.hardware.SensorManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import app.simple.positional.R
-import app.simple.positional.dialogs.compass.CompassCalibration
+import app.simple.positional.ui.compose.CalibrationDialog
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MessageDialog
 
 abstract class SensorPanel : ScopedFragment() {
     protected val dialogs = DialogHost()
     private var calibrationShown = false
+    private var accelerometerAccuracy by mutableIntStateOf(-1)
+    private var magnetometerAccuracy by mutableIntStateOf(-1)
 
     protected fun showSensorError() {
         val message = getString(R.string.sensor_error)
@@ -10667,20 +9499,18 @@ abstract class SensorPanel : ScopedFragment() {
     }
 
     protected fun showCalibration() {
-        if (!isStateSaved && parentFragmentManager.findFragmentByTag(CALIBRATION_TAG) == null) {
-            CompassCalibration.newInstance().show(parentFragmentManager, CALIBRATION_TAG)
-        }
+        dialogs.show { CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) }
     }
 
-    protected fun checkCalibration(accuracy: Int) {
+    protected fun checkCalibration(type: Int, accuracy: Int) {
+        when (type) {
+            Sensor.TYPE_ACCELEROMETER -> accelerometerAccuracy = accuracy
+            Sensor.TYPE_MAGNETIC_FIELD -> magnetometerAccuracy = accuracy
+        }
         if (!calibrationShown && accuracy <= SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
             calibrationShown = true
             showCalibration()
         }
-    }
-
-    private companion object {
-        const val CALIBRATION_TAG = "calibration_dialog"
     }
 }
 
@@ -16789,6 +15619,95 @@ fun Modifier.vertical(): Modifier = layout { measurable, _ ->
 }.rotate(-90f)
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/PanelDialogs.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import app.simple.positional.sensors.SensorAccuracy
+
+@Composable
+fun CalibrationDialog(accelerometer: Int, magnetometer: Int, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.ok)) } },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(painterResource(R.drawable.compass_calibrate), contentDescription = null, modifier = Modifier.size(CALIBRATION_IMAGE.dp))
+                Text(stringResource(R.string.compass_calibration_notice), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 12.dp))
+                AccuracyLine(R.string.accelerometer_accuracy, accelerometer)
+                AccuracyLine(R.string.magnetometer_accuracy, magnetometer)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
+}
+
+@Composable
+private fun AccuracyLine(label: Int, accuracy: Int) {
+    val value = stringResource(SensorAccuracy.label(accuracy))
+    Text(
+        buildAnnotatedString {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(stringResource(label)) }
+            append(" ")
+            append(value)
+        },
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+fun TargetCoordinatesDialog(form: CustomLocationForm, onSearch: () -> Unit, onDismiss: () -> Unit, onSave: (Double, Double) -> Unit) {
+    val parsed = CoordinateInput.parse(form.latitude, form.longitude)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(enabled = parsed != null, onClick = { parsed?.let { onSave(it.first, it.second) } }) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.target), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                IconAction(R.drawable.ic_search, stringResource(R.string.target), onSearch)
+            }
+        },
+        text = {
+            Row {
+                CoordinateField(form.latitude, R.string.specified_hint_latitude, Modifier.weight(1f)) { form.latitude = it }
+                Spacer(Modifier.width(10.dp))
+                CoordinateField(form.longitude, R.string.specified_hint_longitude, Modifier.weight(1f)) { form.longitude = it }
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
+}
+
+private const val CALIBRATION_IMAGE = 160
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/PanelMenus.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -17868,6 +16787,217 @@ private fun AboutSection(state: SettingsState, actions: SettingsActions) {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/SkinDialogs.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
+import app.simple.positional.constants.CompassBloom.compassBloomRes
+import app.simple.positional.constants.LocationPins
+import app.simple.positional.math.RotationPhysics
+import app.simple.positional.preferences.CompassPreferences
+import app.simple.positional.preferences.GPSPreferences
+
+@Composable
+private fun PickerDialog(title: String, onDismiss: () -> Unit, actions: @Composable () -> Unit = {}, content: @Composable () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.ok)) } },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                actions()
+            }
+        },
+        text = { Column { content() } },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
+}
+
+@Composable
+private fun SkinPager(count: Int, initial: Int, onSettled: (Int) -> Unit, page: @Composable (Int) -> Unit) {
+    val state = rememberPagerState(initialPage = initial.coerceIn(0, count - 1)) { count }
+    LaunchedEffect(state.settledPage) { onSettled(state.settledPage) }
+    HorizontalPager(state = state, modifier = Modifier.fillMaxWidth().height(PAGER_HEIGHT.dp)) { index ->
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { page(index) }
+    }
+    Text(
+        "${state.currentPage + 1}/$count",
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+    )
+}
+
+@Composable
+fun ClockNeedleDialog(selected: Int, onDismiss: () -> Unit, onSelect: (Int) -> Unit) {
+    PickerDialog(stringResource(R.string.needles), onDismiss) {
+        SkinPager(clockNeedleSkins.size, selected, onSelect) { index ->
+            val size = dimensionResource(R.dimen.clock_needle_dimensions)
+            Image(painterResource(R.drawable.clock_face), contentDescription = null, modifier = Modifier.size(size))
+            clockNeedleSkins[index].forEachIndexed { hand, res ->
+                Image(painterResource(res), contentDescription = null, modifier = Modifier.size(size).rotate(NEEDLE_ANGLES.getOrElse(hand) { 0f }))
+            }
+        }
+    }
+}
+
+@Composable
+fun BloomSkinDialog(selected: Int, onDismiss: () -> Unit, onSelect: (Int) -> Unit) {
+    PickerDialog(stringResource(R.string.bloom_skins), onDismiss) {
+        SkinPager(compassBloomRes.size, selected, onSelect) { index ->
+            BLOOM_ANGLES.forEach { angle -> SkinImage(compassBloomRes[index], angle) }
+        }
+    }
+}
+
+@Composable
+private fun SkinImage(@DrawableRes res: Int, angle: Float) {
+    Image(painterResource(res), contentDescription = null, modifier = Modifier.size(dimensionResource(R.dimen.compass_bloom_dimension)).rotate(angle))
+}
+
+@Composable
+fun PinCustomizationDialog(onDismiss: () -> Unit) {
+    var size by remember { mutableFloatStateOf(GPSPreferences.getPinSize().toFloat()) }
+    var opacity by remember { mutableFloatStateOf(GPSPreferences.getPinOpacity().toFloat()) }
+    PickerDialog(
+        stringResource(R.string.customize_pin),
+        onDismiss,
+        actions = {
+            IconAction(R.drawable.ic_reset, stringResource(R.string.customize_pin)) {
+                size = PIN_SIZE_DEFAULT
+                opacity = PIN_OPACITY_MAX
+                GPSPreferences.setPinSize(size.toInt())
+                GPSPreferences.setPinOpacity(opacity.toInt())
+            }
+        },
+    ) {
+        SkinPager(LocationPins.locationsPins.size, GPSPreferences.getPinSkin(), GPSPreferences::setPinSkin) { index ->
+            Image(
+                painterResource(LocationPins.locationsPins[index]),
+                contentDescription = null,
+                modifier = Modifier.size((PIN_PREVIEW_UNIT * size).dp).alpha(opacity / PIN_OPACITY_MAX),
+            )
+        }
+        LabeledSlider(R.string.size, size, PIN_SIZE_MIN..PIN_SIZE_MAX, steps = (PIN_SIZE_MAX - PIN_SIZE_MIN).toInt() - 1) {
+            size = it
+            GPSPreferences.setPinSize(it.toInt())
+        }
+        LabeledSlider(R.string.opacity, opacity, PIN_OPACITY_MIN..PIN_OPACITY_MAX) {
+            opacity = it
+            GPSPreferences.setPinOpacity(it.toInt())
+        }
+    }
+}
+
+@Composable
+fun PhysicalPropertiesDialog(onDismiss: () -> Unit, onHelp: () -> Unit) {
+    var enabled by remember { mutableStateOf(CompassPreferences.isUsingPhysicalProperties()) }
+    var inertia by remember { mutableFloatStateOf(CompassPreferences.getRotationalInertia()) }
+    var damping by remember { mutableFloatStateOf(CompassPreferences.getDampingCoefficient()) }
+    var magnetic by remember { mutableFloatStateOf(CompassPreferences.getMagneticCoefficient()) }
+    PickerDialog(
+        stringResource(R.string.physical_properties),
+        onDismiss,
+        actions = {
+            IconAction(R.drawable.ic_help_outline, stringResource(R.string.help), onHelp)
+            IconAction(R.drawable.ic_reset, stringResource(R.string.physical_properties)) {
+                inertia = RotationPhysics.INERTIA
+                damping = RotationPhysics.DAMPING
+                magnetic = RotationPhysics.MAGNETIC
+                CompassPreferences.setRotationalInertia(inertia)
+                CompassPreferences.setDampingCoefficient(damping)
+                CompassPreferences.setMagneticCoefficient(magnetic)
+            }
+        },
+    ) {
+        PreferenceItem(
+            title = stringResource(R.string.use_physical_properties),
+            trailing = { Switch(checked = enabled, onCheckedChange = null) },
+        ) {
+            enabled = !enabled
+            CompassPreferences.setUsePhysicalProperties(enabled)
+        }
+        Column(Modifier.alpha(if (enabled) 1f else DISABLED_ALPHA)) {
+            LabeledSlider(R.string.rotational_inertia, inertia, 0f..INERTIA_MAX, enabled) {
+                inertia = it
+                CompassPreferences.setRotationalInertia(physicsValue(it))
+            }
+            LabeledSlider(R.string.damping_coefficient, damping, 0f..DAMPING_MAX, enabled) {
+                damping = it
+                CompassPreferences.setDampingCoefficient(physicsValue(it))
+            }
+            LabeledSlider(R.string.coefficient_of_magnetic_field, magnetic, 0f..MAGNETIC_MAX, enabled) {
+                magnetic = it
+                CompassPreferences.setMagneticCoefficient(physicsValue(it))
+            }
+        }
+    }
+}
+
+fun physicsValue(value: Float): Float = value.coerceAtLeast(PHYSICS_MIN)
+
+@Composable
+private fun LabeledSlider(
+    label: Int,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    enabled: Boolean = true,
+    steps: Int = 0,
+    onChange: (Float) -> Unit,
+) {
+    Text(stringResource(label), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 12.dp))
+    Slider(value = value.coerceIn(range), onValueChange = onChange, valueRange = range, steps = steps, enabled = enabled)
+}
+
+private const val PAGER_HEIGHT = 240
+private const val PIN_PREVIEW_UNIT = 12f
+private const val PIN_SIZE_MIN = 1f
+private const val PIN_SIZE_MAX = 12f
+private const val PIN_SIZE_DEFAULT = 4f
+private const val PIN_OPACITY_MIN = 10f
+private const val PIN_OPACITY_MAX = 255f
+private const val INERTIA_MAX = 50f
+private const val DAMPING_MAX = 50f
+private const val MAGNETIC_MAX = 15000f
+private const val PHYSICS_MIN = 0.1f
+private const val DISABLED_ALPHA = 0.5f
+private val NEEDLE_ANGLES = listOf(0f, 90f, 245f)
+private val BLOOM_ANGLES = listOf(0f, 45f, 90f, 135f)
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/Speedometer.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -18767,8 +17897,10 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
-import app.simple.positional.dialogs.compass.CompassBloom
-import app.simple.positional.dialogs.compass.CompassPhysicalProperties
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
+import app.simple.positional.ui.compose.BloomSkinDialog
+import app.simple.positional.ui.compose.PhysicalPropertiesDialog
 import app.simple.positional.extensions.fragment.SensorPanel
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
@@ -18802,8 +17934,12 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.compass(
-            onBloomSkins = { CompassBloom().show(parentFragmentManager, "compass_bloom") },
-            onPhysicalProperties = { CompassPhysicalProperties().show(parentFragmentManager, "compass_properties") },
+            onBloomSkins = {
+                dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
+            },
+            onPhysicalProperties = {
+                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES) } }
+            },
         )
     }
 
@@ -18820,7 +17956,7 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
             Sensor.TYPE_ACCELEROMETER -> state.accelerometerAccuracy = accuracy
             Sensor.TYPE_MAGNETIC_FIELD -> state.magnetometerAccuracy = accuracy
         }
-        checkCalibration(accuracy)
+        checkCalibration(type, accuracy)
     }
 
     override fun onReadings(accelerometer: FloatArray, magnetometer: FloatArray) {
@@ -18940,7 +18076,7 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
-    override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(accuracy)
+    override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(type, accuracy)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
@@ -18982,6 +18118,7 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -18992,6 +18129,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModelProvider
@@ -19004,8 +18142,6 @@ import app.simple.positional.decorations.maps.Maps
 import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.dialogs.gps.CoordinatesExpansion
 import app.simple.positional.dialogs.gps.LocationExpansion
-import app.simple.positional.dialogs.gps.PinCustomization
-import app.simple.positional.dialogs.gps.TargetCoordinates
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
@@ -19026,6 +18162,11 @@ import app.simple.positional.ui.compose.positionalComposeView
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PinCustomizationDialog
+import app.simple.positional.ui.compose.CoordinateInput
+import app.simple.positional.ui.compose.CustomLocationForm
+import app.simple.positional.ui.compose.TargetCoordinatesDialog
+import app.simple.positional.activities.subactivity.MapSearchActivity
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
@@ -19051,6 +18192,17 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private lateinit var state: GpsState
     private val menuSheet = MenuSheetState()
     private val dialogs = DialogHost()
+    private val targetForm = CustomLocationForm()
+    private val search = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == Activity.RESULT_OK && data != null) {
+            targetForm.fill(
+                data.getStringExtra("address").orEmpty(),
+                CoordinateInput.format(data.getDoubleExtra("latitude", 0.0)),
+                CoordinateInput.format(data.getDoubleExtra("longitude", 0.0)),
+            )
+        }
+    }
     private lateinit var maps: Maps
     private lateinit var viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
@@ -19236,14 +18388,14 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     override fun menu() = menuSheet.show {
-        PanelMenus.gps(onPin = { PinCustomization.newInstance().show(parentFragmentManager, "pin_customization") }) {
+        PanelMenus.gps(onPin = ::pinCustomization) {
             WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
         }
     }
 
     override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
 
-    override fun pinCustomization() = PinCustomization.newInstance().show(parentFragmentManager, "pin_customization")
+    override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
 
     override fun locate(close: Boolean) {
         if (getLocationStatus(requireContext())) {
@@ -19261,7 +18413,22 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         maps.setTargetMarker(null)
     }
 
-    override fun targetCoordinates() = TargetCoordinates.newInstance().show(childFragmentManager, "target_coordinates")
+    override fun targetCoordinates() {
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        targetForm.fill("", CoordinateInput.format(target[0].toDouble()), CoordinateInput.format(target[1].toDouble()))
+        dialogs.show {
+            TargetCoordinatesDialog(
+                targetForm,
+                onSearch = { search.launch(Intent(requireContext(), MapSearchActivity::class.java)) },
+                onDismiss = dialogs::dismiss,
+            ) { latitude, longitude ->
+                GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
+                GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
+                GPSPreferences.setTargetMarker(true)
+                dialogs.dismiss()
+            }
+        }
+    }
 
     override fun removeTarget() = GPSPreferences.setTargetMarker(false)
 
@@ -19844,7 +19011,6 @@ import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.dialogs.app.LocationParameters
-import app.simple.positional.dialogs.clock.ClockNeedle
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
@@ -19855,6 +19021,7 @@ import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.positionalComposeView
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
+import app.simple.positional.ui.compose.ClockNeedleDialog
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
@@ -19894,7 +19061,9 @@ class Time : ScopedFragment() {
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.clock(
-            onNeedles = { ClockNeedle.newInstance().show(parentFragmentManager, "clock_needle") },
+            onNeedles = {
+                dialogs.show { ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) } }
+            },
             onMotionType = ::showMotionTypes,
         )
     }
@@ -23538,139 +22707,6 @@ class TwilightWidget : AppWidgetProvider() {
 </set>
 
 ################################################################################
-# FILE: app/src/main/res/layout-land/dialog_pin_customization.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="true"
-        android:clipToPadding="true"
-        android:elevation="40dp"
-        android:orientation="horizontal"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/pins_view_pager"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginVertical="10dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="@dimen/options_text_margin_start">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/customize_pin"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/info_text_secondary_size" />
-
-                <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                    android:id="@+id/reset_pin_customization"
-                    android:layout_width="@dimen/app_button_size"
-                    android:layout_height="@dimen/app_button_size"
-                    android:background="@drawable/ripple_btn"
-                    android:contentDescription="@string/button_reset"
-                    android:src="@drawable/ic_reset"
-                    android:tint="@color/iconColor" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="15dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:text="@string/opacity"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size" />
-
-                <SeekBar
-                    android:id="@+id/pin_opacity_seekbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginHorizontal="@dimen/options_text_margin_start"
-                    android:max="255"
-                    android:maxHeight="4dp"
-                    android:progressDrawable="@drawable/seek_bar"
-                    android:progressTint="?attr/colorAppAccent"
-                    android:splitTrack="true"
-                    android:thumb="@drawable/seekbar_thumb"
-                    android:translationZ="8dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="@dimen/options_text_margin_start"
-                    android:fontFamily="@font/regular"
-                    android:text="@string/size"
-                    android:textColor="@color/textPrimary"
-                    android:textSize="@dimen/options_item_text_size" />
-
-                <SeekBar
-                    android:id="@+id/pin_size_seekbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginHorizontal="@dimen/options_text_margin_start"
-                    android:max="12"
-                    android:maxHeight="4dp"
-                    android:progressDrawable="@drawable/seek_bar"
-                    android:progressTint="?attr/colorAppAccent"
-                    android:splitTrack="true"
-                    android:thumb="@drawable/seekbar_thumb"
-                    android:translationZ="8dp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout-land/fragment_launcher.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -24114,52 +23150,6 @@ class TwilightWidget : AppWidgetProvider() {
 </merge>
 
 ################################################################################
-# FILE: app/src/main/res/layout/adapter_bloom_skin.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ImageView
-        android:id="@+id/adapter_bloom_one"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/adapter_bloom_two"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:rotation="45"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/adapter_bloom_three"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:rotation="90"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/adapter_bloom_four"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:rotation="135"
-        tools:ignore="ContentDescription" />
-
-</FrameLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/adapter_bottom_bar.xml
 ################################################################################
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -24174,51 +23164,6 @@ class TwilightWidget : AppWidgetProvider() {
     android:src="@drawable/ic_clock"
     app:tint="@android:color/white"
     tools:ignore="ContentDescription" />
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_clock_needle.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ImageView
-        android:id="@+id/adapter_needle_background"
-        android:layout_width="@dimen/clock_image_dimensions"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/adapter_needle_hour"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/adapter_needle_minute"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:rotation="90"
-        tools:ignore="ContentDescription" />
-
-    <ImageView
-        android:id="@+id/adapter_needle_second"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
-        android:rotation="245"
-        tools:ignore="ContentDescription" />
-
-</FrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/adapter_panel.xml
@@ -24251,342 +23196,6 @@ class TwilightWidget : AppWidgetProvider() {
         android:gravity="center" />
 
 </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_pins.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ImageView
-        android:id="@+id/adapter_pin"
-        android:layout_width="@dimen/clock_image_dimensions"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        tools:ignore="ContentDescription" />
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_clock_needle_skins.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:elevation="40dp"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:translationZ="20dp"
-        tools:ignore="UselessParent">
-
-        <TextView
-            android:id="@+id/current_clock_theme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="15dp"
-            android:fontFamily="@font/regular"
-            android:textColor="@color/textPrimary"
-            android:textSize="6pt" />
-
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/needle_skin"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="20dp" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_compass_bloom.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:backgroundTint="@color/toolbarBackground"
-        android:elevation="40dp"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/current_bloom_theme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="15dp"
-            android:fontFamily="@font/regular"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size" />
-
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/bloom_skin_view_pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="20dp" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_compass_calibration.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/toolbarBackground"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <ImageView
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginHorizontal="30dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/compass_calibrate"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginHorizontal="40dp"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/regular"
-            android:gravity="center"
-            android:text="@string/compass_calibration_notice"
-            android:textAlignment="center"
-            android:textColor="@color/textSecondary"
-            android:textSize="@dimen/description_text_size" />
-
-        <TextView
-            android:id="@+id/acc_accuracy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:fontFamily="@font/medium"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/description_text_size" />
-
-        <TextView
-            android:id="@+id/mag_accuracy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/medium"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/description_text_size" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_compass_physical_properties.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:elevation="40dp"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_text_margin_start">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:fontFamily="@font/medium"
-                android:text="@string/physical_properties"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/reset_physical_properties"
-                android:layout_width="@dimen/app_button_size"
-                android:layout_height="@dimen/app_button_size"
-                android:background="@drawable/ripple_btn"
-                android:contentDescription="@string/button_reset"
-                android:tint="@color/iconColor"
-                android:src="@drawable/ic_reset" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/help_physical_properties"
-                android:layout_width="@dimen/app_button_size"
-                android:layout_height="@dimen/app_button_size"
-                android:background="@drawable/ripple_btn"
-                android:contentDescription="@string/help"
-                android:tint="@color/iconColor"
-                android:src="@drawable/ic_help_outline" />
-
-        </LinearLayout>
-
-        <app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-            android:id="@+id/compass_toggle_physical_properties"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/ripple_btn"
-            android:clickable="true"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="true"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:gravity="center_vertical"
-                android:text="@string/use_physical_properties"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.switchview.SwitchView
-                android:id="@+id/compass_physical_properties"
-                android:layout_width="@dimen/switch_width"
-                android:layout_height="wrap_content" />
-
-        </app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="@dimen/options_text_margin_start"
-            android:layout_marginTop="15dp"
-            android:fontFamily="@font/regular"
-            android:text="@string/rotational_inertia"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size" />
-
-        <SeekBar
-            android:id="@+id/compass_rotational_inertia_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/options_text_margin_start"
-            android:layout_marginTop="@dimen/options_text_margin_start"
-            android:layout_marginBottom="20dp"
-            android:maxHeight="4dp"
-            android:progressDrawable="@drawable/seek_bar"
-            android:progressTint="?attr/colorAppAccent"
-            android:splitTrack="true"
-            android:thumb="@drawable/seekbar_thumb"
-            android:translationZ="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:text="@string/damping_coefficient"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size" />
-
-        <SeekBar
-            android:id="@+id/compass_damping_coefficient_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/options_text_margin_start"
-            android:layout_marginTop="@dimen/options_text_margin_start"
-            android:layout_marginBottom="20dp"
-            android:maxHeight="4dp"
-            android:progressDrawable="@drawable/seek_bar"
-            android:progressTint="?attr/colorAppAccent"
-            android:splitTrack="true"
-            android:thumb="@drawable/seekbar_thumb"
-            android:translationZ="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="@dimen/options_text_margin_start"
-            android:fontFamily="@font/regular"
-            android:text="@string/coefficient_of_magnetic_field"
-            android:textColor="@color/textPrimary"
-            android:textSize="@dimen/options_item_text_size" />
-
-        <SeekBar
-            android:id="@+id/compass_magnetic_coefficient_seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/options_text_margin_start"
-            android:layout_marginTop="@dimen/options_text_margin_start"
-            android:maxHeight="4dp"
-            android:progressDrawable="@drawable/seek_bar"
-            android:progressTint="?attr/colorAppAccent"
-            android:splitTrack="true"
-            android:thumb="@drawable/seekbar_thumb" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/dialog_custom_location_shortcut.xml
@@ -24705,339 +23314,6 @@ class TwilightWidget : AppWidgetProvider() {
     </app.simple.positional.decorations.corners.DynamicCornerFrameLayout>
 
 </FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_permission_info.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:padding="@dimen/options_container_horizontal_padding">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dialog_height"
-        android:backgroundTint="@color/toolbarBackground"
-        android:elevation="40dp"
-        android:orientation="vertical">
-
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:overScrollMode="always"
-            android:scrollIndicators="none"
-            android:scrollbarSize="0dp">
-
-            <app.simple.positional.decorations.views.CustomWebView
-                android:id="@+id/permissions_webview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </androidx.core.widget.NestedScrollView>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:background="@color/dividerColor" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/show_perm_dialog"
-                style="@style/Widget.AppCompat.CompoundButton.CheckBox"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="start|center_vertical"
-                android:layout_marginHorizontal="10dp"
-                android:buttonTint="@color/iconColor"
-                android:checked="true" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:text="@string/show_again"
-                android:textColor="@color/textSecondary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleButton
-                android:id="@+id/close"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ripple_btn"
-                android:fontFamily="@font/bold"
-                android:text="@string/button_close"
-                android:textColor="@color/textPrimary" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleButton
-                android:id="@+id/grant"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:background="@drawable/ripple_btn"
-                android:fontFamily="@font/bold"
-                android:text="@string/button_grant"
-                android:textColor="@color/textPrimary" />
-
-        </LinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_pin_customization.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@android:color/transparent"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:clipChildren="true"
-        android:clipToPadding="true"
-        android:elevation="40dp"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_text_margin_start">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
-                android:fontFamily="@font/medium"
-                android:text="@string/customize_pin"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/info_text_secondary_size" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/reset_pin_customization"
-                android:layout_width="@dimen/app_button_size"
-                android:layout_height="@dimen/app_button_size"
-                android:background="@drawable/ripple_btn"
-                android:contentDescription="@string/button_reset"
-                android:src="@drawable/ic_reset"
-                android:tint="@color/iconColor" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="15dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:text="@string/opacity"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <SeekBar
-                android:id="@+id/pin_opacity_seekbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/options_text_margin_start"
-                android:max="255"
-                android:layout_gravity="center_vertical"
-                android:maxHeight="4dp"
-                android:progressDrawable="@drawable/seek_bar"
-                android:progressTint="?attr/colorAppAccent"
-                android:splitTrack="true"
-                android:thumb="@drawable/seekbar_thumb"
-                android:translationZ="8dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="15dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:fontFamily="@font/regular"
-                android:text="@string/size"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <SeekBar
-                android:id="@+id/pin_size_seekbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/options_text_margin_start"
-                android:max="12"
-                android:layout_gravity="center_vertical"
-                android:maxHeight="4dp"
-                android:progressDrawable="@drawable/seek_bar"
-                android:progressTint="?attr/colorAppAccent"
-                android:splitTrack="true"
-                android:thumb="@drawable/seekbar_thumb"
-                android:translationZ="8dp" />
-
-        </LinearLayout>
-
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/pins_view_pager"
-            android:layout_width="match_parent"
-            android:layout_marginVertical="10dp"
-            android:layout_height="150dp" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_target_location.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/popup_padding"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/specified_hint_latitude"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/target_latitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="numberDecimal"
-            android:maxLength="40"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/popup_padding"
-            android:fontFamily="@font/medium"
-            android:text="@string/specified_hint_longitude"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/target_longitude"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="numberDecimal"
-            android:maxLength="40"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:animateLayoutChanges="true"
-        android:orientation="horizontal">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-            android:id="@+id/search"
-            android:layout_width="@dimen/app_button_size"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_marginEnd="5dp"
-            android:src="@drawable/ic_search" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/button_cancel"
-            android:fontFamily="@font/bold"
-            android:textColor="@color/textPrimary" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:text="@string/save"
-            android:textColor="@color/textPrimary"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/expansion_dialog_coordinates.xml
@@ -25451,34 +23727,6 @@ class TwilightWidget : AppWidgetProvider() {
         tools:ignore="ContentDescription,MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/switch_view.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="@dimen/switch_width"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/switch_off"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:elevation="10dp"
-    android:padding="@dimen/switch_padding"
-    tools:parentTag="app.simple.positional.decorations.switchview.SwitchFrameLayout">
-
-    <ImageView
-        android:id="@+id/switch_thumb"
-        android:layout_width="@dimen/switch_thumb_dimensions"
-        android:layout_height="@dimen/switch_thumb_dimensions"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/switch_thumb"
-        tools:ignore="ContentDescription" />
-
-</merge>
-
-
-
 
 ################################################################################
 # FILE: app/src/main/res/layout/widget_clock.xml
@@ -26158,12 +24406,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="copy_button_dimensions">30dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_text_margin_start">10dp</dimen>
-    <dimen name="options_item_padding">4dp</dimen>
     <dimen name="options_item_text_size">12sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">350dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">20dp</dimen>
@@ -26189,9 +24434,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="touch_indicator_size">100dp</dimen>
     <dimen name="popup_text_size">12sp</dimen>
 
-    <dimen name="switch_width">50dp</dimen>
-    <dimen name="switch_padding">5dp</dimen>
-    <dimen name="switch_thumb_dimensions">20dp</dimen>
 </resources>
 
 ################################################################################
@@ -26296,12 +24538,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_text_margin_start">10dp</dimen>
-    <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
@@ -26327,9 +24566,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="touch_indicator_size">100dp</dimen>
     <dimen name="popup_text_size">16sp</dimen>
 
-    <dimen name="switch_width">50dp</dimen>
-    <dimen name="switch_padding">5dp</dimen>
-    <dimen name="switch_thumb_dimensions">20dp</dimen>
 
     <dimen name="afs_min_touch_target_size">48dp</dimen>
     <dimen name="fs_md2_popup_min_width">78dp</dimen>
@@ -26363,12 +24599,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_text_margin_start">10dp</dimen>
-    <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
@@ -26394,9 +24627,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="touch_indicator_size">100dp</dimen>
     <dimen name="popup_text_size">16sp</dimen>
 
-    <dimen name="switch_width">50dp</dimen>
-    <dimen name="switch_padding">5dp</dimen>
-    <dimen name="switch_thumb_dimensions">20dp</dimen>
 
     <dimen name="afs_min_touch_target_size">48dp</dimen>
     <dimen name="fs_md2_popup_min_width">78dp</dimen>
@@ -26462,12 +24692,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">100dp</dimen>
 
-    <dimen name="options_text_margin_start">5dp</dimen>
-    <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">10dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">400dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">30dp</dimen>
@@ -26493,9 +24720,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="touch_indicator_size">100dp</dimen>
     <dimen name="popup_text_size">13sp</dimen>
 
-    <dimen name="switch_width">50dp</dimen>
-    <dimen name="switch_padding">5dp</dimen>
-    <dimen name="switch_thumb_dimensions">20dp</dimen>
 </resources>
 
 ################################################################################
@@ -26515,12 +24739,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_text_margin_start">10dp</dimen>
-    <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
@@ -26712,12 +24933,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_text_margin_start">10dp</dimen>
-    <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
@@ -26743,9 +24961,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="touch_indicator_size">100dp</dimen>
     <dimen name="popup_text_size">16sp</dimen>
 
-    <dimen name="switch_width">50dp</dimen>
-    <dimen name="switch_padding">5dp</dimen>
-    <dimen name="switch_thumb_dimensions">20dp</dimen>
 
     <dimen name="afs_min_touch_target_size">48dp</dimen>
     <dimen name="fs_md2_popup_min_width">78dp</dimen>
@@ -27000,7 +25215,6 @@ class TwilightWidget : AppWidgetProvider() {
 
     <string name="compass_calibration_notice">If your device compass sensor accuracy is low, move your device in figure eight direction to calibrate the sensors.</string>
     <string name="specified_location_notice">Information shown below are being updated for specified location coordinates.</string>
-    <string name="show_again">Show Again</string>
     <string name="search_timezone">Search Timezones</string>
     <string name="auto_system_default_language">Auto (System Default)</string>
     <string name="location_permission_denied">"Location Permission Denied!"</string>
@@ -27010,7 +25224,6 @@ class TwilightWidget : AppWidgetProvider() {
     <string name="button_set">Set</string>
     <string name="button_close">Close</string>
     <string name="button_grant">Grant</string>
-    <string name="button_reset">Reset</string>
 
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>
@@ -28145,6 +26358,26 @@ class MenuSheetStateTest {
         assertNull(state.items)
         state.refresh()
         assertNull(state.items)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/PhysicsValueTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class PhysicsValueTest {
+    @Test
+    fun zeroIsRaisedToMinimum() {
+        assertEquals(0.1f, physicsValue(0f), 0f)
+    }
+
+    @Test
+    fun positiveValuesPassThrough() {
+        assertEquals(25f, physicsValue(25f), 0f)
     }
 }
 
