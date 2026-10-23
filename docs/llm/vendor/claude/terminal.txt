@@ -325,4 +325,51 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.299s
 user	0m0.529s
 sys	0m0.792s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/adapters/trail/AdapterTrailPoints.kt app/src/main/java/app/simple/positional/callbacks/BottomSheetSlide.kt app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerConstraintLayout.java app/src/main/java/app/simple/positional/decorations/measure/MeasureToolbar.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureToolbarCallbacks.java app/src/main/java/app/simple/positional/decorations/measure/MeasureTools.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureToolsCallbacks.java app/src/main/java/app/simple/positional/decorations/popup/BasePopupWindow.kt app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleConstraintLayout.java app/src/main/java/app/simple/positional/decorations/trails/TrailToolbar.kt app/src/main/java/app/simple/positional/decorations/trails/TrailTools.kt app/src/main/java/app/simple/positional/decorations/views/LocationButton.java app/src/main/java/app/simple/positional/popups/miscellaneous/DeletePopupMenu.kt app/src/main/java/app/simple/positional/popups/trail/PopupTrailsDataMenu.kt app/src/main/java/app/simple/positional/singleton/FloatingButtonStateCommunicator.kt app/src/main/java/app/simple/positional/util/ImageLoader.kt app/src/main/java/app/simple/positional/viewmodels/factory/TrailDataFactory.kt app/src/main/res/anim/image_out.xml app/src/main/res/drawable/ic_add_8dp.xml app/src/main/res/layout-land/fragment_trail.xml app/src/main/res/layout-land/tools_trails.xml app/src/main/res/layout/adapter_trail_data.xml app/src/main/res/layout/adapter_trail_data_footer.xml app/src/main/res/layout/adapter_trail_data_header.xml app/src/main/res/layout/bottom_sheet_trail.xml app/src/main/res/layout/fragment_measure.xml app/src/main/res/layout/fragment_trail.xml app/src/main/res/layout/popup_delete_confirmation.xml app/src/main/res/layout/popup_trails_data.xml app/src/main/res/layout/toolbar_measure.xml app/src/main/res/layout/toolbar_trail_maps.xml app/src/main/res/layout/tools_measure.xml app/src/main/res/layout/tools_trails.xml app/src/main/res/transition/tools_transition.xml
+rm 'app/src/main/java/app/simple/positional/adapters/trail/AdapterTrailPoints.kt'
+rm 'app/src/main/java/app/simple/positional/callbacks/BottomSheetSlide.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerConstraintLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/measure/MeasureToolbar.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/measure/MeasureToolbarCallbacks.java'
+rm 'app/src/main/java/app/simple/positional/decorations/measure/MeasureTools.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/measure/MeasureToolsCallbacks.java'
+rm 'app/src/main/java/app/simple/positional/decorations/popup/BasePopupWindow.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleConstraintLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/trails/TrailToolbar.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/trails/TrailTools.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/views/LocationButton.java'
+rm 'app/src/main/java/app/simple/positional/popups/miscellaneous/DeletePopupMenu.kt'
+rm 'app/src/main/java/app/simple/positional/popups/trail/PopupTrailsDataMenu.kt'
+rm 'app/src/main/java/app/simple/positional/singleton/FloatingButtonStateCommunicator.kt'
+rm 'app/src/main/java/app/simple/positional/util/ImageLoader.kt'
+rm 'app/src/main/java/app/simple/positional/viewmodels/factory/TrailDataFactory.kt'
+rm 'app/src/main/res/anim/image_out.xml'
+rm 'app/src/main/res/drawable/ic_add_8dp.xml'
+rm 'app/src/main/res/layout-land/fragment_trail.xml'
+rm 'app/src/main/res/layout-land/tools_trails.xml'
+rm 'app/src/main/res/layout/adapter_trail_data.xml'
+rm 'app/src/main/res/layout/adapter_trail_data_footer.xml'
+rm 'app/src/main/res/layout/adapter_trail_data_header.xml'
+rm 'app/src/main/res/layout/bottom_sheet_trail.xml'
+rm 'app/src/main/res/layout/fragment_measure.xml'
+rm 'app/src/main/res/layout/fragment_trail.xml'
+rm 'app/src/main/res/layout/popup_delete_confirmation.xml'
+rm 'app/src/main/res/layout/popup_trails_data.xml'
+rm 'app/src/main/res/layout/toolbar_measure.xml'
+rm 'app/src/main/res/layout/toolbar_trail_maps.xml'
+rm 'app/src/main/res/layout/tools_measure.xml'
+rm 'app/src/main/res/layout/tools_trails.xml'
+rm 'app/src/main/res/transition/tools_transition.xml'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-08-13-35
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.215s
+user	0m0.532s
+sys	0m0.659s
 kushal@fedora:~/src/kotlin/positional$ 
+
+
+
+
+
