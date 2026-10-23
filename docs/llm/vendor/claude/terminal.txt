@@ -51,4 +51,9 @@ rm 'app/src/main/res/layout/pref_appearance.xml'
 rm 'app/src/main/res/layout/pref_configuration.xml'
 rm 'app/src/main/res/layout/pref_contribute.xml'
 rm 'app/src/main/res/layout/pref_other_apps.xml'
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.454s
+user	0m0.636s
+sys	0m0.851s
 kushal@fedora:~/src/kotlin/positional$ 
