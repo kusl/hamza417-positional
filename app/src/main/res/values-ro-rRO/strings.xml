@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copiat în clipboard</string>
-    <string name="invalid_coordinates">Coordonate incorecte</string>
     <string name="internet_connection_alert">Conexiune la internet indisponibilă</string>
     <string name="error">Eroare</string>
     <string name="not_available">Indisponibil</string>
@@ -207,7 +206,6 @@
     <string name="east_E">E</string>
     <string name="north_east_NE">NE</string>
 
-    <string name="location_details">Detalii locație</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Mediu:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Eșuat!</string>
     <string name="set_only">Setare doar</string>
     <string name="sure">Desigur</string>
-    <string name="desc_custom_coord_dialog">Acești parametri sunt utilizați în prezent pentru calcularea informațiilor.</string>
     <string name="trail">Traseu</string>
     <string name="geodesic_trail">Traseu geodezic</string>
     <string name="sensor_error">Dispozitivul dvs. nu are senzorii necesari.</string>

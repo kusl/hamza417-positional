@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">In Zwischenablage kopiert</string>
-    <string name="invalid_coordinates">Ungültige Koordinaten</string>
     <string name="internet_connection_alert">Keine Internetverbindung verfügbar</string>
     <string name="error">Fehler</string>
     <string name="not_available">N/A</string>
@@ -207,7 +206,6 @@
     <string name="east_E">O</string>
     <string name="north_east_NE">NO</string>
 
-    <string name="location_details">Standortdetails</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Durchschnitt:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Fehlgeschlagen!</string>
     <string name="set_only">Nur festlegen</string>
     <string name="sure">Gerne</string>
-    <string name="desc_custom_coord_dialog">Diese Parameter werden derzeit für die Berechnung von Informationen verwendet.</string>
     <string name="trail">Weg</string>
     <string name="geodesic_trail">Geodätischer Schweif</string>
     <string name="sensor_error">Ihr Gerät verfügt nicht über die erforderlichen Sensoren.</string>

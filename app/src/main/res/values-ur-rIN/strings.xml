@@ -96,7 +96,6 @@
     <string name="seconds">سیکنڈ</string>
 
     <string name="info_copied">کلپ بورڈ میں کاپی ہو گیا ہے</string>
-    <string name="invalid_coordinates">غلط نقاط</string>
     <string name="internet_connection_alert">انٹرنیٹ کنکشن دستیاب نہیں ہے</string>
     <string name="error">خرابی واقع ہوئی</string>
     <string name="not_available">دستیاب نہیں ہے</string>
@@ -207,7 +206,6 @@
     <string name="east_E">مش</string>
     <string name="north_east_NE">ش۔مش</string>
 
-    <string name="location_details">مقام کی تفصیلات</string>
     <string name="min">کم سے کم:</string>
     <string name="max">زیادہ سے زیادہ:</string>
     <string name="avg">اوسط:</string>
@@ -245,7 +243,6 @@
     <string name="failed">ناکام!</string>
     <string name="set_only">صرف سیٹ کریں</string>
     <string name="sure">ضرور</string>
-    <string name="desc_custom_coord_dialog">فی الحال یہ اعداد و شمار معلومات کے حساب کتاب کرنے کے لئے استعمال ہو رہے ہیں۔</string>
     <string name="trail">پگڈنڈی</string>
     <string name="geodesic_trail">جیوڈیسک پگڈنڈی</string>
     <string name="sensor_error">آپ کا آلہ ضروری سینسر پر مشتمل نہیں ہے.</string>

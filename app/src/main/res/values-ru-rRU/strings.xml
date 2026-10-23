@@ -96,7 +96,6 @@
     <string name="seconds">с</string>
 
     <string name="info_copied">Скопировано в буфер обмена</string>
-    <string name="invalid_coordinates">Неверные координаты</string>
     <string name="internet_connection_alert">Отсутствует интернет-соединение</string>
     <string name="error">Ошибка</string>
     <string name="not_available">Нет данных</string>
@@ -207,7 +206,6 @@
     <string name="east_E">В</string>
     <string name="north_east_NE">СВ</string>
 
-    <string name="location_details">Подробности местоположения</string>
     <string name="min">Минимум:</string>
     <string name="max">Максимум:</string>
     <string name="avg">Среднее:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Сбой!</string>
     <string name="set_only">Только установить</string>
     <string name="sure">Обязательно</string>
-    <string name="desc_custom_coord_dialog">В настоящее время эти параметры используются для вычисления информации.</string>
     <string name="trail">След</string>
     <string name="geodesic_trail">Геодезический след</string>
     <string name="sensor_error">В вашем устройстве нет необходимых датчиков.</string>

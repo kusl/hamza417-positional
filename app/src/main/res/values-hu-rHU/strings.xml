@@ -96,7 +96,6 @@
     <string name="seconds">p</string>
 
     <string name="info_copied">Másolás a vágólapra</string>
-    <string name="invalid_coordinates">Érvénytelen koordináták</string>
     <string name="internet_connection_alert">Nincs internetkapcsolat</string>
     <string name="error">Hiba</string>
     <string name="not_available">N/A</string>
@@ -207,7 +206,6 @@
     <string name="east_E">K</string>
     <string name="north_east_NE">ÉK</string>
 
-    <string name="location_details">Helyadatok</string>
     <string name="min">Min.:</string>
     <string name="max">Max.:</string>
     <string name="avg">Átl.:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Nem sikerült!</string>
     <string name="set_only">Csak beállítás</string>
     <string name="sure">Rendben</string>
-    <string name="desc_custom_coord_dialog">Ezeket a paramétereket jelenleg az adatok kiszámításához használják.</string>
     <string name="trail">Útvonal</string>
     <string name="geodesic_trail">Geodéziai útvonal</string>
     <string name="sensor_error">Az Ön készüléke nem rendelkezik a szükséges érzékelőkkel.</string>

@@ -12,6 +12,9 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModelProvider
@@ -21,9 +24,6 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.dialogs.app.LocationParameters
-import app.simple.positional.dialogs.gps.CoordinatesExpansion
-import app.simple.positional.dialogs.gps.LocationExpansion
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
@@ -48,6 +48,10 @@ import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
 import app.simple.positional.ui.compose.TargetCoordinatesDialog
+import app.simple.positional.ui.compose.CoordinateDetailsDialog
+import app.simple.positional.ui.compose.LocationDetailsDialog
+import app.simple.positional.ui.compose.LocationSummaryDialog
+import app.simple.positional.util.LocationShare
 import app.simple.positional.activities.subactivity.MapSearchActivity
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
@@ -75,6 +79,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private val menuSheet = MenuSheetState()
     private val dialogs = DialogHost()
     private val targetForm = CustomLocationForm()
+    private var accuracySeries by mutableStateOf(emptyList<Float>())
+    private var altitudeSeries by mutableStateOf(emptyList<Float>())
     private val search = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
@@ -154,6 +160,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             publishLocationRows()
         }
         viewModel.targetData.observe(viewLifecycleOwner) { state.target = it.toAnnotatedString() }
+        viewModel.accuracyGraphData.observe(viewLifecycleOwner) { accuracySeries = it.toList() }
+        viewModel.altitudeGraphData.observe(viewLifecycleOwner) { altitudeSeries = it.toList() }
     }
 
     override fun onDestroyView() {
@@ -275,7 +283,17 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         }
     }
 
-    override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
+    override fun customLocation() {
+        val (latitude, longitude) = coordinates()
+        dialogs.show { LocationSummaryDialog(latitude, longitude, state.custom, dialogs::dismiss) }
+    }
+
+    private fun coordinates(): Pair<Double, Double> {
+        val current = location
+        if (!state.custom && current != null) return current.latitude to current.longitude
+        val stored = if (state.custom) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
+        return stored[0].toDouble() to stored[1].toDouble()
+    }
 
     override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
 
@@ -366,19 +384,18 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     override fun share() {
-        val target = location?.let { it.latitude to it.longitude }
-            ?: MainPreferences.getCoordinates().takeIf { state.custom }?.let { it[0].toDouble() to it[1].toDouble() }
-            ?: return
-        val latitude = round(target.first, 6)
-        val longitude = round(target.second, 6)
-        val text = "${getString(R.string.gps_coordinates)}: $latitude, $longitude\n\n${state.address}\n\n" +
-                "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude\n\ngeo:$latitude,$longitude?q=$latitude,$longitude"
-        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), getString(R.string.share)))
+        val (latitude, longitude) = coordinates()
+        LocationShare.share(requireContext(), latitude, longitude, state.address)
     }
 
-    override fun locationDetails() = LocationExpansion.newInstance().show(childFragmentManager, "location_expansion")
+    override fun locationDetails() = dialogs.show {
+        LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
+    }
 
-    override fun coordinateDetails() = CoordinatesExpansion.newInstance().show(childFragmentManager, "coordinates_expansion")
+    override fun coordinateDetails() {
+        val (latitude, longitude) = coordinates()
+        dialogs.show { CoordinateDetailsDialog(latitude, longitude, dialogs::dismiss) }
+    }
 
     override fun showTarget() {
         sheet(false)

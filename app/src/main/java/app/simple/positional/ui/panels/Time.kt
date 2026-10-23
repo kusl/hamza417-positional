@@ -15,7 +15,6 @@ import app.simple.positional.R
 import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
-import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
@@ -28,6 +27,7 @@ import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
 import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
@@ -60,7 +60,7 @@ class Time : ScopedFragment() {
                 top,
                 onTimezone = { startActivity(Intent(requireActivity(), TimezonePickerActivity::class.java)) },
                 onMenu = ::showMenu,
-                onLocation = { LocationParameters.newInstance().show(parentFragmentManager, LocationParameters.TAG) },
+                onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
             )
         }
 

@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">已複製到剪貼簿</string>
-    <string name="invalid_coordinates">無效的座標</string>
     <string name="internet_connection_alert">網際網路連線不可用</string>
     <string name="error">錯誤</string>
     <string name="not_available">不適用</string>
@@ -207,7 +206,6 @@
     <string name="east_E">E</string>
     <string name="north_east_NE">NE</string>
 
-    <string name="location_details">位置詳細資料</string>
     <string name="min">最小:</string>
     <string name="max">最大:</string>
     <string name="avg">平均:</string>
@@ -245,7 +243,6 @@
     <string name="failed">失敗！</string>
     <string name="set_only">僅設定</string>
     <string name="sure">沒問題</string>
-    <string name="desc_custom_coord_dialog">目前這些參數正被用於計算資訊。</string>
     <string name="trail">軌跡</string>
     <string name="geodesic_trail">測地線軌跡</string>
     <string name="sensor_error">您的裝置沒有必要的感應器。</string>

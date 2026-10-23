@@ -24,21 +24,12 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ArrayHelper.isLastValueSame
 import app.simple.positional.util.ConditionUtils.invert
 import app.simple.positional.util.ConditionUtils.isNull
-import app.simple.positional.util.DMSConverter.latitudeAsDD
-import app.simple.positional.util.DMSConverter.latitudeAsDM
-import app.simple.positional.util.DMSConverter.latitudeAsDMS
-import app.simple.positional.util.DMSConverter.longitudeAsDD
-import app.simple.positional.util.DMSConverter.longitudeAsDM
-import app.simple.positional.util.DMSConverter.longitudeAsDMS
 import app.simple.positional.util.Direction
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.util.NetworkCheck
 import app.simple.positional.util.ParcelUtils.parcelable
-import app.simple.positional.util.UTMConverter
 import com.google.android.gms.maps.model.LatLng
-import gov.nasa.worldwind.geom.Angle
-import gov.nasa.worldwind.geom.coords.MGRSCoord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -55,11 +46,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
     private val location = MutableLiveData<Location>()
     private val provider = MutableLiveData<String>()
 
-    val dms = MutableLiveData<Pair<String, String>>()
-    val dm = MutableLiveData<Pair<String, String>>()
-    val dd = MutableLiveData<Pair<String, String>>()
-    val mgrs = MutableLiveData<String>()
-    val utm = MutableLiveData<UTMConverter.UTM>()
     val latency = MutableLiveData<Pair<Number, Boolean>>()
     val targetData = MutableLiveData<Spanned>()
 
@@ -82,12 +68,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
                                 location.postValue(this)
 
                                 measureLatency()
-
-                                dms(this)
-                                dm(this)
-                                dd(this)
-                                mgrs(this)
-                                utm(this)
 
                                 graphData(this)
 
@@ -362,47 +342,9 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
         }
     }
 
-    private fun dms(location: Location) {
-        with(getApplication<Application>()) {
-            dms.postValue(Pair(
-                latitudeAsDMS(location.latitude, this),
-                longitudeAsDMS(location.longitude, this)))
-        }
-    }
-
-    private fun dm(location: Location) {
-        with(getApplication<Application>()) {
-            dm.postValue(Pair(
-                latitudeAsDM(location.latitude, this),
-                longitudeAsDM(location.longitude, this)))
-        }
-    }
-
-    private fun dd(location: Location) {
-        dd.postValue(Pair(
-            latitudeAsDD(location.latitude),
-            longitudeAsDD(location.longitude)))
-    }
-
-    private fun mgrs(location: Location) {
-        with(location) {
-            mgrs.postValue(
-                MGRSCoord.fromLatLon(
-                    Angle.fromDegreesLatitude(latitude),
-                    Angle.fromDegreesLongitude(longitude)
-                ).toString())
-        }
-    }
-
-    private fun utm(location: Location) {
-        with(location) {
-            utm.postValue(UTMConverter.getUTM(latitude, longitude))
-        }
-    }
-
     private fun graphData(location: Location) {
-        accuracyGraphData.postValue(manipulateDataForGraph(accuracyData, location.accuracy))
-        altitudeGraphData.postValue(manipulateDataForGraph(altitudeData, location.altitude.toFloat()))
+        accuracyGraphData.postValue(ArrayList(manipulateDataForGraph(accuracyData, location.accuracy)))
+        altitudeGraphData.postValue(ArrayList(manipulateDataForGraph(altitudeData, location.altitude.toFloat())))
     }
 
     private fun manipulateDataForGraph(arrayList: ArrayList<Float>, value: Float): ArrayList<Float> {

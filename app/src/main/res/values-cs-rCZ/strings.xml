@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Zkopírováno do schránky</string>
-    <string name="invalid_coordinates">Neplatné souřadnice</string>
     <string name="internet_connection_alert">Není k dispozici připojení k Internetu</string>
     <string name="error">Chyba</string>
     <string name="not_available">Není k dispozici</string>
@@ -207,7 +206,6 @@
     <string name="east_E">V</string>
     <string name="north_east_NE">SV</string>
 
-    <string name="location_details">Podrobnosti o umístění</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Průměr:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Neúspěšné!</string>
     <string name="set_only">Pouze nastavit</string>
     <string name="sure">Jistě</string>
-    <string name="desc_custom_coord_dialog">Tyto parametry se v současné době používají pro výpočet informací.</string>
     <string name="trail">Trasa</string>
     <string name="geodesic_trail">Geodetická trasa</string>
     <string name="sensor_error">Vaše zařízení nemá potřebné senzory.</string>

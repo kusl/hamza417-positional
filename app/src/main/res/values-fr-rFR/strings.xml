@@ -96,7 +96,6 @@
     <string name="seconds">s</string>
 
     <string name="info_copied">Copié dans la Presse-Papiers</string>
-    <string name="invalid_coordinates">Coordonnées invalides</string>
     <string name="internet_connection_alert">Connexion Internet non disponible</string>
     <string name="error">Erreur</string>
     <string name="not_available">N/A</string>
@@ -207,7 +206,6 @@
     <string name="east_E">E</string>
     <string name="north_east_NE">NE</string>
 
-    <string name="location_details">Détails de l\'emplacement</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Moyenne:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Erreur !</string>
     <string name="set_only">Définir uniquement</string>
     <string name="sure">Sûr</string>
-    <string name="desc_custom_coord_dialog">Ces paramètres sont actuellement utilisés pour le calcul des informations.</string>
     <string name="trail">Piste</string>
     <string name="geodesic_trail">Piste Géodésique</string>
     <string name="sensor_error">Votre appareil n\'a pas de capteurs requis.</string>

@@ -96,7 +96,6 @@
     <string name="seconds">സെക്കന്റുകൾ</string>
 
     <string name="info_copied">കോപ്പി ചെയ്യപ്പെട്ടു</string>
-    <string name="invalid_coordinates">തെറ്റായ സൂചികകൾ</string>
     <string name="internet_connection_alert">ഇന്റർനെറ്റ് സേവനം ലഭ്യമല്ല</string>
     <string name="error">പിഴവ്</string>
     <string name="not_available">ലഭ്യമല്ല</string>
@@ -207,7 +206,6 @@
     <string name="east_E">കിഴക്ക്</string>
     <string name="north_east_NE">വടക്കുകിഴക്ക്</string>
 
-    <string name="location_details">ലൊക്കേഷൻ വിവരങ്ങൾ</string>
     <string name="min">കുറഞ്ഞത്:</string>
     <string name="max">പരമാവധി:</string>
     <string name="avg">ശരാശരി:</string>
@@ -245,7 +243,6 @@
     <string name="failed">പരാജയം!</string>
     <string name="set_only">ക്രമീകരിക്കുക മാത്രം ചെയ്യുക</string>
     <string name="sure">തീർച്ചയായും</string>
-    <string name="desc_custom_coord_dialog">ഇത് വിവരശേഖരണത്തിന് വേണ്ടി മാത്രം ഉപയോഗിക്കുന്നു.</string>
     <string name="trail">ചിഹ്നം</string>
     <string name="geodesic_trail">ഭൗമിക ചിഹ്നം</string>
     <string name="sensor_error">ആവശ്യമായിരിക്കുന്ന സെൻസറുകൾ നിങ്ങളുടെ സ്മാർട്ട്‌ ഫോണിൽ ലഭ്യമല്ല.</string>

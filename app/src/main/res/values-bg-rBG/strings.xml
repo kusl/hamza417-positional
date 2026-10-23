@@ -96,7 +96,6 @@
     <string name="seconds">с</string>
 
     <string name="info_copied">Копирано в клипборда</string>
-    <string name="invalid_coordinates">Невалидни координати</string>
     <string name="internet_connection_alert">Не е налична мрежова връзка</string>
     <string name="error">Грешка</string>
     <string name="not_available">N/A</string>
@@ -207,7 +206,6 @@
     <string name="east_E">И</string>
     <string name="north_east_NE">СИ</string>
 
-    <string name="location_details">Местоположение детайли</string>
     <string name="min">Мин:</string>
     <string name="max">Макс:</string>
     <string name="avg">Средно:</string>
@@ -245,7 +243,6 @@
     <string name="failed">Неуспешно!</string>
     <string name="set_only">Приложи</string>
     <string name="sure">Разбира се</string>
-    <string name="desc_custom_coord_dialog">Понастоящем тези параметри се използват за изчисляване на информация.</string>
     <string name="trail">Пътека</string>
     <string name="geodesic_trail">Геодезическа пътека</string>
     <string name="sensor_error">Вашето устройство няма необходимите сензори.</string>
