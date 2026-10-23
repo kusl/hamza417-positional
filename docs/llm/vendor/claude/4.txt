@@ -1,0 +1,20 @@
+61
+32
+
+the latest build looks good 
+it installs fine on my oneplus nord n30 5g 
+and yes please continue the upgrade to kotlin compose and all that fun stuff 
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this 
+NO CODE COMMENTS 
