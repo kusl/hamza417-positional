@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T16:20:04-04:00
+Generated: 2026-10-23T16:48:51-04:00
 Branch:    master
-Commit:    90d7e7ed 2026-10-23 16:10:48 -0400 run scripts
+Commit:    81b5207e 2026-10-23 16:48:46 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (872 files)
+## TREE (873 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -917,6 +917,9 @@ app/
             positional/
               constants/
                 HtmlPageTest.kt
+              database/
+                converters/
+                  MeasurePointConverterTest.kt
               math/
                 AngleTest.kt
                 ClockMotionTest.kt
@@ -2821,33 +2824,12 @@ import app.simple.positional.model.MeasurePoint
 
 class MeasurePointConverter {
     @TypeConverter
-    fun fromMeasurePoints(measurePoints: ArrayList<MeasurePoint>): String {
-        val stringBuilder = StringBuilder()
-
-        if (measurePoints.isNotEmpty()) {
-            for (point in measurePoints) {
-                stringBuilder.append(point.convertForDatabase()).append(";")
-            }
-        } else {
-            return ""
-        }
-
-        return stringBuilder.toString()
-    }
+    fun fromMeasurePoints(measurePoints: ArrayList<MeasurePoint>): String =
+        measurePoints.joinToString("") { it.convertForDatabase() + ";" }
 
     @TypeConverter
-    fun toMeasurePoints(data: String?): ArrayList<MeasurePoint?> {
-        val measurePoints = ArrayList<MeasurePoint?>()
-
-        if (!data.isNullOrEmpty()) {
-            val points = data.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            for (point in points) {
-                measurePoints.add(MeasurePoint.convertFromDatabase(point))
-            }
-        }
-
-        return measurePoints
-    }
+    fun toMeasurePoints(data: String?): ArrayList<MeasurePoint> =
+        data.orEmpty().split(';').filter { it.isNotEmpty() }.mapTo(ArrayList()) { MeasurePoint.convertFromDatabase(it) }
 }
 
 ################################################################################
@@ -6720,14 +6702,11 @@ public class Measure {
 package app.simple.positional.model;
 
 import androidx.annotation.NonNull;
-import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
-
-public class MeasurePoint {
-    private double latitude;
-    private double longitude;
-    private int order;
+public final class MeasurePoint {
+    private final double latitude;
+    private final double longitude;
+    private final int order;
 
     public MeasurePoint(double latitude, double longitude, int order) {
         this.latitude = latitude;
@@ -6739,50 +6718,16 @@ public class MeasurePoint {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
     public double getLongitude() {
         return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
     }
 
     public int getOrder() {
         return order;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public LatLng getLatLng() {
-        return new LatLng(latitude, longitude);
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "MeasurePoint{" + "latitude=" + latitude + ", longitude=" + longitude + ", order=" + order + '}';
-    }
-
     public String convertForDatabase() {
         return latitude + "," + longitude + "," + order;
-    }
-
-    public ArrayList<MeasurePoint> convertForDatabase(ArrayList<MeasurePoint> measurePoints) {
-        return new ArrayList<>(measurePoints);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Double.hashCode(getLatitude());
-        result = 31 * result + Double.hashCode(getLongitude());
-        result = 31 * result + getOrder();
-        return result;
     }
 
     public static MeasurePoint convertFromDatabase(String data) {
@@ -6791,6 +6736,30 @@ public class MeasurePoint {
                 Double.parseDouble(parts[0]),
                 Double.parseDouble(parts[1]),
                 Integer.parseInt(parts[2]));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MeasurePoint)) return false;
+        MeasurePoint that = (MeasurePoint) o;
+        return Double.compare(latitude, that.latitude) == 0
+                && Double.compare(longitude, that.longitude) == 0
+                && order == that.order;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Double.hashCode(latitude);
+        result = 31 * result + Double.hashCode(longitude);
+        result = 31 * result + order;
+        return result;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "MeasurePoint{" + "latitude=" + latitude + ", longitude=" + longitude + ", order=" + order + '}';
     }
 }
 
@@ -17940,7 +17909,6 @@ import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
-import androidx.glance.layout.defaultWeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
@@ -19779,6 +19747,42 @@ class HtmlPageTest {
     @Test
     fun urlPointsToAndroidAssets() {
         assertEquals("file:///android_asset/html/credits.html", HtmlPage.CREDITS.url)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/database/converters/MeasurePointConverterTest.kt
+################################################################################
+package app.simple.positional.database.converters
+
+import app.simple.positional.model.MeasurePoint
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class MeasurePointConverterTest {
+    private val converter = MeasurePointConverter()
+
+    @Test
+    fun roundTrip() {
+        val points = arrayListOf(MeasurePoint(1.5, -2.25, 1), MeasurePoint(-45.0, 170.125, 2))
+        val data = converter.fromMeasurePoints(points)
+        assertEquals("1.5,-2.25,1;-45.0,170.125,2;", data)
+        assertEquals(points, converter.toMeasurePoints(data))
+    }
+
+    @Test
+    fun emptyAndNull() {
+        assertEquals("", converter.fromMeasurePoints(arrayListOf()))
+        assertTrue(converter.toMeasurePoints(null).isEmpty())
+        assertTrue(converter.toMeasurePoints("").isEmpty())
+    }
+
+    @Test
+    fun pointsCompareByValue() {
+        val list = arrayListOf(MeasurePoint(3.0, 4.0, 1))
+        list.remove(MeasurePoint(3.0, 4.0, 1))
+        assertTrue(list.isEmpty())
     }
 }
 
