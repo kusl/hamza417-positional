@@ -7,3 +7,55 @@ the headline `Moon Illunimation` is in two lines on my oneplus nord N30 5G in po
 which is fine but the M of Moon and I of illumination touch 
 I suspect this is a systemic problem  
 please fix all regressions and defects and continue with the next phase 
+
+Claude
+/
+Good news is the build passes, the apk publishes, I am able to install it, and the app works. 
+however, I see a visual regression in the time screen 
+the headline Moon Illunimation is in two lines on my oneplus nord N30 5G in portrait 
+which is fine but the M of Moon and I of illumination touch 
+I suspect this is a systemic problem  
+please fix all regressions and defects and continue with the next phase
+
+Ran 49 commands, read memory
+The heading bug was systemic. Any Text without an explicit style inherited Material 3’s bodyLarge, which has a fixed 24sp line height. Your Nord uses the default 40sp heading size, so wrapped lines got 24sp of spacing and collided. bodyLarge now uses the font’s natural line height, which fixes every oversized label in the app, not just Moon Illumination.
+
+I couldn’t build or run this here because the Android SDK repositories aren’t reachable from my sandbox. CI is the first real check, and the clock widgets haven’t been seen on a device yet.
+
+Download: /mnt/user-data/outputs/positional-phase9c.tar.gz (changed and added files only; extract at the repo root)
+
+Delete:
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+Phase 9c: clock widgets without the per-second foreground service
+
+The widgets now use the system AnalogClock, and the launcher ticks the hands, including the seconds hand.
+The app draws the hands once in your chosen needle skin and accent colour. The sweeping trail is built into the second hand.
+The date is a TextClock, so it rolls over at midnight on its own.
+The day/night icon refreshes from an alarm at 6:00 and 19:00 that doesn’t wake the phone. It now uses the same 6–18 daytime range as the clock panel.
+Widgets refresh when you leave the app, so skin and accent changes show up.
+Upgraded installs also cancel the old one-minute alarm.
+The foreground service, notification, battery-optimisation setup screen and their 6 strings in all 14 languages are gone. So are the FOREGROUND_SERVICE, FOREGROUND_SERVICE_SPECIAL_USE and POST_NOTIFICATIONS permissions, which nothing else used.
+The 3x3 widget was using the 4x4 layout; that’s fixed.
+A new DayNightTest covers the day/night boundaries.
+Unused helper functions in BitmapHelper and PermissionUtils were removed, and the accent-to-theme lookup moved to AccentThemes, shared by activities and widgets.
+Trade-offs to know about:
+
+Android 12+ only: The clock widgets need Android 12 or newer, because that’s when the system clock gained custom hands. On older Android they are hidden; everything else still supports Android 7+.
+12-hour face: The clock widgets always use the 12-hour face, because the system clock can’t turn an hour hand on a 24-hour dial.
+The README is updated: Phase 9c is done, and Phase 10 (the OpenStreetMap fallback) is next.
+
+Claude reached its tool-use limit for this turn.
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+87
+63
+
+Please continue 
