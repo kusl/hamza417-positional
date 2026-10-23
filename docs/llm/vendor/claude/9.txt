@@ -1,0 +1,133 @@
+55
+60
+
+github actions are still failing
+please review the dump thoroughly 
+don’t assume anything 
+fix everything thoroughly 
+
+Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:processDebugNavigationResources
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:generateDebugRFile
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:generateReleaseResValues FROM-CACHE
+> Task :app:generateReleaseResources
+> Task :app:mergeDebugResources
+> Task :app:packageReleaseResources
+> Task :app:processReleaseNavigationResources
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:processDebugManifestForPackage
+> Task :app:parseReleaseLocalResources
+> Task :app:generateReleaseRFile FROM-CACHE
+> Task :app:extractProguardFiles
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:generateDebugGlobalSynthetics FROM-CACHE
+> Task :app:l8DexDesugarLibDebug FROM-CACHE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:processDebugResources
+> Task :app:kspReleaseKotlin
+> Task :app:kspDebugKotlin
+> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:mergeExtDexDebug
+
+> Task :app:compileDebugKotlin
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:103:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/widgets/SunTimeWidget.kt:17:31 Unresolved reference 'defaultWeight'.
+
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+> Task :app:compileReleaseKotlin FAILED
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:103:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/widgets/SunTimeWidget.kt:17:31 Unresolved reference 'defaultWeight'.
+
+FAILURE: Build completed with 2 failures.
+> Task :app:compileDebugKotlin FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792786282550.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+
+
+1: Task failed with an exception.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+-----------
+
+* What went wrong:
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+Execution failed for task ':app:compileReleaseKotlin' (registered by plugin 'com.android.internal.application').
+
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+   > Kotlin compiler: ARGUMENT_TYPE_MISMATCH
+       Kotlin compiler error
+48 actionable tasks: 32 executed, 16 from cache
+         Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+         Location: /home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.android.internal.application').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Kotlin compiler: ARGUMENT_TYPE_MISMATCH
+       Kotlin compiler error
+         Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+         Location: /home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 1m 19s
+Error: Process completed with exit code 1.
+0s
+11s
+0s
+0s
+0s
+
