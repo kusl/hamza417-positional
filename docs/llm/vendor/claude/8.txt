@@ -402,3 +402,131 @@ Claude finished the response
 44
 
 please continue with phase 8b 
+
+Claude
+/
+Ran 34 commands, shared files
+Diagnosing why the app crashes right after launch.
+Tracing the app launch path to locate a crash.
+Tracking down the cause of a crash at launch.
+Exploring how to analyze the app without building or running it.
+Inspecting the manifest for the launcher activity component.
+Figuring out why the latest build crashes on launch.
+Removing unused view classes and layout files from the project.
+Tracing the app's launch sequence for a crash cause.
+Reviewing sensor and panel code for orientation features.
+Debugging a sensor callback for a null-safety crash.
+Pinpointing which build first included both later phases.
+Checking database naming conventions for consistency.
+Tracking down crashes in clock and time zone screens.
+Tracking down which crash report belongs to the default view.
+Fixing clock icon usage across resources.
+Debugging compatibility issues with vector drawable rendering.
+Checking identifier fields for uniqueness across screens.
+Debugging a crash risk in the clock rendering code.
+Checking the suncalc library for a twilight angle method.
+Investigating how the release build process behaves.
+Tracking down a crash from an unexpected numeric value.
+Checking edge cases for rounding and overflow behavior.
+Checking other code areas for runtime issues.
+Verifying icon assets across different drawable directories.
+Checking lint rules for removed translation strings.
+Presented file
+The archive is positional-phase8a.tar.gz. It contains the crash fix and the GPS panel from phase 8a. Extract it at the repo root; it holds only new and changed files.
+
+Cause of the crash: the phase 7 Clock screen loaded the clock’s sweep trail through Compose’s image loader. That trail image is an XML shape, and Compose can only load vector images and bitmaps, so it throws as soon as the Clock panel is drawn. The app reopens on the last panel you used, so once you had opened Clock, every launch crashed. The time zone picker had the same problem with its “selected” dot (an XML layer-list), so it would also crash whenever a selected zone was on screen.
+
+Fixes:
+
+The sweep trail is now drawn directly with a sweep gradient.
+The selected time zone dot is now a plain filled circle.
+A new unit test, ComposeDrawablesTest, fails the build if any image drawn by Compose isn’t a vector or bitmap.
+Other checks I made:
+
+Every class name in a layout or the manifest points to a class that exists.
+The phase 6 database changes are consistent with the stored schemas.
+Rounding, list keys, sensor setup and the clock and sky calculations hold up.
+Nothing else turned up that would crash at launch. I still can’t build or run the app here, so CI and your phone are the real test. If it still crashes, a stack trace from adb logcat would let me pin it down.
+
+Phase 8a, delivered here:
+
+The GPS panel is now Compose, as described last time.
+The map follows the screen’s lifecycle through a shared observer.
+Address lookups use the non-blocking geocoder on Android 13+ and run only after you move 25 m.
+Saving a location reuses the shared database.
+New tests: GeoDistanceTest and SpeedometerDialTest.
+The README is updated.
+Delete these files:
+
+sh
+git rm app/src/main/java/app/simple/positional/constants/SpeedometerConstants.kt app/src/main/java/app/simple/positional/decorations/maps/MapToolbar.kt app/src/main/java/app/simple/positional/decorations/maps/MapsTools.kt app/src/main/java/app/simple/positional/decorations/maps/MapsToolsCallbacks.java app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareConstraintLayout.java app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareFrameLayout.java app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareNestedScrollView.java app/src/main/java/app/simple/positional/decorations/views/Speedometer.kt app/src/main/java/app/simple/positional/popups/location/PopupCoordinateBox.kt app/src/main/java/app/simple/positional/popups/location/PopupLocationMenu.kt app/src/main/res/drawable/ic_circle_stroke.xml app/src/main/res/drawable/ripple.xml app/src/main/res/layout-land/fragment_gps.xml app/src/main/res/layout-land/tools_maps.xml app/src/main/res/layout/bottom_sheet_gps.xml app/src/main/res/layout/fragment_gps.xml app/src/main/res/layout/info_panel_gps.xml app/src/main/res/layout/popup_coordinates_box.xml app/src/main/res/layout/popup_location_map.xml app/src/main/res/layout/speedometer.xml app/src/main/res/layout/toolbar_map_panel.xml app/src/main/res/layout/tools_maps.xml
+Next is phase 8b: the Trail and Measure map panels.
+
+
+Positional phase8a.tar
+GZ 
+please continue with phase 8b
+
+Ran 37 commands, created 3 files, shared files
+Investigating how trail data connects to marker storage.
+Working out how to integrate map overlays into the view.
+Deciding which actions to offer in the trail menu.
+Working out how to sync polylines with map updates.
+Tracking down a missing string resource definition.
+Investigating marker callback and measurement callback edge cases.
+Now the data layer.
+Shared map panel components
+MapPanel.kt
+Untangling the order of renamed code elements.
+Trail Compose screen
+TrailScreen.kt
+Building a shared formatter for distance and unit display.
+Extracting shared navigation logic into a reusable utility.
+Now the Trail fragment.
+Trail fragment hosting Compose
+Trail.kt
+Failed
+Trail fragment hosting Compose
+Trail.kt
+Updating map constructors to support nullable attributes.
+Fixing a Kotlin override mismatch with a Java platform type.
+Presented file
+Phase 8b is in positional-phase8b.tar.gz: extract it at the repo root; it contains only changed and new files. I couldn’t compile it here (no Android SDK), so CI is the real check; the 8a build passed CI.
+
+Panels
+
+Shared map layout: a new MapPanel.kt now holds the map layout, toolbar, tool buttons and sheet handle used by all three map panels. The GPS screen was rebuilt on it without changing what it does.
+Trail panel: now in Compose. The list of trail points opens as a bottom sheet in portrait and sits beside the map in landscape. Long-pressing a point gives navigate, share, copy and delete. Choosing a marker icon is now a small grid dialog instead of the old popup window.
+Measure panel: now in Compose. The name, point count and distances show in a card at the bottom. That card sits above the bottom bar, so the old code that tracked the bar’s size is gone.
+Data and bug fixes
+
+Trail points update live: they now come from Room as a Flow. Previously every load, save and delete opened and closed its own database. Now one database stays open for the current trail, and it is closed before that trail is deleted.
+Crash on Android 7–10 fixed: TrailPoint’s name and note getters used a Java method that only exists from Android 11. Phone or emulator testing on those versions would have crashed on the trail panel.
+Distances: one shared DistanceText formatter now handles trail, measure and direction distances. Direction used to switch from feet to miles at 1000 m; all three now switch at one mile.
+Navigation links: navigate and share go through a shared MapIntents helper. If Google Maps isn’t installed, it falls back to a generic geo: link.
+Bottom bar callback: the panels now tell MainActivity to show or hide the bar through a new BottomBarHost interface, replacing BottomSheetSlide.
+Cleanup
+
+The timeline list library is removed from build.gradle.
+Strings and dimensions that nothing uses any more are removed from every language.
+New tests: DistanceTextTest, and a path-length test added to GeoDistanceTest.
+The README is updated.
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/adapters/trail/AdapterTrailPoints.kt app/src/main/java/app/simple/positional/callbacks/BottomSheetSlide.kt app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerConstraintLayout.java app/src/main/java/app/simple/positional/decorations/measure/MeasureToolbar.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureToolbarCallbacks.java app/src/main/java/app/simple/positional/decorations/measure/MeasureTools.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureToolsCallbacks.java app/src/main/java/app/simple/positional/decorations/popup/BasePopupWindow.kt app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleConstraintLayout.java app/src/main/java/app/simple/positional/decorations/trails/TrailToolbar.kt app/src/main/java/app/simple/positional/decorations/trails/TrailTools.kt app/src/main/java/app/simple/positional/decorations/views/LocationButton.java app/src/main/java/app/simple/positional/popups/miscellaneous/DeletePopupMenu.kt app/src/main/java/app/simple/positional/popups/trail/PopupTrailsDataMenu.kt app/src/main/java/app/simple/positional/singleton/FloatingButtonStateCommunicator.kt app/src/main/java/app/simple/positional/util/ImageLoader.kt app/src/main/java/app/simple/positional/viewmodels/factory/TrailDataFactory.kt app/src/main/res/anim/image_out.xml app/src/main/res/drawable/ic_add_8dp.xml app/src/main/res/layout-land/fragment_trail.xml app/src/main/res/layout-land/tools_trails.xml app/src/main/res/layout/adapter_trail_data.xml app/src/main/res/layout/adapter_trail_data_footer.xml app/src/main/res/layout/adapter_trail_data_header.xml app/src/main/res/layout/bottom_sheet_trail.xml app/src/main/res/layout/fragment_measure.xml app/src/main/res/layout/fragment_trail.xml app/src/main/res/layout/popup_delete_confirmation.xml app/src/main/res/layout/popup_trails_data.xml app/src/main/res/layout/toolbar_measure.xml app/src/main/res/layout/toolbar_trail_maps.xml app/src/main/res/layout/tools_measure.xml app/src/main/res/layout/tools_trails.xml app/src/main/res/transition/tools_transition.xml
+Next is 8c: the remaining dialogs, a single activity with Navigation Compose, and dropping the AppCompat themes.
+
+
+Positional phase8b.tar
+GZ 
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+28
+47
