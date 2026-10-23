@@ -898,3 +898,615 @@ git rm app/src/main/java/app/simple/positional/model/ClockModel.java app/src/mai
 
 
 
+tests failed 
+please see dump.txt for latest code as exists in the repository 
+I have uploaded the latest dump.txt so you can cross reference if needed 
+
+2026-10-23T23:51:32.9975784Z Current runner version: '2.338.0'
+2026-10-23T23:51:33.0002528Z ##[group]Runner Image Provisioner
+2026-10-23T23:51:33.0003482Z Hosted Compute Agent
+2026-10-23T23:51:33.0004098Z Version: 20261012.601
+2026-10-23T23:51:33.0004752Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-23T23:51:33.0005547Z Build Date: 2026-10-12T17:48:21Z
+2026-10-23T23:51:33.0006279Z Worker ID: {4823e6a3-86a2-4f6a-93fe-650abe0339ca}
+2026-10-23T23:51:33.0007036Z Region: westus
+2026-10-23T23:51:33.0007604Z Cloud: Azure
+2026-10-23T23:51:33.0008141Z ##[endgroup]
+2026-10-23T23:51:33.0009774Z ##[group]Operating System
+2026-10-23T23:51:33.0010759Z Ubuntu
+2026-10-23T23:51:33.0011267Z 24.04.5
+2026-10-23T23:51:33.0011894Z LTS
+2026-10-23T23:51:33.0012451Z ##[endgroup]
+2026-10-23T23:51:33.0013057Z ##[group]Runner Image
+2026-10-23T23:51:33.0013685Z Image: ubuntu-24.04
+2026-10-23T23:51:33.0014615Z Version: 20261012.334.1
+2026-10-23T23:51:33.0016080Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-23T23:51:33.0017795Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-23T23:51:33.0018835Z ##[endgroup]
+2026-10-23T23:51:33.0020402Z ##[group]GITHUB_TOKEN Permissions
+2026-10-23T23:51:33.0022626Z Contents: read
+2026-10-23T23:51:33.0023351Z Metadata: read
+2026-10-23T23:51:33.0024029Z ##[endgroup]
+2026-10-23T23:51:33.0026289Z Secret source: Actions
+2026-10-23T23:51:33.0027361Z Cache mode: write
+2026-10-23T23:51:33.0028109Z Prepare workflow directory
+2026-10-23T23:51:33.0443049Z Prepare all required actions
+2026-10-23T23:51:33.0492901Z Getting action download info
+2026-10-23T23:51:33.4015299Z Download action repository 'actions/checkout@v7' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-10-23T23:51:33.5053263Z Download action repository 'actions/setup-java@v6' (SHA:b843ebf9b913146b38da2eaa7aeddf76074ae1ad)
+2026-10-23T23:51:34.1369696Z Download action repository 'gradle/actions@v6' (SHA:3f5f9adaf7d9fecd50b5935e54106014257a94e6)
+2026-10-23T23:51:35.1473716Z Download action repository 'actions/upload-artifact@v7' (SHA:cf430e030ddbb5b0abf93d22962f4752f3646cd9)
+2026-10-23T23:51:35.7081529Z Complete job name: test
+2026-10-23T23:51:35.7916277Z ##[group]Run actions/checkout@v7
+2026-10-23T23:51:35.7917117Z with:
+2026-10-23T23:51:35.7917485Z   repository: kusl/hamza417-positional
+2026-10-23T23:51:35.7920571Z   token: ***
+2026-10-23T23:51:35.7920938Z   ssh-strict: true
+2026-10-23T23:51:35.7921358Z   ssh-user: git
+2026-10-23T23:51:35.7921718Z   persist-credentials: true
+2026-10-23T23:51:35.7922084Z   clean: true
+2026-10-23T23:51:35.7922510Z   sparse-checkout-cone-mode: true
+2026-10-23T23:51:35.7922943Z   fetch-depth: 1
+2026-10-23T23:51:35.7923326Z   fetch-tags: false
+2026-10-23T23:51:35.7923744Z   show-progress: true
+2026-10-23T23:51:35.7924100Z   lfs: false
+2026-10-23T23:51:35.7924544Z   submodules: false
+2026-10-23T23:51:35.7924911Z   set-safe-directory: true
+2026-10-23T23:51:35.7925367Z   allow-unsafe-pr-checkout: false
+2026-10-23T23:51:35.7926145Z ##[endgroup]
+2026-10-23T23:51:35.9030410Z Syncing repository: kusl/hamza417-positional
+2026-10-23T23:51:35.9032502Z ##[group]Getting Git version info
+2026-10-23T23:51:35.9033409Z Working directory is '/home/runner/work/hamza417-positional/hamza417-positional'
+2026-10-23T23:51:35.9034725Z [command]/usr/bin/git version
+2026-10-23T23:51:35.9147646Z git version 2.55.0
+2026-10-23T23:51:35.9172521Z ##[endgroup]
+2026-10-23T23:51:35.9183422Z Temporarily overriding HOME='/home/runner/work/_temp/b8f3a4e2-93b8-4232-ada9-33ed0249862b' before making global git config changes
+2026-10-23T23:51:35.9184989Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-23T23:51:35.9190970Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hamza417-positional/hamza417-positional
+2026-10-23T23:51:35.9252026Z Deleting the contents of '/home/runner/work/hamza417-positional/hamza417-positional'
+2026-10-23T23:51:35.9254085Z ##[group]Determining repository object format
+2026-10-23T23:51:35.9255580Z ##[endgroup]
+2026-10-23T23:51:35.9256453Z ##[group]Initializing the repository
+2026-10-23T23:51:35.9260380Z [command]/usr/bin/git init /home/runner/work/hamza417-positional/hamza417-positional
+2026-10-23T23:51:35.9391007Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-23T23:51:35.9392022Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-23T23:51:35.9392946Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-23T23:51:35.9393739Z hint: call:
+2026-10-23T23:51:35.9394160Z hint:
+2026-10-23T23:51:35.9394716Z hint: 	git config --global init.defaultBranch <name>
+2026-10-23T23:51:35.9395314Z hint:
+2026-10-23T23:51:35.9395872Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-23T23:51:35.9396784Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-23T23:51:35.9397510Z hint:
+2026-10-23T23:51:35.9397904Z hint: 	git branch -m <name>
+2026-10-23T23:51:35.9398448Z hint:
+2026-10-23T23:51:35.9399129Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-23T23:51:35.9400831Z Initialized empty Git repository in /home/runner/work/hamza417-positional/hamza417-positional/.git/
+2026-10-23T23:51:35.9406569Z [command]/usr/bin/git remote add origin https://github.com/kusl/hamza417-positional
+2026-10-23T23:51:35.9470905Z ##[endgroup]
+2026-10-23T23:51:35.9472216Z ##[group]Disabling automatic garbage collection
+2026-10-23T23:51:35.9475033Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-23T23:51:35.9512635Z ##[endgroup]
+2026-10-23T23:51:35.9514178Z ##[group]Setting up auth
+2026-10-23T23:51:35.9515267Z Removing SSH command configuration
+2026-10-23T23:51:35.9520767Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-23T23:51:35.9571881Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-23T23:51:35.9985010Z Removing HTTP extra header
+2026-10-23T23:51:35.9991799Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-23T23:51:36.0032096Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-23T23:51:36.0257387Z Removing includeIf entries pointing to credentials config files
+2026-10-23T23:51:36.0262759Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-23T23:51:36.0301997Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-23T23:51:36.0541850Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-23T23:51:36.0589542Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git.path /home/runner/work/_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:51:36.0631130Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:51:36.0675765Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:51:36.0714494Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:51:36.0752291Z ##[endgroup]
+2026-10-23T23:51:36.0753413Z ##[group]Fetching the repository
+2026-10-23T23:51:36.0762170Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9:refs/remotes/origin/master
+2026-10-23T23:51:37.2654724Z From https://github.com/kusl/hamza417-positional
+2026-10-23T23:51:37.2660939Z  * [new ref]         56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9 -> origin/master
+2026-10-23T23:51:37.2666263Z [command]/usr/bin/git branch --list --remote origin/master
+2026-10-23T23:51:37.2699520Z   origin/master
+2026-10-23T23:51:37.2709792Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-10-23T23:51:37.2742196Z 56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9
+2026-10-23T23:51:37.2747344Z ##[endgroup]
+2026-10-23T23:51:37.2748402Z ##[group]Determining the checkout info
+2026-10-23T23:51:37.2749367Z ##[endgroup]
+2026-10-23T23:51:37.2754264Z [command]/usr/bin/git sparse-checkout disable
+2026-10-23T23:51:37.2818999Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-23T23:51:37.2859235Z ##[group]Checking out the ref
+2026-10-23T23:51:37.2866749Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-10-23T23:51:37.4466442Z Reset branch 'master'
+2026-10-23T23:51:37.4472626Z branch 'master' set up to track 'origin/master'.
+2026-10-23T23:51:37.4487659Z ##[endgroup]
+2026-10-23T23:51:37.4545206Z [command]/usr/bin/git log -1 --format=%H
+2026-10-23T23:51:37.4581673Z 56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9
+2026-10-23T23:51:37.4973250Z ##[group]Run actions/setup-java@v6
+2026-10-23T23:51:37.4973607Z with:
+2026-10-23T23:51:37.4973818Z   distribution: temurin
+2026-10-23T23:51:37.4974051Z   java-version: 21
+2026-10-23T23:51:37.4974275Z   java-package: jdk
+2026-10-23T23:51:37.4974490Z   check-latest: false
+2026-10-23T23:51:37.4974710Z   force-download: false
+2026-10-23T23:51:37.4974939Z   set-default: true
+2026-10-23T23:51:37.4975144Z   server-id: github
+2026-10-23T23:51:37.4975404Z   mvn-repositories-include-central: true
+2026-10-23T23:51:37.4975781Z   mvn-repositories-prioritize-central: true
+2026-10-23T23:51:37.4976128Z   overwrite-settings: true
+2026-10-23T23:51:37.4976414Z   cache-read-only: false
+2026-10-23T23:51:37.4976647Z   job-status: success
+2026-10-23T23:51:37.4979140Z   token: ***
+2026-10-23T23:51:37.4979369Z   show-download-progress: false
+2026-10-23T23:51:37.4979643Z   problem-matcher: true
+2026-10-23T23:51:37.4980130Z ##[endgroup]
+2026-10-23T23:51:37.5810883Z ##[group]Installed distributions
+2026-10-23T23:51:37.5907713Z Resolved Java 21.0.12+1 from tool-cache
+2026-10-23T23:51:37.5917593Z Setting Java 21.0.12+1 as the default
+2026-10-23T23:51:37.5917949Z 
+2026-10-23T23:51:37.5918139Z Java configuration:
+2026-10-23T23:51:37.5918544Z   Distribution: temurin
+2026-10-23T23:51:37.5918956Z   Version: 21.0.12+1
+2026-10-23T23:51:37.5919531Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:37.5920299Z 
+2026-10-23T23:51:37.5920799Z ##[endgroup]
+2026-10-23T23:51:37.5955033Z Creating settings.xml with server-id: github
+2026-10-23T23:51:37.5955748Z Creating toolchains.xml for JDK version 21 from temurin
+2026-10-23T23:51:37.5956357Z Writing to /home/runner/.m2/settings.xml
+2026-10-23T23:51:37.5965493Z Writing to /home/runner/.m2/toolchains.xml
+2026-10-23T23:51:37.5973990Z Configured MAVEN_ARGS to include -ntp to suppress Maven transfer progress logs. Set 'show-download-progress: true' to keep the download progress output.
+2026-10-23T23:51:37.6271734Z ##[group]Run gradle/actions/setup-gradle@v6
+2026-10-23T23:51:37.6272114Z with:
+2026-10-23T23:51:37.6272335Z   cache-provider: enhanced
+2026-10-23T23:51:37.6272592Z   cache-disabled: false
+2026-10-23T23:51:37.6272826Z   cache-read-only: false
+2026-10-23T23:51:37.6273061Z   cache-write-only: false
+2026-10-23T23:51:37.6273322Z   cache-overwrite-existing: false
+2026-10-23T23:51:37.6273602Z   cache-cleanup: on-success
+2026-10-23T23:51:37.6273897Z   gradle-home-cache-includes: caches
+notifications
+
+2026-10-23T23:51:37.6274235Z   add-job-summary: always
+2026-10-23T23:51:37.6274739Z   add-job-summary-as-pr-comment: never
+2026-10-23T23:51:37.6275036Z   dependency-graph: disabled
+2026-10-23T23:51:37.6275362Z   dependency-graph-report-dir: dependency-graph-reports
+2026-10-23T23:51:37.6275749Z   dependency-graph-continue-on-failure: true
+2026-10-23T23:51:37.6276065Z   build-scan-publish: false
+2026-10-23T23:51:37.6276325Z   validate-wrappers: true
+2026-10-23T23:51:37.6276642Z   allow-snapshot-wrappers: false
+2026-10-23T23:51:37.6276926Z   gradle-home-cache-strict-match: false
+2026-10-23T23:51:37.6277216Z   workflow-job-context: null
+2026-10-23T23:51:37.6281105Z   github-token: ***
+2026-10-23T23:51:37.6281536Z env:
+2026-10-23T23:51:37.6282044Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:37.6282899Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:37.6283600Z   MAVEN_ARGS: -ntp
+2026-10-23T23:51:37.6283935Z ##[endgroup]
+2026-10-23T23:51:39.5775621Z Merged default JDK locations into /home/runner/.m2/toolchains.xml
+2026-10-23T23:51:39.5788189Z Enhanced Caching: This build is using the proprietary 'gradle-actions-caching' provider for optimized caching support. See https://github.com/gradle/actions/blob/main/DISTRIBUTION.md for terms of use and opt-out instructions.
+2026-10-23T23:51:39.6663763Z ##[group]Restore Gradle state from cache
+2026-10-23T23:51:39.9217279Z Cache hit for restore-key: gradle-home-v2|Linux-X64|test[27df40b80d25f4e0c5be504ed712742e]-d32863d40ba44c29311260eb96ff4bc3fdc7fde2
+2026-10-23T23:51:41.1915855Z Received 518096 of 4712400 (11.0%), 0.5 MBs/sec
+2026-10-23T23:51:41.4531975Z Received 4712400 of 4712400 (100.0%), 3.6 MBs/sec
+2026-10-23T23:51:41.4532806Z Cache Size: ~4 MB (4712400 B)
+2026-10-23T23:51:41.4696919Z [command]/usr/bin/tar -xf /home/runner/work/_temp/82c42056-e4b9-4ef3-8b84-750239b47e31/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:41.5970360Z Cache restored successfully
+2026-10-23T23:51:41.5977335Z Restored cache entry with key gradle-home-v2|Linux-X64|test[27df40b80d25f4e0c5be504ed712742e]-56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9 in 1930ms
+2026-10-23T23:51:41.8465962Z Cache hit for: gradle-dependencies-v2-590472c89b6b2dee5e78058fc719987a
+2026-10-23T23:51:41.8506538Z Cache hit for: gradle-build-cache-v2-e1ffc8da09c9a82feae0b299341bbe7d
+2026-10-23T23:51:41.8511896Z Cache hit for: gradle-instrumented-jars-v2-af2c01c105aa0bfa318b831c9f459cad
+2026-10-23T23:51:41.8519670Z Cache hit for: gradle-transforms-v2-23e1e04960774bb126b884189094c43b
+2026-10-23T23:51:41.8527553Z Cache hit for: gradle-groovy-dsl-v2-d1c7763db8ea58b975f1e2fa420ba685
+2026-10-23T23:51:41.8607196Z Cache hit for: gradle-wrapper-zips-v2-0745be66ec2c2a083a82d587fa4f7d57
+2026-10-23T23:51:42.6260758Z Received 80804 of 80804 (100.0%), 0.2 MBs/sec
+2026-10-23T23:51:42.6261591Z Cache Size: ~0 MB (80804 B)
+2026-10-23T23:51:42.6286644Z [command]/usr/bin/tar -xf /home/runner/work/_temp/131d9bba-a60a-462f-9faf-a1c8e642a5b3/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:42.6425737Z Cache restored successfully
+2026-10-23T23:51:42.6427957Z Restored cache entry with key gradle-instrumented-jars-v2-af2c01c105aa0bfa318b831c9f459cad in 1043ms
+2026-10-23T23:51:42.6882113Z Received 122358 of 122358 (100.0%), 0.2 MBs/sec
+2026-10-23T23:51:42.6882920Z Cache Size: ~0 MB (122358 B)
+2026-10-23T23:51:42.6914178Z [command]/usr/bin/tar -xf /home/runner/work/_temp/7d4e44ee-76be-4908-993f-53f06e906dea/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:42.7123964Z Cache restored successfully
+2026-10-23T23:51:42.7126014Z Restored cache entry with key gradle-groovy-dsl-v2-d1c7763db8ea58b975f1e2fa420ba685 in 1113ms
+2026-10-23T23:51:43.1091867Z Received 0 of 445830891 (0.0%), 0.0 MBs/sec
+2026-10-23T23:51:43.1316687Z Received 0 of 87308609 (0.0%), 0.0 MBs/sec
+2026-10-23T23:51:43.1474926Z Received 0 of 171551862 (0.0%), 0.0 MBs/sec
+2026-10-23T23:51:43.1535168Z Received 0 of 150843240 (0.0%), 0.0 MBs/sec
+2026-10-23T23:51:43.9990301Z Received 87308609 of 87308609 (100.0%), 44.5 MBs/sec
+2026-10-23T23:51:43.9991661Z Cache Size: ~83 MB (87308609 B)
+2026-10-23T23:51:44.0123080Z [command]/usr/bin/tar -xf /home/runner/work/_temp/c8a9914f-9314-4405-b53c-888be3dc8268/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:44.1491365Z Received 100663296 of 445830891 (22.6%), 47.0 MBs/sec
+2026-10-23T23:51:44.1492624Z Received 88080384 of 171551862 (51.3%), 41.9 MBs/sec
+2026-10-23T23:51:44.1916465Z Received 54525952 of 150843240 (36.1%), 25.5 MBs/sec
+2026-10-23T23:51:44.2392494Z Cache restored successfully
+2026-10-23T23:51:44.2440517Z Restored cache entry with key gradle-build-cache-v2-e1ffc8da09c9a82feae0b299341bbe7d in 2644ms
+2026-10-23T23:51:44.9452918Z Received 171551862 of 171551862 (100.0%), 58.6 MBs/sec
+2026-10-23T23:51:44.9480741Z Cache Size: ~164 MB (171551862 B)
+2026-10-23T23:51:44.9527385Z [command]/usr/bin/tar -xf /home/runner/work/_temp/11641ff7-c675-4bdc-afbf-e9e9f7643b96/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:45.1772545Z Received 230686720 of 445830891 (51.7%), 71.7 MBs/sec
+2026-10-23T23:51:45.1997545Z Received 134217728 of 150843240 (89.0%), 42.0 MBs/sec
+2026-10-23T23:51:46.1791834Z Received 394264576 of 445830891 (88.4%), 92.4 MBs/sec
+2026-10-23T23:51:46.1986440Z Received 146648936 of 150843240 (97.2%), 34.6 MBs/sec
+2026-10-23T23:51:46.3441911Z Received 150843240 of 150843240 (100.0%), 34.3 MBs/sec
+2026-10-23T23:51:46.3443400Z Cache Size: ~144 MB (150843240 B)
+2026-10-23T23:51:46.3560805Z [command]/usr/bin/tar -xf /home/runner/work/_temp/e023e798-ae1c-422a-a190-1080dc5d6981/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:46.7082582Z Received 445830891 of 445830891 (100.0%), 92.4 MBs/sec
+2026-10-23T23:51:46.7083290Z Cache Size: ~425 MB (445830891 B)
+2026-10-23T23:51:46.7112427Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d65ac933-9e6b-4d44-b20a-a80cec5b444d/cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --use-compress-program unzstd
+2026-10-23T23:51:47.3505897Z Cache restored successfully
+2026-10-23T23:51:47.3617311Z Restored cache entry with key gradle-wrapper-zips-v2-0745be66ec2c2a083a82d587fa4f7d57 in 5763ms
+2026-10-23T23:51:47.4678503Z Cache restored successfully
+2026-10-23T23:51:47.4768257Z Restored cache entry with key gradle-transforms-v2-23e1e04960774bb126b884189094c43b in 5876ms
+2026-10-23T23:51:47.9001185Z Cache restored successfully
+2026-10-23T23:51:47.9191379Z Restored cache entry with key gradle-dependencies-v2-590472c89b6b2dee5e78058fc719987a in 6320ms
+2026-10-23T23:51:47.9202460Z ##[endgroup]
+2026-10-23T23:51:47.9399215Z ##[group]All Gradle Wrapper jars are valid
+2026-10-23T23:51:47.9400695Z ✓ Found known Gradle Wrapper JAR files:
+2026-10-23T23:51:47.9401591Z   3b8a25775a69158b5ad2b1d17a80a88dc7b40a352a73eb27d06c612a7ce68e98 gradle/wrapper/gradle-wrapper.jar
+2026-10-23T23:51:47.9402532Z ##[endgroup]
+2026-10-23T23:51:47.9597746Z ##[group]Run chmod +x gradlew
+2026-10-23T23:51:47.9598152Z [36;1mchmod +x gradlew[0m
+2026-10-23T23:51:47.9994843Z shell: /usr/bin/bash -e {0}
+2026-10-23T23:51:47.9995243Z env:
+2026-10-23T23:51:47.9995679Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:47.9996381Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:47.9996938Z   MAVEN_ARGS: -ntp
+2026-10-23T23:51:47.9997298Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-23T23:51:47.9997737Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-10-23T23:51:47.9998154Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-23T23:51:47.9998714Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-10-23T23:51:47.9999309Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-10-23T23:51:48.0000208Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-10-23T23:51:48.0000553Z ##[endgroup]
+2026-10-23T23:51:48.0164721Z ##[group]Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+2026-10-23T23:51:48.0165436Z [36;1m./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug[0m
+2026-10-23T23:51:48.0229134Z shell: /usr/bin/bash -e {0}
+2026-10-23T23:51:48.0229450Z env:
+2026-10-23T23:51:48.0229824Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:48.0230730Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:51:48.0231204Z   MAVEN_ARGS: -ntp
+2026-10-23T23:51:48.0231506Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-23T23:51:48.0231869Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-10-23T23:51:48.0232215Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-23T23:51:48.0232733Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-10-23T23:51:48.0233302Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-10-23T23:51:48.0233718Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-10-23T23:51:48.0234045Z ##[endgroup]
+2026-10-23T23:51:49.5835643Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-10-23T23:51:50.9829546Z Daemon will be stopped at the end of the build 
+2026-10-23T23:52:00.8851494Z > Task :app:preBuild UP-TO-DATE
+2026-10-23T23:52:00.9830074Z > Task :app:preDebugBuild UP-TO-DATE
+2026-10-23T23:52:01.0841368Z > Task :app:generateDebugBuildConfig FROM-CACHE
+2026-10-23T23:52:01.0842179Z > Task :app:generateDebugResValues FROM-CACHE
+2026-10-23T23:52:01.1828049Z > Task :app:generateDebugResources FROM-CACHE
+2026-10-23T23:52:01.5855439Z > Task :app:packageDebugResources FROM-CACHE
+2026-10-23T23:52:02.0851470Z > Task :app:processDebugNavigationResources FROM-CACHE
+2026-10-23T23:52:03.5866626Z > Task :app:parseDebugLocalResources FROM-CACHE
+2026-10-23T23:52:03.6826823Z > Task :app:generateDebugRFile FROM-CACHE
+2026-10-23T23:52:03.9842533Z > Task :app:kspDebugKotlin FROM-CACHE
+2026-10-23T23:52:04.8841952Z > Task :app:javaPreCompileDebug FROM-CACHE
+2026-10-23T23:52:05.1827106Z > Task :app:mapDebugSourceSetPaths
+2026-10-23T23:52:05.1851085Z > Task :app:checkDebugAarMetadata
+2026-10-23T23:52:05.1878140Z > Task :app:compileDebugNavigationResources FROM-CACHE
+2026-10-23T23:52:05.6828524Z > Task :app:mergeDebugResources FROM-CACHE
+2026-10-23T23:52:05.6856174Z > Task :app:createDebugCompatibleScreenManifests
+2026-10-23T23:52:05.6881603Z > Task :app:extractDeepLinksDebug FROM-CACHE
+2026-10-23T23:52:05.8831315Z > Task :app:processDebugMainManifest FROM-CACHE
+2026-10-23T23:52:05.8846079Z > Task :app:processDebugManifest FROM-CACHE
+2026-10-23T23:52:05.8914411Z > Task :app:processDebugManifestForPackage FROM-CACHE
+2026-10-23T23:52:06.2851388Z > Task :app:processDebugResources FROM-CACHE
+2026-10-23T23:52:06.2881744Z > Task :app:preDebugUnitTestBuild UP-TO-DATE
+2026-10-23T23:52:06.2906447Z > Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+2026-10-23T23:52:06.2916765Z > Task :app:preReleaseBuild UP-TO-DATE
+2026-10-23T23:52:06.2940858Z > Task :app:generateReleaseBuildConfig FROM-CACHE
+2026-10-23T23:52:06.2971075Z > Task :app:generateReleaseResValues FROM-CACHE
+2026-10-23T23:52:06.3000800Z > Task :app:generateReleaseResources FROM-CACHE
+2026-10-23T23:52:06.6861988Z > Task :app:packageReleaseResources FROM-CACHE
+2026-10-23T23:52:06.7861304Z > Task :app:processReleaseNavigationResources FROM-CACHE
+2026-10-23T23:52:06.7890715Z > Task :app:parseReleaseLocalResources FROM-CACHE
+2026-10-23T23:52:06.8848469Z > Task :app:generateReleaseRFile FROM-CACHE
+2026-10-23T23:52:06.8881085Z > Task :app:kspReleaseKotlin FROM-CACHE
+2026-10-23T23:52:07.0870152Z > Task :app:javaPreCompileRelease FROM-CACHE
+2026-10-23T23:52:07.0892044Z > Task :app:extractProguardFiles
+2026-10-23T23:52:07.0960956Z > Task :app:extractDeepLinksRelease FROM-CACHE
+2026-10-23T23:52:07.1038262Z > Task :app:processReleaseMainManifest FROM-CACHE
+2026-10-23T23:52:07.1881530Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+2026-10-23T23:52:07.1910929Z > Task :app:generateDebugAssets UP-TO-DATE
+2026-10-23T23:52:07.3831816Z > Task :app:mergeDebugAssets
+2026-10-23T23:52:07.3832595Z > Task :app:compressDebugAssets FROM-CACHE
+2026-10-23T23:52:07.3837992Z > Task :app:generateDebugGlobalSynthetics FROM-CACHE
+2026-10-23T23:52:07.9861599Z > Task :app:l8DexDesugarLibDebug FROM-CACHE
+2026-10-23T23:52:08.2827503Z > Task :app:checkDebugDuplicateClasses
+2026-10-23T23:52:09.1881614Z > Task :app:desugarDebugFileDependencies FROM-CACHE
+2026-10-23T23:52:09.8881659Z > Task :app:mergeExtDexDebug FROM-CACHE
+2026-10-23T23:52:09.8882469Z > Task :app:mergeLibDexDebug FROM-CACHE
+2026-10-23T23:52:09.8961008Z > Task :app:mergeDebugJniLibFolders
+2026-10-23T23:52:10.2841323Z > Task :app:mergeDebugNativeLibs
+2026-10-23T23:52:11.9830524Z > Task :app:validateSigningDebug
+2026-10-23T23:52:11.9860989Z > Task :app:writeDebugAppMetadata
+2026-10-23T23:52:12.0841699Z > Task :app:writeDebugSigningConfigVersions
+2026-10-23T23:52:12.1875186Z 
+2026-10-23T23:52:12.1907710Z > Task :app:stripDebugDebugSymbols
+2026-10-23T23:52:12.1918477Z Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libmaplibre.so. Run with --info option to learn more.
+2026-10-23T23:52:33.9830554Z 
+2026-10-23T23:52:33.9855837Z > Task :app:compileDebugKotlin
+2026-10-23T23:52:36.8826359Z > Task :app:compileReleaseKotlin
+2026-10-23T23:52:52.4833910Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmGpsMap.kt:17:1 Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.4881936Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.4941313Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.5022542Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmMapView.kt:254:14 Accidental override: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.5091139Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmPanelMap
+2026-10-23T23:52:52.5151235Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmPanelMap
+2026-10-23T23:52:52.5173599Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmMeasureMap.kt:15:1 Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.5191415Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmMeasureMap
+2026-10-23T23:52:52.5241086Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmMeasureMap
+2026-10-23T23:52:52.5266385Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmTrailMap.kt:16:1 Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.5277069Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmTrailMap
+2026-10-23T23:52:52.5301284Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmTrailMap
+2026-10-23T23:52:52.5838611Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmGpsMap.kt:17:1 Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.5841329Z 
+2026-10-23T23:52:52.5860966Z > Task :app:compileDebugKotlin FAILED
+2026-10-23T23:52:52.5862485Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.5894773Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.5895717Z 
+2026-10-23T23:52:52.5921437Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmMapView.kt:254:14 Accidental override: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.5923947Z > Task :app:compileReleaseKotlin FAILED
+2026-10-23T23:52:52.5951169Z gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792799513210.json
+2026-10-23T23:52:52.5976034Z 
+2026-10-23T23:52:52.5981357Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmPanelMap
+2026-10-23T23:52:52.6001409Z [Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+2026-10-23T23:52:52.6011508Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmPanelMap
+2026-10-23T23:52:52.6014572Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmMeasureMap.kt:15:1 Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.6071557Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmMeasureMap
+2026-10-23T23:52:52.6091213Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmMeasureMap
+2026-10-23T23:52:52.6122436Z e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmTrailMap.kt:16:1 Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.6131043Z     fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmTrailMap
+2026-10-23T23:52:52.6162341Z     fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmTrailMap
+2026-10-23T23:52:52.6840643Z 
+2026-10-23T23:52:52.6890427Z 
+2026-10-23T23:52:52.6891233Z FAILURE: Build completed with 2 failures.
+2026-10-23T23:52:52.6891752Z 
+2026-10-23T23:52:52.6892320Z Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+2026-10-23T23:52:52.6893033Z 
+2026-10-23T23:52:52.6893869Z You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+2026-10-23T23:52:52.6894908Z 
+2026-10-23T23:52:52.6921085Z 1: Task failed with an exception.
+2026-10-23T23:52:52.6922415Z For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+2026-10-23T23:52:52.6950737Z -----------
+2026-10-23T23:52:52.6951295Z 48 actionable tasks: 14 executed, 34 from cache
+2026-10-23T23:52:52.6960701Z * What went wrong:
+2026-10-23T23:52:52.6979002Z Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.android.internal.application').
+2026-10-23T23:52:52.7011415Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+2026-10-23T23:52:52.7020697Z    > Kotlin compiler: CONFLICTING_INHERITED_JVM_DECLARATIONS
+2026-10-23T23:52:52.7054849Z        Kotlin compiler error
+2026-10-23T23:52:52.7063358Z          Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.7065661Z              fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.7067135Z              fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.7068280Z          Location: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmGpsMap.kt:17
+2026-10-23T23:52:52.7069066Z 
+2026-10-23T23:52:52.7069310Z * Try:
+2026-10-23T23:52:52.7069767Z > Run with --stacktrace option to get the stack trace.
+2026-10-23T23:52:52.7070716Z > Run with --info or --debug option to get more log output.
+2026-10-23T23:52:52.7071375Z > Run with --scan to get full insights from a Build Scan (powered by Develocity).
+2026-10-23T23:52:52.7072012Z > Get more help at https://help.gradle.org.
+2026-10-23T23:52:52.7072547Z ==============================================================================
+2026-10-23T23:52:52.7072961Z 
+2026-10-23T23:52:52.7073223Z 2: Task failed with an exception.
+2026-10-23T23:52:52.7073655Z -----------
+2026-10-23T23:52:52.7074031Z * What went wrong:
+2026-10-23T23:52:52.7074706Z Execution failed for task ':app:compileReleaseKotlin' (registered by plugin 'com.android.internal.application').
+2026-10-23T23:52:52.7075706Z > A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+2026-10-23T23:52:52.7076578Z    > Kotlin compiler: CONFLICTING_INHERITED_JVM_DECLARATIONS
+2026-10-23T23:52:52.7077218Z        Kotlin compiler error
+2026-10-23T23:52:52.7078483Z          Inherited platform declarations clash: The following declarations have the same JVM signature (setCallbacks(Lapp/simple/positional/extensions/maps/MapsCallbacks;)V):
+2026-10-23T23:52:52.7079858Z              fun `<set-callbacks>`(`<set-?>`: MapsCallbacks?): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.7081381Z              fun setCallbacks(callbacks: MapsCallbacks): Unit defined in app.simple.positional.decorations.maps.OsmGpsMap
+2026-10-23T23:52:52.7082712Z          Location: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/maps/OsmGpsMap.kt:17
+2026-10-23T23:52:52.7083543Z 
+2026-10-23T23:52:52.7083883Z * Try:
+2026-10-23T23:52:52.7084545Z > Run with --stacktrace option to get the stack trace.
+2026-10-23T23:52:52.7085255Z > Run with --info or --debug option to get more log output.
+2026-10-23T23:52:52.7086116Z > Run with --scan to get full insights from a Build Scan (powered by Develocity).
+2026-10-23T23:52:52.7086920Z > Get more help at https://help.gradle.org.
+2026-10-23T23:52:52.7087627Z ==============================================================================
+2026-10-23T23:52:52.7088104Z 
+2026-10-23T23:52:52.7088420Z BUILD FAILED in 1m 4s
+2026-10-23T23:52:53.1559099Z ##[error]Process completed with exit code 1.
+2026-10-23T23:52:53.1643837Z ##[group]Run actions/upload-artifact@v7
+2026-10-23T23:52:53.1644190Z with:
+2026-10-23T23:52:53.1644426Z   name: test-reports
+2026-10-23T23:52:53.1644702Z   path: app/build/reports/tests
+2026-10-23T23:52:53.1645005Z   if-no-files-found: ignore
+2026-10-23T23:52:53.1645290Z   compression-level: 6
+2026-10-23T23:52:53.1645556Z   overwrite: false
+2026-10-23T23:52:53.1645821Z   include-hidden-files: false
+2026-10-23T23:52:53.1646111Z   archive: true
+2026-10-23T23:52:53.1646357Z env:
+2026-10-23T23:52:53.1646712Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:52:53.1647456Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+2026-10-23T23:52:53.1647904Z   MAVEN_ARGS: -ntp
+2026-10-23T23:52:53.1648191Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-23T23:52:53.1648546Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-10-23T23:52:53.1648877Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-23T23:52:53.1649403Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-10-23T23:52:53.1650121Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-10-23T23:52:53.1650498Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-10-23T23:52:53.1650806Z ##[endgroup]
+2026-10-23T23:52:53.3076387Z No files were found with the provided path: app/build/reports/tests. No artifacts will be uploaded.
+2026-10-23T23:52:53.3456546Z Post job cleanup.
+2026-10-23T23:52:53.6357584Z In post-action step
+2026-10-23T23:52:53.6366607Z Enhanced Caching: This build is using the proprietary 'gradle-actions-caching' provider for optimized caching support. See https://github.com/gradle/actions/blob/main/DISTRIBUTION.md for terms of use and opt-out instructions.
+2026-10-23T23:52:53.7217414Z ##[group]Stopping Gradle daemons
+2026-10-23T23:52:53.7218820Z Stopping Gradle daemons for /home/runner/.gradle/wrapper/dists/gradle-9.8.2-bin/8wepis63pzuhrlfaiy04bagwu/gradle-9.8.2
+2026-10-23T23:52:53.7241660Z [command]/home/runner/.gradle/wrapper/dists/gradle-9.8.2-bin/8wepis63pzuhrlfaiy04bagwu/gradle-9.8.2/bin/gradle --stop
+2026-10-23T23:52:54.4302890Z No Gradle daemons are running.
+2026-10-23T23:52:54.4502286Z ##[endgroup]
+2026-10-23T23:52:54.4503183Z Not performing cache-cleanup due to build failure
+2026-10-23T23:52:54.4504751Z ##[group]Caching Gradle state
+2026-10-23T23:52:56.7022564Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/hamza417-positional/hamza417-positional --files-from manifest.txt --use-compress-program zstdmt
+2026-10-23T23:52:57.9812112Z Sent 4710399 of 4710399 (100.0%), 5.1 MBs/sec
+2026-10-23T23:52:58.2592222Z Saved cache entry with key gradle-home-v2|Linux-X64|test[27df40b80d25f4e0c5be504ed712742e]-56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9 from /home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle in 1570ms
+2026-10-23T23:52:58.2594590Z ##[endgroup]
+2026-10-23T23:52:58.2597884Z ##[group]Generating Job Summary
+2026-10-23T23:52:58.2606878Z 
+2026-10-23T23:52:58.2606888Z 
+2026-10-23T23:52:58.2607125Z <table>
+2026-10-23T23:52:58.2607490Z     <tr>
+2026-10-23T23:52:58.2607827Z         <th>Gradle Root Project</th>
+2026-10-23T23:52:58.2608246Z         <th>Requested Tasks</th>
+2026-10-23T23:52:58.2608624Z         <th>Gradle Version</th>
+2026-10-23T23:52:58.2608987Z         <th>Build Outcome</th>
+2026-10-23T23:52:58.2609600Z         <th>Build&nbsp;Scan®</th>
+2026-10-23T23:52:58.2610141Z     </tr>
+2026-10-23T23:52:58.2610420Z     <tr>
+2026-10-23T23:52:58.2610708Z         <td>Positional</td>
+2026-10-23T23:52:58.2611183Z         <td>testDebugUnitTest lintVitalRelease assembleDebug</td>
+2026-10-23T23:52:58.2611687Z         <td align='center'>9.8.2</td>
+2026-10-23T23:52:58.2612086Z         <td align='center'>:x:</td>
+2026-10-23T23:52:58.2613302Z         <td><a href="https://scans.gradle.com" rel="nofollow" target="_blank"><img src="https://img.shields.io/badge/Not%20published-lightgrey" alt="Build Scan not published" /></a></td>
+2026-10-23T23:52:58.2614359Z     </tr>
+2026-10-23T23:52:58.2614630Z </table>
+2026-10-23T23:52:58.2614782Z 
+2026-10-23T23:52:58.2615197Z ============================
+2026-10-23T23:52:58.2616097Z <h4>Gradle State Caching - ⚡ Enhanced</h4>
+2026-10-23T23:52:58.2616570Z 
+2026-10-23T23:52:58.2618838Z **[Enhanced Caching](https://github.com/gradle/actions/blob/main/docs/setup-gradle.md#enhanced-caching)** uses the proprietary `gradle-actions-caching` provider. See [DISTRIBUTION.md](https://github.com/gradle/actions/blob/main/DISTRIBUTION.md) for terms of use and opt-out instructions.
+2026-10-23T23:52:58.2621193Z 
+2026-10-23T23:52:58.2621345Z <details>
+2026-10-23T23:52:58.2621864Z <summary>Entries: 7 restored (821Mb), 1 saved (4Mb) - Expand for more details</summary>
+2026-10-23T23:52:58.2622342Z 
+2026-10-23T23:52:58.2623525Z [Cache was enabled](https://github.com/gradle/actions/blob/main/docs/setup-gradle.md#caching-build-state-between-jobs) — Gradle User Home was restored from the cache and saved for use by subsequent jobs.
+2026-10-23T23:52:58.2624796Z 
+2026-10-23T23:52:58.2625634Z [Cache cleanup](https://github.com/gradle/actions/blob/main/docs/setup-gradle.md#configuring-cache-cleanup) was skipped due to a build failure. Use `cache-cleanup: always` to override.
+2026-10-23T23:52:58.2626834Z 
+2026-10-23T23:52:58.2626943Z <table>
+2026-10-23T23:52:58.2627559Z     <tr><td></td><th>Count</th><th>Total Size (Mb)</th><th>Total Time (ms)</th></tr>
+2026-10-23T23:52:58.2628022Z     <tr><td>Entries Restored</td>
+2026-10-23T23:52:58.2628329Z         <td>7</td>
+2026-10-23T23:52:58.2628573Z         <td>821</td>
+2026-10-23T23:52:58.2628841Z         <td>24689</td>
+2026-10-23T23:52:58.2629086Z     </tr>
+2026-10-23T23:52:58.2629321Z     <tr><td>Entries Saved</td>
+2026-10-23T23:52:58.2629606Z         <td>1</td>
+2026-10-23T23:52:58.2629844Z         <td>4</td>
+2026-10-23T23:52:58.2630624Z         <td>1570</td>
+2026-10-23T23:52:58.2631092Z     </tr>
+2026-10-23T23:52:58.2631486Z </table>
+2026-10-23T23:52:58.2631689Z 
+2026-10-23T23:52:58.2631849Z <pre>
+2026-10-23T23:52:58.2632354Z Entry: Gradle User Home
+2026-10-23T23:52:58.2633402Z     Requested Key : gradle-home-v2|Linux-X64|test[27df40b80d25f4e0c5be504ed712742e]-56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9
+2026-10-23T23:52:58.2635002Z     Restored  Key : gradle-home-v2|Linux-X64|test[27df40b80d25f4e0c5be504ed712742e]-d32863d40ba44c29311260eb96ff4bc3fdc7fde2
+2026-10-23T23:52:58.2636275Z               Size: 4 MB (4712400 B)
+2026-10-23T23:52:58.2636971Z               Time: 1930 ms
+2026-10-23T23:52:58.2637564Z               (Entry restored: partial match found)
+2026-10-23T23:52:58.2638722Z     Saved     Key : gradle-home-v2|Linux-X64|test[27df40b80d25f4e0c5be504ed712742e]-56cc4c6195fd8afc0a2d2ddb638b2562f99b9ba9
+2026-10-23T23:52:58.2639773Z               Size: 4 MB (4710399 B)
+2026-10-23T23:52:58.2640557Z               Time: 1570 ms
+2026-10-23T23:52:58.2641035Z               (Entry saved)
+2026-10-23T23:52:58.2641437Z ---
+2026-10-23T23:52:58.2641779Z Entry: wrapper/dists/gradle-9.8.2-bin/8wepis63pzuhrlfaiy04bagwu
+2026-10-23T23:52:58.2642355Z     Requested Key : gradle-wrapper-zips-v2-0745be66ec2c2a083a82d587fa4f7d57
+2026-10-23T23:52:58.2642953Z     Restored  Key : gradle-wrapper-zips-v2-0745be66ec2c2a083a82d587fa4f7d57
+2026-10-23T23:52:58.2643411Z               Size: 144 MB (150843240 B)
+2026-10-23T23:52:58.2643731Z               Time: 5763 ms
+2026-10-23T23:52:58.2644044Z               (Entry restored: exact match found)
+2026-10-23T23:52:58.2644403Z     Saved     Key : 
+2026-10-23T23:52:58.2644660Z               Size: 
+2026-10-23T23:52:58.2644904Z               Time: 
+2026-10-23T23:52:58.2645185Z               (Entry not saved: contents unchanged)
+2026-10-23T23:52:58.2645524Z ---
+2026-10-23T23:52:58.2645751Z Entry: dependencies
+2026-10-23T23:52:58.2646153Z     Requested Key : gradle-dependencies-v2-590472c89b6b2dee5e78058fc719987a
+2026-10-23T23:52:58.2647172Z     Restored  Key : gradle-dependencies-v2-590472c89b6b2dee5e78058fc719987a
+2026-10-23T23:52:58.2648064Z               Size: 425 MB (445830891 B)
+2026-10-23T23:52:58.2648663Z               Time: 6320 ms
+2026-10-23T23:52:58.2649187Z               (Entry restored: exact match found)
+2026-10-23T23:52:58.2649764Z     Saved     Key : 
+2026-10-23T23:52:58.2650409Z               Size: 
+2026-10-23T23:52:58.2650815Z               Time: 
+2026-10-23T23:52:58.2651294Z               (Entry not saved: contents unchanged)
+2026-10-23T23:52:58.2651864Z ---
+2026-10-23T23:52:58.2652266Z Entry: instrumented-jars
+2026-10-23T23:52:58.2653041Z     Requested Key : gradle-instrumented-jars-v2-af2c01c105aa0bfa318b831c9f459cad
+2026-10-23T23:52:58.2654638Z     Restored  Key : gradle-instrumented-jars-v2-af2c01c105aa0bfa318b831c9f459cad
+2026-10-23T23:52:58.2655508Z               Size: 0 MB (80804 B)
+2026-10-23T23:52:58.2656028Z               Time: 1043 ms
+2026-10-23T23:52:58.2656544Z               (Entry restored: exact match found)
+2026-10-23T23:52:58.2657113Z     Saved     Key : 
+2026-10-23T23:52:58.2657568Z               Size: 
+2026-10-23T23:52:58.2675653Z               Time: 
+2026-10-23T23:52:58.2676177Z               (Entry not saved: contents unchanged)
+2026-10-23T23:52:58.2676738Z ---
+2026-10-23T23:52:58.2677118Z Entry: build-cache
+2026-10-23T23:52:58.2677780Z     Requested Key : gradle-build-cache-v2-e1ffc8da09c9a82feae0b299341bbe7d
+2026-10-23T23:52:58.2678719Z     Restored  Key : gradle-build-cache-v2-e1ffc8da09c9a82feae0b299341bbe7d
+2026-10-23T23:52:58.2679757Z               Size: 83 MB (87308609 B)
+2026-10-23T23:52:58.2680518Z               Time: 2644 ms
+2026-10-23T23:52:58.2681041Z               (Entry restored: exact match found)
+2026-10-23T23:52:58.2681637Z     Saved     Key : 
+2026-10-23T23:52:58.2682057Z               Size: 
+2026-10-23T23:52:58.2682470Z               Time: 
+2026-10-23T23:52:58.2682937Z               (Entry not saved: contents unchanged)
+2026-10-23T23:52:58.2683469Z ---
+2026-10-23T23:52:58.2683852Z Entry: groovy-dsl
+2026-10-23T23:52:58.2684512Z     Requested Key : gradle-groovy-dsl-v2-d1c7763db8ea58b975f1e2fa420ba685
+2026-10-23T23:52:58.2685482Z     Restored  Key : gradle-groovy-dsl-v2-d1c7763db8ea58b975f1e2fa420ba685
+2026-10-23T23:52:58.2686234Z               Size: 0 MB (122358 B)
+2026-10-23T23:52:58.2686748Z               Time: 1113 ms
+2026-10-23T23:52:58.2687228Z               (Entry restored: exact match found)
+2026-10-23T23:52:58.2687760Z     Saved     Key : 
+2026-10-23T23:52:58.2688160Z               Size: 
+2026-10-23T23:52:58.2688563Z               Time: 
+2026-10-23T23:52:58.2689049Z               (Entry not saved: contents unchanged)
+2026-10-23T23:52:58.2689601Z ---
+2026-10-23T23:52:58.2690154Z Entry: transforms
+2026-10-23T23:52:58.2690808Z     Requested Key : gradle-transforms-v2-23e1e04960774bb126b884189094c43b
+2026-10-23T23:52:58.2691776Z     Restored  Key : gradle-transforms-v2-23e1e04960774bb126b884189094c43b
+2026-10-23T23:52:58.2692520Z               Size: 164 MB (171551862 B)
+2026-10-23T23:52:58.2693020Z               Time: 5876 ms
+2026-10-23T23:52:58.2693504Z               (Entry restored: exact match found)
+2026-10-23T23:52:58.2694061Z     Saved     Key : 
+2026-10-23T23:52:58.2694484Z               Size: 
+2026-10-23T23:52:58.2694896Z               Time: 
+2026-10-23T23:52:58.2695368Z               (Entry not saved: contents unchanged)
+2026-10-23T23:52:58.2695942Z </pre>
+2026-10-23T23:52:58.2696326Z </details>
+2026-10-23T23:52:58.2696546Z 
+2026-10-23T23:52:58.2697045Z ##[endgroup]
+2026-10-23T23:52:58.2697484Z Completed post-action step
+2026-10-23T23:52:58.2887193Z Post job cleanup.
+2026-10-23T23:52:58.3749605Z Post job cleanup.
+2026-10-23T23:52:58.4657601Z [command]/usr/bin/git version
+2026-10-23T23:52:58.4712515Z git version 2.55.0
+2026-10-23T23:52:58.4754501Z Temporarily overriding HOME='/home/runner/work/_temp/6bc204f6-10ef-476d-a6d6-cb9facb77262' before making global git config changes
+2026-10-23T23:52:58.4755574Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-23T23:52:58.4760421Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/hamza417-positional/hamza417-positional
+2026-10-23T23:52:58.4795777Z Removing SSH command configuration
+2026-10-23T23:52:58.4802499Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-23T23:52:58.4837911Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-23T23:52:58.5095700Z Removing HTTP extra header
+2026-10-23T23:52:58.5097323Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-23T23:52:58.5133790Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-23T23:52:58.5397448Z Removing includeIf entries pointing to credentials config files
+2026-10-23T23:52:58.5421453Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-23T23:52:58.5454339Z includeif.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git.path
+2026-10-23T23:52:58.5464856Z includeif.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git/worktrees/*.path
+2026-10-23T23:52:58.5466203Z includeif.gitdir:/github/workspace/.git.path
+2026-10-23T23:52:58.5467538Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-23T23:52:58.5469462Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git.path
+2026-10-23T23:52:58.5486024Z /home/runner/work/_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:52:58.5497836Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git.path \/home\/runner\/work\/_temp\/git\-credentials\-09999823\-09cd\-4b85\-9360\-4b7d1cf91678\.config
+2026-10-23T23:52:58.5539607Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git/worktrees/*.path
+2026-10-23T23:52:58.5568401Z /home/runner/work/_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:52:58.5578969Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/hamza417-positional/hamza417-positional/.git/worktrees/*.path \/home\/runner\/work\/_temp\/git\-credentials\-09999823\-09cd\-4b85\-9360\-4b7d1cf91678\.config
+2026-10-23T23:52:58.5625844Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-23T23:52:58.5654019Z /github/runner_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:52:58.5663610Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-09999823\-09cd\-4b85\-9360\-4b7d1cf91678\.config
+2026-10-23T23:52:58.5702809Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-23T23:52:58.5729757Z /github/runner_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config
+2026-10-23T23:52:58.5737028Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-09999823\-09cd\-4b85\-9360\-4b7d1cf91678\.config
+2026-10-23T23:52:58.5776214Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-23T23:52:58.6008641Z Removing credentials config '/home/runner/work/_temp/git-credentials-09999823-09cd-4b85-9360-4b7d1cf91678.config'
+2026-10-23T23:52:58.6176866Z Cleaning up orphan processes
