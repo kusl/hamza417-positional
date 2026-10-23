@@ -417,5 +417,33 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.097s
 user	0m0.508s
 sys	0m0.601s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/adapters/trail/AdapterPopupMarkers.kt app/src/main/java/app/simple/positional/decorations/popup/PopupLinearLayout.java app/src/main/java/app/simple/positional/decorations/views/CustomRadioButton.java app/src/main/java/app/simple/positional/dialogs/app/ErrorDialog.kt app/src/main/java/app/simple/positional/dialogs/clock/ClockMotionType.kt app/src/main/java/app/simple/positional/dialogs/measure/MeasureAdd.kt app/src/main/java/app/simple/positional/dialogs/trail/AddMarker.kt app/src/main/java/app/simple/positional/dialogs/trail/AddTrail.kt app/src/main/java/app/simple/positional/popups/trail/PopupMarkers.kt app/src/main/res/anim/marker_grid_anim.xml app/src/main/res/anim/marker_grid_controller.xml app/src/main/res/layout/adapter_popup_markers.xml app/src/main/res/layout/dialog_clock_motion_type.xml app/src/main/res/layout/dialog_error.xml app/src/main/res/layout/dialog_measure_add.xml app/src/main/res/layout/dialog_on_trail_add.xml app/src/main/res/layout/dialog_trail_name.xml app/src/main/res/layout/popup_trail_markers.xml
+rm 'app/src/main/java/app/simple/positional/adapters/trail/AdapterPopupMarkers.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/popup/PopupLinearLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/CustomRadioButton.java'
+rm 'app/src/main/java/app/simple/positional/dialogs/app/ErrorDialog.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/clock/ClockMotionType.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/measure/MeasureAdd.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/trail/AddMarker.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/trail/AddTrail.kt'
+rm 'app/src/main/java/app/simple/positional/popups/trail/PopupMarkers.kt'
+rm 'app/src/main/res/anim/marker_grid_anim.xml'
+rm 'app/src/main/res/anim/marker_grid_controller.xml'
+rm 'app/src/main/res/layout/adapter_popup_markers.xml'
+rm 'app/src/main/res/layout/dialog_clock_motion_type.xml'
+rm 'app/src/main/res/layout/dialog_error.xml'
+rm 'app/src/main/res/layout/dialog_measure_add.xml'
+rm 'app/src/main/res/layout/dialog_on_trail_add.xml'
+rm 'app/src/main/res/layout/dialog_trail_name.xml'
+rm 'app/src/main/res/layout/popup_trail_markers.xml'
 kushal@fedora:~/src/kotlin/positional$ 
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-08-45-25
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
 
+real	0m1.111s
+user	0m0.438s
+sys	0m0.681s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-08-45-39
+kushal@fedora:~/src/kotlin/positional$ 

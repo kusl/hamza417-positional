@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T08:26:27-04:00
+Generated: 2026-10-23T08:45:36-04:00
 Branch:    master
-Commit:    06b3ad85 2026-10-23 08:26:18 -0400 run scripts
+Commit:    82c97ba5 2026-10-23 08:45:33 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (981 files)
+## TREE (968 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -97,8 +97,6 @@ app/
                   BloomSkinAdapter.kt
                 maps/
                   PinSkinAdapter.kt
-                trail/
-                  AdapterPopupMarkers.kt
               callbacks/
                 BottomBarHost.kt
                 PanelsCallback.java
@@ -152,8 +150,6 @@ app/
                   MeasureMaps.kt
                 padding/
                   PaddingAwareLinearLayout.java
-                popup/
-                  PopupLinearLayout.java
                 ripple/
                   DynamicRippleButton.java
                   DynamicRippleImageButton.java
@@ -177,17 +173,14 @@ app/
                 views/
                   CustomBottomSheetDialogFragment.kt
                   CustomDialogFragment.kt
-                  CustomRadioButton.java
                   CustomRecyclerView.kt
                   CustomWebView.kt
               dialogs/
                 app/
-                  ErrorDialog.kt
                   LocationParameters.kt
                   Panels.kt
                   Permission.kt
                 clock/
-                  ClockMotionType.kt
                   ClockNeedle.kt
                 compass/
                   CompassBloom.kt
@@ -198,11 +191,6 @@ app/
                   LocationExpansion.kt
                   PinCustomization.kt
                   TargetCoordinates.kt
-                measure/
-                  MeasureAdd.kt
-                trail/
-                  AddMarker.kt
-                  AddTrail.kt
               extensions/
                 activity/
                   BaseActivity.kt
@@ -237,9 +225,6 @@ app/
                 MeasurePoint.java
                 TrailEntry.java
                 TrailPoint.java
-              popups/
-                trail/
-                  PopupMarkers.kt
               preferences/
                 BottomBarPreferences.kt
                 ClockPreferences.kt
@@ -278,6 +263,7 @@ app/
                   ClockScreen.kt
                   CompassScreen.kt
                   CustomLocationScreen.kt
+                  DialogHost.kt
                   DirectionPanel.kt
                   DirectionsScreen.kt
                   GpsScreen.kt
@@ -285,7 +271,9 @@ app/
                   MapPanel.kt
                   MapSearchScreen.kt
                   MeasureScreen.kt
+                  MenuSheet.kt
                   PanelComponents.kt
+                  PanelMenus.kt
                   PositionalTheme.kt
                   Preferences.kt
                   RecordsScreen.kt
@@ -365,8 +353,6 @@ app/
           grid_list_animation_controller.xml
           image_in.xml
           launcher_icon.xml
-          marker_grid_anim.xml
-          marker_grid_controller.xml
         drawable-night/
           compass_dial.xml
         drawable/
@@ -689,25 +675,18 @@ app/
           adapter_clock_needle.xml
           adapter_panel.xml
           adapter_pins.xml
-          adapter_popup_markers.xml
-          dialog_clock_motion_type.xml
           dialog_clock_needle_skins.xml
           dialog_compass_bloom.xml
           dialog_compass_calibration.xml
           dialog_compass_physical_properties.xml
           dialog_custom_location_shortcut.xml
-          dialog_error.xml
-          dialog_measure_add.xml
-          dialog_on_trail_add.xml
           dialog_panel_switcher.xml
           dialog_permission_info.xml
           dialog_pin_customization.xml
           dialog_target_location.xml
-          dialog_trail_name.xml
           expansion_dialog_coordinates.xml
           expansion_dialog_location.xml
           fragment_launcher.xml
-          popup_trail_markers.xml
           switch_view.xml
           widget_clock.xml
           widget_clock_2x2.xml
@@ -1088,7 +1067,9 @@ app/
                   ArtsCatalogTest.kt
                   ComposeDrawablesTest.kt
                   CoordinateInputTest.kt
+                  DialogHostTest.kt
                   MapSearchQueryTest.kt
+                  MenuSheetStateTest.kt
                   SettingsLabelsTest.kt
                   SpeedometerDialTest.kt
                   TimeZoneCatalogTest.kt
@@ -1391,7 +1372,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -1410,7 +1391,10 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 7 | Level, compass, clock and direction panels in Compose; settle-aware needle physics, lifecycle-bound sensors, sun diagram on `Canvas` | Done |
 | 8a | GPS map panel in Compose: toolbar, map tools, info sheet, speedometer; shared map lifecycle observer; address lookups only after moving 25 m | Done |
 | 8b | Trail and measure map panels in Compose on a shared map scaffold; trail points observed through Room `Flow` with one open database per trail; popup windows, tool views and the timeline library removed | Done |
-| 8c | Remaining dialogs, single activity with Navigation Compose, drop AppCompat themes | Next |
+| 8c | Panel menus (GPS, trail, measure, compass, clock, direction) as one Compose bottom sheet built from `PanelMenus`; sub dialogs no longer reopen menus while being destroyed | Done |
+| 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
+| 8e | Remaining dialogs (location parameters, coordinates and location details, pins, target coordinates, calibration, skins, panels, permission) in Compose | Next |
+| 8f | Single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -3425,7 +3409,6 @@ import java.util.ArrayList;
 import app.simple.positional.R;
 import app.simple.positional.constants.LocationPins;
 import app.simple.positional.model.BottomBar;
-import app.simple.positional.ui.panels.Measure;
 
 public class BottomBarItems {
     public static final String CLOCK = "clock";
@@ -3433,7 +3416,7 @@ public class BottomBarItems {
     public static final String DIRECTION = "direction";
     public static final String LOCATION = "location";
     public static final String TRAIL = "trail";
-    public static final String MEASURE = Measure.TAG;
+    public static final String MEASURE = "Measure";
     public static final String LEVEL = "level";
     public static final String SETTINGS = "settings";
 
@@ -3592,51 +3575,6 @@ class PinSkinAdapter(context: Context) : PagerAdapter() {
     override fun restoreState(state: Parcelable?, loader: ClassLoader?) {}
     override fun saveState(): Parcelable? {
         return null
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/trail/AdapterPopupMarkers.kt
-################################################################################
-package app.simple.positional.adapters.trail
-
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-
-class AdapterPopupMarkers : RecyclerView.Adapter<AdapterPopupMarkers.Holder>() {
-    var onIconClicked: (position: Int) -> Unit = {}
-    var onIconLongClicked: (position: Int) -> Unit = {}
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(
-                LayoutInflater.from(parent.context).inflate(R.layout.adapter_popup_markers, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.icon.setImageResource(TrailIcons.icons[position])
-
-        holder.icon.setOnClickListener {
-            onIconClicked.invoke(position)
-        }
-
-        holder.icon.setOnLongClickListener {
-            onIconLongClicked.invoke(position)
-            true
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return TrailIcons.icons.size
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val icon: DynamicRippleImageButton = itemView.findViewById(R.id.marker)
     }
 }
 
@@ -7403,7 +7341,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     fun createMeasurePolylines(measure: Measure?) {
         try {
             measurePoints.clear()
-            measurePoints.addAll(measure!!.measurePoints!!)
+            measurePoints.addAll(measure!!.measurePoints)
             removeAllPolylines()
             updatePolylines(measurePoints)
         } catch (e: NullPointerException) {
@@ -7518,59 +7456,6 @@ public class PaddingAwareLinearLayout extends LinearLayout {
                 StatusBarHeight.getStatusBarHeight(getResources()) + getPaddingTop(),
                 getPaddingRight(),
                 getPaddingBottom());
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/popup/PopupLinearLayout.java
-################################################################################
-package app.simple.positional.decorations.popup;
-
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.LinearLayout;
-import androidx.core.content.ContextCompat;
-
-import app.simple.positional.R;
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout;
-
-public class PopupLinearLayout extends DynamicCornerLinearLayout {
-    public PopupLinearLayout(Context context) {
-        super(context);
-        init();
-    }
-
-    private void init() {
-        int p = getResources().getDimensionPixelOffset(R.dimen.popup_padding);
-        setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.mainBackground)));
-        setOrientation(LinearLayout.VERTICAL);
-    }
-
-    private void animateChildren() {
-        if (!isInEditMode()) {
-            setScaleY(0);
-
-            animate()
-                    .scaleY(1)
-                    .setDuration(200)
-                    .setInterpolator(new DecelerateInterpolator(1.5F))
-                    .start();
-
-            post(() -> {
-                for (int i = 0; i < getChildCount(); i++) {
-                    getChildAt(i).setAlpha(0);
-                    getChildAt(i).setTranslationY(-8);
-
-                    getChildAt(i).animate()
-                            .translationY(0)
-                            .alpha(1)
-                            .setDuration(200)
-                            .setStartDelay(200 + (i * 35L))
-                            .start();
-                }
-            });
-        }
     }
 }
 
@@ -9092,41 +8977,6 @@ open class CustomDialogFragment : DialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/views/CustomRadioButton.java
-################################################################################
-package app.simple.positional.decorations.views;
-
-import android.content.Context;
-import android.util.AttributeSet;
-import androidx.core.content.ContextCompat;
-
-import app.simple.positional.R;
-import app.simple.positional.util.ColorUtils;
-import static app.simple.positional.decorations.utils.Utils.animateTint;
-
-public class CustomRadioButton extends androidx.appcompat.widget.AppCompatRadioButton {
-    public CustomRadioButton(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public CustomRadioButton(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @Override
-    public void setChecked(boolean checked) {
-        if (checked) {
-            animateTint(ColorUtils.INSTANCE.resolveAttrColor(getContext(), R.attr.colorAppAccent), this);
-        }
-        else {
-            animateTint(ContextCompat.getColor(getContext(), R.color.iconRegular), this);
-        }
-
-        super.setChecked(checked);
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt
 ################################################################################
 package app.simple.positional.decorations.views
@@ -9258,47 +9108,6 @@ open class CustomWebView @JvmOverloads constructor(context: Context, attributeSe
         } else if (night && WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
             @Suppress("DEPRECATION")
             WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/app/ErrorDialog.kt
-################################################################################
-package app.simple.positional.dialogs.app
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import app.simple.positional.R
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-
-class ErrorDialog : CustomBottomSheetDialogFragment() {
-    private lateinit var error: TextView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_error, container, false)
-
-        error = view.findViewById(R.id.print_error)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        error.text = requireArguments().getString("error")
-    }
-
-    companion object {
-        fun newInstance(error: String): ErrorDialog {
-            val args = Bundle()
-            args.putString("error", error)
-            val fragment = ErrorDialog()
-            fragment.arguments = args
-            return fragment
         }
     }
 }
@@ -9613,92 +9422,6 @@ class Permission : CustomBottomSheetDialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/clock/ClockMotionType.kt
-################################################################################
-package app.simple.positional.dialogs.clock
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import app.simple.positional.R
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.decorations.views.CustomRadioButton
-import app.simple.positional.preferences.ClockPreferences
-
-class ClockMotionType : CustomBottomSheetDialogFragment() {
-    private lateinit var smooth: CustomRadioButton
-    private lateinit var tick: CustomRadioButton
-    private lateinit var oscillate: CustomRadioButton
-    private lateinit var tickSmooth: CustomRadioButton
-    private lateinit var mechanical: CustomRadioButton
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_clock_motion_type, container, false)
-
-        smooth = view.findViewById(R.id.motion_smooth)
-        tick = view.findViewById(R.id.motion_tick)
-        oscillate = view.findViewById(R.id.motion_tick_oscillate)
-        tickSmooth = view.findViewById(R.id.motion_tick_smooth)
-        mechanical = view.findViewById(R.id.motion_mechanical)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setButton(ClockPreferences.getMovementType())
-
-        smooth.setOnClickListener {
-            setButton("smooth")
-        }
-
-        tick.setOnClickListener {
-            setButton("tick")
-        }
-
-        oscillate.setOnClickListener {
-            setButton("oscillate")
-        }
-
-        tickSmooth.setOnClickListener {
-            setButton("tick_smooth")
-        }
-
-        mechanical.setOnClickListener {
-            setButton("mechanical")
-        }
-    }
-
-    private fun setButton(value: String) {
-        smooth.isChecked = value == "smooth"
-        tick.isChecked = value == "tick"
-        oscillate.isChecked = value == "oscillate"
-        tickSmooth.isChecked = value == "tick_smooth"
-        mechanical.isChecked = value == "mechanical"
-
-        ClockPreferences.setMovementType(value)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (!requireActivity().isDestroyed) {
-            ClockMenu.newInstance().show(parentFragmentManager, "clock_menu")
-        }
-    }
-
-    companion object {
-        fun newInstance(): ClockMotionType {
-            val args = Bundle()
-            val fragment = ClockMotionType()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/dialogs/clock/ClockNeedle.kt
 ################################################################################
 package app.simple.positional.dialogs.clock
@@ -9753,13 +9476,6 @@ class ClockNeedle : CustomBottomSheetDialogFragment() {
                 }
             }
         })
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (!requireActivity().isDestroyed) {
-            ClockMenu.newInstance().show(parentFragmentManager, "clock_menu")
-        }
     }
 
     companion object {
@@ -9831,13 +9547,6 @@ class CompassBloom : CustomBottomSheetDialogFragment() {
                 }
             }
         })
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (!requireActivity().isDestroyed) {
-            CompassMenu().show(parentFragmentManager, "compass_menu")
-        }
     }
 }
 
@@ -10103,9 +9812,6 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
         dampingCoefficient.clearAnimation()
         rotationalInertia.clearAnimation()
         magneticCoefficient.clearAnimation()
-        if (!requireActivity().isDestroyed) {
-            CompassMenu().show(parentFragmentManager, "compass_menu")
-        }
     }
 
     private fun updateSeekbar(seekBar: SeekBar, value: Int) {
@@ -10556,20 +10262,10 @@ class PinCustomization : CustomBottomSheetDialogFragment() {
         objectAnimator?.cancel()
         opacity.clearAnimation()
         size.clearAnimation()
-        if (!requireActivity().isDestroyed && !requireArguments().getBoolean("long_pressed")) {
-            GPSMenu.newInstance()
-                .show(parentFragmentManager, "gps_menu")
-        }
     }
 
     companion object {
-        fun newInstance(longPressed: Boolean): PinCustomization {
-            val args = Bundle()
-            args.putBoolean("long_pressed", longPressed)
-            val fragment = PinCustomization()
-            fragment.arguments = args
-            return fragment
-        }
+        fun newInstance() = PinCustomization()
     }
 }
 
@@ -10697,347 +10393,6 @@ class TargetCoordinates : CustomDialogFragment() {
         fun newInstance(): TargetCoordinates {
             val args = Bundle()
             val fragment = TargetCoordinates()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/measure/MeasureAdd.kt
-################################################################################
-package app.simple.positional.dialogs.measure
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.EditText
-import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.Fragment
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleButton
-import app.simple.positional.decorations.views.CustomDialogFragment
-import app.simple.positional.util.ViewUtils.setVisibility
-
-class MeasureAdd : CustomDialogFragment() {
-    private lateinit var name: EditText
-    private lateinit var note: EditText
-    private lateinit var save: DynamicRippleButton
-    private lateinit var cancel: DynamicRippleButton
-
-    private lateinit var callbacks: MeasureAddCallbacks
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_measure_add, container, false)
-
-        name = view.findViewById(R.id.name_edit_text)
-        note = view.findViewById(R.id.note)
-        save = view.findViewById(R.id.save)
-        cancel = view.findViewById(R.id.cancel)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        name.doOnTextChanged { text, _, _, _ ->
-            save.setVisibility(text.toString().isNotEmpty())
-            save.isEnabled = text.toString().isNotEmpty()
-        }
-
-        save.setOnClickListener {
-            val name = name.text.toString()
-            val note = note.text.toString()
-            callbacks.onSave(name, note)
-            dismiss()
-        }
-
-        cancel.setOnClickListener {
-            dismiss()
-        }
-    }
-
-    fun setOnMeasureAddCallbacks(callbacks: MeasureAddCallbacks) {
-        this.callbacks = callbacks
-    }
-
-    companion object {
-        fun newInstance(): MeasureAdd {
-            val args = Bundle()
-            val fragment = MeasureAdd()
-            fragment.arguments = args
-            return fragment
-        }
-
-        fun Fragment.showMeasureAdd(): MeasureAdd {
-            val dialog = newInstance()
-            dialog.show(childFragmentManager, TAG)
-            return dialog
-        }
-
-        interface MeasureAddCallbacks {
-            fun onSave(name: String, note: String)
-        }
-
-        const val TAG = "MeasureAdd"
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/trail/AddMarker.kt
-################################################################################
-package app.simple.positional.dialogs.trail
-
-import android.content.Context
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import androidx.core.widget.doOnTextChanged
-import app.simple.positional.R
-import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.ripple.DynamicRippleButton
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.CustomDialogFragment
-import app.simple.positional.model.TrailPoint
-import app.simple.positional.popups.trail.PopupMarkers
-import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.ParcelUtils.parcelable
-import com.google.android.gms.maps.model.LatLng
-
-class AddMarker : CustomDialogFragment() {
-    private lateinit var nameInputEditText: EditText
-    private lateinit var noteInputEditText: EditText
-    private lateinit var icon: DynamicRippleImageButton
-    private lateinit var save: DynamicRippleButton
-    private lateinit var cancel: DynamicRippleButton
-
-    var onNewTrailAddedSuccessfully: (trailPoint: TrailPoint) -> Unit = {}
-
-    private var latLng: LatLng? = null
-    private var accuracy: Float = -1F
-    private var iconPosition = 0
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_on_trail_add, container, false)
-
-        nameInputEditText = view.findViewById(R.id.name)
-        noteInputEditText = view.findViewById(R.id.note)
-        icon = view.findViewById(R.id.icon)
-        save = view.findViewById(R.id.save)
-        cancel = view.findViewById(R.id.cancel)
-
-        latLng = requireArguments().parcelable("latlng")
-        accuracy = requireArguments().getFloat("accuracy")
-        setMarkerIcon(requireArguments().getInt("icon_position"))
-
-        nameInputEditText.setText(TrailPreferences.getLastMarkerName())
-        noteInputEditText.setText(TrailPreferences.getLastMarkerNote())
-
-        kotlin.runCatching {
-            nameInputEditText.requestFocus()
-            dialog!!.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        }.getOrElse {
-            nameInputEditText.clearFocus()
-        }
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        with(requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager) {
-            @Suppress("DEPRECATION")
-            showSoftInput(nameInputEditText, InputMethodManager.SHOW_FORCED)
-        }
-
-        nameInputEditText.doOnTextChanged { text, _, _, _ ->
-            TrailPreferences.setLastMarkerName(text.toString())
-        }
-
-        noteInputEditText.doOnTextChanged { text, _, _, _ ->
-            TrailPreferences.setLastMarkerNote(text.toString())
-        }
-
-        icon.setOnClickListener {
-            val popup = PopupMarkers(
-                    icon, it.x, it.y)
-
-            popup.setOnPopupMarkersCallbackListener(object : PopupMarkers.Companion.PopupMarkersCallbacks {
-                override fun onMarkerClicked(position: Int) {
-                    setMarkerIcon(position)
-                }
-
-                override fun onMarkerLongClicked(position: Int) {
-                    setMarkerIcon(position)
-                }
-            })
-        }
-
-        save.setOnClickListener {
-            val trails = TrailPoint(
-                latLng!!.latitude,
-                latLng!!.longitude,
-                requireArguments().getLong("time"),
-                iconPosition,
-                if (noteInputEditText.text.toString().isNotEmpty()) {
-                    noteInputEditText.text.toString()
-                } else {
-                    null
-                },
-                if (nameInputEditText.text.toString().isNotEmpty()) {
-                    nameInputEditText.text.toString()
-                } else {
-                    null
-                },
-                accuracy
-            )
-
-            TrailPreferences.setLastMarkerName("")
-            TrailPreferences.setLastMarkerNote("")
-
-            dismiss()
-
-            onNewTrailAddedSuccessfully.invoke(trails)
-        }
-
-        cancel.setOnClickListener {
-            dismiss()
-        }
-    }
-
-    private fun setMarkerIcon(position: Int) {
-        requireArguments().putInt("icon_position", position)
-        iconPosition = position
-        icon.setImageResource(TrailIcons.icons[position])
-    }
-
-    companion object {
-        fun newInstance(position: Int, latLng: LatLng, accuracy: Float): AddMarker {
-            val args = Bundle()
-            args.putInt("icon_position", position)
-            args.putParcelable("latlng", latLng)
-            args.putFloat("accuracy", accuracy)
-            args.putLong("time", System.currentTimeMillis())
-            val fragment = AddMarker()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/trail/AddTrail.kt
-################################################################################
-package app.simple.positional.dialogs.trail
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.EditText
-import androidx.core.widget.doOnTextChanged
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleButton
-import app.simple.positional.decorations.views.CustomDialogFragment
-import app.simple.positional.model.TrailEntry
-import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.TrailNames
-import app.simple.positional.util.ViewUtils.setVisibility
-import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
-
-class AddTrail : CustomDialogFragment() {
-    private lateinit var nameInputEditText: EditText
-    private lateinit var noteInputEditText: EditText
-    private lateinit var save: DynamicRippleButton
-    private lateinit var cancel: DynamicRippleButton
-
-    private val trailsViewModel: TrailsViewModel by viewModels()
-    private var existing: List<String> = emptyList()
-
-    var onNewTrailAddedSuccessfully: (trailEntry: TrailEntry) -> Unit = {}
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_trail_name, container, false)
-
-        nameInputEditText = view.findViewById(R.id.trail_name_edit_text)
-        noteInputEditText = view.findViewById(R.id.note)
-        save = view.findViewById(R.id.save)
-        cancel = view.findViewById(R.id.cancel)
-
-        nameInputEditText.setText(TrailPreferences.getLastTrailName())
-        noteInputEditText.setText(TrailPreferences.getLastTrailNote())
-
-        runCatching {
-            nameInputEditText.requestFocus()
-            dialog!!.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-        }.getOrElse {
-            nameInputEditText.clearFocus()
-        }
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        updateSave()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            trailsViewModel.trails.filterNotNull().collect { trails ->
-                existing = trails.map { it.trailName }
-                updateSave()
-            }
-        }
-
-        nameInputEditText.doOnTextChanged { text, _, _, _ ->
-            updateSave()
-            TrailPreferences.setLastTrailName(text.toString())
-        }
-
-        noteInputEditText.doOnTextChanged { text, _, _, _ ->
-            TrailPreferences.setLastTrailNote(text.toString())
-        }
-
-        save.setOnClickListener {
-            val trail = TrailEntry(
-                System.currentTimeMillis(),
-                nameInputEditText.text.toString().trim(),
-                noteInputEditText.text.toString().trim(),
-            )
-
-            TrailPreferences.setLastTrailNote("")
-            TrailPreferences.setLastTrailName("")
-
-            dismiss()
-
-            onNewTrailAddedSuccessfully.invoke(trail)
-        }
-
-        cancel.setOnClickListener {
-            dismiss()
-        }
-    }
-
-    private fun updateSave() {
-        save.setVisibility(TrailNames.isValid(nameInputEditText.text.toString(), existing))
-    }
-
-    companion object {
-        fun newInstance(): AddTrail {
-            val args = Bundle()
-            val fragment = AddTrail()
             fragment.arguments = args
             return fragment
         }
@@ -11298,16 +10653,17 @@ package app.simple.positional.extensions.fragment
 
 import android.hardware.SensorManager
 import app.simple.positional.R
-import app.simple.positional.dialogs.app.ErrorDialog
 import app.simple.positional.dialogs.compass.CompassCalibration
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MessageDialog
 
 abstract class SensorPanel : ScopedFragment() {
+    protected val dialogs = DialogHost()
     private var calibrationShown = false
 
     protected fun showSensorError() {
-        if (childFragmentManager.findFragmentByTag(ERROR_TAG) == null) {
-            ErrorDialog.newInstance(getString(R.string.sensor_error)).show(childFragmentManager, ERROR_TAG)
-        }
+        val message = getString(R.string.sensor_error)
+        dialogs.show { MessageDialog(message, dialogs::dismiss) }
     }
 
     protected fun showCalibration() {
@@ -11324,7 +10680,6 @@ abstract class SensorPanel : ScopedFragment() {
     }
 
     private companion object {
-        const val ERROR_TAG = "error_dialog"
         const val CALIBRATION_TAG = "calibration_dialog"
     }
 }
@@ -12444,6 +11799,7 @@ public class Measure {
     @Nullable
     ArrayList<MeasurePoint> measurePoints;
 
+    @Ignore
     public Measure(long dateCreated, String name, String note) {
         this.dateCreated = dateCreated;
         this.name = name;
@@ -12486,6 +11842,9 @@ public class Measure {
 
     @NonNull
     public ArrayList<MeasurePoint> getMeasurePoints() {
+        if (measurePoints == null) {
+            measurePoints = new ArrayList<>();
+        }
         return measurePoints;
     }
 
@@ -12736,85 +12095,6 @@ public class TrailPoint {
 
     public void setName(String name) {
         this.name = name;
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/popups/trail/PopupMarkers.kt
-################################################################################
-package app.simple.positional.popups.trail
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.PopupWindow
-import androidx.recyclerview.widget.GridLayoutManager
-import app.simple.positional.R
-import app.simple.positional.adapters.trail.AdapterPopupMarkers
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.views.CustomRecyclerView
-import app.simple.positional.util.ViewUtils
-
-class PopupMarkers(view: View, x: Float, y: Float) : PopupWindow() {
-    private lateinit var popupMarkersCallbacks: PopupMarkersCallbacks
-
-    init {
-        val contentView = LayoutInflater.from(view.context).inflate(R.layout.popup_trail_markers,
-                DynamicCornerLinearLayout(view.context))
-
-        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
-        contentView.clipToOutline = false
-        width = contentView.measuredWidth
-        height = contentView.measuredHeight
-        animationStyle = R.style.PopupAnimation
-        isClippingEnabled = false
-        isFocusable = true
-        elevation = 50F
-        overlapAnchor = true
-
-        ViewUtils.addShadow(contentView)
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            setIsClippedToScreen(false)
-            setIsLaidOutInScreen(true)
-        }
-
-        setContentView(contentView)
-
-        val markers = contentView.findViewById<CustomRecyclerView>(R.id.markers_recycler_view)
-
-        markers.layoutManager =
-            GridLayoutManager(contentView.context, 3, GridLayoutManager.VERTICAL, false)
-
-        val adapter = AdapterPopupMarkers()
-
-        adapter.onIconClicked = {
-            popupMarkersCallbacks.onMarkerClicked(it).also {
-                dismiss()
-            }
-        }
-
-        adapter.onIconLongClicked = {
-            popupMarkersCallbacks.onMarkerLongClicked(it).also {
-                dismiss()
-            }
-        }
-
-        markers.adapter = adapter
-
-        showAsDropDown(view, x.toInt(), y.toInt(), Gravity.NO_GRAVITY)
-        ViewUtils.dimBehind(contentView)
-    }
-
-    fun setOnPopupMarkersCallbackListener(popupMarkersCallbacks: PopupMarkersCallbacks) {
-        this.popupMarkersCallbacks = popupMarkersCallbacks
-    }
-
-    companion object {
-        interface PopupMarkersCallbacks {
-            fun onMarkerClicked(position: Int)
-            fun onMarkerLongClicked(position: Int)
-        }
     }
 }
 
@@ -16190,6 +15470,48 @@ private fun LocationCard(location: Locations, actions: CustomLocationActions) {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/DialogHost.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import app.simple.positional.R
+
+@Stable
+class DialogHost {
+    var content by mutableStateOf<(@Composable () -> Unit)?>(null)
+        private set
+
+    fun show(content: @Composable () -> Unit) {
+        this.content = content
+    }
+
+    fun dismiss() {
+        content = null
+    }
+}
+
+@Composable
+fun MessageDialog(message: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.ok)) } },
+        title = { Text(stringResource(R.string.error), style = MaterialTheme.typography.titleLarge) },
+        text = { Text(message, style = MaterialTheme.typography.bodyMedium) },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/DirectionPanel.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -17260,6 +16582,93 @@ private fun MeasureCard(state: MeasureState) {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/MenuSheet.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+sealed interface MenuItem {
+    data class Toggle(@StringRes val label: Int, val checked: Boolean, val enabled: Boolean = true, val onChange: (Boolean) -> Unit) : MenuItem
+    data class Action(@StringRes val label: Int, val onClick: () -> Unit) : MenuItem
+}
+
+@Stable
+class MenuSheetState {
+    private var builder: (() -> List<MenuItem>)? = null
+    var items by mutableStateOf<List<MenuItem>?>(null)
+        private set
+
+    fun show(build: () -> List<MenuItem>) {
+        builder = build
+        items = build()
+    }
+
+    fun refresh() {
+        items = builder?.invoke()
+    }
+
+    fun dismiss() {
+        builder = null
+        items = null
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MenuSheet(state: MenuSheetState) {
+    val items = state.items ?: return
+    ModalBottomSheet(
+        onDismissRequest = state::dismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 10.dp, vertical = 8.dp)) {
+            items.forEach { item ->
+                when (item) {
+                    is MenuItem.Toggle -> Column(Modifier.alpha(if (item.enabled) 1f else DISABLED)) {
+                        PreferenceItem(
+                            title = stringResource(item.label),
+                            trailing = { Switch(checked = item.checked, onCheckedChange = null, enabled = item.enabled) },
+                        ) {
+                            if (item.enabled) {
+                                item.onChange(!item.checked)
+                                state.refresh()
+                            }
+                        }
+                    }
+                    is MenuItem.Action -> PreferenceItem(title = stringResource(item.label)) {
+                        state.dismiss()
+                        item.onClick()
+                    }
+                }
+            }
+        }
+    }
+}
+
+private const val DISABLED = 0.4f
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/PanelComponents.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -17380,6 +16789,88 @@ fun Modifier.vertical(): Modifier = layout { measurable, _ ->
 }.rotate(-90f)
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/PanelMenus.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import app.simple.positional.R
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.preferences.CompassPreferences
+import app.simple.positional.preferences.DirectionPreferences
+import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.preferences.MeasurePreferences
+import app.simple.positional.preferences.TrailPreferences
+import app.simple.positional.ui.compose.MenuItem.Action
+import app.simple.positional.ui.compose.MenuItem.Toggle
+
+object PanelMenus {
+    fun gps(onPin: () -> Unit, onHelp: () -> Unit): List<MenuItem> = with(GPSPreferences) {
+        val satellite = isSatelliteOn()
+        listOf(
+            Toggle(R.string.labels, isLabelOn()) { setLabelMode(it) },
+            Toggle(R.string.satellite_mode, satellite) { setSatelliteMode(it) },
+            Toggle(R.string.buildings, getShowBuildingsOnMap(), !satellite) { setShowBuildingsOnMap(it) },
+            Toggle(R.string.high_contrast_mode, getHighContrastMap(), !satellite) { setHighContrastMap(it) },
+            Toggle(R.string.traffic, isTrafficShown()) { setTrafficMode(it) },
+            Toggle(R.string.use_media_keys, isUsingVolumeKeys()) { setUseVolumeKeys(it) },
+            Action(R.string.customize_pin, onPin),
+            Action(R.string.help, onHelp),
+        )
+    }
+
+    fun trail(onHelp: () -> Unit): List<MenuItem> = with(TrailPreferences) {
+        val satellite = isSatelliteOn()
+        listOf(
+            Toggle(R.string.labels, isLabelOn()) { setLabelMode(it) },
+            Toggle(R.string.satellite_mode, satellite) { setSatelliteMode(it) },
+            Toggle(R.string.buildings, getShowBuildingsOnMap(), !satellite) { setShowBuildingsOnMap(it) },
+            Toggle(R.string.high_contrast_mode, getHighContrastMap(), !satellite) { setHighContrastMap(it) },
+            Toggle(R.string.auto_center_map, getMapAutoCenter()) { setMapAutoCenter(it) },
+            Toggle(R.string.geodesic_trail, isTrailGeodesic()) { setGeodesic(it) },
+            Action(R.string.help, onHelp),
+        )
+    }
+
+    fun measure(): List<MenuItem> = with(MeasurePreferences) {
+        val satellite = isSatelliteOn()
+        listOf(
+            Toggle(R.string.labels, isLabelOn()) { setLabelMode(it) },
+            Toggle(R.string.satellite_mode, satellite) { setSatelliteMode(it) },
+            Toggle(R.string.buildings, getShowBuildingsOnMap(), !satellite) { setShowBuildingsOnMap(it) },
+            Toggle(R.string.high_contrast_mode, getHighContrastMap(), !satellite) { setHighContrastMap(it) },
+        )
+    }
+
+    fun compass(onBloomSkins: () -> Unit, onPhysicalProperties: () -> Unit): List<MenuItem> = with(CompassPreferences) {
+        listOf(
+            Toggle(R.string.bloom, isFlowerBloomOn()) { setFlowerBloom(it) },
+            Action(R.string.bloom_skins, onBloomSkins),
+            Toggle(R.string.gimbal_lock, isUsingGimbalLock()) { setUseGimbalLock(it) },
+            Toggle(R.string.show_code, getDirectionCode()) { setDirectionCode(it) },
+            Action(R.string.physical_properties, onPhysicalProperties),
+        )
+    }
+
+    fun clock(onNeedles: () -> Unit, onMotionType: () -> Unit): List<MenuItem> = with(ClockPreferences) {
+        listOf(
+            Action(R.string.needles, onNeedles),
+            Action(R.string.motion_type, onMotionType),
+            Toggle(R.string.twenty_four_hours_clock, isClockFace24Hour()) { setClockFaceType(it) },
+            Toggle(R.string.time_format, getDefaultClockTimeFormat()) { setDefaultClockTime(it) },
+            Toggle(R.string.seconds_precision, isUsingSecondsPrecision()) { setUseSecondsPrecision(it) },
+        )
+    }
+
+    fun direction(onTargets: () -> Unit): List<MenuItem> = with(DirectionPreferences) {
+        listOf(
+            Action(R.string.targets, onTargets),
+            Toggle(R.string.gimbal_lock, isGimbalLock()) { setGimbalLock(it) },
+            Toggle(R.string.use_maps_target, isUsingMapsTarget(), GPSPreferences.isTargetMarkerSet()) { setUseMapsTarget(it) },
+        )
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/PositionalTheme.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -17465,12 +16956,16 @@ fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -
     })
 }
 
-fun Fragment.positionalComposeView(content: @Composable (topInset: Dp) -> Unit): ComposeView {
+fun Fragment.positionalComposeView(menu: MenuSheetState? = null, dialog: DialogHost? = null, content: @Composable (topInset: Dp) -> Unit): ComposeView {
     val topInset = StatusBarHeight.getStatusBarHeight(resources)
     return ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
+            PositionalTheme {
+                content(with(LocalDensity.current) { topInset.toDp() })
+                menu?.let { MenuSheet(it) }
+                dialog?.content?.invoke()
+            }
         }
     }
 }
@@ -17836,9 +17331,17 @@ fun ConfirmDialog(title: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
 }
 
 @Composable
-fun NameNoteDialog(title: String, isValid: (String) -> Boolean, onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var note by rememberSaveable { mutableStateOf("") }
+fun NameNoteDialog(
+    title: String,
+    isValid: (String) -> Boolean,
+    onDismiss: () -> Unit,
+    initial: Pair<String, String> = "" to "",
+    onDraft: (String, String) -> Unit = { _, _ -> },
+    extra: (@Composable () -> Unit)? = null,
+    onSave: (String, String) -> Unit,
+) {
+    var name by rememberSaveable { mutableStateOf(initial.first) }
+    var note by rememberSaveable { mutableStateOf(initial.second) }
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -17848,16 +17351,23 @@ fun NameNoteDialog(title: String, isValid: (String) -> Boolean, onDismiss: () ->
         title = { Text(title, style = MaterialTheme.typography.titleLarge) },
         text = {
             Column {
+                extra?.invoke()
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        onDraft(name, note)
+                    },
                     label = { Text(stringResource(R.string.name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = note,
-                    onValueChange = { note = it },
+                    onValueChange = {
+                        note = it
+                        onDraft(name, note)
+                    },
                     label = { Text(stringResource(R.string.note)) },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -18645,6 +18155,8 @@ import android.view.View
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18678,6 +18190,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -18873,6 +18386,24 @@ private fun MarkerPicker(actions: TrailActions, onDismiss: () -> Unit) {
             }
         },
     )
+}
+
+@Composable
+fun MarkerIconRow(selected: Int, onSelect: (Int) -> Unit) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp)) {
+        TrailIcons.icons.forEachIndexed { index, icon ->
+            val highlight = if (index == selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else Color.Transparent
+            Box(
+                Modifier
+                    .size(48.dp)
+                    .background(highlight, CircleShape)
+                    .clickable { onSelect(index) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(painterResource(icon), contentDescription = null, tint = colorResource(R.color.iconColor), modifier = Modifier.size(26.dp))
+            }
+        }
+    }
 }
 
 private const val MARKER_COLUMNS = 3
@@ -19236,7 +18767,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
-import app.simple.positional.dialogs.compass.CompassMenu
+import app.simple.positional.dialogs.compass.CompassBloom
+import app.simple.positional.dialogs.compass.CompassPhysicalProperties
 import app.simple.positional.extensions.fragment.SensorPanel
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
@@ -19246,10 +18778,13 @@ import app.simple.positional.ui.compose.CompassState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
 class Compass : SensorPanel(), HeadingSensor.Listener {
     private val state = CompassState()
+    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var lastReadings = 0L
 
@@ -19261,9 +18796,16 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
-            CompassScreen(state, top, onCalibrate = { showCalibration() }, onMenu = { CompassMenu().show(parentFragmentManager, "compass_menu") })
+        positionalComposeView(menuSheet, dialogs) { top ->
+            CompassScreen(state, top, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
         }
+
+    private fun showMenu() = menuSheet.show {
+        PanelMenus.compass(
+            onBloomSkins = { CompassBloom().show(parentFragmentManager, "compass_bloom") },
+            onPhysicalProperties = { CompassPhysicalProperties().show(parentFragmentManager, "compass_properties") },
+        )
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -19342,7 +18884,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.DirectionsActivity
-import app.simple.positional.dialogs.direction.DirectionMenu
 import app.simple.positional.extensions.fragment.SensorPanel
 import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.preferences.GPSPreferences
@@ -19352,6 +18893,8 @@ import app.simple.positional.ui.compose.DirectionPanel
 import app.simple.positional.ui.compose.DirectionState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension
@@ -19360,6 +18903,7 @@ import com.google.android.gms.maps.model.LatLng
 
 class Direction : SensorPanel(), HeadingSensor.Listener {
     private val state = DirectionState()
+    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var target = LatLng(0.0, 0.0)
     private var location: Location? = null
@@ -19372,15 +18916,17 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
+        positionalComposeView(menuSheet, dialogs) { top ->
             DirectionPanel(
                 state,
                 top,
                 onCalibrate = { showCalibration() },
-                onTarget = { startActivity(Intent(requireActivity(), DirectionsActivity::class.java)) },
-                onMenu = { DirectionMenu.newInstance().show(childFragmentManager, "direction_menu") },
+                onTarget = ::openTargets,
+                onMenu = { menuSheet.show { PanelMenus.direction(::openTargets) } },
             )
         }
+
+    private fun openTargets() = startActivity(Intent(requireActivity(), DirectionsActivity::class.java))
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -19455,10 +19001,8 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.dialogs.app.ErrorDialog
 import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.dialogs.gps.CoordinatesExpansion
-import app.simple.positional.dialogs.gps.GPSMenu
 import app.simple.positional.dialogs.gps.LocationExpansion
 import app.simple.positional.dialogs.gps.PinCustomization
 import app.simple.positional.dialogs.gps.TargetCoordinates
@@ -19479,6 +19023,12 @@ import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
@@ -19499,6 +19049,8 @@ import kotlinx.coroutines.withContext
 
 class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private lateinit var state: GpsState
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private lateinit var maps: Maps
     private lateinit var viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
@@ -19539,7 +19091,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
                 }
             }
         }
-        return positionalComposeView { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
+        return positionalComposeView(menuSheet, dialogs) { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -19548,7 +19100,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         if (state.fullScreen) bottomBar(visible = false)
 
         if (!LocationPrompt.checkGooglePlayServices(requireContext())) {
-            ErrorDialog.newInstance(getString(R.string.play_services_error)).show(childFragmentManager, "error_dialog")
+            val message = getString(R.string.play_services_error)
+            dialogs.show { MessageDialog(message, dialogs::dismiss) }
         }
 
         if (state.custom) {
@@ -19682,11 +19235,15 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         state.pressed = IntOffset(point.x, point.y)
     }
 
-    override fun menu() = GPSMenu().show(parentFragmentManager, "gps_menu")
+    override fun menu() = menuSheet.show {
+        PanelMenus.gps(onPin = { PinCustomization.newInstance().show(parentFragmentManager, "pin_customization") }) {
+            WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
+        }
+    }
 
     override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
 
-    override fun pinCustomization() = PinCustomization.newInstance(true).show(parentFragmentManager, "pin_customization")
+    override fun pinCustomization() = PinCustomization.newInstance().show(parentFragmentManager, "pin_customization")
 
     override fun locate(close: Boolean) {
         if (getLocationStatus(requireContext())) {
@@ -19854,7 +19411,7 @@ class Level : SensorPanel() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
+        positionalComposeView(dialog = dialogs) { top ->
             LevelScreen({ tilt }, square, top) { LevelPreferences.setSquareStyle(!square) }
         }
 
@@ -19889,9 +19446,6 @@ import app.simple.positional.R
 import app.simple.positional.activities.subactivity.MeasuresActivity
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.decorations.measure.MeasureMaps
-import app.simple.positional.dialogs.measure.MeasureAdd
-import app.simple.positional.dialogs.measure.MeasureAdd.Companion.showMeasureAdd
-import app.simple.positional.dialogs.measure.MeasureMenu.Companion.showMeasureMenu
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
@@ -19904,6 +19458,10 @@ import app.simple.positional.ui.compose.MeasureActions
 import app.simple.positional.ui.compose.MeasureScreen
 import app.simple.positional.ui.compose.MeasureState
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
@@ -19916,6 +19474,8 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private lateinit var locationViewModel: LocationViewModel
     private lateinit var measureViewModel: MeasureViewModel
     private lateinit var maps: MeasureMaps
@@ -19937,7 +19497,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
             onCreate(null)
             setOnMapsCallbackListener(this@Measure)
         }
-        return positionalComposeView { top -> MeasureScreen(state, maps, top, this) }
+        return positionalComposeView(menuSheet, dialogs) { top -> MeasureScreen(state, maps, top, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -19999,7 +19559,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     private fun showSummary(measure: MeasureModel) {
-        val points = measure.measurePoints.orEmpty()
+        val points = measure.measurePoints
         state.hasPoints = points.isNotEmpty()
         state.summary = listOf(
             InfoRow(getString(R.string.total), points.size.toString()),
@@ -20027,16 +19587,18 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     override fun addMeasure() {
-        showMeasureAdd().setOnMeasureAddCallbacks(object : MeasureAdd.Companion.MeasureAddCallbacks {
-            override fun onSave(name: String, note: String) = measureViewModel.addMeasure(name, note)
-        })
+        val title = getString(R.string.create_new)
+        dialogs.show {
+            NameNoteDialog(title, isValid = { it.isNotEmpty() }, onDismiss = dialogs::dismiss) { name, note ->
+                measureViewModel.addMeasure(name, note)
+                dialogs.dismiss()
+            }
+        }
     }
 
     override fun measures() = startActivity(Intent(requireContext(), MeasuresActivity::class.java))
 
-    override fun menu() {
-        showMeasureMenu()
-    }
+    override fun menu() = menuSheet.show { PanelMenus.measure() }
 
     override fun locate(close: Boolean) {
         if (!getLocationStatus(requireContext())) {
@@ -20282,7 +19844,7 @@ import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.dialogs.app.LocationParameters
-import app.simple.positional.dialogs.clock.ClockMenu
+import app.simple.positional.dialogs.clock.ClockNeedle
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
@@ -20291,6 +19853,11 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.ClockScreen
 import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.Choice
+import app.simple.positional.ui.compose.ChoiceDialog
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -20300,6 +19867,8 @@ import java.time.ZoneId
 
 class Time : ScopedFragment() {
     private val state = ClockState()
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private lateinit var report: ClockReport
     private var latitude = 0.0
     private var longitude = 0.0
@@ -20313,15 +19882,33 @@ class Time : ScopedFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
+        positionalComposeView(menuSheet, dialogs) { top ->
             ClockScreen(
                 state,
                 top,
                 onTimezone = { startActivity(Intent(requireActivity(), TimezonePickerActivity::class.java)) },
-                onMenu = { ClockMenu.newInstance().show(parentFragmentManager, ClockMenu.TAG) },
+                onMenu = ::showMenu,
                 onLocation = { LocationParameters.newInstance().show(parentFragmentManager, LocationParameters.TAG) },
             )
         }
+
+    private fun showMenu() = menuSheet.show {
+        PanelMenus.clock(
+            onNeedles = { ClockNeedle.newInstance().show(parentFragmentManager, "clock_needle") },
+            onMotionType = ::showMotionTypes,
+        )
+    }
+
+    private fun showMotionTypes() {
+        val title = getString(R.string.motion_type)
+        val choices = motionTypes.map { (value, label) -> Choice(value, getString(label)) }
+        dialogs.show {
+            ChoiceDialog(title, choices, ClockPreferences.getMovementType(), onDismiss = dialogs::dismiss) {
+                ClockPreferences.setMovementType(it)
+                dialogs.dismiss()
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -20385,6 +19972,13 @@ class Time : ScopedFragment() {
 
     companion object {
         private const val SKY_INTERVAL = 60_000L
+        private val motionTypes = listOf(
+            "smooth" to R.string.motion_type_smooth,
+            "tick" to R.string.motion_type_tick,
+            "oscillate" to R.string.tick_oscillate,
+            "tick_smooth" to R.string.tick_smooth,
+            "mechanical" to R.string.mechanical,
+        )
         private const val SKY_MIN_INTERVAL = 10_000L
         private val clockKeys = setOf(
             ClockPreferences.clockNeedleMovementType,
@@ -20417,6 +20011,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -20428,14 +20027,12 @@ import app.simple.positional.activities.subactivity.TrailsViewerActivity
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.trails.TrailMaps
-import app.simple.positional.dialogs.trail.AddMarker
-import app.simple.positional.dialogs.trail.AddTrail
-import app.simple.positional.dialogs.trail.TrailMenu
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.model.TrailEntry
 import app.simple.positional.model.TrailPoint
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
@@ -20445,6 +20042,13 @@ import app.simple.positional.ui.compose.TrailPointItem
 import app.simple.positional.ui.compose.TrailScreen
 import app.simple.positional.ui.compose.TrailState
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MarkerIconRow
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
@@ -20452,6 +20056,7 @@ import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.util.TimeFormatter.formatDate
+import app.simple.positional.util.TrailNames
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
@@ -20461,6 +20066,8 @@ import kotlinx.coroutines.launch
 
 class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     private val state = TrailState()
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private val trailData: TrailDataViewModel by viewModels()
     private val trails: TrailsViewModel by viewModels()
     private lateinit var locationViewModel: LocationViewModel
@@ -20483,7 +20090,7 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
             onCreate(null)
             setOnMapsCallbackListener(this@Trail)
         }
-        return positionalComposeView { top -> TrailScreen(state, maps, top, isLandscapeOrientation, this) }
+        return positionalComposeView(menuSheet, dialogs) { top -> TrailScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -20582,12 +20189,28 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     override fun trails() = startActivity(Intent(requireContext(), TrailsViewerActivity::class.java))
 
     override fun addTrail() {
-        AddTrail.newInstance().also { dialog ->
-            dialog.onNewTrailAddedSuccessfully = { trails.addTrail(it) }
-        }.show(childFragmentManager, "add_trail")
+        val title = getString(R.string.enter_trail_name)
+        dialogs.show {
+            val existing by trails.trails.collectAsState()
+            NameNoteDialog(
+                title,
+                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().map { it.trailName }) },
+                onDismiss = dialogs::dismiss,
+                initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
+                onDraft = { name, note ->
+                    TrailPreferences.setLastTrailName(name)
+                    TrailPreferences.setLastTrailNote(note)
+                },
+            ) { name, note ->
+                trails.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
+                TrailPreferences.setLastTrailName("")
+                TrailPreferences.setLastTrailNote("")
+                dialogs.dismiss()
+            }
+        }
     }
 
-    override fun menu() = TrailMenu.newInstance().show(childFragmentManager, "trail_menu")
+    override fun menu() = menuSheet.show { PanelMenus.trail { WebPageViewerActivity.open(requireContext(), HtmlPage.TRAIL_HELP) } }
 
     override fun locate(close: Boolean) {
         if (!getLocationStatus(requireContext())) {
@@ -20629,9 +20252,31 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
         if (quick) {
             save(TrailPoint(latitude, longitude, System.currentTimeMillis(), icon, null, null, accuracy))
         } else {
-            AddMarker.newInstance(icon, LatLng(latitude, longitude), accuracy).also { dialog ->
-                dialog.onNewTrailAddedSuccessfully = ::save
-            }.show(childFragmentManager, "add_marker")
+            showMarkerDialog(icon, latitude, longitude, accuracy)
+        }
+    }
+
+    private fun showMarkerDialog(icon: Int, latitude: Double, longitude: Double, accuracy: Float) {
+        val title = getString(R.string.enter_marker_name)
+        val time = System.currentTimeMillis()
+        dialogs.show {
+            var selected by rememberSaveable { mutableIntStateOf(icon) }
+            NameNoteDialog(
+                title,
+                isValid = { true },
+                onDismiss = dialogs::dismiss,
+                initial = TrailPreferences.getLastMarkerName() to TrailPreferences.getLastMarkerNote(),
+                onDraft = { name, note ->
+                    TrailPreferences.setLastMarkerName(name)
+                    TrailPreferences.setLastMarkerNote(note)
+                },
+                extra = { MarkerIconRow(selected) { selected = it } },
+            ) { name, note ->
+                save(TrailPoint(latitude, longitude, time, selected, note.ifEmpty { null }, name.ifEmpty { null }, accuracy))
+                TrailPreferences.setLastMarkerName("")
+                TrailPreferences.setLastMarkerNote("")
+                dialogs.dismiss()
+            }
         }
     }
 
@@ -23002,7 +22647,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             measure.value?.let {
-                it.measurePoints?.add(measurePoint)
+                it.measurePoints.add(measurePoint)
                 dao.updateMeasure(it)
                 onAdded(it)
             }
@@ -23013,7 +22658,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         viewModelScope.launch(Dispatchers.IO) {
             val current = measure.value
             if (measurePoint != null && current != null) {
-                current.measurePoints?.remove(measurePoint)
+                current.measurePoints.remove(measurePoint)
                 dao.updateMeasure(current)
                 onRemoved(current)
             }
@@ -23893,37 +23538,6 @@ class TwilightWidget : AppWidgetProvider() {
 </set>
 
 ################################################################################
-# FILE: app/src/main/res/anim/marker_grid_anim.xml
-################################################################################
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/overshoot"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale="0"
-        android:fromYScale="0"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/marker_grid_controller.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
-    android:animation="@anim/marker_grid_anim"
-    android:animationOrder="normal"
-    android:delay="15%" />
-
-################################################################################
 # FILE: app/src/main/res/layout-land/dialog_pin_customization.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -24657,167 +24271,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/adapter_popup_markers.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.ripple.DynamicRippleImageButton xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/marker"
-    android:layout_width="match_parent"
-    android:layout_margin="5dp"
-    android:tint="@color/iconColor"
-    android:layout_height="50dp" />
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_clock_motion_type.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/toolbarBackground"
-        android:elevation="40dp"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:translationZ="20dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:text="@string/motion_type_smooth"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.views.CustomRadioButton
-                android:id="@+id/motion_smooth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/iconColor" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:text="@string/motion_type_tick"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.views.CustomRadioButton
-                android:id="@+id/motion_tick"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/iconColor" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:text="@string/tick_oscillate"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.views.CustomRadioButton
-                android:id="@+id/motion_tick_oscillate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/iconColor" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:text="@string/tick_smooth"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.views.CustomRadioButton
-                android:id="@+id/motion_tick_smooth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/iconColor" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="@dimen/options_item_padding">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="@dimen/options_text_margin_start"
-                android:layout_weight="1"
-                android:fontFamily="@font/regular"
-                android:text="@string/mechanical"
-                android:textColor="@color/textPrimary"
-                android:textSize="@dimen/options_item_text_size" />
-
-            <app.simple.positional.decorations.views.CustomRadioButton
-                android:id="@+id/motion_mechanical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/iconColor" />
-
-        </LinearLayout>
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/dialog_clock_needle_skins.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -25222,271 +24675,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/dialog_error.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:maxHeight="@dimen/dialog_height">
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:backgroundTint="@color/mainBackground"
-        android:elevation="@dimen/app_views_elevation"
-        android:orientation="vertical"
-        android:padding="@dimen/options_container_horizontal_padding">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:fontFamily="@font/medium"
-            android:text="@string/error"
-            android:textColor="?attr/colorAppAccent"
-            android:textSize="@dimen/popup_text_size" />
-
-        <TextView
-            android:id="@+id/print_error"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:background="@android:color/transparent"
-            android:fontFamily="@font/regular"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/options_item_text_size" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_measure_add.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/popup_padding"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/name"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/name_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="text"
-            android:maxLength="40"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/popup_padding"
-            android:fontFamily="@font/medium"
-            android:text="@string/note"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:gravity="top"
-            android:importantForAutofill="no"
-            android:maxHeight="300dp"
-            android:minHeight="100dp"
-            android:padding="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor,TextFields" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:animateLayoutChanges="true"
-        android:orientation="horizontal">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/bold"
-            android:text="@string/button_cancel"
-            android:textColor="?attr/colorAppAccent" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/bold"
-            android:text="@string/save"
-            android:textColor="?attr/colorAppAccent"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_on_trail_add.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/popup_padding"
-        android:backgroundTint="@color/editTextBackground"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/enter_marker_name"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:importantForAutofill="no"
-            android:maxLength="60"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor,TextFields" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/popup_padding"
-            android:fontFamily="@font/medium"
-            android:text="@string/note"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:gravity="top"
-            android:importantForAutofill="no"
-            android:maxHeight="300dp"
-            android:minHeight="100dp"
-            android:padding="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor,TextFields" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
-        android:orientation="horizontal">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-            android:id="@+id/icon"
-            android:layout_width="@dimen/app_button_size"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_gravity="center_vertical" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:text="@string/button_cancel"
-            android:textColor="@color/textPrimary"
-            tools:ignore="RelativeOverlap" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save"
-            android:textColor="@color/textPrimary" />
-
-    </LinearLayout>
-
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/dialog_panel_switcher.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -25845,114 +25033,6 @@ class TwilightWidget : AppWidgetProvider() {
             android:layout_gravity="center_vertical"
             android:text="@string/save"
             android:textColor="@color/textPrimary"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_trail_name.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/popup_padding"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/enter_trail_name"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/trail_name_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="text"
-            android:maxLength="40"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/popup_padding"
-            android:fontFamily="@font/medium"
-            android:text="@string/note"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:gravity="top"
-            android:importantForAutofill="no"
-            android:maxHeight="300dp"
-            android:minHeight="100dp"
-            android:padding="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor,TextFields" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:animateLayoutChanges="true"
-        android:orientation="horizontal">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/bold"
-            android:text="@string/button_cancel"
-            android:textColor="?attr/colorAppAccent" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="@font/bold"
-            android:text="@string/save"
-            android:textColor="?attr/colorAppAccent"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -26371,37 +25451,6 @@ class TwilightWidget : AppWidgetProvider() {
         tools:ignore="ContentDescription,MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/popup_trail_markers.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:clipChildren="true"
-    android:clipToPadding="true"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding"
-    tools:parentTag="app.simple.positional.decorations.popup.PopupLinearLayout">
-
-    <app.simple.positional.decorations.views.CustomRecyclerView
-        android:id="@+id/markers_recycler_view"
-        android:layout_width="200dp"
-        android:layout_height="300dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        app:statusBarPaddingRequired="false"
-        app:isFastScrollerRequired="false"
-        android:layoutAnimation="@anim/marker_grid_controller"
-        android:requiresFadingEdge="vertical"
-        android:fadingEdge="vertical"
-        android:fadingEdgeLength="25dp" />
-
-</merge>
 
 ################################################################################
 # FILE: app/src/main/res/layout/switch_view.xml
@@ -27114,7 +26163,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="options_item_text_size">12sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">350dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
@@ -27179,7 +26227,6 @@ class TwilightWidget : AppWidgetProvider() {
     <color name="dividerColor">#BDBDBD</color>
     <color name="toolbarBackground">#191919</color>
     <color name="rippleColor">#515151</color>
-    <color name="editTextBackground">#3C3C3C</color>
 
     <color name="iconRegular">#808080</color>
     <color name="indicator">#3A3A3A</color>
@@ -27254,7 +26301,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
@@ -27322,7 +26368,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
@@ -27422,7 +26467,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">10dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">400dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
@@ -27476,7 +26520,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
@@ -27562,7 +26605,6 @@ class TwilightWidget : AppWidgetProvider() {
     <color name="dividerColor">#BDBDBD</color>
     <color name="toolbarBackground">#FFFFFF</color>
     <color name="rippleColor">#9FDADADA</color>
-    <color name="editTextBackground">#F6F6F6</color>
 
     <color name="iconRegular">#9A9A9A</color>
     <color name="indicator">#F3F3F3</color>
@@ -27675,7 +26717,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
@@ -28146,12 +27187,6 @@ class TwilightWidget : AppWidgetProvider() {
         <item name="android:fontFamily">@font/light</item>
         <item name="android:textColor">@color/textPrimary</item>
     </style>
-
-    <style name="PopupAnimation">
-        <item name="android:windowEnterAnimation">@anim/dialog_in</item>
-        <item name="android:windowExitAnimation">@anim/dialog_out</item>
-    </style>
-
 </resources>
 
 ################################################################################
@@ -29037,6 +28072,27 @@ class CoordinateInputTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/DialogHostTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class DialogHostTest {
+    @Test
+    fun showAndDismiss() {
+        val host = DialogHost()
+        assertNull(host.content)
+        host.show {}
+        assertNotNull(host.content)
+        host.dismiss()
+        assertNull(host.content)
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/ui/compose/MapSearchQueryTest.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -29056,6 +28112,39 @@ class MapSearchQueryTest {
     fun queriesAreTrimmed() {
         assertEquals("Paris", MapSearchQuery.normalize("  Paris "))
         assertEquals("abc", MapSearchQuery.normalize("abc"))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/MenuSheetStateTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import app.simple.positional.R
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class MenuSheetStateTest {
+    @Test
+    fun refreshRebuildsFromBuilder() {
+        var checked = false
+        val state = MenuSheetState()
+        state.show { listOf(MenuItem.Toggle(R.string.labels, checked) { checked = it }) }
+        val toggle = state.items!!.single() as MenuItem.Toggle
+        toggle.onChange(!toggle.checked)
+        state.refresh()
+        assertEquals(true, (state.items!!.single() as MenuItem.Toggle).checked)
+    }
+
+    @Test
+    fun dismissClearsItems() {
+        val state = MenuSheetState()
+        state.show { listOf(MenuItem.Action(R.string.help) {}) }
+        state.dismiss()
+        assertNull(state.items)
+        state.refresh()
+        assertNull(state.items)
     }
 }
 
