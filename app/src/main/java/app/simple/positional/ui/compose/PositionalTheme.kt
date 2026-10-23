@@ -81,12 +81,16 @@ fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -
     })
 }
 
-fun Fragment.positionalComposeView(content: @Composable (topInset: Dp) -> Unit): ComposeView {
+fun Fragment.positionalComposeView(menu: MenuSheetState? = null, dialog: DialogHost? = null, content: @Composable (topInset: Dp) -> Unit): ComposeView {
     val topInset = StatusBarHeight.getStatusBarHeight(resources)
     return ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
+            PositionalTheme {
+                content(with(LocalDensity.current) { topInset.toDp() })
+                menu?.let { MenuSheet(it) }
+                dialog?.content?.invoke()
+            }
         }
     }
 }

@@ -12,9 +12,6 @@ import app.simple.positional.R
 import app.simple.positional.activities.subactivity.MeasuresActivity
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.decorations.measure.MeasureMaps
-import app.simple.positional.dialogs.measure.MeasureAdd
-import app.simple.positional.dialogs.measure.MeasureAdd.Companion.showMeasureAdd
-import app.simple.positional.dialogs.measure.MeasureMenu.Companion.showMeasureMenu
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
@@ -27,6 +24,10 @@ import app.simple.positional.ui.compose.MeasureActions
 import app.simple.positional.ui.compose.MeasureScreen
 import app.simple.positional.ui.compose.MeasureState
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
@@ -39,6 +40,8 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private lateinit var locationViewModel: LocationViewModel
     private lateinit var measureViewModel: MeasureViewModel
     private lateinit var maps: MeasureMaps
@@ -60,7 +63,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
             onCreate(null)
             setOnMapsCallbackListener(this@Measure)
         }
-        return positionalComposeView { top -> MeasureScreen(state, maps, top, this) }
+        return positionalComposeView(menuSheet, dialogs) { top -> MeasureScreen(state, maps, top, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -122,7 +125,7 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     private fun showSummary(measure: MeasureModel) {
-        val points = measure.measurePoints.orEmpty()
+        val points = measure.measurePoints
         state.hasPoints = points.isNotEmpty()
         state.summary = listOf(
             InfoRow(getString(R.string.total), points.size.toString()),
@@ -150,16 +153,18 @@ class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
     }
 
     override fun addMeasure() {
-        showMeasureAdd().setOnMeasureAddCallbacks(object : MeasureAdd.Companion.MeasureAddCallbacks {
-            override fun onSave(name: String, note: String) = measureViewModel.addMeasure(name, note)
-        })
+        val title = getString(R.string.create_new)
+        dialogs.show {
+            NameNoteDialog(title, isValid = { it.isNotEmpty() }, onDismiss = dialogs::dismiss) { name, note ->
+                measureViewModel.addMeasure(name, note)
+                dialogs.dismiss()
+            }
+        }
     }
 
     override fun measures() = startActivity(Intent(requireContext(), MeasuresActivity::class.java))
 
-    override fun menu() {
-        showMeasureMenu()
-    }
+    override fun menu() = menuSheet.show { PanelMenus.measure() }
 
     override fun locate(close: Boolean) {
         if (!getLocationStatus(requireContext())) {

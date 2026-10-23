@@ -4,6 +4,8 @@ import android.view.View
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -232,6 +235,24 @@ private fun MarkerPicker(actions: TrailActions, onDismiss: () -> Unit) {
             }
         },
     )
+}
+
+@Composable
+fun MarkerIconRow(selected: Int, onSelect: (Int) -> Unit) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(bottom = 8.dp)) {
+        TrailIcons.icons.forEachIndexed { index, icon ->
+            val highlight = if (index == selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f) else Color.Transparent
+            Box(
+                Modifier
+                    .size(48.dp)
+                    .background(highlight, CircleShape)
+                    .clickable { onSelect(index) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(painterResource(icon), contentDescription = null, tint = colorResource(R.color.iconColor), modifier = Modifier.size(26.dp))
+            }
+        }
+    }
 }
 
 private const val MARKER_COLUMNS = 3

@@ -54,7 +54,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             measure.value?.let {
-                it.measurePoints?.add(measurePoint)
+                it.measurePoints.add(measurePoint)
                 dao.updateMeasure(it)
                 onAdded(it)
             }
@@ -65,7 +65,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         viewModelScope.launch(Dispatchers.IO) {
             val current = measure.value
             if (measurePoint != null && current != null) {
-                current.measurePoints?.remove(measurePoint)
+                current.measurePoints.remove(measurePoint)
                 dao.updateMeasure(current)
                 onRemoved(current)
             }

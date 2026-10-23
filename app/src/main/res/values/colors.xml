@@ -10,7 +10,6 @@
     <color name="dividerColor">#BDBDBD</color>
     <color name="toolbarBackground">#FFFFFF</color>
     <color name="rippleColor">#9FDADADA</color>
-    <color name="editTextBackground">#F6F6F6</color>
 
     <color name="iconRegular">#9A9A9A</color>
     <color name="indicator">#F3F3F3</color>

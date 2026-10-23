@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import app.simple.positional.R;
 import app.simple.positional.constants.LocationPins;
 import app.simple.positional.model.BottomBar;
-import app.simple.positional.ui.panels.Measure;
 
 public class BottomBarItems {
     public static final String CLOCK = "clock";
@@ -15,7 +14,7 @@ public class BottomBarItems {
     public static final String DIRECTION = "direction";
     public static final String LOCATION = "location";
     public static final String TRAIL = "trail";
-    public static final String MEASURE = Measure.TAG;
+    public static final String MEASURE = "Measure";
     public static final String LEVEL = "level";
     public static final String SETTINGS = "settings";
 

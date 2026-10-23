@@ -19,10 +19,8 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.dialogs.app.ErrorDialog
 import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.dialogs.gps.CoordinatesExpansion
-import app.simple.positional.dialogs.gps.GPSMenu
 import app.simple.positional.dialogs.gps.LocationExpansion
 import app.simple.positional.dialogs.gps.PinCustomization
 import app.simple.positional.dialogs.gps.TargetCoordinates
@@ -43,6 +41,12 @@ import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
@@ -63,6 +67,8 @@ import kotlinx.coroutines.withContext
 
 class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private lateinit var state: GpsState
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private lateinit var maps: Maps
     private lateinit var viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
@@ -103,7 +109,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
                 }
             }
         }
-        return positionalComposeView { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
+        return positionalComposeView(menuSheet, dialogs) { top -> GpsScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -112,7 +118,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         if (state.fullScreen) bottomBar(visible = false)
 
         if (!LocationPrompt.checkGooglePlayServices(requireContext())) {
-            ErrorDialog.newInstance(getString(R.string.play_services_error)).show(childFragmentManager, "error_dialog")
+            val message = getString(R.string.play_services_error)
+            dialogs.show { MessageDialog(message, dialogs::dismiss) }
         }
 
         if (state.custom) {
@@ -246,11 +253,15 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         state.pressed = IntOffset(point.x, point.y)
     }
 
-    override fun menu() = GPSMenu().show(parentFragmentManager, "gps_menu")
+    override fun menu() = menuSheet.show {
+        PanelMenus.gps(onPin = { PinCustomization.newInstance().show(parentFragmentManager, "pin_customization") }) {
+            WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
+        }
+    }
 
     override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
 
-    override fun pinCustomization() = PinCustomization.newInstance(true).show(parentFragmentManager, "pin_customization")
+    override fun pinCustomization() = PinCustomization.newInstance().show(parentFragmentManager, "pin_customization")
 
     override fun locate(close: Boolean) {
         if (getLocationStatus(requireContext())) {

@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.DirectionsActivity
-import app.simple.positional.dialogs.direction.DirectionMenu
 import app.simple.positional.extensions.fragment.SensorPanel
 import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.preferences.GPSPreferences
@@ -20,6 +19,8 @@ import app.simple.positional.ui.compose.DirectionPanel
 import app.simple.positional.ui.compose.DirectionState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension
@@ -28,6 +29,7 @@ import com.google.android.gms.maps.model.LatLng
 
 class Direction : SensorPanel(), HeadingSensor.Listener {
     private val state = DirectionState()
+    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var target = LatLng(0.0, 0.0)
     private var location: Location? = null
@@ -40,15 +42,17 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
+        positionalComposeView(menuSheet, dialogs) { top ->
             DirectionPanel(
                 state,
                 top,
                 onCalibrate = { showCalibration() },
-                onTarget = { startActivity(Intent(requireActivity(), DirectionsActivity::class.java)) },
-                onMenu = { DirectionMenu.newInstance().show(childFragmentManager, "direction_menu") },
+                onTarget = ::openTargets,
+                onMenu = { menuSheet.show { PanelMenus.direction(::openTargets) } },
             )
         }
+
+    private fun openTargets() = startActivity(Intent(requireActivity(), DirectionsActivity::class.java))
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

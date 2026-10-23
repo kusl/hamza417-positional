@@ -485,7 +485,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     fun createMeasurePolylines(measure: Measure?) {
         try {
             measurePoints.clear()
-            measurePoints.addAll(measure!!.measurePoints!!)
+            measurePoints.addAll(measure!!.measurePoints)
             removeAllPolylines()
             updatePolylines(measurePoints)
         } catch (e: NullPointerException) {

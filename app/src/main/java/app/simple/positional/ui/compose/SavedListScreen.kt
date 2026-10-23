@@ -136,9 +136,17 @@ fun ConfirmDialog(title: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
 }
 
 @Composable
-fun NameNoteDialog(title: String, isValid: (String) -> Boolean, onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var note by rememberSaveable { mutableStateOf("") }
+fun NameNoteDialog(
+    title: String,
+    isValid: (String) -> Boolean,
+    onDismiss: () -> Unit,
+    initial: Pair<String, String> = "" to "",
+    onDraft: (String, String) -> Unit = { _, _ -> },
+    extra: (@Composable () -> Unit)? = null,
+    onSave: (String, String) -> Unit,
+) {
+    var name by rememberSaveable { mutableStateOf(initial.first) }
+    var note by rememberSaveable { mutableStateOf(initial.second) }
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
@@ -148,16 +156,23 @@ fun NameNoteDialog(title: String, isValid: (String) -> Boolean, onDismiss: () ->
         title = { Text(title, style = MaterialTheme.typography.titleLarge) },
         text = {
             Column {
+                extra?.invoke()
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        onDraft(name, note)
+                    },
                     label = { Text(stringResource(R.string.name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = note,
-                    onValueChange = { note = it },
+                    onValueChange = {
+                        note = it
+                        onDraft(name, note)
+                    },
                     label = { Text(stringResource(R.string.note)) },
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),

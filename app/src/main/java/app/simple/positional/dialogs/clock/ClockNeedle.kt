@@ -52,13 +52,6 @@ class ClockNeedle : CustomBottomSheetDialogFragment() {
         })
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (!requireActivity().isDestroyed) {
-            ClockMenu.newInstance().show(parentFragmentManager, "clock_menu")
-        }
-    }
-
     companion object {
         fun newInstance(): ClockNeedle {
             val args = Bundle()

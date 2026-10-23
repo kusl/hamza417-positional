@@ -2,16 +2,17 @@ package app.simple.positional.extensions.fragment
 
 import android.hardware.SensorManager
 import app.simple.positional.R
-import app.simple.positional.dialogs.app.ErrorDialog
 import app.simple.positional.dialogs.compass.CompassCalibration
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MessageDialog
 
 abstract class SensorPanel : ScopedFragment() {
+    protected val dialogs = DialogHost()
     private var calibrationShown = false
 
     protected fun showSensorError() {
-        if (childFragmentManager.findFragmentByTag(ERROR_TAG) == null) {
-            ErrorDialog.newInstance(getString(R.string.sensor_error)).show(childFragmentManager, ERROR_TAG)
-        }
+        val message = getString(R.string.sensor_error)
+        dialogs.show { MessageDialog(message, dialogs::dismiss) }
     }
 
     protected fun showCalibration() {
@@ -28,7 +29,6 @@ abstract class SensorPanel : ScopedFragment() {
     }
 
     private companion object {
-        const val ERROR_TAG = "error_dialog"
         const val CALIBRATION_TAG = "calibration_dialog"
     }
 }

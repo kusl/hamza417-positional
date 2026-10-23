@@ -46,10 +46,4 @@
         <item name="android:fontFamily">@font/light</item>
         <item name="android:textColor">@color/textPrimary</item>
     </style>
-
-    <style name="PopupAnimation">
-        <item name="android:windowEnterAnimation">@anim/dialog_in</item>
-        <item name="android:windowExitAnimation">@anim/dialog_out</item>
-    </style>
-
 </resources>

@@ -39,7 +39,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -58,7 +58,10 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 7 | Level, compass, clock and direction panels in Compose; settle-aware needle physics, lifecycle-bound sensors, sun diagram on `Canvas` | Done |
 | 8a | GPS map panel in Compose: toolbar, map tools, info sheet, speedometer; shared map lifecycle observer; address lookups only after moving 25 m | Done |
 | 8b | Trail and measure map panels in Compose on a shared map scaffold; trail points observed through Room `Flow` with one open database per trail; popup windows, tool views and the timeline library removed | Done |
-| 8c | Remaining dialogs, single activity with Navigation Compose, drop AppCompat themes | Next |
+| 8c | Panel menus (GPS, trail, measure, compass, clock, direction) as one Compose bottom sheet built from `PanelMenus`; sub dialogs no longer reopen menus while being destroyed | Done |
+| 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
+| 8e | Remaining dialogs (location parameters, coordinates and location details, pins, target coordinates, calibration, skins, panels, permission) in Compose | Next |
+| 8f | Single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 

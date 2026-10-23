@@ -17,7 +17,6 @@
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">10dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="options_sub_item_padding">10dp</dimen>
     <dimen name="dialog_height">400dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 

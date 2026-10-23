@@ -28,6 +28,7 @@ public class Measure {
     @Nullable
     ArrayList<MeasurePoint> measurePoints;
 
+    @Ignore
     public Measure(long dateCreated, String name, String note) {
         this.dateCreated = dateCreated;
         this.name = name;
@@ -70,6 +71,9 @@ public class Measure {
 
     @NonNull
     public ArrayList<MeasurePoint> getMeasurePoints() {
+        if (measurePoints == null) {
+            measurePoints = new ArrayList<>();
+        }
         return measurePoints;
     }
 

@@ -28,7 +28,7 @@ class Level : SensorPanel() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
+        positionalComposeView(dialog = dialogs) { top ->
             LevelScreen({ tilt }, square, top) { LevelPreferences.setSquareStyle(!square) }
         }
 

@@ -16,7 +16,7 @@ import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.dialogs.app.LocationParameters
-import app.simple.positional.dialogs.clock.ClockMenu
+import app.simple.positional.dialogs.clock.ClockNeedle
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
@@ -25,6 +25,11 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.ClockScreen
 import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.Choice
+import app.simple.positional.ui.compose.ChoiceDialog
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -34,6 +39,8 @@ import java.time.ZoneId
 
 class Time : ScopedFragment() {
     private val state = ClockState()
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private lateinit var report: ClockReport
     private var latitude = 0.0
     private var longitude = 0.0
@@ -47,15 +54,33 @@ class Time : ScopedFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
+        positionalComposeView(menuSheet, dialogs) { top ->
             ClockScreen(
                 state,
                 top,
                 onTimezone = { startActivity(Intent(requireActivity(), TimezonePickerActivity::class.java)) },
-                onMenu = { ClockMenu.newInstance().show(parentFragmentManager, ClockMenu.TAG) },
+                onMenu = ::showMenu,
                 onLocation = { LocationParameters.newInstance().show(parentFragmentManager, LocationParameters.TAG) },
             )
         }
+
+    private fun showMenu() = menuSheet.show {
+        PanelMenus.clock(
+            onNeedles = { ClockNeedle.newInstance().show(parentFragmentManager, "clock_needle") },
+            onMotionType = ::showMotionTypes,
+        )
+    }
+
+    private fun showMotionTypes() {
+        val title = getString(R.string.motion_type)
+        val choices = motionTypes.map { (value, label) -> Choice(value, getString(label)) }
+        dialogs.show {
+            ChoiceDialog(title, choices, ClockPreferences.getMovementType(), onDismiss = dialogs::dismiss) {
+                ClockPreferences.setMovementType(it)
+                dialogs.dismiss()
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -119,6 +144,13 @@ class Time : ScopedFragment() {
 
     companion object {
         private const val SKY_INTERVAL = 60_000L
+        private val motionTypes = listOf(
+            "smooth" to R.string.motion_type_smooth,
+            "tick" to R.string.motion_type_tick,
+            "oscillate" to R.string.tick_oscillate,
+            "tick_smooth" to R.string.tick_smooth,
+            "mechanical" to R.string.mechanical,
+        )
         private const val SKY_MIN_INTERVAL = 10_000L
         private val clockKeys = setOf(
             ClockPreferences.clockNeedleMovementType,

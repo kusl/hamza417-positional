@@ -10,6 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -21,14 +26,12 @@ import app.simple.positional.activities.subactivity.TrailsViewerActivity
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.trails.TrailMaps
-import app.simple.positional.dialogs.trail.AddMarker
-import app.simple.positional.dialogs.trail.AddTrail
-import app.simple.positional.dialogs.trail.TrailMenu
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.model.TrailEntry
 import app.simple.positional.model.TrailPoint
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
@@ -38,6 +41,13 @@ import app.simple.positional.ui.compose.TrailPointItem
 import app.simple.positional.ui.compose.TrailScreen
 import app.simple.positional.ui.compose.TrailState
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.MarkerIconRow
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
@@ -45,6 +55,7 @@ import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.util.TimeFormatter.formatDate
+import app.simple.positional.util.TrailNames
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
@@ -54,6 +65,8 @@ import kotlinx.coroutines.launch
 
 class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     private val state = TrailState()
+    private val menuSheet = MenuSheetState()
+    private val dialogs = DialogHost()
     private val trailData: TrailDataViewModel by viewModels()
     private val trails: TrailsViewModel by viewModels()
     private lateinit var locationViewModel: LocationViewModel
@@ -76,7 +89,7 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
             onCreate(null)
             setOnMapsCallbackListener(this@Trail)
         }
-        return positionalComposeView { top -> TrailScreen(state, maps, top, isLandscapeOrientation, this) }
+        return positionalComposeView(menuSheet, dialogs) { top -> TrailScreen(state, maps, top, isLandscapeOrientation, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -175,12 +188,28 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
     override fun trails() = startActivity(Intent(requireContext(), TrailsViewerActivity::class.java))
 
     override fun addTrail() {
-        AddTrail.newInstance().also { dialog ->
-            dialog.onNewTrailAddedSuccessfully = { trails.addTrail(it) }
-        }.show(childFragmentManager, "add_trail")
+        val title = getString(R.string.enter_trail_name)
+        dialogs.show {
+            val existing by trails.trails.collectAsState()
+            NameNoteDialog(
+                title,
+                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().map { it.trailName }) },
+                onDismiss = dialogs::dismiss,
+                initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
+                onDraft = { name, note ->
+                    TrailPreferences.setLastTrailName(name)
+                    TrailPreferences.setLastTrailNote(note)
+                },
+            ) { name, note ->
+                trails.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
+                TrailPreferences.setLastTrailName("")
+                TrailPreferences.setLastTrailNote("")
+                dialogs.dismiss()
+            }
+        }
     }
 
-    override fun menu() = TrailMenu.newInstance().show(childFragmentManager, "trail_menu")
+    override fun menu() = menuSheet.show { PanelMenus.trail { WebPageViewerActivity.open(requireContext(), HtmlPage.TRAIL_HELP) } }
 
     override fun locate(close: Boolean) {
         if (!getLocationStatus(requireContext())) {
@@ -222,9 +251,31 @@ class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
         if (quick) {
             save(TrailPoint(latitude, longitude, System.currentTimeMillis(), icon, null, null, accuracy))
         } else {
-            AddMarker.newInstance(icon, LatLng(latitude, longitude), accuracy).also { dialog ->
-                dialog.onNewTrailAddedSuccessfully = ::save
-            }.show(childFragmentManager, "add_marker")
+            showMarkerDialog(icon, latitude, longitude, accuracy)
+        }
+    }
+
+    private fun showMarkerDialog(icon: Int, latitude: Double, longitude: Double, accuracy: Float) {
+        val title = getString(R.string.enter_marker_name)
+        val time = System.currentTimeMillis()
+        dialogs.show {
+            var selected by rememberSaveable { mutableIntStateOf(icon) }
+            NameNoteDialog(
+                title,
+                isValid = { true },
+                onDismiss = dialogs::dismiss,
+                initial = TrailPreferences.getLastMarkerName() to TrailPreferences.getLastMarkerNote(),
+                onDraft = { name, note ->
+                    TrailPreferences.setLastMarkerName(name)
+                    TrailPreferences.setLastMarkerNote(note)
+                },
+                extra = { MarkerIconRow(selected) { selected = it } },
+            ) { name, note ->
+                save(TrailPoint(latitude, longitude, time, selected, note.ifEmpty { null }, name.ifEmpty { null }, accuracy))
+                TrailPreferences.setLastMarkerName("")
+                TrailPreferences.setLastMarkerNote("")
+                dialogs.dismiss()
+            }
         }
     }
 

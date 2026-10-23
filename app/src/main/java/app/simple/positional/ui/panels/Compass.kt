@@ -12,7 +12,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
-import app.simple.positional.dialogs.compass.CompassMenu
+import app.simple.positional.dialogs.compass.CompassBloom
+import app.simple.positional.dialogs.compass.CompassPhysicalProperties
 import app.simple.positional.extensions.fragment.SensorPanel
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
@@ -22,10 +23,13 @@ import app.simple.positional.ui.compose.CompassState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
 class Compass : SensorPanel(), HeadingSensor.Listener {
     private val state = CompassState()
+    private val menuSheet = MenuSheetState()
     private lateinit var sensor: HeadingSensor
     private var lastReadings = 0L
 
@@ -37,9 +41,16 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        positionalComposeView { top ->
-            CompassScreen(state, top, onCalibrate = { showCalibration() }, onMenu = { CompassMenu().show(parentFragmentManager, "compass_menu") })
+        positionalComposeView(menuSheet, dialogs) { top ->
+            CompassScreen(state, top, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
         }
+
+    private fun showMenu() = menuSheet.show {
+        PanelMenus.compass(
+            onBloomSkins = { CompassBloom().show(parentFragmentManager, "compass_bloom") },
+            onPhysicalProperties = { CompassPhysicalProperties().show(parentFragmentManager, "compass_properties") },
+        )
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
