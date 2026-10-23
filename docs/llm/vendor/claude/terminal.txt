@@ -568,6 +568,7 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.907s
 user	0m0.381s
 sys	0m0.527s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/extensions/fragment/ScopedFragment.kt app/src/main/java/app/simple/positional/extensions/fragment/SensorPanel.kt
+rm 'app/src/main/java/app/simple/positional/extensions/fragment/ScopedFragment.kt'
+rm 'app/src/main/java/app/simple/positional/extensions/fragment/SensorPanel.kt'
 kushal@fedora:~/src/kotlin/positional$ 
-
-
