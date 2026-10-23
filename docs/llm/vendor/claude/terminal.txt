@@ -28,4 +28,15 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.816s
 user	0m0.379s
 sys	0m0.458s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/activities/subactivity/AccentColorsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/ArtsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/CustomLocationsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/DirectionsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/MapSearchActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/MeasuresActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/TimezonePickerActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/TrailsViewerActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/WebPageViewerActivity.kt app/src/main/java/app/simple/positional/util/StatusBarHeight.java
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/AccentColorsActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/ArtsActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/CustomLocationsActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/DirectionsActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/MapSearchActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/MeasuresActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/TimezonePickerActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/TrailsViewerActivity.kt'
+rm 'app/src/main/java/app/simple/positional/activities/subactivity/WebPageViewerActivity.kt'
+rm 'app/src/main/java/app/simple/positional/util/StatusBarHeight.java'
 kushal@fedora:~/src/kotlin/positional$ 

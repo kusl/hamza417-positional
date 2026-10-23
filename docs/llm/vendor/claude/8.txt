@@ -2294,3 +2294,207 @@ For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/comman
 11 actionable tasks: 1 executed, 10 from cache
 Error: Process completed with exit code 1.
 
+Claude
+/
+Ran 32 commands, shared files
+Phase 8i is in positional-phase8i.tar.gz; extract it at the repo root. It contains only changed and new files. The build from your last push (8h) passed CI, but I can’t compile here, so the next CI run is the real check for 8i.
+
+I split this phase again. AppCompat and the old view libraries are gone. Moving the sub screens into one activity with Navigation Compose is now phase 8j.
+
+What changed:
+
+Base activity: all activities now build on the plain Android ComponentActivity. The base activity sets the accent theme, turns on edge-to-edge display and keeps content clear of the navigation bar.
+Day/night theme: this was AppCompat’s job before. A new NightMode object now applies it when each screen opens and reads your existing saved setting, with the same options as before:
+always day
+always night
+follow the system
+follow battery saver
+by time of day (06:00–18:00 counts as day)
+Changing the theme in Settings now restarts the screen to apply it.
+Language: the language override no longer modifies the app’s shared configuration object; it works on a copy.
+Splash screen: now a Compose screen. It keeps the random day or night background, the gradient pin, the app name, and the touch glow. It opens the app after 2 seconds, or 1 second after you let go.
+Clock widget setup screen: now a Compose screen with the same two grant buttons.
+Themes: they now build on the platform Material themes. The accent colours (including Material You) carry over, and the two extra Android 8.1 theme copies are gone.
+Dependencies:
+
+Removed:
+appcompat
+Material Components
+fragment-ktx
+constraintlayout
+legacy-support-v4
+Added explicitly: each of these used to come in indirectly through a removed library.
+activity-ktx 1.10.1
+lifecycle-livedata-ktx
+localbroadcastmanager
+I picked 1.10.1 because I know that version exists. Dependabot will raise it later.
+Removed code and resources:
+
+The splash fragment and the old night-mode helper.
+The ripple button and the two ripple/animation helper classes.
+The padding-aware layout, four layouts, four animations, and the touch-indicator icon.
+Unused dimensions and the ripple colour.
+The colour animation helpers that nothing used.
+Tests:
+
+New NightModeTest.
+SettingsLabelsTest now uses the new theme constants.
+README: updated. 8j is next.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/decorations/padding/PaddingAwareLinearLayout.java app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleButton.java app/src/main/java/app/simple/positional/decorations/ripple/Utils.java app/src/main/java/app/simple/positional/decorations/utils/Utils.java app/src/main/java/app/simple/positional/ui/launcher/SplashScreen.kt app/src/main/java/app/simple/positional/util/ThemeSetter.kt app/src/main/res/anim/dialog_in.xml app/src/main/res/anim/dialog_out.xml app/src/main/res/anim/image_in.xml app/src/main/res/anim/launcher_icon.xml app/src/main/res/drawable/ic_touch_indicator.xml app/src/main/res/layout-land/fragment_launcher.xml app/src/main/res/layout/activity_clock_widget.xml app/src/main/res/layout/activity_launcher.xml app/src/main/res/layout/fragment_launcher.xml app/src/main/res/values-night-v27/styles.xml app/src/main/res/values-v27/styles.xml
+
+Positional phase8i.tar
+GZ 
+dump_1.txt
+dump_1.txt
+TXT
+github action is failing. 
+please fix this and any other defect as well and continue with next phase 
+
+19s
+Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+Task :app:preBuild UP-TO-DATE
+Task :app:preDebugBuild UP-TO-DATE
+Task :app:generateDebugBuildConfig FROM-CACHE
+Task :app:generateDebugResValues FROM-CACHE
+Task :app:generateDebugResources FROM-CACHE
+Task :app:packageDebugResources FROM-CACHE
+Task :app:processDebugNavigationResources FROM-CACHE
+Task :app:parseDebugLocalResources FROM-CACHE
+Task :app:generateDebugRFile FROM-CACHE
+Task :app:kspDebugKotlin FROM-CACHE
+Task :app:compileDebugKotlin FROM-CACHE
+Task :app:javaPreCompileDebug FROM-CACHE
+
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:7: error: package androidx.interpolator.view.animation does not exist
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                           ^
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:6: error: package androidx.interpolator.view.animation does not exist
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                           ^
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:26: error: cannot find symbol
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                              ^
+  symbol:   class LinearOutSlowInInterpolator
+  location: class CircleUtils
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:61: error: cannot find symbol
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                              ^
+  symbol:   class LinearOutSlowInInterpolator
+  location: class MarkerUtils
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java:46: error: cannot find symbol
+        if (context.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)) {
+                                                      ^
+  symbol:   variable actionBarSize
+  location: class attr
+Note: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+5 errors
+
+Task :app:compileDebugJavaWithJavac FAILED
+
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792784651829.json
+
+FAILURE: Build failed with an exception.
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+
+What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac' (registered by plugin 'com.android.internal.application').
+
+Compilation failed; see the compiler output below.
+
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:7: error: package androidx.interpolator.view.animation does not exist
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                           ^
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:6: error: package androidx.interpolator.view.animation does not exist
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                           ^
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:26: error: cannot find symbol
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                              ^
+  symbol:   class LinearOutSlowInInterpolator
+  location: class CircleUtils
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:61: error: cannot find symbol
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                              ^
+  symbol:   class LinearOutSlowInInterpolator
+  location: class MarkerUtils
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java:46: error: cannot find symbol
+        if (context.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)) {
+                                                      ^
+  symbol:   variable actionBarSize
+  location: class attr
+Note: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+5 errors
+
+Try:
+
+Check your code and dependencies to fix the compilation error(s)
+Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 17s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+11 actionable tasks: 1 executed, 10 from cache
+Error: Process completed with exit code 1.
+
+Ran 19 commands, created a file, shared files
+positional-phase8j.tar.gz has the build fix and phase 8j. It contains only changed and new files; extract it at the repo root. I still can’t compile here, so CI is the real check.
+
+Build fix. Removing the support libraries in 8i also removed two things that Java files still used:
+
+CircleUtils and MarkerUtils used LinearOutSlowInInterpolator from the removed library. They now use the platform’s PathInterpolator(0f, 0f, 0.2f, 1f), which is the same curve.
+StatusBarHeight.java referred to an AppCompat-only attribute in an unused method. It is now a small Kotlin file with just the status-bar height function the screens use.
+Phase 8j: one activity for everything.
+
+Sub screens: accent colours, arts, time zones, saved measures, trails, directions, custom locations, map search and help pages are now Navigation Compose screens inside MainActivity. Back works as before.
+Map search results: the GPS target dialog, the directions screen and the custom-locations screen all receive the chosen location from map search directly. The old activity-result passing is gone.
+Panels pause while a sub screen is open. The current panel stays alive, so a GPS target dialog you started is still there when you come back. Its sensors and map are paused until you return.
+Map reuse fix: a map panel’s map view is detached from its old container before being shown again. Without this, returning from a sub screen would have crashed with “child already has a parent”.
+Removed: nine sub-screen activities and their manifest entries.
+Dependencies added:
+navigation-compose 2.9.0, chosen as a version I know exists; Dependabot can raise it later.
+lifecycle-runtime-compose and lifecycle-viewmodel-compose.
+Behaviour change: sub screens no longer keep their map or web page position across rotation. Each one reloads.
+New test: RoutesTest.
+README: updated, including the project layout. Phase 8 is complete; phase 9, the widgets on Glance, is next. The OpenStreetMap fallback is phase 10, as you asked.
+
+Delete these:
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/subactivity/AccentColorsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/ArtsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/CustomLocationsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/DirectionsActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/MapSearchActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/MeasuresActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/TimezonePickerActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/TrailsViewerActivity.kt app/src/main/java/app/simple/positional/activities/subactivity/WebPageViewerActivity.kt app/src/main/java/app/simple/positional/util/StatusBarHeight.java
+
+Positional phase8j.tar
+GZ 
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+
+
+Claude finished the response
+
+47
+59
+
+
+
+
+
+
+
+
+
