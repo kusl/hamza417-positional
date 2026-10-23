@@ -10,4 +10,3 @@ captures/
 local.properties
 *.keystore
 *.jks
-docs/llm/
