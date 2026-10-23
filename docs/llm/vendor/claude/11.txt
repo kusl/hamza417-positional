@@ -198,3 +198,103 @@ Claude finished the response
 
 
 
+Claude
+/
+Good news is the build passes, the apk publishes, I am able to install it, and the app works. 
+however, I see a visual regression in the time screen 
+the headline Moon Illunimation is in two lines on my oneplus nord N30 5G in portrait 
+which is fine but the M of Moon and I of illumination touch 
+I suspect this is a systemic problem  
+please fix all regressions and defects and continue with the next phase
+
+Ran 49 commands, read memory
+The heading bug was systemic. Any Text without an explicit style inherited Material 3’s bodyLarge, which has a fixed 24sp line height. Your Nord uses the default 40sp heading size, so wrapped lines got 24sp of spacing and collided. bodyLarge now uses the font’s natural line height, which fixes every oversized label in the app, not just Moon Illumination.
+
+I couldn’t build or run this here because the Android SDK repositories aren’t reachable from my sandbox. CI is the first real check, and the clock widgets haven’t been seen on a device yet.
+
+Download: /mnt/user-data/outputs/positional-phase9c.tar.gz (changed and added files only; extract at the repo root)
+
+Delete:
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+Phase 9c: clock widgets without the per-second foreground service
+
+The widgets now use the system AnalogClock, and the launcher ticks the hands, including the seconds hand.
+The app draws the hands once in your chosen needle skin and accent colour. The sweeping trail is built into the second hand.
+The date is a TextClock, so it rolls over at midnight on its own.
+The day/night icon refreshes from an alarm at 6:00 and 19:00 that doesn’t wake the phone. It now uses the same 6–18 daytime range as the clock panel.
+Widgets refresh when you leave the app, so skin and accent changes show up.
+Upgraded installs also cancel the old one-minute alarm.
+The foreground service, notification, battery-optimisation setup screen and their 6 strings in all 14 languages are gone. So are the FOREGROUND_SERVICE, FOREGROUND_SERVICE_SPECIAL_USE and POST_NOTIFICATIONS permissions, which nothing else used.
+The 3x3 widget was using the 4x4 layout; that’s fixed.
+A new DayNightTest covers the day/night boundaries.
+Unused helper functions in BitmapHelper and PermissionUtils were removed, and the accent-to-theme lookup moved to AccentThemes, shared by activities and widgets.
+Trade-offs to know about:
+
+Android 12+ only: The clock widgets need Android 12 or newer, because that’s when the system clock gained custom hands. On older Android they are hidden; everything else still supports Android 7+.
+12-hour face: The clock widgets always use the 12-hour face, because the system clock can’t turn an hour hand on a 24-hour dial.
+The README is updated: Phase 9c is done, and Phase 10 (the OpenStreetMap fallback) is next.
+
+Please continue
+
+Ran 30 commands
+Continuing phase 10 work on top of unpushed local changes.
+Working out whether map tiles can render without a valid key.
+Comparing mapping libraries for performance and caching support.
+Identifying the correct library identifier and package name.
+Weighing rendering engine compatibility across device generations.
+Identifying the app from its user agent string.
+Checking how Kotlin exposes CameraUpdateFactory's static-style methods.
+Working out offline cache configuration in Kotlin's map SDK.
+Building a map source selection option.
+Setting up map dependencies and build configuration.
+Updating credits to remove outdated library mentions.
+Untangling dependencies between configuration and preference classes.
+please continue
+
+Ran 22 commands, updated memory
+Phase 10a is done: the GPS panel can now show OpenStreetMap instead of Google Maps. Nothing here has been compiled or run, because the Android SDK and Maven repositories aren’t reachable from my sandbox. CI is the first real check.
+
+The tarball builds on top of master and also contains the Phase 9c changes from my last reply, since your repo doesn’t have them yet. Extracting it again is harmless if you’ve already applied 9c.
+
+Download: /mnt/user-data/outputs/positional-phase10a.tar.gz (52 changed or added files; extract at the repo root)
+
+Delete (same list as 9c; skip if you already ran it):
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+What’s new
+
+Map source setting: Settings now has Automatic, Google Maps and OpenStreetMap. Automatic picks OpenStreetMap when the build has no MAPS_API_KEY and Google Maps otherwise.
+No automatic quota fallback: Google’s map library gives no signal when a key is rejected or over quota, so the app can’t switch on its own. If the Google map stays blank, pick OpenStreetMap.
+Map library: The OpenStreetMap view uses MapLibre Native 13.7.1 (OpenGL build), which is actively maintained. I didn’t use osmdroid because it was archived in 2024.
+Tile cache: Map tiles are cached on the device, up to 128 MB.
+Night mode: Map tiles are darkened in night mode.
+Same GPS features: The pin, accuracy circle, target line, follow mode, and compass and bearing rotation all work on OpenStreetMap.
+Shared code: The GPS panel now talks to a GpsMap interface with a Google and an OpenStreetMap version, and the pin drawing is shared between them.
+Tests: New unit tests cover the map source choice, the map style, and the accuracy circle radius.
+Trade-offs
+
+Bigger APK: MapLibre adds native code. To limit the size, the APK now includes only arm64-v8a, armeabi-v7a and x86_64, so 32-bit x86 emulators can no longer install it.
+Google-only options: Satellite, labels, traffic, buildings and high contrast do nothing on OpenStreetMap.
+Not migrated yet: The trail and measure panels and map search still use Google Maps. They are Phase 10b and 10c.
+Docs updated
+
+The README phase table now shows 10a done and 10b next.
+PRIVACY.md, the privacy, terms, internet-use and credits pages now mention that OpenStreetMap’s tile servers see your IP address and the area you view.
+The credits page also had two stale entries (Timeline-View and Material Components, both removed in earlier phases); those are fixed.
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+16
+66
+
+
+
+
