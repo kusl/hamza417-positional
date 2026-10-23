@@ -598,3 +598,143 @@ Claude finished the response
 
 
 
+github action is still failing 
+
+Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+  ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+  shell: /usr/bin/bash -e {0}
+  env:
+    JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+    JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.12-1/x64
+    MAVEN_ARGS: -ntp
+    GRADLE_ACTION_ID: gradle/actions/setup-gradle
+    GRADLE_USER_HOME: /home/runner/.gradle
+    GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+    DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+    DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+    GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:generateDebugRFile FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+> Task :app:mapDebugSourceSetPaths
+> Task :app:checkDebugAarMetadata
+> Task :app:compileDebugNavigationResources FROM-CACHE
+> Task :app:mergeDebugResources FROM-CACHE
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug FROM-CACHE
+> Task :app:processDebugMainManifest FROM-CACHE
+> Task :app:processDebugManifest FROM-CACHE
+> Task :app:processDebugManifestForPackage FROM-CACHE
+> Task :app:processDebugResources FROM-CACHE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest FROM-CACHE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:generateReleaseBuildConfig FROM-CACHE
+> Task :app:generateReleaseResValues FROM-CACHE
+> Task :app:generateReleaseResources FROM-CACHE
+> Task :app:packageReleaseResources FROM-CACHE
+> Task :app:processReleaseNavigationResources FROM-CACHE
+> Task :app:parseReleaseLocalResources FROM-CACHE
+> Task :app:generateReleaseRFile FROM-CACHE
+> Task :app:javaPreCompileRelease FROM-CACHE
+> Task :app:extractProguardFiles
+> Task :app:extractDeepLinksRelease FROM-CACHE
+> Task :app:processReleaseMainManifest FROM-CACHE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets FROM-CACHE
+> Task :app:generateDebugGlobalSynthetics FROM-CACHE
+> Task :app:l8DexDesugarLibDebug FROM-CACHE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugNativeLibs
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :app:kspReleaseKotlin
+> Task :app:kspDebugKotlin
+
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:103:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+> Task :app:compileReleaseKotlin
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:165:29 Assignment type mismatch: actual type is 'ArrayList<MeasurePoint>', but 'ArrayList<MeasurePoint?>?' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:215:29 Assignment type mismatch: actual type is 'ArrayList<MeasurePoint>', but 'ArrayList<MeasurePoint?>?' was expected.
+
+> Task :app:compileDebugKotlin FAILED
+
+> Task :app:compileReleaseKotlin FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792788572434.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+48 actionable tasks: 16 executed, 32 from cache
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:103:60 Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:165:29 Assignment type mismatch: actual type is 'ArrayList<MeasurePoint>', but 'ArrayList<MeasurePoint?>?' was expected.
+e: file:///home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:215:29 Assignment type mismatch: actual type is 'ArrayList<MeasurePoint>', but 'ArrayList<MeasurePoint?>?' was expected.
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin' (registered by plugin 'com.android.internal.application').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Kotlin compiler: ARGUMENT_TYPE_MISMATCH
+       Kotlin compiler error
+         Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+         Location: /home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/debug/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileReleaseKotlin' (registered by plugin 'com.android.internal.application').
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Kotlin compiler: ARGUMENT_TYPE_MISMATCH
+       Kotlin compiler error
+         Argument type mismatch: actual type is 'ArrayList<MeasurePoint?>', but 'ArrayList<MeasurePoint>' was expected.
+         Location: /home/runner/work/hamza417-positional/hamza417-positional/app/build/generated/ksp/release/kotlin/app/simple/positional/database/dao/MeasureDao_Impl.kt:65
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 52s
+Error: Process completed with exit code 1.
+1s
+12s
+0s
+0s
+0s
