@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -138,11 +137,6 @@ public class FastScrollerBuilder {
             throw new UnsupportedOperationException("Please use "
                     + FastScrollScrollView.class.getSimpleName() + " instead of "
                     + ScrollView.class.getSimpleName() + "for fast scroll");
-        }
-        else if (mView instanceof WebView) {
-            throw new UnsupportedOperationException("Please use "
-                    + FastScrollWebView.class.getSimpleName() + " instead of "
-                    + WebView.class.getSimpleName() + "for fast scroll");
         }
         else {
             throw new UnsupportedOperationException(mView.getClass().getSimpleName()

@@ -24,6 +24,7 @@ import app.simple.positional.activities.subactivity.AccentColorsActivity
 import app.simple.positional.activities.subactivity.ArtsActivity
 import app.simple.positional.activities.subactivity.CustomLocationsActivity
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PositionalTheme
@@ -153,7 +154,7 @@ class Settings : ScopedFragment(), SettingsActions {
     }
 
     override fun openLegal(page: Int) {
-        startActivity(Intent(requireContext(), WebPageViewerActivity::class.java).putExtra("source", getString(page)))
+        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(requireContext(), it) }
     }
 
     override fun openReleases() = openUrl("$REPOSITORY_URL/releases")

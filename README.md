@@ -39,7 +39,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette and coordinate input.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog and address search.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -53,8 +53,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 2 | Fork-owned legal pages, upstream contacts and unused resources removed | Done |
 | 3 | Settings dialogs (theme, icon, corners, units, coordinates, provider, language) | Done |
 | 4 | Accent colors and custom locations screens, Room `Flow` for saved places | Done |
-| 5 | Arts, web page viewer, map search and target address screens | Next |
-| 6 | List screens (trails, measures, directions, time zones) | Planned |
+| 5 | Arts pager, help and legal page viewer, map search with debounced geocoding; unused target address screen removed | Done |
+| 6 | List screens (trails, measures, directions, time zones) | Next |
 | 7 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
 | 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
@@ -98,6 +98,7 @@ Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper a
 ```
 app/src/main/java/app/simple/positional/
   activities/   entry points and sub screens
+  constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
   ui/           panel fragments
   decorations/  legacy custom views, map wrappers, fast scroller

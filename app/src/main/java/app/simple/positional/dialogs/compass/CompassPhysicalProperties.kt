@@ -2,7 +2,6 @@ package app.simple.positional.dialogs.compass
 
 import android.animation.ObjectAnimator
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.decorations.switchview.SwitchView
 import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.decorations.views.PhysicalRotationImageView
@@ -100,9 +100,7 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
         }
 
         help.setOnClickListener {
-            val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-            intent.putExtra("source", getString(R.string.physical_properties))
-            startActivity(intent)
+            WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES)
         }
 
         toggleContainer.setOnClickListener {

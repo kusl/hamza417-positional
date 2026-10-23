@@ -327,16 +327,13 @@
         <activity
             android:name=".activities.subactivity.ArtsActivity"
             android:colorMode="wideColorGamut"
-            android:exported="true"
+            android:exported="false"
             tools:targetApi="o" />
 
         <activity
-            android:name=".activities.subactivity.TargetAddressActivity"
-            android:exported="true" />
-
-        <activity
             android:name=".activities.subactivity.MapSearchActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".activities.subactivity.MeasuresActivity"

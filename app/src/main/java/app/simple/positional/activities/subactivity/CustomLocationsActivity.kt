@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import app.simple.positional.R
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.model.Locations
 import app.simple.positional.preferences.MainPreferences
@@ -75,9 +76,7 @@ class CustomLocationsActivity : BaseActivity(), CustomLocationActions {
 
     override fun deleteAll() = viewModel.deleteAll()
 
-    override fun help() {
-        startActivity(Intent(this, WebPageViewerActivity::class.java).putExtra("source", "Custom Coordinates Help"))
-    }
+    override fun help() = WebPageViewerActivity.open(this, HtmlPage.CUSTOM_COORDINATES_HELP)
 
     override fun failed() = Toast.makeText(this, R.string.failed, Toast.LENGTH_SHORT).show()
 

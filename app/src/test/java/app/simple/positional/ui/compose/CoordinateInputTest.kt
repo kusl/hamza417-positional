@@ -38,4 +38,11 @@ class CoordinateInputTest {
         assertEquals("1.0", form.latitude)
         assertEquals("2.0", form.longitude)
     }
+
+    @Test
+    fun formatsToSixDecimals() {
+        assertEquals("48.858372", CoordinateInput.format(48.8583721))
+        assertEquals("-2.5", CoordinateInput.format(-2.5))
+        assertEquals("0.0", CoordinateInput.format(0.0))
+    }
 }

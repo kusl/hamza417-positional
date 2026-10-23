@@ -16,3 +16,88 @@ Docs updated alongside code changes
 Low verbosity, no code comments
 I can't emphasize this enough
 NO CODE COMMENTS 
+
+Claude
+/
+please continue with phase 5
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this enough
+NO CODE COMMENTS
+
+Ran 41 commands, read memory, and 2 more tools
+Let me read the Phase 5 target files.
+Removing unused activity and fragment files from the project.
+Fixing a map lifecycle leak in the migration to Compose.
+Minimizing file changes while keeping the string contract intact.
+Reviewing security settings across several Android app components.
+Removing unused view model and related resource files.
+Fixing a custom WebView's constructor to accept an attribute set.
+Checking coordinate rounding for potential integer overflow.
+Checking Kotlin syntax details in the Android code.
+Untangling how Kotlin lambdas satisfy a functional interface parameter.
+Building out test coverage for coordinates, pages, and queries.
+Pure ints, good. Tests:
+Rounding a decimal value to fit precision requirements.
+Now the manifest.
+Scanning project resources for unused files and references.
+Finding unused references to removed layout files.
+Removing unused overscroll files and related resources.
+Checking build configuration for minimum SDK API compatibility.
+Updating the README with phase status and test details.
+Presented file
+Phase 5 is in positional-phase5.tar.gz. It contains only the changed and new files, laid out from the repo root. Extract it from the repo root with tar xzf positional-phase5.tar.gz. The last CI run on Phase 4 (2bae2c6d) passed.
+
+What changed
+
+Arts is now a Compose VerticalPager built on a tested ArtsCatalog. The current page is still saved, and the old ViewPager2 adapter and layouts are gone.
+Help and legal pages:
+A new HtmlPage enum replaces the old practice of passing localized title strings around.
+Every caller now uses WebPageViewerActivity.open(context, page). The callers are Settings, the GPS menu, the trail menu, compass physical properties and custom locations.
+The viewer is a Compose screen that hosts CustomWebView and keeps its scroll state when the screen rotates.
+null.html, FastScrollWebView, HtmlViewer and OverScrollBehavior are removed.
+Map search is now a Compose screen with a MapSearchViewModel.
+Address lookup waits 800 ms after typing stops (debounce) and cancels any older lookup still running. It uses the non-blocking Geocoder API on Android 13 and newer, and a background thread below that.
+The map’s lifecycle is now handled properly. The old screen never paused or destroyed it.
+Coordinates update when the map stops moving rather than on every frame, which saves battery. Tapping the map moves it to that point.
+The coordinates are checked before the result is returned.
+The keyboard now resizes the screen (adjustResize).
+Target address was never opened from anywhere, so the activity, fragment, adapter, view model, layouts and manifest entry are deleted.
+Manifest: ArtsActivity is no longer exported.
+Tests:
+New HtmlPageTest checks that every page has an HTML file and every HTML file has a page.
+New ArtsCatalogTest and MapSearchQueryTest.
+CoordinateInputTest has a new formatting case.
+README: Phase 5 is marked done and Phase 6 next.
+I couldn’t compile this here because the sandbox can’t reach Google’s Maven repository. The CI run is the real check.
+
+Delete:
+
+sh
+git rm app/src/main/assets/html/null.html app/src/main/java/app/simple/positional/activities/subactivity/TargetAddressActivity.kt app/src/main/java/app/simple/positional/adapters/location/AdapterTargetAddress.kt app/src/main/java/app/simple/positional/adapters/miscellaneous/ArtsAdapter.kt app/src/main/java/app/simple/positional/behaviors/OverScrollBehavior.kt app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollWebView.java app/src/main/java/app/simple/positional/decorations/views/SearchMap.kt app/src/main/java/app/simple/positional/ui/subpanels/HtmlViewer.kt app/src/main/java/app/simple/positional/ui/subpanels/TargetAddress.kt app/src/main/java/app/simple/positional/viewmodels/viewmodel/AddressViewModel.kt app/src/main/res/drawable/ic_crosshair_dec.xml app/src/main/res/layout-land/activity_map_search.xml app/src/main/res/layout/activity_arts.xml app/src/main/res/layout/activity_map_search.xml app/src/main/res/layout/adapter_address.xml app/src/main/res/layout/adapter_arts.xml app/src/main/res/layout/fragment_target_address_search.xml app/src/main/res/layout/fragment_webpage.xml
+Next up is Phase 6: the trails, measures, directions and time zones list screens.
+
+
+Positional phase5.tar
+GZ 
+
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+85
+34

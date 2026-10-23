@@ -1,124 +1,110 @@
 package app.simple.positional.activities.subactivity
 
-import android.location.Geocoder
-import android.os.Build
+import android.content.Intent
+import android.content.res.Configuration
+import android.location.Address
 import android.os.Bundle
-import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.TextView
-import androidx.core.widget.doOnTextChanged
+import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.SearchMap
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.math.MathExtensions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlin.coroutines.cancellation.CancellationException
+import app.simple.positional.ui.compose.CoordinateInput
+import app.simple.positional.ui.compose.MapSearchActions
+import app.simple.positional.ui.compose.MapSearchScreen
+import app.simple.positional.ui.compose.PositionalTheme
+import app.simple.positional.viewmodels.viewmodel.MapSearchViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 
-class MapSearchActivity : BaseActivity() {
-    private lateinit var map: SearchMap
-    private lateinit var latitude: TextView
-    private lateinit var longitude: TextView
-    private lateinit var address: AutoCompleteTextView
-    private lateinit var confirm: DynamicRippleImageButton
-    private lateinit var cancel: DynamicRippleImageButton
-
-    private var job: Job? = null
+class MapSearchActivity : BaseActivity(), MapSearchActions {
+    private val viewModel: MapSearchViewModel by viewModels()
+    private lateinit var mapView: MapView
+    private var map: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_search)
-
-        map = findViewById(R.id.map)
-        latitude = findViewById(R.id.latitude)
-        longitude = findViewById(R.id.longitude)
-        address = findViewById(R.id.address)
-        confirm = findViewById(R.id.confirm)
-        cancel = findViewById(R.id.cancel)
-
-        map.onCreate(savedInstanceState)
-
-        latitude.text = MathExtensions.round(map.lastLatitude, 6).toString()
-        longitude.text = MathExtensions.round(map.lastLongitude, 6).toString()
-        address.threshold = 3
-
-        map.callbacks = {
-            latitude.text = MathExtensions.round(it.latitude, 6).toString()
-            longitude.text = MathExtensions.round(it.longitude, 6).toString()
-        }
-
-        address.doOnTextChanged { text, _, _, _ ->
-            try {
-                job?.cancel(CancellationException("New search"))
-            } catch (_: IllegalStateException) {
-            }
-
-            postDelayed(1000) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Geocoder(applicationContext).getFromLocationName(text.toString(), 10) { addresses ->
-                        runOnUiThread {
-                            try {
-                                ArrayAdapter(applicationContext, android.R.layout.simple_dropdown_item_1line, addresses.map { it.getAddressLine(0) }).also {
-                                    address.setAdapter(it)
-                                    (address.adapter as ArrayAdapter<*>).setNotifyOnChange(true)
-                                    (address.adapter as ArrayAdapter<*>).notifyDataSetChanged()
-                                    address.showDropDown()
-
-                                    address.setOnItemClickListener { _, _, position, _ ->
-                                        latitude.text = MathExtensions.round(addresses[position].latitude, 6).toString()
-                                        longitude.text = MathExtensions.round(addresses[position].longitude, 6).toString()
-                                        map.moveCamera(addresses[position].latitude, addresses[position].longitude)
-                                    }
-                                }
-                            } catch (e: IllegalStateException) {
-                                Log.e("MapSearch", "IllegalStateException: ${e.message}")
-                            }
-                        }
-                    }
-                } else {
-                    job = CoroutineScope(Dispatchers.IO).launch {
-                        @Suppress("DEPRECATION")
-                        Geocoder(applicationContext).getFromLocationName(text.toString(), 10)?.let { addresses ->
-                            launch(Dispatchers.Main) {
-                                try {
-                                    ArrayAdapter(applicationContext, android.R.layout.simple_dropdown_item_1line, addresses.map { it.getAddressLine(0) }).also {
-                                        address.setAdapter(it)
-                                        (address.adapter as ArrayAdapter<*>).setNotifyOnChange(true)
-                                        (address.adapter as ArrayAdapter<*>).notifyDataSetChanged()
-                                        address.showDropDown()
-
-                                        address.setOnItemClickListener { _, _, position, _ ->
-                                            latitude.text = MathExtensions.round(addresses[position].latitude, 6).toString()
-                                            longitude.text = MathExtensions.round(addresses[position].longitude, 6).toString()
-                                            map.moveCamera(addresses[position].latitude, addresses[position].longitude)
-                                        }
-                                    }
-                                } catch (e: IllegalStateException) {
-                                    Log.e("MapSearch", "IllegalStateException: ${e.message}")
-                                }
-                            }
-                        }
-                    }
+        mapView = MapView(this)
+        mapView.onCreate(savedInstanceState?.getBundle(MAP_STATE))
+        lifecycle.addObserver(MapLifecycle(mapView))
+        mapView.getMapAsync { onMapReady(it, savedInstanceState == null) }
+        setContentView(ComposeView(this).apply {
+            setContent {
+                PositionalTheme {
+                    val suggestions by viewModel.suggestions.collectAsState()
+                    MapSearchScreen(viewModel.form, suggestions, mapView, this@MapSearchActivity)
                 }
             }
-        }
+        })
+    }
 
-        confirm.setOnClickListener {
-            setResult(RESULT_OK, intent.apply {
-                putExtra("latitude", latitude.text.toString().toDouble())
-                putExtra("longitude", longitude.text.toString().toDouble())
-                putExtra("address", address.text.toString())
-            })
-            finish()
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle(MAP_STATE, Bundle().also(mapView::onSaveInstanceState))
+    }
 
-        cancel.setOnClickListener {
-            setResult(RESULT_CANCELED)
-            finish()
+    private fun onMapReady(googleMap: GoogleMap, moveToLast: Boolean) {
+        map = googleMap
+        googleMap.uiSettings.isMapToolbarEnabled = false
+        googleMap.uiSettings.isCompassEnabled = false
+        val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        runCatching {
+            googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, if (night) R.raw.maps_dark_labelled else R.raw.maps_light_labelled))
         }
+        if (moveToLast) {
+            CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) ->
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), ZOOM))
+            }
+        }
+        googleMap.setOnCameraIdleListener {
+            googleMap.cameraPosition.target.let { viewModel.onCameraIdle(it.latitude, it.longitude) }
+        }
+        googleMap.setOnMapClickListener { googleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) }
+    }
+
+    override fun addressChanged(text: String) = viewModel.onAddressChange(text)
+
+    override fun pick(address: Address) {
+        viewModel.pick(address)
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(address.latitude, address.longitude), ZOOM))
+    }
+
+    override fun cancel() {
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
+    override fun confirm() {
+        val form = viewModel.form
+        val coordinates = CoordinateInput.parse(form.latitude, form.longitude)
+        if (coordinates == null) {
+            Toast.makeText(this, R.string.failed, Toast.LENGTH_SHORT).show()
+            return
+        }
+        setResult(RESULT_OK, Intent()
+            .putExtra("latitude", coordinates.first)
+            .putExtra("longitude", coordinates.second)
+            .putExtra("address", form.address.trim()))
+        finish()
+    }
+
+    private class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) = mapView.onStart()
+        override fun onResume(owner: LifecycleOwner) = mapView.onResume()
+        override fun onPause(owner: LifecycleOwner) = mapView.onPause()
+        override fun onStop(owner: LifecycleOwner) = mapView.onStop()
+        override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
+    }
+
+    companion object {
+        private const val MAP_STATE = "map_state"
+        private const val ZOOM = 15F
     }
 }

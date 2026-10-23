@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
+import app.simple.positional.math.MathExtensions
 import app.simple.positional.model.Locations
 import app.simple.positional.util.DMSConverter
 
@@ -69,6 +70,8 @@ object CoordinateInput {
         val lon = longitude.toCoordinate() ?: return null
         return if (lat in -90.0..90.0 && lon in -180.0..180.0) lat to lon else null
     }
+
+    fun format(value: Double): String = MathExtensions.round(value, 6).toString()
 
     private fun String.toCoordinate(): Double? = trim().replace(',', '.').toDoubleOrNull()
 }
@@ -187,7 +190,7 @@ private fun MenuEntry(label: Int, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CoordinateField(value: String, label: Int, modifier: Modifier, onValueChange: (String) -> Unit) {
+internal fun CoordinateField(value: String, label: Int, modifier: Modifier, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
