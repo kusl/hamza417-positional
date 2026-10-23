@@ -1,42 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T09:36:28-04:00
+Generated: 2026-10-23T09:37:53-04:00
 Branch:    master
-Commit:    a4cd2e2a 2026-10-23 09:36:19 -0400 add claude response
+Commit:    3a0a1379 2026-10-23 09:37:45 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
-D  app/src/main/java/app/simple/positional/decorations/corners/DynamicCornersNestedScrollView.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/DefaultAnimationHelper.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollNestedScrollView.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollScrollView.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/FastScroller.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollerBuilder.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/Md2PopupBackground.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/PopupStyles.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/PopupTextProvider.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/Predicate.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/RecyclerViewHelper.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/SimpleViewHelper.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/Utils.java
-D  app/src/main/java/app/simple/positional/decorations/fastscroll/ViewHelperProvider.java
-D  app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleImageButton.java
-D  app/src/main/java/app/simple/positional/decorations/viewholders/VerticalListViewHolder.kt
-D  app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt
-D  app/src/main/java/app/simple/positional/dialogs/app/LocationParameters.kt
-D  app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt
-D  app/src/main/java/app/simple/positional/dialogs/gps/LocationExpansion.kt
-D  app/src/main/java/app/simple/positional/sparkline/data/CurvePoints.kt
-D  app/src/main/java/app/simple/positional/sparkline/extensions/PathExtensions.kt
-D  app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt
-D  app/src/main/res/drawable/fs_md2_thumb.xml
-D  app/src/main/res/drawable/fs_md2_track.xml
-D  app/src/main/res/drawable/fs_thumb.xml
-D  app/src/main/res/drawable/ripple_btn.xml
-D  app/src/main/res/layout/dialog_custom_location_shortcut.xml
-D  app/src/main/res/layout/expansion_dialog_coordinates.xml
-D  app/src/main/res/layout/expansion_dialog_location.xml
 
-## TREE (910 files)
+## TREE (916 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -197,6 +167,7 @@ app/
                 LowPassFilter.kt
                 MathExtensions.kt
                 RotationPhysics.kt
+                SeriesStats.kt
                 Tilt.kt
                 TimeConverter.kt
                 UnitConverter.kt
@@ -247,6 +218,7 @@ app/
                   DirectionsScreen.kt
                   GpsScreen.kt
                   LevelScreen.kt
+                  LocationDialogs.kt
                   MapPanel.kt
                   MapSearchScreen.kt
                   MeasureScreen.kt
@@ -285,6 +257,7 @@ app/
                 ColorUtils.kt
                 ConditionUtils.kt
                 ContextUtils.kt
+                CoordinateFormats.kt
                 DMSConverter.kt
                 Direction.kt
                 DistanceText.kt
@@ -292,6 +265,7 @@ app/
                 LocaleHelper.kt
                 LocationExtension.kt
                 LocationPrompt.kt
+                LocationShare.kt
                 MapIntents.kt
                 MoonAngle.kt
                 MoonTimeFormatter.kt
@@ -1013,6 +987,7 @@ app/
                 LowPassFilterTest.kt
                 MathExtensionsTest.kt
                 RotationPhysicsTest.kt
+                SeriesStatsTest.kt
                 TiltTest.kt
                 TimeConverterTest.kt
                 UnitConverterTest.kt
@@ -1038,6 +1013,7 @@ app/
                 ConditionUtilsTest.kt
                 DirectionTest.kt
                 DistanceTextTest.kt
+                LocationShareTest.kt
                 TrailNamesTest.kt
 build.gradle
 export.sh
@@ -1331,7 +1307,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -1353,8 +1329,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8c | Panel menus (GPS, trail, measure, compass, clock, direction) as one Compose bottom sheet built from `PanelMenus`; sub dialogs no longer reopen menus while being destroyed | Done |
 | 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
 | 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
-| 8f | Location parameters, location and coordinate details and the panel switcher in Compose | Next |
-| 8g | Single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 8f | Location summary, location details (Compose `Canvas` sparklines) and coordinate formats dialogs in Compose; coordinate formats computed only while the dialog is open instead of on every fix; sparkline, fast scroller and recycler view decorations removed | Done |
+| 8g | Panel switcher, single activity with Navigation Compose, drop AppCompat themes | Next |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -1522,7 +1498,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation 'androidx.core:core-ktx:1.19.1'
     implementation 'androidx.fragment:fragment-ktx:1.9.1'
-    implementation 'androidx.dynamicanimation:dynamicanimation:1.1.0'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
@@ -7978,6 +7953,21 @@ class RotationPhysics(inertia: Float = INERTIA, damping: Float = DAMPING, magnet
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/math/SeriesStats.kt
+################################################################################
+package app.simple.positional.math
+
+data class SeriesStats(val min: Double, val max: Double, val average: Double) {
+    companion object {
+        fun of(values: List<Float>): SeriesStats = if (values.isEmpty()) {
+            SeriesStats(0.0, 0.0, 0.0)
+        } else {
+            SeriesStats(values.min().toDouble(), values.max().toDouble(), values.average())
+        }
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/math/Tilt.kt
 ################################################################################
 package app.simple.positional.math
@@ -12165,6 +12155,147 @@ private fun TiltText(label: String, value: () -> Float, modifier: Modifier) {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/LocationDialogs.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.widget.Toast
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.content.getSystemService
+import app.simple.positional.R
+import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.math.SeriesStats
+import app.simple.positional.math.UnitConverter.toFeet
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.util.CoordinateFormats
+import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.LocationShare
+import app.simple.positional.util.ReverseGeocoder
+
+@Composable
+private fun InfoDialog(title: String, onDismiss: () -> Unit, action: Pair<String, () -> Unit>? = null, content: @Composable () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.ok)) } },
+        dismissButton = action?.let { (label, onClick) -> @Composable { TextButton(onClick = onClick) { Text(label) } } },
+        title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        text = { Column(Modifier.verticalScroll(rememberScrollState())) { content() } },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
+}
+
+@Composable
+fun LocationSummaryDialog(latitude: Double, longitude: Double, custom: Boolean, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val notAvailable = stringResource(R.string.not_available)
+    val address by produceState(if (custom) MainPreferences.getAddress() else "-", latitude, longitude) {
+        if (!custom) value = ReverseGeocoder.addressLine(context, latitude, longitude) ?: notAvailable
+    }
+    InfoDialog(
+        stringResource(R.string.gps_location),
+        onDismiss,
+        action = stringResource(R.string.share) to { LocationShare.share(context, latitude, longitude, address) },
+    ) {
+        InfoSection(
+            stringResource(R.string.gps_coordinates),
+            listOf(
+                InfoRow(stringResource(R.string.local_timezone), ClockPreferences.getTimeZone()),
+                InfoRow(stringResource(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, context)),
+                InfoRow(stringResource(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, context)),
+                InfoRow(stringResource(R.string.gps_address) + ":", address),
+            ),
+        )
+    }
+}
+
+@Composable
+fun LocationDetailsDialog(rows: List<InfoRow>, accuracy: List<Float>, altitude: List<Float>, metric: Boolean, onDismiss: () -> Unit) {
+    InfoDialog(stringResource(R.string.gps_location), onDismiss) {
+        InfoSection(stringResource(R.string.gps_location), rows)
+        SeriesSection(stringResource(R.string.gps_accuracy), accuracy, metric)
+        SeriesSection(stringResource(R.string.gps_altitude), altitude, metric)
+    }
+}
+
+@Composable
+private fun SeriesSection(title: String, values: List<Float>, metric: Boolean) {
+    val stats = SeriesStats.of(values)
+    val unit = stringResource(if (metric) R.string.meter else R.string.feet)
+    fun format(value: Double) = "${round(if (metric) value else value.toFeet(), 2)} $unit"
+    Sparkline(values, Modifier.fillMaxWidth().height(SPARKLINE_HEIGHT.dp).padding(horizontal = 10.dp, vertical = 8.dp))
+    InfoSection(
+        title,
+        listOf(
+            InfoRow(stringResource(R.string.min), format(stats.min)),
+            InfoRow(stringResource(R.string.max), format(stats.max)),
+            InfoRow(stringResource(R.string.avg), format(stats.average)),
+        ),
+    )
+}
+
+@Composable
+fun Sparkline(values: List<Float>, modifier: Modifier = Modifier) {
+    val color = MaterialTheme.colorScheme.primary
+    Canvas(modifier) {
+        if (values.size < 2) return@Canvas
+        val low = values.min()
+        val span = (values.max() - low).takeIf { it > 0f } ?: 1f
+        val step = size.width / (values.size - 1)
+        val path = Path()
+        values.forEachIndexed { index, value ->
+            val x = index * step
+            val y = size.height - (value - low) / span * size.height
+            if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        drawPath(path, color, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+    }
+}
+
+@Composable
+fun CoordinateDetailsDialog(latitude: Double, longitude: Double, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val sections = remember(latitude, longitude) { CoordinateFormats.sections(context, latitude, longitude) }
+    val copied = stringResource(R.string.info_copied)
+    InfoDialog(
+        stringResource(R.string.gps_coordinates),
+        onDismiss,
+        action = stringResource(R.string.copy) to {
+            context.getSystemService<ClipboardManager>()?.setPrimaryClip(ClipData.newPlainText("Coordinates", CoordinateFormats.text(sections)))
+            Toast.makeText(context, copied, Toast.LENGTH_SHORT).show()
+        },
+    ) {
+        sections.forEach { (title, rows) -> InfoSection(title, rows) }
+    }
+}
+
+private const val SPARKLINE_HEIGHT = 90
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/MapPanel.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -15328,6 +15459,9 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModelProvider
@@ -15337,9 +15471,6 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
-import app.simple.positional.dialogs.app.LocationParameters
-import app.simple.positional.dialogs.gps.CoordinatesExpansion
-import app.simple.positional.dialogs.gps.LocationExpansion
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
@@ -15364,6 +15495,10 @@ import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
 import app.simple.positional.ui.compose.TargetCoordinatesDialog
+import app.simple.positional.ui.compose.CoordinateDetailsDialog
+import app.simple.positional.ui.compose.LocationDetailsDialog
+import app.simple.positional.ui.compose.LocationSummaryDialog
+import app.simple.positional.util.LocationShare
 import app.simple.positional.activities.subactivity.MapSearchActivity
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
@@ -15391,6 +15526,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private val menuSheet = MenuSheetState()
     private val dialogs = DialogHost()
     private val targetForm = CustomLocationForm()
+    private var accuracySeries by mutableStateOf(emptyList<Float>())
+    private var altitudeSeries by mutableStateOf(emptyList<Float>())
     private val search = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         if (result.resultCode == Activity.RESULT_OK && data != null) {
@@ -15470,6 +15607,8 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
             publishLocationRows()
         }
         viewModel.targetData.observe(viewLifecycleOwner) { state.target = it.toAnnotatedString() }
+        viewModel.accuracyGraphData.observe(viewLifecycleOwner) { accuracySeries = it.toList() }
+        viewModel.altitudeGraphData.observe(viewLifecycleOwner) { altitudeSeries = it.toList() }
     }
 
     override fun onDestroyView() {
@@ -15591,7 +15730,17 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         }
     }
 
-    override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
+    override fun customLocation() {
+        val (latitude, longitude) = coordinates()
+        dialogs.show { LocationSummaryDialog(latitude, longitude, state.custom, dialogs::dismiss) }
+    }
+
+    private fun coordinates(): Pair<Double, Double> {
+        val current = location
+        if (!state.custom && current != null) return current.latitude to current.longitude
+        val stored = if (state.custom) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
+        return stored[0].toDouble() to stored[1].toDouble()
+    }
 
     override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
 
@@ -15682,19 +15831,18 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     override fun share() {
-        val target = location?.let { it.latitude to it.longitude }
-            ?: MainPreferences.getCoordinates().takeIf { state.custom }?.let { it[0].toDouble() to it[1].toDouble() }
-            ?: return
-        val latitude = round(target.first, 6)
-        val longitude = round(target.second, 6)
-        val text = "${getString(R.string.gps_coordinates)}: $latitude, $longitude\n\n${state.address}\n\n" +
-                "https://www.google.com/maps/search/?api=1&query=$latitude,$longitude\n\ngeo:$latitude,$longitude?q=$latitude,$longitude"
-        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), getString(R.string.share)))
+        val (latitude, longitude) = coordinates()
+        LocationShare.share(requireContext(), latitude, longitude, state.address)
     }
 
-    override fun locationDetails() = LocationExpansion.newInstance().show(childFragmentManager, "location_expansion")
+    override fun locationDetails() = dialogs.show {
+        LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
+    }
 
-    override fun coordinateDetails() = CoordinatesExpansion.newInstance().show(childFragmentManager, "coordinates_expansion")
+    override fun coordinateDetails() {
+        val (latitude, longitude) = coordinates()
+        dialogs.show { CoordinateDetailsDialog(latitude, longitude, dialogs::dismiss) }
+    }
 
     override fun showTarget() {
         sheet(false)
@@ -16208,7 +16356,6 @@ import app.simple.positional.R
 import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
-import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
@@ -16221,6 +16368,7 @@ import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
 import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
@@ -16253,7 +16401,7 @@ class Time : ScopedFragment() {
                 top,
                 onTimezone = { startActivity(Intent(requireActivity(), TimezonePickerActivity::class.java)) },
                 onMenu = ::showMenu,
-                onLocation = { LocationParameters.newInstance().show(parentFragmentManager, LocationParameters.TAG) },
+                onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
             )
         }
 
@@ -17067,6 +17215,43 @@ open class ContextUtils(context: Context) : ContextWrapper(context) {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/CoordinateFormats.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import app.simple.positional.R
+import app.simple.positional.ui.compose.InfoRow
+import gov.nasa.worldwind.geom.Angle
+import gov.nasa.worldwind.geom.coords.MGRSCoord
+
+object CoordinateFormats {
+    fun sections(context: Context, latitude: Double, longitude: Double): List<Pair<String, List<InfoRow>>> {
+        val lat = context.getString(R.string.gps_latitude)
+        val lon = context.getString(R.string.gps_longitude)
+        val utm = UTMConverter.getUTM(latitude, longitude)
+        val mgrs = runCatching { MGRSCoord.fromLatLon(Angle.fromDegreesLatitude(latitude), Angle.fromDegreesLongitude(longitude)).toString() }
+            .getOrDefault(context.getString(R.string.not_available))
+        return listOf(
+            "DD°MM'SS.SSS" to listOf(InfoRow(lat, DMSConverter.latitudeAsDMS(latitude, context)), InfoRow(lon, DMSConverter.longitudeAsDMS(longitude, context))),
+            "DD°MM.MMM'" to listOf(InfoRow(lat, DMSConverter.latitudeAsDM(latitude, context)), InfoRow(lon, DMSConverter.longitudeAsDM(longitude, context))),
+            "DD.DDD°" to listOf(InfoRow(lat, DMSConverter.latitudeAsDD(latitude)), InfoRow(lon, DMSConverter.longitudeAsDD(longitude))),
+            "MGRS" to listOf(InfoRow(mgrs)),
+            "UTM" to listOf(
+                InfoRow(context.getString(R.string.utm_zone), utm.zone),
+                InfoRow(context.getString(R.string.utm_easting), utm.easting),
+                InfoRow(context.getString(R.string.utm_northing), utm.northing),
+                InfoRow(context.getString(R.string.utm_meridian), utm.centralMeridian),
+            ),
+        )
+    }
+
+    fun text(sections: List<Pair<String, List<InfoRow>>>): String = sections.joinToString("\n\n") { (title, rows) ->
+        (listOf(title) + rows.map { "${it.label} ${it.value}".trim() }).joinToString("\n")
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/DMSConverter.kt
 ################################################################################
 package app.simple.positional.util
@@ -17511,6 +17696,30 @@ object LocationPrompt {
                 }
             }
         }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/LocationShare.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import android.content.Intent
+import app.simple.positional.R
+import app.simple.positional.math.MathExtensions.round
+
+object LocationShare {
+    fun text(label: String, latitude: Double, longitude: Double, address: String): String {
+        val lat = round(latitude, 6)
+        val lon = round(longitude, 6)
+        return "$label: $lat, $lon\n\n$address\n\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lon\n\ngeo:$lat,$lon?q=$lat,$lon"
+    }
+
+    fun share(context: Context, latitude: Double, longitude: Double, address: String) {
+        val text = text(context.getString(R.string.gps_coordinates), latitude, longitude, address)
+        val intent = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
     }
 }
 
@@ -17970,54 +18179,11 @@ public class StatusBarHeight {
 ################################################################################
 package app.simple.positional.util
 
-import android.view.View
-import android.widget.TextView
-
 object TextViewUtils {
-    fun TextView.setTextAnimation(text: String, duration: Long = 300, completion: (() -> Unit)? = null) {
-        fadeOutAnimation(duration) {
-            this.text = text
-            fadeInAnimation(duration) {
-                completion?.let {
-                    it()
-                }
-            }
-        }
-    }
-
-    fun View.fadeOutAnimation(duration: Long = 300, visibility: Int = View.INVISIBLE, completion: (() -> Unit)? = null) {
-        animate()
-                .alpha(0f)
-                .setDuration(duration)
-                .withEndAction {
-                    this.visibility = visibility
-                    completion?.let {
-                        it()
-                    }
-                }
-    }
-
-    fun View.fadeInAnimation(duration: Long = 300, completion: (() -> Unit)? = null) {
-        alpha = 0f
-        visibility = View.VISIBLE
-        animate()
-                .alpha(1f)
-                .setDuration(duration)
-                .withEndAction {
-                    completion?.let {
-                        it()
-                    }
-                }
-    }
-
     fun String.capitalizeText(): String {
-        return this.lowercase(LocaleHelper.getAppLocale()).split(" ").joinToString(" ") { it ->
-            if (it.length <= 1) {
-                it
-            } else {
-                it.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocaleHelper.getAppLocale()) else it.toString() }
-            }
-        }.trimEnd().trim()
+        return lowercase(LocaleHelper.getAppLocale()).split(" ").joinToString(" ") { word ->
+            if (word.length <= 1) word else word.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocaleHelper.getAppLocale()) else it.toString() }
+        }
     }
 }
 
@@ -18455,21 +18621,12 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ArrayHelper.isLastValueSame
 import app.simple.positional.util.ConditionUtils.invert
 import app.simple.positional.util.ConditionUtils.isNull
-import app.simple.positional.util.DMSConverter.latitudeAsDD
-import app.simple.positional.util.DMSConverter.latitudeAsDM
-import app.simple.positional.util.DMSConverter.latitudeAsDMS
-import app.simple.positional.util.DMSConverter.longitudeAsDD
-import app.simple.positional.util.DMSConverter.longitudeAsDM
-import app.simple.positional.util.DMSConverter.longitudeAsDMS
 import app.simple.positional.util.Direction
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.util.NetworkCheck
 import app.simple.positional.util.ParcelUtils.parcelable
-import app.simple.positional.util.UTMConverter
 import com.google.android.gms.maps.model.LatLng
-import gov.nasa.worldwind.geom.Angle
-import gov.nasa.worldwind.geom.coords.MGRSCoord
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -18486,11 +18643,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
     private val location = MutableLiveData<Location>()
     private val provider = MutableLiveData<String>()
 
-    val dms = MutableLiveData<Pair<String, String>>()
-    val dm = MutableLiveData<Pair<String, String>>()
-    val dd = MutableLiveData<Pair<String, String>>()
-    val mgrs = MutableLiveData<String>()
-    val utm = MutableLiveData<UTMConverter.UTM>()
     val latency = MutableLiveData<Pair<Number, Boolean>>()
     val targetData = MutableLiveData<Spanned>()
 
@@ -18513,12 +18665,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
                                 location.postValue(this)
 
                                 measureLatency()
-
-                                dms(this)
-                                dm(this)
-                                dd(this)
-                                mgrs(this)
-                                utm(this)
 
                                 graphData(this)
 
@@ -18793,47 +18939,9 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
         }
     }
 
-    private fun dms(location: Location) {
-        with(getApplication<Application>()) {
-            dms.postValue(Pair(
-                latitudeAsDMS(location.latitude, this),
-                longitudeAsDMS(location.longitude, this)))
-        }
-    }
-
-    private fun dm(location: Location) {
-        with(getApplication<Application>()) {
-            dm.postValue(Pair(
-                latitudeAsDM(location.latitude, this),
-                longitudeAsDM(location.longitude, this)))
-        }
-    }
-
-    private fun dd(location: Location) {
-        dd.postValue(Pair(
-            latitudeAsDD(location.latitude),
-            longitudeAsDD(location.longitude)))
-    }
-
-    private fun mgrs(location: Location) {
-        with(location) {
-            mgrs.postValue(
-                MGRSCoord.fromLatLon(
-                    Angle.fromDegreesLatitude(latitude),
-                    Angle.fromDegreesLongitude(longitude)
-                ).toString())
-        }
-    }
-
-    private fun utm(location: Location) {
-        with(location) {
-            utm.postValue(UTMConverter.getUTM(latitude, longitude))
-        }
-    }
-
     private fun graphData(location: Location) {
-        accuracyGraphData.postValue(manipulateDataForGraph(accuracyData, location.accuracy))
-        altitudeGraphData.postValue(manipulateDataForGraph(altitudeData, location.altitude.toFloat()))
+        accuracyGraphData.postValue(ArrayList(manipulateDataForGraph(accuracyData, location.accuracy)))
+        altitudeGraphData.postValue(ArrayList(manipulateDataForGraph(altitudeData, location.altitude.toFloat())))
     }
 
     private fun manipulateDataForGraph(arrayList: ArrayList<Float>, value: Float): ArrayList<Float> {
@@ -21166,16 +21274,11 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">300dp</dimen>
 
-    <dimen name="info_text_item_margin_horizontal">0dp</dimen>
-    <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_primary_size">20sp</dimen>
     <dimen name="info_text_secondary_size">12sp</dimen>
-    <dimen name="copy_button_dimensions">30dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_item_text_size">12sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="options_container_vertical_padding">10dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">20dp</dimen>
@@ -21298,16 +21401,11 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">300dp</dimen>
 
-    <dimen name="info_text_item_margin_horizontal">0dp</dimen>
-    <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
-    <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="options_container_vertical_padding">10dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
@@ -21334,14 +21432,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="popup_text_size">16sp</dimen>
 
 
-    <dimen name="afs_min_touch_target_size">48dp</dimen>
-    <dimen name="fs_md2_popup_min_width">78dp</dimen>
-    <dimen name="fs_md2_popup_min_height">64dp</dimen>
-    <dimen name="fs_md2_popup_margin_end">14dp</dimen>
-    <dimen name="afs_md2_popup_padding_start">16dp</dimen>
-    <dimen name="afs_md2_popup_padding_end">29dp</dimen>
-    <dimen name="fs_md2_popup_text_size">34dp</dimen>
-    <dimen name="app_views_elevation">10dp</dimen>
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
@@ -21359,16 +21449,11 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">300dp</dimen>
 
-    <dimen name="info_text_item_margin_horizontal">0dp</dimen>
-    <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
-    <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="options_container_vertical_padding">10dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
@@ -21395,14 +21480,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="popup_text_size">16sp</dimen>
 
 
-    <dimen name="afs_min_touch_target_size">48dp</dimen>
-    <dimen name="fs_md2_popup_min_width">78dp</dimen>
-    <dimen name="fs_md2_popup_min_height">64dp</dimen>
-    <dimen name="fs_md2_popup_margin_end">14dp</dimen>
-    <dimen name="afs_md2_popup_padding_start">16dp</dimen>
-    <dimen name="afs_md2_popup_padding_end">29dp</dimen>
-    <dimen name="fs_md2_popup_text_size">34dp</dimen>
-    <dimen name="app_views_elevation">10dp</dimen>
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
@@ -21452,16 +21529,11 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">280dp</dimen>
 
-    <dimen name="info_text_item_margin_horizontal">0dp</dimen>
-    <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_primary_size">31sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
-    <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">100dp</dimen>
 
-    <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">10dp</dimen>
-    <dimen name="options_container_vertical_padding">10dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">30dp</dimen>
@@ -21499,16 +21571,11 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">300dp</dimen>
 
-    <dimen name="info_text_item_margin_horizontal">0dp</dimen>
-    <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
-    <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="options_container_vertical_padding">10dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
@@ -21544,37 +21611,10 @@ class TwilightWidget : AppWidgetProvider() {
     <attr name="colorAppAccentLight" format="color" />
     <attr name="colorAccentRipple" format="color" />
 
-    <declare-styleable name="SparkLineLayout">
-        <attr name="s_line_color" format="color|reference" />
-        <attr name="s_line_second_color" format="color|reference" />
-        <attr name="s_line_thickness" format="dimension|reference" />
-        <attr name="s_line_bezier" format="float|reference" />
-        <attr name="s_gradient_line" format="boolean|reference" />
-
-        <attr name="s_split_line" format="boolean|reference" />
-        <attr name="s_split_ratio" format="float|reference" />
-        <attr name="s_split_left_color" format="color|reference" />
-        <attr name="s_split_right_color" format="color|reference" />
-
-        <attr name="s_marker_width" format="dimension|reference" />
-        <attr name="s_marker_height" format="dimension|reference" />
-        <attr name="s_marker_background_color" format="color|reference" />
-
-        <attr name="s_marker_border_color" format="color|reference" />
-        <attr name="s_marker_border_size" format="dimension|reference" />
-
-        <attr name="s_marker_circle_style" format="boolean|reference" />
-    </declare-styleable>
-
     <declare-styleable name="DynamicCornerLayout">
         <attr name="roundTopCorners" format="boolean" />
         <attr name="roundBottomCorners" format="boolean" />
         <attr name="roundAllCorners" format="boolean" />
-    </declare-styleable>
-
-    <declare-styleable name="CustomRecyclerView">
-        <attr name="statusBarPaddingRequired" format="boolean" />
-        <attr name="isFastScrollerRequired" format="boolean" />
     </declare-styleable>
 </resources>
 
@@ -21693,16 +21733,11 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="clock_day_night_indicator">30dp</dimen>
     <dimen name="clock_image_shadow_size">300dp</dimen>
 
-    <dimen name="info_text_item_margin_horizontal">0dp</dimen>
-    <dimen name="info_text_item_margin_vertical">5dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
-    <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="options_container_vertical_padding">10dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
@@ -21729,14 +21764,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="popup_text_size">16sp</dimen>
 
 
-    <dimen name="afs_min_touch_target_size">48dp</dimen>
-    <dimen name="fs_md2_popup_min_width">78dp</dimen>
-    <dimen name="fs_md2_popup_min_height">64dp</dimen>
-    <dimen name="fs_md2_popup_margin_end">14dp</dimen>
-    <dimen name="afs_md2_popup_padding_start">16dp</dimen>
-    <dimen name="afs_md2_popup_padding_end">29dp</dimen>
-    <dimen name="fs_md2_popup_text_size">34dp</dimen>
-    <dimen name="app_views_elevation">10dp</dimen>
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
@@ -21921,7 +21948,6 @@ class TwilightWidget : AppWidgetProvider() {
     <string name="seconds">s</string>
 
     <string name="info_copied">Copied to Clipboard</string>
-    <string name="invalid_coordinates">Invalid Coordinates</string>
     <string name="internet_connection_alert">Internet connection not available</string>
     <string name="error">Error</string>
     <string name="not_available">N/A</string>
@@ -22032,7 +22058,6 @@ class TwilightWidget : AppWidgetProvider() {
     <string name="east_E">E</string>
     <string name="north_east_NE">NE</string>
 
-    <string name="location_details">Location Details</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
     <string name="avg">Avg:</string>
@@ -22072,7 +22097,6 @@ class TwilightWidget : AppWidgetProvider() {
     <string name="failed">Failed!</string>
     <string name="set_only">Set Only</string>
     <string name="sure">Sure</string>
-    <string name="desc_custom_coord_dialog">These parameters are currently being used for calculating information.</string>
     <string name="trail">Trail</string>
     <string name="geodesic_trail">Geodesic Trail</string>
     <string name="sensor_error">Your device does not have required sensors.</string>
@@ -22156,16 +22180,6 @@ class TwilightWidget : AppWidgetProvider() {
     <style name="BottomDialogAnimation">
         <item name="android:windowEnterAnimation">@anim/bottom_sheet_dialog_in</item>
         <item name="android:windowExitAnimation">@anim/bottom_sheet_dialog_out</item>
-    </style>
-
-    <style name="SecondaryTextView" parent="Widget.AppCompat.TextView">
-        <item name="android:fontFamily">@font/light</item>
-        <item name="android:textColor">@color/textSecondary</item>
-    </style>
-
-    <style name="PrimaryTextView" parent="Widget.AppCompat.TextView">
-        <item name="android:fontFamily">@font/light</item>
-        <item name="android:textColor">@color/textPrimary</item>
     </style>
 </resources>
 
@@ -22753,6 +22767,29 @@ class RotationPhysicsTest {
         assertEquals(20.0, RotationPhysics.shortestDelta(350.0, 10.0), 1e-9)
         assertEquals(-20.0, RotationPhysics.shortestDelta(10.0, 350.0), 1e-9)
         assertEquals(0.0, RotationPhysics.shortestDelta(-360.0, 720.0), 1e-9)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/math/SeriesStatsTest.kt
+################################################################################
+package app.simple.positional.math
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class SeriesStatsTest {
+    @Test
+    fun emptySeriesIsZero() {
+        assertEquals(SeriesStats(0.0, 0.0, 0.0), SeriesStats.of(emptyList()))
+    }
+
+    @Test
+    fun computesMinMaxAverage() {
+        val stats = SeriesStats.of(listOf(4f, 2f, 6f))
+        assertEquals(2.0, stats.min, 0.0)
+        assertEquals(6.0, stats.max, 0.0)
+        assertEquals(4.0, stats.average, 1e-9)
     }
 }
 
@@ -23438,6 +23475,33 @@ class DistanceTextTest {
     @Test
     fun zeroIsMeters() {
         assertEquals(0.0 to R.string.meter, DistanceText.parts(0.0, true))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/util/LocationShareTest.kt
+################################################################################
+package app.simple.positional.util
+
+import app.simple.positional.ui.compose.InfoRow
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class LocationShareTest {
+    @Test
+    fun shareTextRoundsAndLinks() {
+        val text = LocationShare.text("Coordinates", 37.12345678, -76.98765432, "Somewhere")
+        assertTrue(text.startsWith("Coordinates: 37.123457, -76.987654"))
+        assertTrue(text.contains("query=37.123457,-76.987654"))
+        assertTrue(text.contains("geo:37.123457,-76.987654?q=37.123457,-76.987654"))
+        assertTrue(text.contains("Somewhere"))
+    }
+
+    @Test
+    fun coordinateTextJoinsSections() {
+        val text = CoordinateFormats.text(listOf("A" to listOf(InfoRow("x:", "1")), "B" to listOf(InfoRow("y"))))
+        assertEquals("A\nx: 1\n\nB\ny", text)
     }
 }
 

@@ -492,4 +492,49 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.996s
 user	0m0.425s
 sys	0m0.586s
+kushal@fedora:~/src/kotlin/positional$ git rm -r app/src/main/java/app/simple/positional/decorations/corners/DynamicCornersNestedScrollView.java app/src/main/java/app/simple/positional/decorations/fastscroll app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleImageButton.java app/src/main/java/app/simple/positional/decorations/viewholders/VerticalListViewHolder.kt app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt app/src/main/java/app/simple/positional/dialogs/app/LocationParameters.kt app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt app/src/main/java/app/simple/positional/dialogs/gps/LocationExpansion.kt app/src/main/java/app/simple/positional/sparkline app/src/main/res/drawable/fs_md2_thumb.xml app/src/main/res/drawable/fs_md2_track.xml app/src/main/res/drawable/fs_thumb.xml app/src/main/res/drawable/ripple_btn.xml app/src/main/res/layout/dialog_custom_location_shortcut.xml app/src/main/res/layout/expansion_dialog_coordinates.xml app/src/main/res/layout/expansion_dialog_location.xml
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornersNestedScrollView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/DefaultAnimationHelper.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollNestedScrollView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollScrollView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/FastScroller.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollerBuilder.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/Md2PopupBackground.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/PopupStyles.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/PopupTextProvider.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/Predicate.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/RecyclerViewHelper.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/SimpleViewHelper.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/Utils.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/ViewHelperProvider.java'
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleImageButton.java'
+rm 'app/src/main/java/app/simple/positional/decorations/viewholders/VerticalListViewHolder.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/views/CustomRecyclerView.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/app/LocationParameters.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/gps/LocationExpansion.kt'
+rm 'app/src/main/java/app/simple/positional/sparkline/data/CurvePoints.kt'
+rm 'app/src/main/java/app/simple/positional/sparkline/extensions/PathExtensions.kt'
+rm 'app/src/main/java/app/simple/positional/sparkline/view/SparkLineLayout.kt'
+rm 'app/src/main/res/drawable/fs_md2_thumb.xml'
+rm 'app/src/main/res/drawable/fs_md2_track.xml'
+rm 'app/src/main/res/drawable/fs_thumb.xml'
+rm 'app/src/main/res/drawable/ripple_btn.xml'
+rm 'app/src/main/res/layout/dialog_custom_location_shortcut.xml'
+rm 'app/src/main/res/layout/expansion_dialog_coordinates.xml'
+rm 'app/src/main/res/layout/expansion_dialog_location.xml'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-09-36-25
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.918s
+user	0m0.396s
+sys	0m0.541s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-09-37-52
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.920s
+user	0m0.396s
+sys	0m0.551s
 kushal@fedora:~/src/kotlin/positional$ 
