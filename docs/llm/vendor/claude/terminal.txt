@@ -260,4 +260,11 @@ user	0m0.559s
 sys	0m0.681s
 kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
 2026-10-23-04-15-22
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-04-29-10
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.205s
+user	0m0.559s
+sys	0m0.680s
 kushal@fedora:~/src/kotlin/positional$ 

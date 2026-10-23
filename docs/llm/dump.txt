@@ -1,7 +1,7 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T04:15:14-04:00
+Generated: 2026-10-23T04:29:12-04:00
 Branch:    master
-Commit:    3e0288fc 2026-10-23 04:15:10 -0400 add claude response
+Commit:    85d3f6b4 2026-10-23 04:29:06 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
@@ -1323,7 +1323,7 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
       - run: chmod +x gradlew
-      - run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+      - run: ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
       - if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -1491,7 +1491,7 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 Requirements: JDK 21, Android SDK (compile and target SDK 37), Android Gradle Plugin 9.2+, Kotlin 2.4 with the Compose compiler plugin.
 
 ```sh
-./gradlew testDebugUnitTest assembleDebug
+./gradlew testDebugUnitTest lintVitalRelease assembleDebug
 ```
 
 Optional `local.properties` keys (environment variables of the same name take precedence):
@@ -1509,7 +1509,7 @@ Optional `local.properties` keys (environment variables of the same name take pr
 
 `.github/workflows/build.yml` runs on every push and pull request:
 
-1. Unit tests and a debug build.
+1. Unit tests, release lint checks (the same fatal checks that gate `assembleRelease`) and a debug build.
 2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
 
 Required secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
