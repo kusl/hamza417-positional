@@ -449,3 +449,352 @@ notifications
 2026-10-23T00:14:04.3257198Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
 2026-10-23T00:14:04.3520843Z Removing credentials config '/home/runner/work/_temp/git-credentials-9366ff6c-0715-4458-9459-cd38db39f6bd.config'
 2026-10-23T00:14:04.3710428Z Cleaning up orphan processes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Claude
+/
+2.txt
+2.txt
+TXT
+Congratulations, I have pushed the code 
+the build is successful 
+the apk generates 
+and I am able to install it on a physical Android phone 
+the OnePlus Nord N30 5G 
+using obtainium 
+It correctly requests location permissions 
+the latitude longitude displayed in app look correct 
+
+don't ignore docs/llm 
+they should not be in the dump 
+but they should be in the git repository
+I have brought them back
+
+dependabot is unable to merge its change though. Please see below 
+and please update everything as necessary 
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this 
+NO CODE COMMENTS
+
+Ran 7 commands, read memory, searched the web
+Root cause: the Dependabot PR bumps androidx.core to 1.19.1, which requires compileSdk 37. The project compiled against 36. AGP 9.2.1, which is already in use, supports API 37, so the fix is to raise the SDK level and take the dependency bumps on master directly.
+
+Three files change.
+
+app/build.gradle
+
+groovy
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.devtools.ksp'
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
+def env = { String key -> System.getenv(key) ?: localProperties.getProperty(key) }
+def mapsApiKey = env('MAPS_API_KEY') ?: ''
+def keystorePath = env('KEYSTORE_FILE')
+def hasReleaseKey = keystorePath && file(keystorePath).exists()
+
+android {
+    namespace 'app.simple.positional'
+    compileSdk = 37
+
+    defaultConfig {
+        applicationId 'app.simple.positional'
+        minSdk = 24
+        targetSdk = 37
+        versionCode = (env('VERSION_CODE') ?: '20260512') as int
+        versionName = env('VERSION_NAME') ?: 'v2026.05.12'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        vectorDrawables.useSupportLibrary = true
+        manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
+        resValue 'string', 'versionName', versionName
+
+        ksp {
+            arg('room.schemaLocation', "$projectDir/databases/schemas")
+        }
+    }
+
+    signingConfigs {
+        if (hasReleaseKey) {
+            release {
+                storeFile file(keystorePath)
+                storePassword env('STORE_PASSWORD')
+                keyAlias env('KEY_ALIAS')
+                keyPassword env('KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseKey) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '_debug'
+        }
+    }
+
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    kotlin {
+        compilerOptions {
+            jvmTarget = 'JVM_21'
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
+        resValues true
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+
+    implementation 'androidx.appcompat:appcompat:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+    implementation 'androidx.core:core-ktx:1.19.1'
+    implementation 'androidx.fragment:fragment-ktx:1.9.1'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.1.0'
+    implementation 'androidx.webkit:webkit:1.16.0'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
+
+    implementation 'com.google.android.gms:play-services-location:21.4.0'
+    implementation 'com.google.android.gms:play-services-maps:20.1.0'
+    implementation 'com.google.android.material:material:1.14.0'
+
+    implementation 'org.shredzone.commons:commons-suncalc:3.11'
+    implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
+    implementation 'com.github.vipulasri:timelineview:1.2.2'
+
+    implementation 'androidx.room:room-ktx:2.8.5'
+    ksp 'androidx.room:room-compiler:2.8.5'
+
+    testImplementation 'junit:junit:4.13.2'
+}
+.gitignore
+
+*.iml
+.gradle/
+.kotlin/
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+*.keystore
+*.jks
+README.md
+
+markdown
+# Positional
+
+![banner](screenshots/banner.png)
+
+A location, compass, clock, level, trail and measurement toolkit for Android. This is a community fork of [Hamza417/Positional](https://github.com/Hamza417/Positional), distributed only through GitHub Releases. It is not published on Google Play.
+
+[![Build](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml/badge.svg)](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/kusl/hamza417-positional)](https://github.com/kusl/hamza417-positional/releases/latest)
+![API](https://img.shields.io/badge/API-24%2B-138D75?logo=android)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
+## Features
+
+- **GPS**: coordinates (DD, DM, DMS, UTM), altitude, speed, accuracy, address, map with custom pins.
+- **Compass**: magnetic azimuth, skins, calibration help.
+- **Clock**: local and time zone time, sun and moon position, rise, set and twilight times.
+- **Level**: bubble level from the accelerometer.
+- **Trail**: record and review paths with markers.
+- **Measure** and **Direction**: distances between points and bearings to targets.
+- Home screen widgets for clock, sun time, moon phase and twilight.
+
+## Install
+
+1. Download the latest APK from [Releases](https://github.com/kusl/hamza417-positional/releases/latest), or
+2. Add `https://github.com/kusl/hamza417-positional` to [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
+
+Android 7.0 (API 24) or newer is supported. Silent background updates through Obtainium require Android 12 or newer; older versions get an install prompt.
+
+The release is signed with this fork's own key. It cannot be installed over the Play Store build of Positional; uninstall that first.
+
+## Differences from upstream
+
+- No Google Play licensing check, in-app update prompt or rating prompt.
+- Release builds come from CI on every push to `master`.
+- Dead code, unused resources and source comments removed.
+- Unit tests for the math and utility code.
+
+The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
+
+## Building
+
+Requirements: JDK 21 and the Android SDK (compile and target SDK 37, Android Gradle Plugin 9.2+).
+
+```sh
+./gradlew testDebugUnitTest assembleDebug
+```
+
+Optional `local.properties` keys (environment variables of the same name take precedence):
+
+| Key | Purpose |
+|---|---|
+| `MAPS_API_KEY` | Google Maps API key |
+| `KEYSTORE_FILE` | Path to the release keystore |
+| `STORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` | Release signing |
+| `VERSION_CODE`, `VERSION_NAME` | Override the app version |
+
+`./gradlew assembleRelease` produces an unsigned APK when no keystore is configured.
+
+## CI and releases
+
+`.github/workflows/build.yml` runs on every push and pull request:
+
+1. Unit tests and a debug build.
+2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
+
+Required repository secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
+
+To create the keystore secret:
+
+```sh
+base64 -w0 release.keystore
+```
+
+Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper and GitHub Actions. Some AndroidX releases require a newer `compileSdk`; when a Dependabot PR fails at `checkDebugAarMetadata`, raise `compileSdk` in `app/build.gradle` first.
+
+## Project layout
+
+```
+app/src/main/java/app/simple/positional/
+  activities/   entry points and sub screens
+  ui/           panel fragments (GPS, compass, clock, level, trail, measure, direction, settings)
+  decorations/  custom views, map wrappers, fast scroller
+  database/     Room entities, DAOs and databases
+  services/     location and clock widget services
+  widgets/      app widget providers
+  math/         vectors, quaternions, angles, unit conversion
+  util/         formatting and Android helpers
+app/src/test/   JVM unit tests
+docs/llm/       LLM context files (tracked in git, excluded from the dump)
+```
+
+`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file except `docs/llm/` and includes the contents of source, build and config files only.
+
+## Credits and license
+
+Original app by [Hamza Rizwan (Hamza417)](https://github.com/Hamza417/Positional). Translations come from the upstream Crowdin project.
+
+Licensed under the [GNU GPL v3](LICENSE). See [PRIVACY.md](PRIVACY.md) for the privacy policy.
+There are no files to delete. export.sh already excludes docs/llm/ from the dump, so the only change needed for docs/llm/ was taking it out of .gitignore.
+
+After you push, Dependabot will rebase PR #1 because its app/build.gradle edits now conflict with master. The rebased PR will contain only the Gradle wrapper update to 9.8.2, which should pass and merge. If it doesn’t rebase on its own, comment @dependabot rebase on the PR.
+
+targetSdk is now 37. That only changes app behavior on Android 17 devices, so your Nord N30 is unaffected.
+
+
+
+
+Claude is AI and can make mistakes. Please double-check cited sources.
+
+
+
+Claude finished the response
+
+32
+29
+
+
+
+
+
+
+
+
+
+
+
+
+
+
