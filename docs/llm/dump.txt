@@ -1,7 +1,7 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-22T20:32:52-04:00
+Generated: 2026-10-22T20:40:33-04:00
 Branch:    master
-Commit:    9537338e 2026-10-22 20:32:45 -0400 don't ignore docs/llm
+Commit:    221e067c 2026-10-22 20:40:30 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
@@ -1327,12 +1327,12 @@ def hasReleaseKey = keystorePath && file(keystorePath).exists()
 
 android {
     namespace 'app.simple.positional'
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId 'app.simple.positional'
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = (env('VERSION_CODE') ?: '20260512') as int
         versionName = env('VERSION_NAME') ?: 'v2026.05.12'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -1397,27 +1397,27 @@ android {
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
-    implementation 'androidx.appcompat:appcompat:1.7.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    implementation 'androidx.core:core-ktx:1.18.0'
-    implementation 'androidx.fragment:fragment-ktx:1.8.9'
-    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+    implementation 'androidx.core:core-ktx:1.19.1'
+    implementation 'androidx.fragment:fragment-ktx:1.9.1'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.1.0'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
-    implementation 'com.google.android.gms:play-services-location:21.3.0'
-    implementation 'com.google.android.gms:play-services-maps:20.0.0'
+    implementation 'com.google.android.gms:play-services-location:21.4.0'
+    implementation 'com.google.android.gms:play-services-maps:20.1.0'
     implementation 'com.google.android.material:material:1.14.0'
 
     implementation 'org.shredzone.commons:commons-suncalc:3.11'
     implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
     implementation 'com.github.vipulasri:timelineview:1.2.2'
 
-    implementation 'androidx.room:room-ktx:2.8.4'
-    ksp 'androidx.room:room-compiler:2.8.4'
+    implementation 'androidx.room:room-ktx:2.8.5'
+    ksp 'androidx.room:room-compiler:2.8.5'
 
     testImplementation 'junit:junit:4.13.2'
 }
@@ -43617,7 +43617,7 @@ The map panels use the Google Maps SDK and Google Play services location. Withou
 
 ## Building
 
-Requirements: JDK 21 and the Android SDK (compile SDK 36).
+Requirements: JDK 21 and the Android SDK (compile and target SDK 37, Android Gradle Plugin 9.2+).
 
 ```sh
 ./gradlew testDebugUnitTest assembleDebug
@@ -43649,7 +43649,7 @@ To create the keystore secret:
 base64 -w0 release.keystore
 ```
 
-Dependabot opens weekly update PRs for Gradle dependencies and GitHub Actions.
+Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper and GitHub Actions. Some AndroidX releases require a newer `compileSdk`; when a Dependabot PR fails at `checkDebugAarMetadata`, raise `compileSdk` in `app/build.gradle` first.
 
 ## Project layout
 
@@ -43664,9 +43664,10 @@ app/src/main/java/app/simple/positional/
   math/         vectors, quaternions, angles, unit conversion
   util/         formatting and Android helpers
 app/src/test/   JVM unit tests
+docs/llm/       LLM context files (tracked in git, excluded from the dump)
 ```
 
-`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file and includes the contents of source, build and config files only.
+`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file except `docs/llm/` and includes the contents of source, build and config files only.
 
 ## Credits and license
 

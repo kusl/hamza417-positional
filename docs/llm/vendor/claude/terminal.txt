@@ -8,15 +8,24 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.486s
 user	0m0.663s
 sys	0m0.838s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.544s
+user	0m0.688s
+sys	0m0.844s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.466s
+user	0m0.630s
+sys	0m0.868s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.462s
+user	0m0.662s
+sys	0m0.837s
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.472s
+user	0m0.671s
+sys	0m0.834s
 kushal@fedora:~/src/kotlin/positional$ 
-
-
-
-
-
-
-
-
-
-
-
