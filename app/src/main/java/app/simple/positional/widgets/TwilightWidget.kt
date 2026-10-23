@@ -9,7 +9,6 @@ import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.ui.panels.Time
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocaleHelper
 import kotlinx.coroutines.CoroutineScope
@@ -35,66 +34,71 @@ class TwilightWidget : AppWidgetProvider() {
     private fun Context.updateWidget() {
         CoroutineScope(Dispatchers.Default).launch {
             SharedPreferences.init(this@updateWidget)
-
-            val latitude = if (MainPreferences.isCustomCoordinate()) {
-                SharedPreferences.getSharedPreferences().getFloat(MainPreferences.latitude, 0.0F).toDouble()
-            } else {
-                SharedPreferences.getSharedPreferences().getFloat(MainPreferences.lastLatitude, 0.0F).toDouble()
-            }
-
-            val longitude = if (MainPreferences.isCustomCoordinate()) {
-                SharedPreferences.getSharedPreferences().getFloat(MainPreferences.longitude, 0.0F).toDouble()
-            } else {
-                SharedPreferences.getSharedPreferences().getFloat(MainPreferences.lastLongitude, 0.0F).toDouble()
-            }
+            val preferences = SharedPreferences.getSharedPreferences()
+            val custom = MainPreferences.isCustomCoordinate()
+            val latitude = preferences.getFloat(if (custom) MainPreferences.latitude else MainPreferences.lastLatitude, 0f).toDouble()
+            val longitude = preferences.getFloat(if (custom) MainPreferences.longitude else MainPreferences.lastLongitude, 0f).toDouble()
 
             val pattern: DateTimeFormatter = if (ClockPreferences.getDefaultClockTimeFormat()) {
                 DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
             } else {
                 DateTimeFormatter.ofPattern("HH:mm")
             }
+            val notAvailable = getString(R.string.not_available)
+            val now = Instant.now()
+            val timezone = ClockPreferences.getTimeZone()
 
+            fun base() = SunTimes.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude)
+            val times = TWILIGHTS.associateWith { base().twilight(it).execute() }
+            val golden = base().twilight(GOLDEN_HOUR_EDGE).execute()
+            fun time(value: ZonedDateTime?) = value?.format(pattern) ?: notAvailable
+            fun rise(twilight: SunTimes.Twilight) = times.getValue(twilight).rise
+            fun set(twilight: SunTimes.Twilight) = times.getValue(twilight).set
+            fun row(color: String, label: Int, value: ZonedDateTime?) =
+                "<b><font color='$color'>$DOT</font> ${getString(label)}</b> ${time(value)}<br>"
+            fun row(color: String, label: Int, from: ZonedDateTime?, to: ZonedDateTime?) =
+                "<b><font color='$color'>$DOT</font> ${getString(label)}</b> ${time(from)} $ARROW ${time(to)}<br>"
+
+            val twilightData = HtmlHelper.fromHtml(
+                "<h3><b>${getString(R.string.twilight_morning)}</b></h3>" +
+                row("#1a237e", R.string.twilight_astronomical_dusk, rise(SunTimes.Twilight.ASTRONOMICAL), rise(SunTimes.Twilight.NAUTICAL)) +
+                row("#0d47a1", R.string.twilight_nautical_dusk, rise(SunTimes.Twilight.NAUTICAL), rise(SunTimes.Twilight.CIVIL)) +
+                row("#1565c0", R.string.twilight_blue_hour, rise(SunTimes.Twilight.NIGHT_HOUR), rise(SunTimes.Twilight.BLUE_HOUR)) +
+                row("#1e88e5", R.string.twilight_civil_dusk, rise(SunTimes.Twilight.CIVIL), rise(SunTimes.Twilight.HORIZON)) +
+                row("#42a5f5", R.string.twilight_visual, rise(SunTimes.Twilight.VISUAL)) +
+                row("#64b5f6", R.string.twilight_horizon, rise(SunTimes.Twilight.HORIZON)) +
+                row("#90caf9", R.string.twilight_visual_lower, rise(SunTimes.Twilight.VISUAL_LOWER)) +
+                row("#ffcc80", R.string.twilight_golden_hour, golden.rise, rise(SunTimes.Twilight.GOLDEN_HOUR)) +
+                "<br><h3>${getString(R.string.twilight_evening)}</h3>" +
+                row("#ffcc80", R.string.twilight_golden_hour, set(SunTimes.Twilight.GOLDEN_HOUR), golden.set) +
+                row("#90caf9", R.string.twilight_visual_lower, set(SunTimes.Twilight.VISUAL_LOWER)) +
+                row("#64b5f6", R.string.twilight_horizon, set(SunTimes.Twilight.HORIZON)) +
+                row("#42a5f5", R.string.twilight_visual, set(SunTimes.Twilight.VISUAL)) +
+                row("#1e88e5", R.string.twilight_civil_dusk, set(SunTimes.Twilight.HORIZON), set(SunTimes.Twilight.CIVIL)) +
+                row("#1565c0", R.string.twilight_blue_hour, set(SunTimes.Twilight.BLUE_HOUR), set(SunTimes.Twilight.NIGHT_HOUR)) +
+                row("#0d47a1", R.string.twilight_nautical_dusk, set(SunTimes.Twilight.CIVIL), set(SunTimes.Twilight.NAUTICAL)) +
+                row("#1a237e", R.string.twilight_astronomical_dusk, set(SunTimes.Twilight.NAUTICAL), set(SunTimes.Twilight.ASTRONOMICAL))
+            )
             val updateTime = getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
-
-            val twilightData =
-                with(SunTimes.compute().timezone(ClockPreferences.getTimeZone()).on(Instant.now()).latitude(latitude).longitude(longitude)) {
-                    HtmlHelper.fromHtml(
-                        "<h3><b>${getString(R.string.twilight_morning)}</b></h3>" +
-                        "<b><font color='#1a237e'>$DOT</font> ${getString(R.string.twilight_astronomical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.ASTRONOMICAL).execute().rise)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().rise)}<br>" +
-                        "<b><font color='#0d47a1'>$DOT</font> ${getString(R.string.twilight_nautical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().rise)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.CIVIL).execute().rise)}<br>" +
-                        "<b><font color='#1565c0'>$DOT</font> ${getString(R.string.twilight_blue_hour)}</b> ${pattern.format(twilight(SunTimes.Twilight.NIGHT_HOUR).execute().rise)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.BLUE_HOUR).execute().rise)}<br>" +
-                        "<b><font color='#1e88e5'>$DOT</font> ${getString(R.string.twilight_civil_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.CIVIL).execute().rise)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.HORIZON).execute().rise)}<br>" +
-                        "<b><font color='#42a5f5'>$DOT</font> ${getString(R.string.twilight_visual)}</b> ${pattern.format(twilight(SunTimes.Twilight.VISUAL).execute().rise)}<br>" +
-                        "<b><font color='#64b5f6'>$DOT</font> ${getString(R.string.twilight_horizon)}</b> ${pattern.format(twilight(SunTimes.Twilight.HORIZON).execute().rise)}<br>" +
-                        "<b><font color='#90caf9'>$DOT</font> ${getString(R.string.twilight_visual_lower)}</b> ${pattern.format(twilight(SunTimes.Twilight.VISUAL_LOWER).execute().rise)}<br>" +
-                        "<b><font color='#ffcc80'>$DOT</font> ${getString(R.string.twilight_golden_hour)}</b> ${pattern.format(twilight(Time.GOLDEN_HOUR_MORNING_START).execute().rise)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.GOLDEN_HOUR).execute().rise)}<br>" +
-                        "<br>" +
-                        "<h3>${getString(R.string.twilight_evening)}</h3>" +
-                        "<b><font color='#ffcc80'>$DOT</font> ${getString(R.string.twilight_golden_hour)}</b> ${pattern.format(twilight(SunTimes.Twilight.GOLDEN_HOUR).execute().set)} ${Time.Companion.ARROW} ${pattern.format(twilight(Time.Companion.GOLDEN_HOUR_EVENING_END).execute().set)}<br>" +
-                        "<b><font color='#90caf9'>$DOT</font> ${getString(R.string.twilight_visual_lower)}</b> ${pattern.format(twilight(SunTimes.Twilight.VISUAL_LOWER).execute().set)}<br>" +
-                        "<b><font color='#64b5f6'>$DOT</font> ${getString(R.string.twilight_horizon)}</b> ${pattern.format(twilight(SunTimes.Twilight.HORIZON).execute().set)}<br>" +
-                        "<b><font color='#42a5f5'>$DOT</font> ${getString(R.string.twilight_visual)}</b> ${pattern.format(twilight(SunTimes.Twilight.VISUAL).execute().set)}<br>" +
-                        "<b><font color='#1e88e5'>$DOT</font> ${getString(R.string.twilight_civil_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.HORIZON).execute().set)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.CIVIL).execute().set)}<br>" +
-                        "<b><font color='#1565c0'>$DOT</font> ${getString(R.string.twilight_blue_hour)}</b> ${pattern.format(twilight(SunTimes.Twilight.BLUE_HOUR).execute().set)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.NIGHT_HOUR).execute().set)}<br>" +
-                        "<b><font color='#0d47a1'>$DOT</font> ${getString(R.string.twilight_nautical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.CIVIL).execute().set)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().set)}<br>" +
-                        "<b><font color='#1a237e'>$DOT</font> ${getString(R.string.twilight_astronomical_dusk)}</b> ${pattern.format(twilight(SunTimes.Twilight.NAUTICAL).execute().set)} ${Time.Companion.ARROW} ${pattern.format(twilight(SunTimes.Twilight.ASTRONOMICAL).execute().set)}<br>"
-                    )
-                }
 
             withContext(Dispatchers.Main) {
                 val views = RemoteViews(packageName, R.layout.widget_twilight)
                 views.setTextViewText(R.id.twilight_info, twilightData)
                 views.setTextViewText(R.id.widget_update_time, updateTime)
-
-                val componentName = ComponentName(this@updateWidget, TwilightWidget::class.java)
-                val manager = AppWidgetManager.getInstance(this@updateWidget)
-                manager.updateAppWidget(componentName, views)
+                AppWidgetManager.getInstance(this@updateWidget)
+                    .updateAppWidget(ComponentName(this@updateWidget, TwilightWidget::class.java), views)
             }
         }
     }
 
-    companion object {
-        private const val TAG = "TwilightWidget"
-        private const val DOT = "⬤"
+    private companion object {
+        const val DOT = "⬤"
+        const val ARROW = "<b>~</b>"
+        const val GOLDEN_HOUR_EDGE = -4.0
+        val TWILIGHTS = listOf(
+            SunTimes.Twilight.ASTRONOMICAL, SunTimes.Twilight.NAUTICAL, SunTimes.Twilight.CIVIL,
+            SunTimes.Twilight.NIGHT_HOUR, SunTimes.Twilight.BLUE_HOUR, SunTimes.Twilight.HORIZON,
+            SunTimes.Twilight.VISUAL, SunTimes.Twilight.VISUAL_LOWER, SunTimes.Twilight.GOLDEN_HOUR,
+        )
     }
 }
