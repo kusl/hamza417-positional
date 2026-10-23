@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T16:09:39-04:00
+Generated: 2026-10-23T16:10:34-04:00
 Branch:    master
-Commit:    fe639885 2026-10-23 16:09:34 -0400 add claude response
+Commit:    a6c1a52f 2026-10-23 16:10:23 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (871 files)
+## TREE (872 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -165,6 +165,7 @@ app/
                 ClockWidgetService3x3.kt
                 ClockWidgetService4x4.kt
                 FusedLocationService.kt
+                LocationBus.kt
                 LocationService.kt
               singleton/
                 SharedPreferences.kt
@@ -1275,7 +1276,9 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 8h | Panels as plain `PanelController` classes with their own child lifecycle; panel fragments, `ScopedFragment` and the fragment Compose host removed | Done |
 | 8i | AppCompat, Material Components, fragments, ConstraintLayout and legacy support libraries removed: activities extend `ComponentActivity` with `enableEdgeToEdge`, day/night is applied through a configuration override (`NightMode`), splash and clock widget setup are Compose screens | Done |
 | 8j | Sub screens (accent colours, arts, time zones, saved measures, trails and directions, custom locations, map search, help pages) are Navigation Compose destinations inside `MainActivity`; the panel lifecycle follows its destination so sensors and maps pause while a sub screen is open; nine activities removed | Done |
-| 9 | Widgets on Glance | Next |
+| 9a | Moon phase and sun time widgets on Glance (same receivers, so placed widgets keep working); location updates delivered through an in-process `LocationBus` instead of the deprecated `LocalBroadcastManager` | Done |
+| 9b | Twilight and sun time art widgets on Glance | Next |
+| 9c | Clock widgets without a per-second foreground service | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
 ## Building
@@ -1442,19 +1445,20 @@ dependencies {
 
     implementation 'androidx.activity:activity-ktx:1.10.1'
     implementation 'androidx.core:core-ktx:1.19.1'
+    implementation 'androidx.fragment:fragment:1.9.1'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
     implementation 'androidx.navigation:navigation-compose:2.9.0'
-    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
 
     implementation platform('androidx.compose:compose-bom:2026.09.00')
     implementation 'androidx.compose.foundation:foundation'
     implementation 'androidx.compose.material3:material3'
     implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.glance:glance-appwidget:1.1.1'
 
     implementation 'com.google.android.gms:play-services-location:21.4.0'
     implementation 'com.google.android.gms:play-services-maps:20.1.0'
@@ -6687,7 +6691,6 @@ public class Measure {
         this.note = note;
     }
 
-    @NonNull
     public ArrayList<MeasurePoint> getMeasurePoints() {
         if (measurePoints == null) {
             measurePoints = new ArrayList<>();
@@ -6695,7 +6698,7 @@ public class Measure {
         return measurePoints;
     }
 
-    public void setMeasurePoints(@NonNull ArrayList<MeasurePoint> measurePoints) {
+    public void setMeasurePoints(ArrayList<MeasurePoint> measurePoints) {
         this.measurePoints = measurePoints;
     }
 
@@ -8218,12 +8221,12 @@ abstract class ClockWidgetService : Service(), OnSharedPreferenceChangeListener 
 
                     onDataGenerated(clockModel)
 
-                    hour!!.recycle()
-                    minute!!.recycle()
-                    second!!.recycle()
+                    hour.recycle()
+                    minute.recycle()
+                    second.recycle()
                     faceBitmap.recycle()
                     dayNight!!.recycle()
-                    trail!!.recycle()
+                    trail.recycle()
                 }
             }
 
@@ -8534,7 +8537,6 @@ import android.os.Build
 import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.PermissionUtils
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -8587,11 +8589,7 @@ class FusedLocationService : Service() {
 
         broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                Intent().also {
-                    it.action = "provider"
-                    it.putExtra("location_provider", intent?.action)
-                    LocalBroadcastManager.getInstance(baseContext).sendBroadcast(it)
-                }
+                LocationBus.publishProvider(intent?.action)
             }
         }
 
@@ -8647,12 +8645,37 @@ class FusedLocationService : Service() {
     }
 
     private fun broadcastLocation(location: Location) {
-        Intent().also { intent ->
-            intent.action = "location"
-            intent.putExtra("location", location)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishLocation(location)
     }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/services/LocationBus.kt
+################################################################################
+package app.simple.positional.services
+
+import android.location.Location
+import java.util.concurrent.CopyOnWriteArraySet
+
+object LocationBus {
+    interface Listener {
+        fun onLocation(location: Location)
+        fun onProvider(provider: String?)
+    }
+
+    private val listeners = CopyOnWriteArraySet<Listener>()
+
+    fun register(listener: Listener) {
+        listeners += listener
+    }
+
+    fun unregister(listener: Listener) {
+        listeners -= listener
+    }
+
+    fun publishLocation(location: Location) = listeners.forEach { it.onLocation(location) }
+
+    fun publishProvider(provider: String?) = listeners.forEach { it.onProvider(provider) }
 }
 
 ################################################################################
@@ -8669,7 +8692,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.PermissionUtils
 
@@ -8699,38 +8721,22 @@ class LocationService : Service(), LocationListener {
     }
 
     override fun onLocationChanged(location: Location) {
-        Intent().also { intent ->
-            intent.action = "location"
-            intent.putExtra("location", location)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishLocation(location)
     }
 
     @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-        Intent().also { intent ->
-            intent.action = "provider"
-            intent.putExtra("location_provider", provider)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishProvider(provider)
     }
 
     override fun onProviderEnabled(provider: String) {
         requestLastKnownLocation()
-        Intent().also { intent ->
-            intent.action = "provider"
-            intent.putExtra("location_provider", provider)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishProvider(provider)
     }
 
     override fun onProviderDisabled(provider: String) {
         handler.removeCallbacks(locationUpdater)
-        Intent().also { intent ->
-            intent.action = "provider"
-            intent.putExtra("location_provider", provider)
-            LocalBroadcastManager.getInstance(baseContext).sendBroadcast(intent)
-        }
+        LocationBus.publishProvider(provider)
     }
 
     private val locationUpdater: Runnable = object : Runnable {
@@ -14050,7 +14056,7 @@ import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
-    private lateinit var sensor: HeadingSensor
+    private val sensor: HeadingSensor
     private var lastReadings = 0L
 
     init {
@@ -14164,7 +14170,7 @@ import com.google.android.gms.maps.model.LatLng
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = DirectionState()
-    private lateinit var sensor: HeadingSensor
+    private val sensor: HeadingSensor
     private var target = LatLng(0.0, 0.0)
     private var location: Location? = null
 
@@ -14301,12 +14307,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, MapsCallbacks {
-    private lateinit var state: GpsState
+    private val state: GpsState
     private val targetForm = CustomLocationForm()
     private var accuracySeries by mutableStateOf(emptyList<Float>())
     private var altitudeSeries by mutableStateOf(emptyList<Float>())
-    private lateinit var maps: Maps
-    private lateinit var viewModel: LocationViewModel
+    private val maps: Maps
+    private val viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
     private var addressJob: Job? = null
     private var location: Location? = null
@@ -14672,7 +14678,7 @@ import app.simple.positional.ui.compose.LevelScreen
 class Level(activity: ComponentActivity) : SensorPanel(activity) {
     private var tilt by mutableStateOf(Tilt.zero)
     private var square by mutableStateOf(false)
-    private lateinit var sensor: GravitySensor
+    private val sensor: GravitySensor
 
     init {
         sensor = GravitySensor(activity) { tilt = it }
@@ -14733,9 +14739,9 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
-    private lateinit var locationViewModel: LocationViewModel
-    private lateinit var measureViewModel: MeasureViewModel
-    private lateinit var maps: MeasureMaps
+    private val locationViewModel: LocationViewModel
+    private val measureViewModel: MeasureViewModel
+    private val maps: MeasureMaps
     private var location: Location? = null
 
     init {
@@ -15081,7 +15087,7 @@ import java.time.ZoneId
 
 class Time(activity: ComponentActivity) : PanelController(activity) {
     private val state = ClockState()
-    private lateinit var report: ClockReport
+    private val report: ClockReport
     private var latitude = 0.0
     private var longitude = 0.0
     private var altitude = 0.0
@@ -15270,8 +15276,8 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private val state = TrailState()
     private val trailData: TrailDataViewModel by activity.viewModels()
     private val trails: TrailsViewModel by activity.viewModels()
-    private lateinit var locationViewModel: LocationViewModel
-    private lateinit var maps: TrailMaps
+    private val locationViewModel: LocationViewModel
+    private val maps: TrailMaps
     private var location: Location? = null
     private var pending: Triple<Double, Double, Float>? = null
 
@@ -16977,10 +16983,6 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.location.Geocoder
 import android.location.Location
@@ -16988,7 +16990,6 @@ import android.text.Spanned
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.math.MathExtensions.round
@@ -16996,6 +16997,7 @@ import app.simple.positional.math.UnitConverter.toFeet
 import app.simple.positional.math.UnitConverter.toKilometers
 import app.simple.positional.math.UnitConverter.toMiles
 import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.services.LocationBus
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.ArrayHelper.isLastValueSame
 import app.simple.positional.util.ConditionUtils.invert
@@ -17004,7 +17006,6 @@ import app.simple.positional.util.Direction
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.util.NetworkCheck
-import app.simple.positional.util.ParcelUtils.parcelable
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17013,8 +17014,13 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-    private var filter: IntentFilter = IntentFilter()
-    private var locationBroadcastReceiver: BroadcastReceiver
+    private val listener = object : LocationBus.Listener {
+        override fun onLocation(location: Location) = onNewLocation(location)
+
+        override fun onProvider(provider: String?) {
+            this@LocationViewModel.provider.postValue(provider?.uppercase(Locale.getDefault()))
+        }
+    }
 
     private val accuracyData = ArrayList<Float>()
     private val altitudeData = ArrayList<Float>()
@@ -17032,44 +17038,24 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
     private var targetAddress: String? = null
 
     init {
-        filter.addAction("location")
-        filter.addAction("provider")
+        LocationBus.register(listener)
+    }
 
-        locationBroadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent != null) {
-                    when (intent.action) {
-                        "location" -> {
-                            with(intent.parcelable<Location>("location")!!) {
-                                location.postValue(this)
-
-                                measureLatency()
-
-                                graphData(this)
-
-                                if (GPSPreferences.isTargetMarkerSet().invert()) {
-                                    GPSPreferences.setTargetMarkerStartLatitude(this.latitude.toFloat())
-                                    GPSPreferences.setTargetMarkerStartLongitude(this.longitude.toFloat())
-                                }
-
-                                targetData(
-                                    LatLng(GPSPreferences.getTargetMarkerCoordinates()[0].toDouble(), GPSPreferences.getTargetMarkerCoordinates()[1].toDouble()),
-                                    if (MainPreferences.isCustomCoordinate()) LatLng(MainPreferences.getCoordinates()[0].toDouble(), MainPreferences.getCoordinates()[1].toDouble()) else LatLng(this.latitude, this.longitude),
-                                    this.speed)
-                            }
-                        }
-
-                        "provider" -> {
-                            provider.postValue(intent.getStringExtra("location_provider")
-                                ?.uppercase(Locale.getDefault()))
-                        }
-                    }
-                }
-            }
+    private fun onNewLocation(newLocation: Location) {
+        location.postValue(newLocation)
+        measureLatency()
+        graphData(newLocation)
+        if (GPSPreferences.isTargetMarkerSet().invert()) {
+            GPSPreferences.setTargetMarkerStartLatitude(newLocation.latitude.toFloat())
+            GPSPreferences.setTargetMarkerStartLongitude(newLocation.longitude.toFloat())
         }
-
-        LocalBroadcastManager.getInstance(getApplication())
-            .registerReceiver(locationBroadcastReceiver, filter)
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        val origin = if (MainPreferences.isCustomCoordinate()) {
+            MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        } else {
+            LatLng(newLocation.latitude, newLocation.longitude)
+        }
+        targetData(LatLng(target[0].toDouble(), target[1].toDouble()), origin, newLocation.speed)
     }
 
     fun getLocation(): LiveData<Location> {
@@ -17347,8 +17333,7 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
 
     override fun onCleared() {
         super.onCleared()
-        LocalBroadcastManager.getInstance(getApplication())
-            .unregisterReceiver(locationBroadcastReceiver)
+        LocationBus.unregister(listener)
     }
 }
 
@@ -17885,45 +17870,52 @@ public class ClockWidget4x4 extends AppWidgetProvider {
 ################################################################################
 package app.simple.positional.widgets
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Column
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import app.simple.positional.R
 import app.simple.positional.math.MathExtensions
 import app.simple.positional.util.MoonAngle
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.shredzone.commons.suncalc.MoonIllumination
 import java.time.Instant
-import java.util.*
+import java.util.TimeZone
 
-class MoonPhaseWidget : AppWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager?, appWidgetIds: IntArray?) {
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-        onWidgetUpdate(context)
-    }
+class MoonPhaseWidget : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = MoonPhaseGlance()
+}
 
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
-        onWidgetUpdate(context)
-    }
-
-    private fun onWidgetUpdate(context: Context) {
-        CoroutineScope(Dispatchers.Default).launch {
-            val moonIllumination = MoonIllumination.compute().timezone(Calendar.getInstance().timeZone.id).on(Instant.now()).execute()
-
-            withContext(Dispatchers.Main) {
-                val views = RemoteViews(context.packageName, R.layout.widget_moon_phase)
-                views.setImageViewResource(R.id.widget_moon_phase_art, MoonAngle.getMoonPhaseGraphics(MathExtensions.round(moonIllumination.phase, 2)))
-                views.setTextViewText(R.id.widget_moon_phase, MoonAngle.getMoonPhase(context, moonIllumination.phase))
-
-                val componentName = ComponentName(context, MoonPhaseWidget::class.java)
-                val manager = AppWidgetManager.getInstance(context)
-                manager.updateAppWidget(componentName, views)
+class MoonPhaseGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val phase = withContext(Dispatchers.Default) {
+            MoonIllumination.compute().timezone(TimeZone.getDefault().id).on(Instant.now()).execute().phase
+        }
+        val art = MoonAngle.getMoonPhaseGraphics(MathExtensions.round(phase, 2))
+        val label = MoonAngle.getMoonPhase(context, phase)
+        provideContent {
+            Column(
+                GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(ImageProvider(art), contentDescription = label, modifier = GlanceModifier.size(120.dp))
+                Text(label, style = TextStyle(color = ColorProvider(R.color.textSecondary)))
             }
         }
     }
@@ -17934,88 +17926,90 @@ class MoonPhaseWidget : AppWidgetProvider() {
 ################################################################################
 package app.simple.positional.widgets
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.defaultWeight
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import app.simple.positional.R
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.LocaleHelper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.shredzone.commons.suncalc.SunTimes
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.TimeZone
 
-class SunTimeWidget : AppWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        onWidgetUpdate(context)
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-    }
+class SunTimeWidget : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = SunTimeGlance()
+}
 
-    override fun onEnabled(context: Context) {
-        onWidgetUpdate(context)
-        super.onEnabled(context)
-    }
-
-    private fun onWidgetUpdate(context: Context) {
-        CoroutineScope(Dispatchers.Default).launch {
-            SharedPreferences.init(context)
-
-            val latitude = if (MainPreferences.isCustomCoordinate()) {
-                getSharedPreferences().getFloat(MainPreferences.latitude, 0.0F).toDouble()
-            } else {
-                getSharedPreferences().getFloat(MainPreferences.lastLatitude, 0.0F).toDouble()
-            }
-
-            val longitude = if (MainPreferences.isCustomCoordinate()) {
-                getSharedPreferences().getFloat(MainPreferences.longitude, 0.0F).toDouble()
-            } else {
-                getSharedPreferences().getFloat(MainPreferences.lastLongitude, 0.0F).toDouble()
-            }
-
-            val pattern: DateTimeFormatter = if (ClockPreferences.getDefaultClockTimeFormat()) {
-                DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
-            } else {
-                DateTimeFormatter.ofPattern("HH:mm")
-            }
-
-            val sunTimes = SunTimes.compute().timezone(Calendar.getInstance().timeZone.id).on(Instant.now()).latitude(latitude).longitude(longitude).execute()
-            val sunRise = pattern.format(sunTimes.rise)
-            val sunNoon = pattern.format(sunTimes.noon)
-            val sunSet = pattern.format(sunTimes.set)
-            val sunNadir = pattern.format(sunTimes.nadir)
-
-            val updateTime = context.getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
-
-            withContext(Dispatchers.Main) {
-                val views = RemoteViews(context.packageName, R.layout.widget_suntime)
-                views.setTextViewText(R.id.widget_sunrise, sunRise)
-                views.setTextViewText(R.id.widget_sun_noon, sunNoon)
-                views.setTextViewText(R.id.widget_sunset, sunSet)
-                views.setTextViewText(R.id.widget_sun_nadir, sunNadir)
-
-                views.setTextViewText(R.id.widget_suntime_heading, updateTime)
-
-                if (MainPreferences.isCustomCoordinate()) {
-                    views.setImageViewResource(R.id.widget_suntime_icon, R.drawable.ic_place_custom)
-                } else {
-                    views.setImageViewResource(R.id.widget_suntime_icon, LocationPins.locationsPins[GPSPreferences.getPinSkin()])
+class SunTimeGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        SharedPreferences.init(context)
+        val pin = if (MainPreferences.isCustomCoordinate()) R.drawable.ic_place_custom else LocationPins.getLocationPin()
+        val pattern = if (ClockPreferences.getDefaultClockTimeFormat()) {
+            DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
+        } else {
+            DateTimeFormatter.ofPattern("HH:mm")
+        }
+        val times = withContext(Dispatchers.Default) {
+            val coordinates = if (MainPreferences.isCustomCoordinate()) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
+            val sun = SunTimes.compute()
+                .timezone(TimeZone.getDefault().id)
+                .on(Instant.now())
+                .latitude(coordinates[0].toDouble())
+                .longitude(coordinates[1].toDouble())
+                .execute()
+            listOf(
+                R.drawable.ic_widget_sunrise to sun.rise,
+                R.drawable.ic_widget_sun_noon to sun.noon,
+                R.drawable.ic_widget_sun_set to sun.set,
+                R.drawable.ic_widget_sun_nadir to sun.nadir,
+            ).map { (icon, time) -> icon to (time?.let(pattern::format) ?: "--") }
+        }
+        val updated = context.getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
+        provideContent {
+            Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).padding(10.dp)) {
+                Row(GlanceModifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Image(ImageProvider(pin), contentDescription = null, modifier = GlanceModifier.size(20.dp))
+                    Text(
+                        updated,
+                        style = TextStyle(color = ColorProvider(R.color.textTertiary)),
+                        modifier = GlanceModifier.defaultWeight().padding(horizontal = 8.dp),
+                    )
+                    Text(context.getString(R.string.app_name), style = TextStyle(color = ColorProvider(R.color.dividerColor), fontSize = 12.sp))
                 }
-
-                val componentName = ComponentName(context, SunTimeWidget::class.java)
-                val manager = AppWidgetManager.getInstance(context)
-                manager.updateAppWidget(componentName, views)
+                Row(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                    times.forEach { (icon, time) ->
+                        Column(GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Image(ImageProvider(icon), contentDescription = null, modifier = GlanceModifier.size(36.dp))
+                            Text(time, style = TextStyle(color = ColorProvider(R.color.textTertiary), fontSize = 12.sp))
+                        }
+                    }
+                }
             }
         }
     }
@@ -19706,7 +19700,7 @@ class TwilightWidget : AppWidgetProvider() {
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/widget_moon_phase"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="3600000" />
 
@@ -19715,7 +19709,7 @@ class TwilightWidget : AppWidgetProvider() {
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/widget_suntime"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:minResizeHeight="150dp"
     android:minResizeWidth="150dp"
     android:minWidth="300dp"
