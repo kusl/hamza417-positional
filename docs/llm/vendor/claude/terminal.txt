@@ -160,7 +160,11 @@ rm 'app/src/main/res/layout/fragment_target_address_search.xml'
 rm 'app/src/main/res/layout/fragment_webpage.xml'
 kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
 2026-10-22-23-08-22
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.338s
+user	0m0.572s
+sys	0m0.793s
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-22-23-08-46
 kushal@fedora:~/src/kotlin/positional$ 
-
-
-

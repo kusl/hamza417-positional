@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-22T22:53:41-04:00
+Generated: 2026-10-22T23:08:43-04:00
 Branch:    master
-Commit:    2bae2c6d 2026-10-22 22:09:11 -0400 run scripts
+Commit:    096185f1 2026-10-22 23:08:37 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (1094 files)
+## TREE (1083 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -59,7 +59,6 @@ app/
           disclaimer.html
           internet_uses.html
           media_keys.html
-          null.html
           physical_properties.html
           privacy_policy.html
           required_permissions.html
@@ -82,7 +81,6 @@ app/
                   DirectionsActivity.kt
                   MapSearchActivity.kt
                   MeasuresActivity.kt
-                  TargetAddressActivity.kt
                   TimezonePickerActivity.kt
                   TrailsViewerActivity.kt
                   WebPageViewerActivity.kt
@@ -100,20 +98,14 @@ app/
                   BloomSkinAdapter.kt
                 direction/
                   AdapterDirections.kt
-                location/
-                  AdapterTargetAddress.kt
                 maps/
                   PinSkinAdapter.kt
                 measure/
                   AdapterMeasures.kt
-                miscellaneous/
-                  ArtsAdapter.kt
                 trail/
                   AdapterPopupMarkers.kt
                   AdapterTrailPoints.kt
                   AdapterTrails.kt
-              behaviors/
-                OverScrollBehavior.kt
               callbacks/
                 BottomSheetSlide.kt
                 PanelsCallback.java
@@ -121,6 +113,7 @@ app/
               constants/
                 ClockSkinsConstants.kt
                 CompassBloom.kt
+                HtmlPage.kt
                 LauncherBackground.kt
                 LocationPins.kt
                 SpeedometerConstants.kt
@@ -150,7 +143,6 @@ app/
                   DefaultAnimationHelper.java
                   FastScrollNestedScrollView.java
                   FastScrollScrollView.java
-                  FastScrollWebView.java
                   FastScroller.java
                   FastScrollerBuilder.java
                   Md2PopupBackground.java
@@ -217,7 +209,6 @@ app/
                   CustomWebView.kt
                   LocationButton.java
                   PhysicalRotationImageView.java
-                  SearchMap.kt
                   Speedometer.kt
                   SunPosition.java
                   VerticalTextView.java
@@ -329,8 +320,10 @@ app/
               ui/
                 compose/
                   AccentColorScreen.kt
+                  ArtsScreen.kt
                   ChoiceDialog.kt
                   CustomLocationScreen.kt
+                  MapSearchScreen.kt
                   PositionalTheme.kt
                   Preferences.kt
                   SettingsDialogs.kt
@@ -348,9 +341,7 @@ app/
                   Trail.kt
                 subpanels/
                   Directions.kt
-                  HtmlViewer.kt
                   Measures.kt
-                  TargetAddress.kt
                   TimeZones.kt
                   Trails.kt
               util/
@@ -385,10 +376,10 @@ app/
                 factory/
                   TrailDataFactory.kt
                 viewmodel/
-                  AddressViewModel.kt
                   CustomLocationViewModel.kt
                   DirectionsViewModel.kt
                   LocationViewModel.kt
+                  MapSearchViewModel.kt
                   MeasureViewModel.kt
                   TrailDataViewModel.kt
                   TrailsViewModel.kt
@@ -497,7 +488,6 @@ app/
           ic_coordinate_route.xml
           ic_cottage.xml
           ic_crosshair.xml
-          ic_crosshair_dec.xml
           ic_day.xml
           ic_direction_code.xml
           ic_direction_indicator.xml
@@ -744,7 +734,6 @@ app/
           medium.ttf
           regular.ttf
         layout-land/
-          activity_map_search.xml
           dialog_pin_customization.xml
           fragment_clock.xml
           fragment_compass.xml
@@ -758,14 +747,10 @@ app/
         layout-v26/
           widget_suntime.xml
         layout/
-          activity_arts.xml
           activity_clock_widget.xml
           activity_launcher.xml
           activity_main.xml
-          activity_map_search.xml
           activity_sub.xml
-          adapter_address.xml
-          adapter_arts.xml
           adapter_bloom_skin.xml
           adapter_bottom_bar.xml
           adapter_clock_needle.xml
@@ -815,11 +800,9 @@ app/
           fragment_level.xml
           fragment_measure.xml
           fragment_measures_list.xml
-          fragment_target_address_search.xml
           fragment_timezone_list.xml
           fragment_trail.xml
           fragment_trails_list.xml
-          fragment_webpage.xml
           generic_compass_rose.xml
           info_panel_clock.xml
           info_panel_compass.xml
@@ -1203,6 +1186,8 @@ app/
         app/
           simple/
             positional/
+              constants/
+                HtmlPageTest.kt
               math/
                 AngleTest.kt
                 CompassAzimuthTest.kt
@@ -1215,7 +1200,9 @@ app/
               ui/
                 compose/
                   AccentPaletteTest.kt
+                  ArtsCatalogTest.kt
                   CoordinateInputTest.kt
+                  MapSearchQueryTest.kt
                   SettingsLabelsTest.kt
               util/
                 AppIconsTest.kt
@@ -1514,7 +1501,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette and coordinate input.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog and address search.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -1528,8 +1515,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 2 | Fork-owned legal pages, upstream contacts and unused resources removed | Done |
 | 3 | Settings dialogs (theme, icon, corners, units, coordinates, provider, language) | Done |
 | 4 | Accent colors and custom locations screens, Room `Flow` for saved places | Done |
-| 5 | Arts, web page viewer, map search and target address screens | Next |
-| 6 | List screens (trails, measures, directions, time zones) | Planned |
+| 5 | Arts pager, help and legal page viewer, map search with debounced geocoding; unused target address screen removed | Done |
+| 6 | List screens (trails, measures, directions, time zones) | Next |
 | 7 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
 | 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
@@ -1573,6 +1560,7 @@ Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper a
 ```
 app/src/main/java/app/simple/positional/
   activities/   entry points and sub screens
+  constants/    static catalogs (help pages, pins, launcher art)
   ui/compose/   Compose theme, shared components, dialogs and screens
   ui/           panel fragments
   decorations/  legacy custom views, map wrappers, fast scroller
@@ -2152,16 +2140,13 @@ dependencies {
         <activity
             android:name=".activities.subactivity.ArtsActivity"
             android:colorMode="wideColorGamut"
-            android:exported="true"
+            android:exported="false"
             tools:targetApi="o" />
 
         <activity
-            android:name=".activities.subactivity.TargetAddressActivity"
-            android:exported="true" />
-
-        <activity
             android:name=".activities.subactivity.MapSearchActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".activities.subactivity.MeasuresActivity"
@@ -2934,33 +2919,29 @@ class AccentColorsActivity : BaseActivity() {
 package app.simple.positional.activities.subactivity
 
 import android.os.Bundle
-import android.widget.FrameLayout
-import androidx.viewpager2.widget.ViewPager2
-import app.simple.positional.R
-import app.simple.positional.adapters.miscellaneous.ArtsAdapter
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
+import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.ui.compose.ArtsScreen
+import app.simple.positional.ui.compose.PositionalTheme
 
 class ArtsActivity : BaseActivity() {
-    private lateinit var viewPager2: ViewPager2
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_arts)
-
-        val content = findViewById<FrameLayout>(android.R.id.content)
-        content.clipChildren = false
-        content.clipToPadding = false
-
-        viewPager2 = findViewById(R.id.arts_view_pager)
-
-        viewPager2.adapter = ArtsAdapter()
-        viewPager2.offscreenPageLimit = 3
-        viewPager2.setCurrentItem(MainPreferences.getCurrentArt(), false)
-
-        viewPager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                MainPreferences.setCurrentArt(position)
+        val radius = MainPreferences.getCornerRadius()
+        val pin = LocationPins.getLocationPin()
+        setContentView(ComposeView(this).apply {
+            setContent {
+                PositionalTheme {
+                    ArtsScreen(
+                        initialPage = MainPreferences.getCurrentArt(),
+                        cornerRadius = with(LocalDensity.current) { radius.toDp() },
+                        pin = pin,
+                        onPageSettled = MainPreferences::setCurrentArt,
+                    )
+                }
             }
         })
     }
@@ -2981,6 +2962,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import app.simple.positional.R
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.model.Locations
 import app.simple.positional.preferences.MainPreferences
@@ -3046,9 +3028,7 @@ class CustomLocationsActivity : BaseActivity(), CustomLocationActions {
 
     override fun deleteAll() = viewModel.deleteAll()
 
-    override fun help() {
-        startActivity(Intent(this, WebPageViewerActivity::class.java).putExtra("source", "Custom Coordinates Help"))
-    }
+    override fun help() = WebPageViewerActivity.open(this, HtmlPage.CUSTOM_COORDINATES_HELP)
 
     override fun failed() = Toast.makeText(this, R.string.failed, Toast.LENGTH_SHORT).show()
 
@@ -3097,126 +3077,112 @@ class DirectionsActivity : BaseActivity() {
 ################################################################################
 package app.simple.positional.activities.subactivity
 
-import android.location.Geocoder
-import android.os.Build
+import android.content.Intent
+import android.content.res.Configuration
+import android.location.Address
 import android.os.Bundle
-import android.util.Log
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.TextView
-import androidx.core.widget.doOnTextChanged
+import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.SearchMap
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.math.MathExtensions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlin.coroutines.cancellation.CancellationException
+import app.simple.positional.ui.compose.CoordinateInput
+import app.simple.positional.ui.compose.MapSearchActions
+import app.simple.positional.ui.compose.MapSearchScreen
+import app.simple.positional.ui.compose.PositionalTheme
+import app.simple.positional.viewmodels.viewmodel.MapSearchViewModel
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 
-class MapSearchActivity : BaseActivity() {
-    private lateinit var map: SearchMap
-    private lateinit var latitude: TextView
-    private lateinit var longitude: TextView
-    private lateinit var address: AutoCompleteTextView
-    private lateinit var confirm: DynamicRippleImageButton
-    private lateinit var cancel: DynamicRippleImageButton
-
-    private var job: Job? = null
+class MapSearchActivity : BaseActivity(), MapSearchActions {
+    private val viewModel: MapSearchViewModel by viewModels()
+    private lateinit var mapView: MapView
+    private var map: GoogleMap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_search)
-
-        map = findViewById(R.id.map)
-        latitude = findViewById(R.id.latitude)
-        longitude = findViewById(R.id.longitude)
-        address = findViewById(R.id.address)
-        confirm = findViewById(R.id.confirm)
-        cancel = findViewById(R.id.cancel)
-
-        map.onCreate(savedInstanceState)
-
-        latitude.text = MathExtensions.round(map.lastLatitude, 6).toString()
-        longitude.text = MathExtensions.round(map.lastLongitude, 6).toString()
-        address.threshold = 3
-
-        map.callbacks = {
-            latitude.text = MathExtensions.round(it.latitude, 6).toString()
-            longitude.text = MathExtensions.round(it.longitude, 6).toString()
-        }
-
-        address.doOnTextChanged { text, _, _, _ ->
-            try {
-                job?.cancel(CancellationException("New search"))
-            } catch (_: IllegalStateException) {
-            }
-
-            postDelayed(1000) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Geocoder(applicationContext).getFromLocationName(text.toString(), 10) { addresses ->
-                        runOnUiThread {
-                            try {
-                                ArrayAdapter(applicationContext, android.R.layout.simple_dropdown_item_1line, addresses.map { it.getAddressLine(0) }).also {
-                                    address.setAdapter(it)
-                                    (address.adapter as ArrayAdapter<*>).setNotifyOnChange(true)
-                                    (address.adapter as ArrayAdapter<*>).notifyDataSetChanged()
-                                    address.showDropDown()
-
-                                    address.setOnItemClickListener { _, _, position, _ ->
-                                        latitude.text = MathExtensions.round(addresses[position].latitude, 6).toString()
-                                        longitude.text = MathExtensions.round(addresses[position].longitude, 6).toString()
-                                        map.moveCamera(addresses[position].latitude, addresses[position].longitude)
-                                    }
-                                }
-                            } catch (e: IllegalStateException) {
-                                Log.e("MapSearch", "IllegalStateException: ${e.message}")
-                            }
-                        }
-                    }
-                } else {
-                    job = CoroutineScope(Dispatchers.IO).launch {
-                        @Suppress("DEPRECATION")
-                        Geocoder(applicationContext).getFromLocationName(text.toString(), 10)?.let { addresses ->
-                            launch(Dispatchers.Main) {
-                                try {
-                                    ArrayAdapter(applicationContext, android.R.layout.simple_dropdown_item_1line, addresses.map { it.getAddressLine(0) }).also {
-                                        address.setAdapter(it)
-                                        (address.adapter as ArrayAdapter<*>).setNotifyOnChange(true)
-                                        (address.adapter as ArrayAdapter<*>).notifyDataSetChanged()
-                                        address.showDropDown()
-
-                                        address.setOnItemClickListener { _, _, position, _ ->
-                                            latitude.text = MathExtensions.round(addresses[position].latitude, 6).toString()
-                                            longitude.text = MathExtensions.round(addresses[position].longitude, 6).toString()
-                                            map.moveCamera(addresses[position].latitude, addresses[position].longitude)
-                                        }
-                                    }
-                                } catch (e: IllegalStateException) {
-                                    Log.e("MapSearch", "IllegalStateException: ${e.message}")
-                                }
-                            }
-                        }
-                    }
+        mapView = MapView(this)
+        mapView.onCreate(savedInstanceState?.getBundle(MAP_STATE))
+        lifecycle.addObserver(MapLifecycle(mapView))
+        mapView.getMapAsync { onMapReady(it, savedInstanceState == null) }
+        setContentView(ComposeView(this).apply {
+            setContent {
+                PositionalTheme {
+                    val suggestions by viewModel.suggestions.collectAsState()
+                    MapSearchScreen(viewModel.form, suggestions, mapView, this@MapSearchActivity)
                 }
             }
-        }
+        })
+    }
 
-        confirm.setOnClickListener {
-            setResult(RESULT_OK, intent.apply {
-                putExtra("latitude", latitude.text.toString().toDouble())
-                putExtra("longitude", longitude.text.toString().toDouble())
-                putExtra("address", address.text.toString())
-            })
-            finish()
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBundle(MAP_STATE, Bundle().also(mapView::onSaveInstanceState))
+    }
 
-        cancel.setOnClickListener {
-            setResult(RESULT_CANCELED)
-            finish()
+    private fun onMapReady(googleMap: GoogleMap, moveToLast: Boolean) {
+        map = googleMap
+        googleMap.uiSettings.isMapToolbarEnabled = false
+        googleMap.uiSettings.isCompassEnabled = false
+        val night = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        runCatching {
+            googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, if (night) R.raw.maps_dark_labelled else R.raw.maps_light_labelled))
         }
+        if (moveToLast) {
+            CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) ->
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lon), ZOOM))
+            }
+        }
+        googleMap.setOnCameraIdleListener {
+            googleMap.cameraPosition.target.let { viewModel.onCameraIdle(it.latitude, it.longitude) }
+        }
+        googleMap.setOnMapClickListener { googleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) }
+    }
+
+    override fun addressChanged(text: String) = viewModel.onAddressChange(text)
+
+    override fun pick(address: Address) {
+        viewModel.pick(address)
+        map?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(address.latitude, address.longitude), ZOOM))
+    }
+
+    override fun cancel() {
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
+    override fun confirm() {
+        val form = viewModel.form
+        val coordinates = CoordinateInput.parse(form.latitude, form.longitude)
+        if (coordinates == null) {
+            Toast.makeText(this, R.string.failed, Toast.LENGTH_SHORT).show()
+            return
+        }
+        setResult(RESULT_OK, Intent()
+            .putExtra("latitude", coordinates.first)
+            .putExtra("longitude", coordinates.second)
+            .putExtra("address", form.address.trim()))
+        finish()
+    }
+
+    private class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) = mapView.onStart()
+        override fun onResume(owner: LifecycleOwner) = mapView.onResume()
+        override fun onPause(owner: LifecycleOwner) = mapView.onPause()
+        override fun onStop(owner: LifecycleOwner) = mapView.onStop()
+        override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
+    }
+
+    companion object {
+        private const val MAP_STATE = "map_state"
+        private const val ZOOM = 15F
     }
 }
 
@@ -3239,30 +3205,6 @@ class MeasuresActivity : BaseActivity() {
             supportFragmentManager.beginTransaction()
                     .replace(R.id.sub_container, Measures.Companion.newInstance(), Measures.Companion.TAG)
                     .commit()
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/activities/subactivity/TargetAddressActivity.kt
-################################################################################
-package app.simple.positional.activities.subactivity
-
-import android.os.Bundle
-import app.simple.positional.R
-import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.TargetAddress
-import app.simple.positional.util.ConditionUtils.isNull
-
-class TargetAddressActivity : BaseActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
-
-        if (savedInstanceState.isNull()) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.sub_container, TargetAddress.newInstance(), "target_address")
-                .commit()
         }
     }
 }
@@ -3321,30 +3263,56 @@ class TrailsViewerActivity : BaseActivity() {
 ################################################################################
 package app.simple.positional.activities.subactivity
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import app.simple.positional.R
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.viewinterop.AndroidView
+import app.simple.positional.constants.HtmlPage
+import app.simple.positional.decorations.views.CustomWebView
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.HtmlViewer
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.ui.compose.PositionalTheme
 
 class WebPageViewerActivity : BaseActivity() {
-    private var source: String = "null"
+    private var webView: CustomWebView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
+        val page = HtmlPage.forName(intent.getStringExtra(EXTRA_PAGE)) ?: return finish()
+        val view = CustomWebView(this).also { webView = it }
+        if (savedInstanceState?.let(view::restoreState) == null) view.loadUrl(page.url)
+        setContentView(ComposeView(this).apply {
+            setContent {
+                PositionalTheme {
+                    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                        AndroidView(factory = { view }, modifier = Modifier.fillMaxSize().systemBarsPadding())
+                    }
+                }
+            }
+        })
+    }
 
-        source = if (intent.extras.isNotNull()) {
-            intent.extras!!.getString("source", "null")
-        } else {
-            "null"
-        }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        webView?.saveState(outState)
+    }
 
-        if (savedInstanceState.isNull()) {
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.sub_container, HtmlViewer.newInstance(source), "web_page")
-                    .commit()
+    override fun onDestroy() {
+        webView?.destroy()
+        webView = null
+        super.onDestroy()
+    }
+
+    companion object {
+        private const val EXTRA_PAGE = "page"
+
+        fun open(context: Context, page: HtmlPage) {
+            context.startActivity(Intent(context, WebPageViewerActivity::class.java).putExtra(EXTRA_PAGE, page.name))
         }
     }
 }
@@ -3797,47 +3765,6 @@ class AdapterDirections constructor(val list: MutableList<DirectionModel>) : Rec
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/location/AdapterTargetAddress.kt
-################################################################################
-package app.simple.positional.adapters.location
-
-import android.location.Address
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-import app.simple.positional.util.DMSConverter
-
-class AdapterTargetAddress(private val addresses: MutableList<Address>) : RecyclerView.Adapter<AdapterTargetAddress.Holder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_address, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        with(holder) {
-            address.text = addresses[position].getAddressLine(0)
-            latitude.text = DMSConverter.getFormattedLatitude(addresses[position].latitude, itemView.context)
-            longitude.text = DMSConverter.getFormattedLongitude(addresses[position].longitude, itemView.context)
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return addresses.size
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val container: DynamicRippleConstraintLayout = itemView.findViewById(R.id.adapter_address_container)
-        val address: TextView = itemView.findViewById(R.id.adapter_address_address)
-        val latitude: TextView = itemView.findViewById(R.id.adapter_address_latitude)
-        val longitude: TextView = itemView.findViewById(R.id.adapter_address_longitude)
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/adapters/maps/PinSkinAdapter.kt
 ################################################################################
 package app.simple.positional.adapters.maps
@@ -3998,78 +3925,6 @@ class AdapterMeasures(private val list: ArrayList<Measure>) :
         interface AdapterMeasuresCallback {
             fun onMeasureClicked(measure: Measure)
             fun onMeasureMenuClicked(measure: Measure, view: View, position: Int)
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/miscellaneous/ArtsAdapter.kt
-################################################################################
-package app.simple.positional.adapters.miscellaneous
-
-import android.annotation.SuppressLint
-import android.os.Build
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.constants.LauncherBackground.vectorBackground
-import app.simple.positional.constants.LauncherBackground.vectorBackgroundNight
-import app.simple.positional.constants.LauncherBackground.vectorColors
-import app.simple.positional.constants.LauncherBackground.vectorNightColors
-import app.simple.positional.constants.LocationPins
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.BitmapHelper.addLinearGradient
-import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
-import com.google.android.material.card.MaterialCardView
-
-class ArtsAdapter : RecyclerView.Adapter<ArtsAdapter.Holder>() {
-    private val radius = MainPreferences.getCornerRadius()
-    private val list = intArrayOf(*vectorBackground, *vectorBackgroundNight)
-    private val colors = arrayOf(*vectorColors, *vectorNightColors)
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.adapter_arts, parent, false))
-    }
-
-    @SuppressLint("SetTextI18n")
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.art.setImageResource(list[position])
-        holder.count.text = position.plus(1).toString() + "/" + list.size
-
-        holder.icon.setImageBitmap(LocationPins.locationsPins[GPSPreferences.getPinSkin()]
-                .toBitmapKeepingSize(holder.itemView.context, 6, 255)
-                .addLinearGradient(intArrayOf(colors[position][0], colors[position][1])))
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            holder.container.outlineAmbientShadowColor = colors[position][0]
-            holder.container.outlineSpotShadowColor = colors[position][0]
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return list.size
-    }
-
-    override fun onViewDetachedFromWindow(holder: Holder) {
-        super.onViewDetachedFromWindow(holder)
-        holder.itemView.clearAnimation()
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val art: ImageView = itemView.findViewById(R.id.art)
-        val icon: ImageView = itemView.findViewById(R.id.arts_icon)
-        val count: TextView = itemView.findViewById(R.id.arts_count)
-        val container: MaterialCardView = itemView.findViewById(R.id.arts_container)
-
-        init {
-            container.radius = radius.toFloat()
         }
     }
 }
@@ -4427,81 +4282,6 @@ class AdapterTrails(private val list: ArrayList<TrailEntry>) :
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/behaviors/OverScrollBehavior.kt
-################################################################################
-package app.simple.positional.behaviors
-
-import android.content.Context
-import android.util.AttributeSet
-import android.view.View
-import android.view.ViewGroup
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.dynamicanimation.animation.DynamicAnimation
-import androidx.dynamicanimation.animation.SpringAnimation
-import androidx.dynamicanimation.animation.SpringForce
-
-class OverScrollBehavior(context: Context, attributeSet: AttributeSet) :
-        CoordinatorLayout.Behavior<View>(context, attributeSet) {
-    private val animationObjects = arrayListOf<SpringAnimation>()
-
-    override fun onStartNestedScroll(coordinatorLayout: CoordinatorLayout, child: View, directTargetChild: View, target: View, axes: Int, type: Int): Boolean {
-        val group = target as ViewGroup
-        val count = group.childCount
-
-        for (animation in animationObjects) {
-            animation.cancel()
-        }
-
-        for (i in 0 until count) {
-            with(group.getChildAt(i)) {
-                clearAnimation()
-                overScrollY = translationY
-            }
-        }
-
-        animationObjects.clear()
-        return true
-    }
-
-    override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: View, target: View, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int, type: Int, consumed: IntArray) {
-        overScrollY -= dyUnconsumed / OVER_SCROLL_AREA
-        val group = target as ViewGroup
-        val count = group.childCount
-        for (i in 0 until count) {
-            val view = group.getChildAt(i)
-            view.translationY = overScrollY
-        }
-    }
-
-    override fun onStopNestedScroll(coordinatorLayout: CoordinatorLayout, child: View, target: View, type: Int) {
-        moveToDefPosition(target)
-    }
-
-    private fun moveToDefPosition(target: View) {
-        val group = target as ViewGroup
-        val count = group.childCount
-        for (i in 0 until count) {
-            val view = group.getChildAt(i)
-
-            val springAnimation = SpringAnimation(view, DynamicAnimation.TRANSLATION_Y)
-            springAnimation.spring = SpringForce()
-                .setFinalPosition(0f)
-                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
-                .setStiffness(SpringForce.STIFFNESS_LOW)
-
-            springAnimation.start()
-
-            animationObjects.add(springAnimation)
-        }
-    }
-
-    companion object {
-        private const val OVER_SCROLL_AREA = 1.5F
-        private var overScrollY = 0F
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/callbacks/BottomSheetSlide.kt
 ################################################################################
 package app.simple.positional.callbacks
@@ -4609,6 +4389,35 @@ object CompassBloom {
             Color.parseColor("#FF00A3B8"),
             Color.parseColor("#FF4C91A1"),
     )
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/constants/HtmlPage.kt
+################################################################################
+package app.simple.positional.constants
+
+import androidx.annotation.StringRes
+import app.simple.positional.R
+
+enum class HtmlPage(val asset: String, @param:StringRes val title: Int? = null) {
+    DISCLAIMER("disclaimer", R.string.disclaimer),
+    PRIVACY_POLICY("privacy_policy", R.string.privacy_policy),
+    TERMS("terms_and_conditions", R.string.terms_of_use),
+    PERMISSIONS("required_permissions", R.string.permissions),
+    CREDITS("credits", R.string.credits),
+    INTERNET_USES("internet_uses", R.string.internet_uses),
+    PHYSICAL_PROPERTIES("physical_properties"),
+    CUSTOM_COORDINATES_HELP("custom_coordinates_help"),
+    MEDIA_KEYS("media_keys"),
+    TRAIL_HELP("trail_help");
+
+    val url: String get() = "file:///android_asset/html/$asset.html"
+
+    companion object {
+        fun forTitle(@StringRes title: Int): HtmlPage? = entries.firstOrNull { it.title == title }
+
+        fun forName(name: String?): HtmlPage? = entries.firstOrNull { it.name == name }
+    }
 }
 
 ################################################################################
@@ -5852,104 +5661,6 @@ public class FastScrollScrollView extends ScrollView implements ViewHelperProvid
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/fastscroll/FastScrollWebView.java
-################################################################################
-package app.simple.positional.decorations.fastscroll;
-
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.util.AttributeSet;
-import android.view.MotionEvent;
-import androidx.annotation.NonNull;
-import app.simple.positional.decorations.views.CustomWebView;
-
-@SuppressLint ("MissingSuperCall")
-public class FastScrollWebView extends CustomWebView implements ViewHelperProvider {
-    @NonNull
-    private final ViewHelper mViewHelper = new ViewHelper();
-
-    public FastScrollWebView(@NonNull Context context, @NonNull AttributeSet attrs) {
-        super(context, attrs);
-        init();
-    }
-
-    private void init() {
-        setVerticalScrollBarEnabled(false);
-        setScrollContainer(true);
-    }
-
-    @NonNull
-    @Override
-    public FastScroller.ViewHelper getViewHelper() {
-        return mViewHelper;
-    }
-
-    @Override
-    public void draw(@NonNull Canvas canvas) {
-        mViewHelper.draw(canvas);
-    }
-
-    @Override
-    protected void onScrollChanged(int left, int top, int oldLeft, int oldTop) {
-        mViewHelper.onScrollChanged(left, top, oldLeft, oldTop);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(@NonNull MotionEvent event) {
-        return mViewHelper.onInterceptTouchEvent(event);
-    }
-
-    @SuppressLint ("ClickableViewAccessibility")
-    @Override
-    public boolean onTouchEvent(@NonNull MotionEvent event) {
-        return mViewHelper.onTouchEvent(event);
-    }
-
-    private class ViewHelper extends SimpleViewHelper {
-        @Override
-        protected void superDraw(@NonNull Canvas canvas) {
-            FastScrollWebView.super.draw(canvas);
-        }
-
-        @Override
-        protected void superOnScrollChanged(int left, int top, int oldLeft, int oldTop) {
-            FastScrollWebView.super.onScrollChanged(left, top, oldLeft, oldTop);
-        }
-
-        @Override
-        protected boolean superOnInterceptTouchEvent(@NonNull MotionEvent event) {
-            return FastScrollWebView.super.onInterceptTouchEvent(event);
-        }
-
-        @Override
-        protected boolean superOnTouchEvent(@NonNull MotionEvent event) {
-            return FastScrollWebView.super.onTouchEvent(event);
-        }
-
-        @Override
-        protected int computeVerticalScrollRange() {
-            return FastScrollWebView.this.computeVerticalScrollRange();
-        }
-
-        @Override
-        protected int computeVerticalScrollOffset() {
-            return FastScrollWebView.this.computeVerticalScrollOffset();
-        }
-
-        @Override
-        protected int getScrollX() {
-            return FastScrollWebView.this.getScrollX();
-        }
-
-        @Override
-        protected void scrollTo(int x, int y) {
-            FastScrollWebView.this.scrollTo(x, y);
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/fastscroll/FastScroller.java
 ################################################################################
 package app.simple.positional.decorations.fastscroll;
@@ -6399,7 +6110,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -6533,11 +6243,6 @@ public class FastScrollerBuilder {
             throw new UnsupportedOperationException("Please use "
                     + FastScrollScrollView.class.getSimpleName() + " instead of "
                     + ScrollView.class.getSimpleName() + "for fast scroll");
-        }
-        else if (mView instanceof WebView) {
-            throw new UnsupportedOperationException("Please use "
-                    + FastScrollWebView.class.getSimpleName() + " instead of "
-                    + WebView.class.getSimpleName() + "for fast scroll");
         }
         else {
             throw new UnsupportedOperationException(mView.getClass().getSimpleName()
@@ -11778,38 +11483,21 @@ package app.simple.positional.decorations.views
 
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
 import android.util.AttributeSet
 import android.webkit.WebView
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 
-open class CustomWebView(context: Context, attributeSet: AttributeSet) : WebView(context, attributeSet) {
+open class CustomWebView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) : WebView(context, attributeSet) {
     init {
         setBackgroundColor(0)
-        settings.allowContentAccess = true
-        settings.allowFileAccess = true
         settings.setSupportZoom(true)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
-                WebSettingsCompat.setAlgorithmicDarkeningAllowed(this.settings, context.resources.configuration.uiMode and
-                        Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
-            } else if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-                if (context.resources.configuration.uiMode and
-                        Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                    @Suppress("DEPRECATION")
-                    WebSettingsCompat.setForceDark(this.settings, WebSettingsCompat.FORCE_DARK_ON)
-                }
-            }
-        } else {
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-                if (context.resources.configuration.uiMode and
-                        Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                    @Suppress("DEPRECATION")
-                    WebSettingsCompat.setForceDark(this.settings, WebSettingsCompat.FORCE_DARK_ON)
-                }
-            }
+        val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+            WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, night)
+        } else if (night && WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+            @Suppress("DEPRECATION")
+            WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
         }
     }
 }
@@ -12012,86 +11700,6 @@ public class PhysicalRotationImageView extends androidx.appcompat.widget.AppComp
         time1 = System.currentTimeMillis();
         rotationUpdate(getRotation(), false);
         super.clearAnimation();
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/views/SearchMap.kt
-################################################################################
-package app.simple.positional.decorations.views
-
-import android.content.Context
-import android.content.res.Configuration
-import android.util.AttributeSet
-import app.simple.positional.R
-import app.simple.positional.extensions.maps.CustomMaps
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.ConditionUtils.isNull
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-
-class SearchMap(context: Context, attrs: AttributeSet) : CustomMaps(context, attrs) {
-    internal var callbacks: (latLng: LatLng) -> Unit = {}
-
-    init {
-        getMapAsync(this)
-    }
-
-    override fun onMapReady(p0: GoogleMap) {
-        super.onMapReady(p0)
-        setMapStyle()
-        moveMapToLastLocation()
-
-        p0.setOnMapClickListener {
-            latLng = it
-            callbacks.invoke(it)
-        }
-    }
-
-    private fun moveMapToLastLocation() {
-        val latLng = LatLng(
-                MainPreferences.getLastCoordinates()[0].toDouble(),
-                MainPreferences.getLastCoordinates()[1].toDouble())
-
-        this.googleMap?.moveCamera(
-                CameraUpdateFactory.newCameraPosition(
-                        CameraPosition(latLng, 15F, 0F, 0F)
-                )
-        )
-
-        this.googleMap?.setOnCameraMoveListener {
-            callbacks.invoke(googleMap?.cameraPosition?.target!!)
-        }
-    }
-
-    private fun setMapStyle() {
-        if (!googleMap.isNull()) {
-            googleMap?.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            when (this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                                Configuration.UI_MODE_NIGHT_YES -> {
-                                    R.raw.maps_dark_labelled
-                                }
-                                Configuration.UI_MODE_NIGHT_NO -> {
-                                    R.raw.maps_light_labelled
-                                }
-                                else -> 0
-                            }
-                    )
-            )
-        }
-    }
-
-    fun moveCamera(latitude: Double, longitude: Double) {
-        googleMap?.moveCamera(
-                CameraUpdateFactory.newCameraPosition(
-                        CameraPosition(LatLng(latitude, longitude), 15F, 0F, 0F)
-                )
-        )
     }
 }
 
@@ -13424,7 +13032,6 @@ package app.simple.positional.dialogs.compass
 
 import android.animation.ObjectAnimator
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13435,6 +13042,7 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.decorations.switchview.SwitchView
 import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
 import app.simple.positional.decorations.views.PhysicalRotationImageView
@@ -13522,9 +13130,7 @@ class CompassPhysicalProperties : CustomBottomSheetDialogFragment() {
         }
 
         help.setOnClickListener {
-            val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-            intent.putExtra("source", getString(R.string.physical_properties))
-            startActivity(intent)
+            WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES)
         }
 
         toggleContainer.setOnClickListener {
@@ -14035,7 +13641,6 @@ class CoordinatesExpansion : CustomBottomSheetDialogFragment() {
 ################################################################################
 package app.simple.positional.dialogs.gps
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14043,6 +13648,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 import app.simple.positional.decorations.switchview.SwitchView
@@ -14157,9 +13763,7 @@ class GPSMenu : CustomBottomSheetDialogFragment() {
         }
 
         toggleVolumeKeysContainer.setOnLongClickListener {
-            val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-            intent.putExtra("source", "Media Keys")
-            startActivity(intent)
+            WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
             true
         }
 
@@ -15028,7 +14632,6 @@ class AddTrail : CustomDialogFragment() {
 ################################################################################
 package app.simple.positional.dialogs.trail
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15036,6 +14639,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
 import app.simple.positional.decorations.ripple.DynamicRippleTextView
 import app.simple.positional.decorations.switchview.SwitchView
@@ -15145,9 +14749,7 @@ class TrailMenu : CustomBottomSheetDialogFragment() {
         }
 
         help.setOnClickListener {
-            val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-            intent.putExtra("source", "trail_help")
-            startActivity(intent)
+            WebPageViewerActivity.open(requireContext(), HtmlPage.TRAIL_HELP)
         }
 
         if (toggleSatellite.isChecked) {
@@ -19988,6 +19590,116 @@ private fun AccentRow(option: AccentOption, selected: Boolean, onClick: () -> Un
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/ArtsScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import app.simple.positional.constants.LauncherBackground
+import app.simple.positional.util.BitmapHelper.addLinearGradient
+import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
+
+data class Art(@param:DrawableRes val background: Int, val startColor: Int, val endColor: Int)
+
+object ArtsCatalog {
+    val arts: List<Art> = (LauncherBackground.vectorBackground + LauncherBackground.vectorBackgroundNight)
+        .zip(LauncherBackground.vectorColors + LauncherBackground.vectorNightColors) { background, colors ->
+            Art(background, colors[0], colors[1])
+        }
+}
+
+private val logoFont = FontFamily(Font(R.font.logo))
+
+@Composable
+fun ArtsScreen(initialPage: Int, cornerRadius: Dp, @DrawableRes pin: Int, onPageSettled: (Int) -> Unit) {
+    val arts = ArtsCatalog.arts
+    val state = rememberPagerState(initialPage = initialPage.coerceIn(0, arts.lastIndex)) { arts.size }
+    LaunchedEffect(state) { snapshotFlow { state.settledPage }.collect { onPageSettled(it) } }
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        VerticalPager(state = state, modifier = Modifier.fillMaxSize().systemBarsPadding(), beyondViewportPageCount = 1) { page ->
+            ArtCard(arts[page], page, arts.size, cornerRadius, pin)
+        }
+    }
+}
+
+@Composable
+private fun ArtCard(art: Art, index: Int, count: Int, cornerRadius: Dp, pin: Int) {
+    val context = LocalContext.current
+    val shape = RoundedCornerShape(cornerRadius)
+    val glow = Color(art.startColor)
+    val icon = remember(art, pin) {
+        pin.toBitmapKeepingSize(context, 6, 255).addLinearGradient(intArrayOf(art.startColor, art.endColor)).asImageBitmap()
+    }
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(dimensionResource(R.dimen.options_container_horizontal_padding))
+            .shadow(25.dp, shape, ambientColor = glow, spotColor = glow)
+            .clip(shape)
+            .background(colorResource(R.color.toolbarBackground)),
+    ) {
+        Text(
+            "${index + 1}/$count",
+            modifier = Modifier.align(Alignment.TopEnd).padding(25.dp),
+            color = colorResource(R.color.textTertiary),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Column(Modifier.align(Alignment.TopCenter).padding(top = 75.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                stringResource(R.string.app_name),
+                fontFamily = logoFont,
+                fontSize = with(LocalDensity.current) { dimensionResource(R.dimen.launcher_app_title).toSp() },
+                color = colorResource(R.color.textSecondary),
+            )
+            Image(icon, contentDescription = null, modifier = Modifier.padding(20.dp).size(dimensionResource(R.dimen.launcher_app_icon_dimen)))
+        }
+        Image(
+            painterResource(art.background),
+            contentDescription = null,
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            contentScale = ContentScale.FillWidth,
+        )
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/ChoiceDialog.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -20127,6 +19839,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
+import app.simple.positional.math.MathExtensions
 import app.simple.positional.model.Locations
 import app.simple.positional.util.DMSConverter
 
@@ -20149,6 +19862,8 @@ object CoordinateInput {
         val lon = longitude.toCoordinate() ?: return null
         return if (lat in -90.0..90.0 && lon in -180.0..180.0) lat to lon else null
     }
+
+    fun format(value: Double): String = MathExtensions.round(value, 6).toString()
 
     private fun String.toCoordinate(): Double? = trim().replace(',', '.').toDoubleOrNull()
 }
@@ -20267,7 +19982,7 @@ private fun MenuEntry(label: Int, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CoordinateField(value: String, label: Int, modifier: Modifier, onValueChange: (String) -> Unit) {
+internal fun CoordinateField(value: String, label: Int, modifier: Modifier, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -20301,6 +20016,110 @@ private fun LocationCard(location: Locations, actions: CustomLocationActions) {
         }
         IconButton(onClick = { actions.delete(location) }) {
             Icon(painterResource(R.drawable.ic_clear), contentDescription = stringResource(R.string.delete), tint = colorResource(R.color.iconColor))
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/MapSearchScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import android.location.Address
+import android.view.View
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import app.simple.positional.R
+
+object MapSearchQuery {
+    const val DELAY = 800L
+    const val MAX_RESULTS = 10
+    private const val MIN_LENGTH = 3
+
+    fun normalize(text: String): String? = text.trim().takeIf { it.length >= MIN_LENGTH }
+}
+
+interface MapSearchActions {
+    fun addressChanged(text: String)
+    fun pick(address: Address)
+    fun cancel()
+    fun confirm()
+}
+
+@Composable
+fun MapSearchScreen(form: CustomLocationForm, suggestions: List<Address>, map: View, actions: MapSearchActions) {
+    val iconTint = colorResource(R.color.iconColor)
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(stringResource(R.string.specified_hint_header), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                IconButton(onClick = actions::cancel) {
+                    Icon(painterResource(R.drawable.ic_clear), contentDescription = stringResource(android.R.string.cancel), tint = iconTint)
+                }
+                IconButton(onClick = actions::confirm) {
+                    Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(android.R.string.ok), tint = iconTint)
+                }
+            }
+            OutlinedTextField(
+                value = form.address,
+                onValueChange = actions::addressChanged,
+                label = { Text(stringResource(R.string.gps_address)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            )
+            suggestions.forEach { address ->
+                Text(
+                    address.getAddressLine(0).orEmpty(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth().clickable { actions.pick(address) }.padding(horizontal = 16.dp, vertical = 10.dp),
+                )
+            }
+            Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp)) {
+                CoordinateField(form.latitude, R.string.specified_hint_latitude, Modifier.weight(1f)) { form.latitude = it }
+                Spacer(Modifier.width(10.dp))
+                CoordinateField(form.longitude, R.string.specified_hint_longitude, Modifier.weight(1f)) { form.longitude = it }
+            }
+            HorizontalDivider(Modifier.padding(top = 12.dp), thickness = Dp.Hairline, color = MaterialTheme.colorScheme.outline)
+            Box(Modifier.fillMaxWidth().weight(1f)) {
+                AndroidView(factory = { map }, modifier = Modifier.fillMaxSize())
+                Icon(
+                    painterResource(R.drawable.ic_crosshair),
+                    contentDescription = null,
+                    tint = colorResource(R.color.iconRegular),
+                    modifier = Modifier.size(30.dp).align(Alignment.Center),
+                )
+            }
         }
     }
 }
@@ -23655,6 +23474,7 @@ import app.simple.positional.activities.subactivity.AccentColorsActivity
 import app.simple.positional.activities.subactivity.ArtsActivity
 import app.simple.positional.activities.subactivity.CustomLocationsActivity
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PositionalTheme
@@ -23784,7 +23604,7 @@ class Settings : ScopedFragment(), SettingsActions {
     }
 
     override fun openLegal(page: Int) {
-        startActivity(Intent(requireContext(), WebPageViewerActivity::class.java).putExtra("source", getString(page)))
+        HtmlPage.forTitle(page)?.let { WebPageViewerActivity.open(requireContext(), it) }
     }
 
     override fun openReleases() = openUrl("$REPOSITORY_URL/releases")
@@ -25071,72 +24891,6 @@ class Directions : ScopedFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/subpanels/HtmlViewer.kt
-################################################################################
-package app.simple.positional.ui.subpanels
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import app.simple.positional.R
-import app.simple.positional.decorations.fastscroll.FastScrollWebView
-import app.simple.positional.decorations.fastscroll.FastScrollerBuilder
-import app.simple.positional.extensions.fragment.ScopedFragment
-
-class HtmlViewer : ScopedFragment() {
-
-    private lateinit var webView: FastScrollWebView
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_webpage, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        webView = view.findViewById(R.id.web_view)
-        FastScrollerBuilder(webView).useMd2Style().build()
-
-        if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState)
-            return
-        }
-
-        pageFor(arguments?.getString("source"))?.let {
-            webView.loadUrl("file:///android_asset/html/$it.html")
-        }
-    }
-
-    private fun pageFor(source: String?): String? = when (source) {
-        getString(R.string.privacy_policy) -> "privacy_policy"
-        getString(R.string.disclaimer) -> "disclaimer"
-        getString(R.string.terms_of_use) -> "terms_and_conditions"
-        getString(R.string.permissions) -> "required_permissions"
-        getString(R.string.credits) -> "credits"
-        getString(R.string.internet_uses) -> "internet_uses"
-        getString(R.string.physical_properties) -> "physical_properties"
-        "Custom Coordinates Help" -> "custom_coordinates_help"
-        "Media Keys" -> "media_keys"
-        "trail_help" -> "trail_help"
-        "null" -> "null"
-        else -> null
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        webView.saveState(outState)
-        super.onSaveInstanceState(outState)
-    }
-
-    companion object {
-        fun newInstance(string: String): HtmlViewer {
-            val fragment = HtmlViewer()
-            fragment.arguments = Bundle().apply { putString("source", string) }
-            return fragment
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/subpanels/Measures.kt
 ################################################################################
 package app.simple.positional.ui.subpanels
@@ -25268,72 +25022,6 @@ class Measures : ScopedFragment() {
         }
 
         const val TAG = "Measures"
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/subpanels/TargetAddress.kt
-################################################################################
-package app.simple.positional.ui.subpanels
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.viewModels
-import app.simple.positional.R
-import app.simple.positional.adapters.location.AdapterTargetAddress
-import app.simple.positional.decorations.searchview.SearchView
-import app.simple.positional.decorations.views.CustomRecyclerView
-import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.util.StatusBarHeight
-import app.simple.positional.viewmodels.viewmodel.AddressViewModel
-
-class TargetAddress : ScopedFragment() {
-    private lateinit var searchView: SearchView
-    private lateinit var recyclerView: CustomRecyclerView
-
-    private val addressViewModel: AddressViewModel by viewModels()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_target_address_search, container, false)
-
-        searchView = view.findViewById(R.id.search_view)
-        recyclerView = view.findViewById(R.id.addresses_rv)
-
-        val params = searchView.layoutParams as ViewGroup.MarginLayoutParams
-        params.setMargins(params.leftMargin,
-                          StatusBarHeight.getStatusBarHeight(resources) + params.topMargin,
-                          params.rightMargin,
-                          params.bottomMargin)
-
-        recyclerView.setPadding(recyclerView.paddingLeft,
-                                recyclerView.paddingTop + params.topMargin + params.height + params.bottomMargin,
-                                recyclerView.paddingRight,
-                                recyclerView.paddingBottom + params.bottomMargin)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        searchView.setSearchViewEventListener { keywords, _ ->
-            addressViewModel.getCoordinatesFromAddress(keywords)
-        }
-
-        addressViewModel.address.observe(viewLifecycleOwner) {
-            recyclerView.adapter = AdapterTargetAddress(it)
-        }
-    }
-
-    companion object {
-        fun newInstance(): TargetAddress {
-            val args = Bundle()
-            val fragment = TargetAddress()
-            fragment.arguments = args
-            return fragment
-        }
     }
 }
 
@@ -27274,48 +26962,6 @@ class TrailDataFactory : ViewModelProvider.Factory {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/AddressViewModel.kt
-################################################################################
-package app.simple.positional.viewmodels.viewmodel
-
-import android.app.Application
-import android.location.Address
-import android.location.Geocoder
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import app.simple.positional.preferences.MainPreferences
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-class AddressViewModel(application: Application) : AndroidViewModel(application) {
-    val coordinates: MutableLiveData<Pair<Double, Double>> = MutableLiveData()
-    val address: MutableLiveData<MutableList<Address>> = MutableLiveData()
-
-    fun getCoordinatesFromAddress(address: String) {
-        viewModelScope.launch {
-            kotlin.runCatching {
-                val geocoder = Geocoder(getApplication())
-                var addresses: MutableList<Address>?
-
-                withContext(Dispatchers.IO) {
-                    runCatching {
-                        MainPreferences.setAddress(address)
-
-                        @Suppress("DEPRECATION")
-                        addresses = geocoder.getFromLocationName(address, 5)
-
-                        coordinates.postValue(Pair(addresses!![0].latitude, addresses!![0].longitude))
-                        this@AddressViewModel.address.postValue(addresses)
-                    }
-                }
-            }
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/CustomLocationViewModel.kt
 ################################################################################
 package app.simple.positional.viewmodels.viewmodel
@@ -27848,6 +27494,96 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
         super.onCleared()
         LocalBroadcastManager.getInstance(getApplication())
             .unregisterReceiver(locationBroadcastReceiver)
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/MapSearchViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import android.app.Application
+import android.location.Address
+import android.location.Geocoder
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.ui.compose.CoordinateInput
+import app.simple.positional.ui.compose.CustomLocationForm
+import app.simple.positional.ui.compose.MapSearchQuery
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+class MapSearchViewModel(application: Application) : AndroidViewModel(application) {
+    val form = CustomLocationForm()
+    private val query = MutableStateFlow("")
+
+    val suggestions: StateFlow<List<Address>> = query
+        .debounce { if (it.isEmpty()) 0L else MapSearchQuery.DELAY }
+        .map(MapSearchQuery::normalize)
+        .distinctUntilChanged()
+        .mapLatest { text -> text?.let { search(it) }.orEmpty().filter { it.hasLatitude() && it.hasLongitude() } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    init {
+        val last = MainPreferences.getLastCoordinates()
+        form.fill("", CoordinateInput.format(last[0].toDouble()), CoordinateInput.format(last[1].toDouble()))
+    }
+
+    fun onAddressChange(text: String) {
+        form.address = text
+        query.value = text
+    }
+
+    fun onCameraIdle(latitude: Double, longitude: Double) {
+        form.latitude = CoordinateInput.format(latitude)
+        form.longitude = CoordinateInput.format(longitude)
+    }
+
+    fun pick(address: Address) {
+        query.value = ""
+        form.fill(address.getAddressLine(0) ?: form.address, CoordinateInput.format(address.latitude), CoordinateInput.format(address.longitude))
+    }
+
+    private suspend fun search(text: String): List<Address> {
+        if (!Geocoder.isPresent()) return emptyList()
+        val geocoder = Geocoder(getApplication())
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            geocoder.searchAsync(text)
+        } else {
+            withContext(Dispatchers.IO) {
+                @Suppress("DEPRECATION")
+                runCatching { geocoder.getFromLocationName(text, MapSearchQuery.MAX_RESULTS) }.getOrNull().orEmpty()
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun Geocoder.searchAsync(text: String): List<Address> = suspendCancellableCoroutine { continuation ->
+        getFromLocationName(text, MapSearchQuery.MAX_RESULTS, object : Geocoder.GeocodeListener {
+            override fun onGeocode(addresses: MutableList<Address>) {
+                if (continuation.isActive) continuation.resume(addresses)
+            }
+
+            override fun onError(errorMessage: String?) {
+                if (continuation.isActive) continuation.resume(emptyList())
+            }
+        })
     }
 }
 
@@ -29064,194 +28800,6 @@ class TwilightWidget : AppWidgetProvider() {
     android:delay="15%" />
 
 ################################################################################
-# FILE: app/src/main/res/layout-land/activity_map_search.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="horizontal">
-
-    <app.simple.positional.decorations.padding.PaddingAwareLinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:layout_weight=".6"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:padding="@dimen/popup_padding">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/gps_address"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <AutoCompleteTextView
-            android:id="@+id/address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="textAutoComplete"
-            android:maxLength="60"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/popup_padding"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/specified_hint_latitude"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/description_text_size" />
-
-                <EditText
-                    android:id="@+id/latitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:autofillHints="@string/note"
-                    android:background="@drawable/text_field"
-                    android:fontFamily="@font/regular"
-                    android:inputType="numberDecimal"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:minHeight="50dp"
-                    android:paddingHorizontal="@dimen/popup_padding"
-                    android:saveEnabled="true"
-                    android:textColor="@color/textSecondary"
-                    android:textColorHighlight="?attr/colorAppAccentLight"
-                    android:textColorHint="@color/textTertiary"
-                    android:textCursorDrawable="@drawable/text_cursor"
-                    tools:ignore="LabelFor" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/popup_padding"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/specified_hint_longitude"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/description_text_size" />
-
-                <EditText
-                    android:id="@+id/longitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:autofillHints="@string/note"
-                    android:background="@drawable/text_field"
-                    android:fontFamily="@font/regular"
-                    android:inputType="numberDecimal"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:minHeight="50dp"
-                    android:paddingHorizontal="@dimen/popup_padding"
-                    android:saveEnabled="true"
-                    android:textColor="@color/textSecondary"
-                    android:textColorHighlight="?attr/colorAppAccentLight"
-                    android:textColorHint="@color/textTertiary"
-                    android:textCursorDrawable="@drawable/text_cursor"
-                    tools:ignore="LabelFor" />
-
-            </LinearLayout>
-        </LinearLayout>
-    </app.simple.positional.decorations.padding.PaddingAwareLinearLayout>
-
-    <View
-        android:layout_width="1px"
-        android:layout_height="match_parent"
-        android:background="@color/dividerColor" />
-
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <app.simple.positional.decorations.views.SearchMap
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_crosshair"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription" />
-
-        <app.simple.positional.decorations.padding.PaddingAwareLinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:animateLayoutChanges="true"
-            android:orientation="horizontal"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:paddingTop="@dimen/popup_padding"
-            tools:ignore="RtlSymmetry">
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/cancel"
-                android:layout_width="@dimen/app_button_size"
-                android:layout_height="@dimen/app_button_size"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="@dimen/popup_padding"
-                android:src="@drawable/ic_clear" />
-
-            <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-                android:id="@+id/confirm"
-                android:layout_width="@dimen/app_button_size"
-                android:layout_height="@dimen/app_button_size"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_check" />
-
-        </app.simple.positional.decorations.padding.PaddingAwareLinearLayout>
-
-    </FrameLayout>
-
-
-</LinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout-land/dialog_pin_customization.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -30439,24 +29987,6 @@ class TwilightWidget : AppWidgetProvider() {
 </LinearLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/activity_arts.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/arts_view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical" />
-
-</merge>
-
-################################################################################
 # FILE: app/src/main/res/layout/activity_clock_widget.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -30663,192 +30193,6 @@ class TwilightWidget : AppWidgetProvider() {
 </merge>
 
 ################################################################################
-# FILE: app/src/main/res/layout/activity_map_search.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.padding.PaddingAwareLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:animateLayoutChanges="true"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/popup_padding"
-        android:paddingTop="@dimen/popup_padding"
-        tools:ignore="RtlSymmetry">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-            android:id="@+id/cancel"
-            android:layout_width="@dimen/app_button_size"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/popup_padding"
-            android:src="@drawable/ic_clear" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-            android:id="@+id/confirm"
-            android:layout_width="@dimen/app_button_size"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_check" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:padding="@dimen/popup_padding">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/gps_address"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <AutoCompleteTextView
-            android:id="@+id/address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="textAutoComplete"
-            android:maxLength="60"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/popup_padding"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/specified_hint_latitude"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/description_text_size" />
-
-                <EditText
-                    android:id="@+id/latitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:autofillHints="@string/note"
-                    android:background="@drawable/text_field"
-                    android:fontFamily="@font/regular"
-                    android:inputType="numberDecimal"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:minHeight="50dp"
-                    android:paddingHorizontal="@dimen/popup_padding"
-                    android:saveEnabled="true"
-                    android:textColor="@color/textSecondary"
-                    android:textColorHighlight="?attr/colorAppAccentLight"
-                    android:textColorHint="@color/textTertiary"
-                    android:textCursorDrawable="@drawable/text_cursor"
-                    tools:ignore="LabelFor" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/popup_padding"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/specified_hint_longitude"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/description_text_size" />
-
-                <EditText
-                    android:id="@+id/longitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:autofillHints="@string/note"
-                    android:background="@drawable/text_field"
-                    android:fontFamily="@font/regular"
-                    android:inputType="numberDecimal"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:minHeight="50dp"
-                    android:paddingHorizontal="@dimen/popup_padding"
-                    android:saveEnabled="true"
-                    android:textColor="@color/textSecondary"
-                    android:textColorHighlight="?attr/colorAppAccentLight"
-                    android:textColorHint="@color/textTertiary"
-                    android:textCursorDrawable="@drawable/text_cursor"
-                    tools:ignore="LabelFor" />
-
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="@color/dividerColor" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <app.simple.positional.decorations.views.SearchMap
-            android:id="@+id/map"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_crosshair"
-            app:tint="@color/iconRegular"
-            tools:ignore="ContentDescription" />
-
-    </FrameLayout>
-
-</app.simple.positional.decorations.padding.PaddingAwareLinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/activity_sub.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -30856,150 +30200,6 @@ class TwilightWidget : AppWidgetProvider() {
     android:id="@+id/sub_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_address.xml
-################################################################################
-<app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/adapter_address_container"
-    android:layout_margin="@dimen/options_container_horizontal_padding"
-    android:focusable="true"
-    android:padding="10dp"
-    android:orientation="vertical">
-
-    <ImageView
-        android:id="@+id/imageView3"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:src="@drawable/ic_crosshair_dec"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-    <TextView
-        android:id="@+id/adapter_address_address"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="16dp"
-        android:fontFamily="@font/medium"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/info_text_secondary_size"
-        app:layout_constraintBottom_toTopOf="@id/adapter_address_latitude"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView3"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/adapter_address_latitude"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/regular"
-        android:maxLines="1"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/description_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/adapter_address_longitude"
-        app:layout_constraintStart_toStartOf="@+id/adapter_address_address"
-        app:layout_constraintTop_toBottomOf="@id/adapter_address_address" />
-
-    <TextView
-        android:id="@+id/adapter_address_longitude"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/regular"
-        android:maxLines="1"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/description_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/adapter_address_address"
-        app:layout_constraintStart_toEndOf="@+id/adapter_address_latitude"
-        app:layout_constraintTop_toBottomOf="@+id/adapter_address_address" />
-
-</app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_arts.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.padding.PaddingAwareFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <com.google.android.material.card.MaterialCardView xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/arts_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/options_container_horizontal_padding"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        app:cardBackgroundColor="@color/toolbarBackground"
-        app:cardElevation="25dp">
-
-        <TextView
-            android:id="@+id/arts_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_margin="25dp"
-            android:fontFamily="@font/light"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/popup_text_size" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="75dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            tools:ignore="UseCompoundDrawables">
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/launcher_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="20dp"
-                android:fontFamily="@font/logo"
-                android:gravity="center"
-                android:text="@string/app_name"
-                android:textColor="@color/textSecondary"
-                android:textSize="@dimen/launcher_app_title" />
-
-            <ImageView
-                android:id="@+id/arts_icon"
-                android:layout_width="@dimen/launcher_app_icon_dimen"
-                android:layout_height="@dimen/launcher_app_icon_dimen"
-                android:layout_gravity="center"
-                android:layout_margin="20dp"
-                android:src="@drawable/ic_pin_01"
-                tools:ignore="ContentDescription" />
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/art"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_marginTop="50dp"
-            android:adjustViewBounds="true"
-            tools:ignore="ContentDescription" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-</app.simple.positional.decorations.padding.PaddingAwareFrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/adapter_bloom_skin.xml
@@ -35605,36 +34805,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/fragment_target_address_search.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:backgroundTint="@color/toolbarBackground"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.searchview.SearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_margin="15dp" />
-
-    <app.simple.positional.decorations.views.CustomRecyclerView
-        android:id="@+id/addresses_rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:layoutAnimation="@anim/list_animation_controller"
-        android:overScrollMode="always"
-        android:scrollbars="none"
-        app:statusBarPaddingRequired="false" />
-</FrameLayout>
-
-
-################################################################################
 # FILE: app/src/main/res/layout/fragment_timezone_list.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -35769,33 +34939,6 @@ class TwilightWidget : AppWidgetProvider() {
     </com.google.android.material.card.MaterialCardView>
 
 </FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/fragment_webpage.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:background="@color/mainBackground"
-    android:layout_height="match_parent">
-
-    <app.simple.positional.decorations.padding.PaddingAwareNestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:scrollIndicators="none"
-        android:scrollbarSize="0dp"
-        app:layout_behavior="app.simple.positional.behaviors.OverScrollBehavior">
-
-        <app.simple.positional.decorations.fastscroll.FastScrollWebView
-            android:id="@+id/web_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </app.simple.positional.decorations.padding.PaddingAwareNestedScrollView>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/generic_compass_rose.xml
@@ -40033,6 +39176,51 @@ class TwilightWidget : AppWidgetProvider() {
     android:updatePeriodMillis="1800000" />
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/constants/HtmlPageTest.kt
+################################################################################
+package app.simple.positional.constants
+
+import app.simple.positional.R
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.io.File
+
+class HtmlPageTest {
+    @Test
+    fun everyPageHasAnAsset() {
+        HtmlPage.entries.forEach { assertTrue(it.asset, File("src/main/assets/html/${it.asset}.html").isFile) }
+    }
+
+    @Test
+    fun everyAssetHasAPage() {
+        val assets = File("src/main/assets/html").listFiles().orEmpty().map { it.nameWithoutExtension }.toSet()
+        assertEquals(HtmlPage.entries.map { it.asset }.toSet(), assets)
+    }
+
+    @Test
+    fun legalTitlesResolve() {
+        assertEquals(HtmlPage.PRIVACY_POLICY, HtmlPage.forTitle(R.string.privacy_policy))
+        assertEquals(HtmlPage.TERMS, HtmlPage.forTitle(R.string.terms_of_use))
+        assertEquals(HtmlPage.CREDITS, HtmlPage.forTitle(R.string.credits))
+        assertNull(HtmlPage.forTitle(R.string.app_name))
+    }
+
+    @Test
+    fun namesRoundTrip() {
+        HtmlPage.entries.forEach { assertEquals(it, HtmlPage.forName(it.name)) }
+        assertNull(HtmlPage.forName(null))
+        assertNull(HtmlPage.forName("unknown"))
+    }
+
+    @Test
+    fun urlPointsToAndroidAssets() {
+        assertEquals("file:///android_asset/html/credits.html", HtmlPage.CREDITS.url)
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/math/AngleTest.kt
 ################################################################################
 package app.simple.positional.math
@@ -40336,6 +39524,38 @@ class AccentPaletteTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/ArtsCatalogTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import app.simple.positional.constants.LauncherBackground
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class ArtsCatalogTest {
+    @Test
+    fun everyArtHasColors() {
+        val backgrounds = LauncherBackground.vectorBackground.size + LauncherBackground.vectorBackgroundNight.size
+        val colors = LauncherBackground.vectorColors.size + LauncherBackground.vectorNightColors.size
+        assertEquals(backgrounds, colors)
+        assertEquals(backgrounds, ArtsCatalog.arts.size)
+    }
+
+    @Test
+    fun colorPairsAreComplete() {
+        (LauncherBackground.vectorColors + LauncherBackground.vectorNightColors).forEach { assertTrue(it.size >= 2) }
+    }
+
+    @Test
+    fun nightArtsFollowDayArts() {
+        val day = LauncherBackground.vectorBackground.size
+        assertEquals(LauncherBackground.vectorBackgroundNight[0], ArtsCatalog.arts[day].background)
+        assertEquals(LauncherBackground.vectorNightColors[0][0], ArtsCatalog.arts[day].startColor)
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/ui/compose/CoordinateInputTest.kt
 ################################################################################
 package app.simple.positional.ui.compose
@@ -40377,6 +39597,36 @@ class CoordinateInputTest {
         assertEquals("Home", form.address)
         assertEquals("1.0", form.latitude)
         assertEquals("2.0", form.longitude)
+    }
+
+    @Test
+    fun formatsToSixDecimals() {
+        assertEquals("48.858372", CoordinateInput.format(48.8583721))
+        assertEquals("-2.5", CoordinateInput.format(-2.5))
+        assertEquals("0.0", CoordinateInput.format(0.0))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/MapSearchQueryTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class MapSearchQueryTest {
+    @Test
+    fun shortQueriesAreIgnored() {
+        assertNull(MapSearchQuery.normalize(""))
+        assertNull(MapSearchQuery.normalize("  ab  "))
+    }
+
+    @Test
+    fun queriesAreTrimmed() {
+        assertEquals("Paris", MapSearchQuery.normalize("  Paris "))
+        assertEquals("abc", MapSearchQuery.normalize("abc"))
     }
 }
 
