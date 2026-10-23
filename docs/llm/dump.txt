@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T17:15:46-04:00
+Generated: 2026-10-23T17:23:02-04:00
 Branch:    master
-Commit:    19852dc4 2026-10-23 17:15:40 -0400 add prompt
+Commit:    9ba8884c 2026-10-23 17:22:54 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (873 files)
+## TREE (874 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -246,6 +246,7 @@ app/
                 TextViewUtils.kt
                 TimeFormatter.kt
                 TrailNames.kt
+                Twilight.kt
                 UTMConverter.kt
               viewmodels/
                 viewmodel/
@@ -264,6 +265,7 @@ app/
                 SunTimeWidget.kt
                 SunTimeWidgetArt.kt
                 TwilightWidget.kt
+                WidgetParts.kt
       res/
         drawable-night/
           compass_dial.xml
@@ -567,8 +569,6 @@ app/
           widget_clock.xml
           widget_clock_2x2.xml
           widget_clock_3x3.xml
-          widget_suntime_art.xml
-          widget_twilight.xml
         mipmap-anydpi-v26/
           ic_launcher_default.xml
           ic_launcher_default_round.xml
@@ -960,6 +960,7 @@ app/
                 LocationShareTest.kt
                 NightModeTest.kt
                 TrailNamesTest.kt
+                TwilightTest.kt
 build.gradle
 export.sh
 gradle.properties
@@ -1230,7 +1231,7 @@ A location, compass, clock, level, trail and measurement toolkit for Android. Co
 - **Level**: bubble level from the accelerometer.
 - **Trail**: record and review paths with markers.
 - **Measure** and **Direction**: distances between points and bearings to targets.
-- Home screen widgets for clock, sun time, moon phase and twilight.
+- Home screen widgets for clock, sun time, moon phase and twilight (Glance, hourly refresh).
 
 ## Install
 
@@ -1252,7 +1253,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -1280,8 +1281,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 8i | AppCompat, Material Components, fragments, ConstraintLayout and legacy support libraries removed: activities extend `ComponentActivity` with `enableEdgeToEdge`, day/night is applied through a configuration override (`NightMode`), splash and clock widget setup are Compose screens | Done |
 | 8j | Sub screens (accent colours, arts, time zones, saved measures, trails and directions, custom locations, map search, help pages) are Navigation Compose destinations inside `MainActivity`; the panel lifecycle follows its destination so sensors and maps pause while a sub screen is open; nine activities removed | Done |
 | 9a | Moon phase and sun time widgets on Glance (same receivers, so placed widgets keep working); location updates delivered through an in-process `LocationBus` instead of the deprecated `LocalBroadcastManager` | Done |
-| 9b | Twilight and sun time art widgets on Glance | Next |
-| 9c | Clock widgets without a per-second foreground service | Planned |
+| 9b | Twilight and sun time art widgets on Glance with shared widget parts; twilight times computed once in `Twilight` for the clock panel and widget; twilight and sun art widgets refresh hourly; info section graphics no longer overlap text | Done |
+| 9c | Clock widgets without a per-second foreground service | Next |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
 ## Building
@@ -11117,7 +11118,6 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import androidx.annotation.DimenRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -11174,15 +11174,8 @@ fun PanelToolbar(title: String, topInset: Dp, divider: Boolean = true, actions: 
 
 @Composable
 fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp)) {
-        if (graphic != null) {
-            Image(
-                graphic,
-                contentDescription = null,
-                modifier = Modifier.size(dimensionResource(R.dimen.info_graphics_dimension)).align(Alignment.CenterEnd),
-            )
-        }
-        Column(Modifier.fillMaxWidth()) {
+    Row(modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
             Text(
                 title,
                 fontFamily = PositionalFonts.light,
@@ -11206,6 +11199,13 @@ fun InfoSection(title: String, rows: List<InfoRow>, graphic: Painter? = null, mo
                     modifier = Modifier.padding(top = if (row.value.isEmpty()) 8.dp else 0.dp),
                 )
             }
+        }
+        if (graphic != null) {
+            Image(
+                graphic,
+                contentDescription = null,
+                modifier = Modifier.padding(start = 12.dp).size(dimensionResource(R.dimen.info_graphics_dimension)),
+            )
         }
     }
 }
@@ -13842,6 +13842,8 @@ import app.simple.positional.util.Direction
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.MoonAngle
 import app.simple.positional.util.MoonTimeFormatter.formatMoonDate
+import app.simple.positional.util.Twilight
+import app.simple.positional.util.TwilightSpan
 import app.simple.positional.util.Ordinal.toOrdinal
 import org.shredzone.commons.suncalc.MoonIllumination
 import org.shredzone.commons.suncalc.MoonPhase
@@ -13897,16 +13899,9 @@ class ClockReport(private val context: Context) {
         fun distance(kilometers: Double) =
             if (metric) "${"%.3E".format(kilometers)} ${text(R.string.kilometer)}" else "${"%.3E".format(kilometers.toMiles())} ${text(R.string.miles)}"
 
-        fun sunTimes() = SunTimes.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude).elevation(altitude)
-        val sun = sunTimes().execute()
-        val twilight = listOf(
-            SunTimes.Twilight.ASTRONOMICAL, SunTimes.Twilight.NAUTICAL, SunTimes.Twilight.CIVIL,
-            SunTimes.Twilight.NIGHT_HOUR, SunTimes.Twilight.BLUE_HOUR, SunTimes.Twilight.HORIZON,
-            SunTimes.Twilight.VISUAL, SunTimes.Twilight.VISUAL_LOWER, SunTimes.Twilight.GOLDEN_HOUR,
-        ).associateWith { sunTimes().twilight(it).execute() }
-        val golden = sunTimes().twilight(GOLDEN_HOUR_EDGE).execute()
-        fun rise(t: SunTimes.Twilight) = twilight.getValue(t).rise
-        fun set(t: SunTimes.Twilight) = twilight.getValue(t).set
+        val sun = SunTimes.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude).elevation(altitude).execute()
+        val day = Twilight.compute(latitude, longitude, timezone, now, altitude)
+        fun rows(spans: List<TwilightSpan>) = spans.map { InfoRow(text(it.phase.label), if (it.range) range(it.start, it.end) else time(it.start)) }
 
         val sunPosition = SunPosition.compute().timezone(timezone).on(now).at(latitude, longitude).elevation(altitude).execute()
         val moonPosition = MoonPosition.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude).elevation(altitude).execute()
@@ -13926,26 +13921,8 @@ class ClockReport(private val context: Context) {
                 InfoRow(text(R.string.sun_noon), time(sun.noon)),
                 InfoRow(text(R.string.sun_nadir), time(sun.nadir)),
             ),
-            twilight = listOf(
-                InfoRow(text(R.string.twilight_morning)),
-                InfoRow(text(R.string.twilight_astronomical_dusk), range(rise(SunTimes.Twilight.ASTRONOMICAL), rise(SunTimes.Twilight.NAUTICAL))),
-                InfoRow(text(R.string.twilight_nautical_dusk), range(rise(SunTimes.Twilight.NAUTICAL), rise(SunTimes.Twilight.CIVIL))),
-                InfoRow(text(R.string.twilight_blue_hour), range(rise(SunTimes.Twilight.NIGHT_HOUR), rise(SunTimes.Twilight.BLUE_HOUR))),
-                InfoRow(text(R.string.twilight_civil_dusk), range(rise(SunTimes.Twilight.CIVIL), rise(SunTimes.Twilight.HORIZON))),
-                InfoRow(text(R.string.twilight_visual), time(rise(SunTimes.Twilight.VISUAL))),
-                InfoRow(text(R.string.twilight_horizon), time(rise(SunTimes.Twilight.HORIZON))),
-                InfoRow(text(R.string.twilight_visual_lower), time(rise(SunTimes.Twilight.VISUAL_LOWER))),
-                InfoRow(text(R.string.twilight_golden_hour), range(golden.rise, rise(SunTimes.Twilight.GOLDEN_HOUR))),
-                InfoRow(text(R.string.twilight_evening)),
-                InfoRow(text(R.string.twilight_golden_hour), range(set(SunTimes.Twilight.GOLDEN_HOUR), golden.set)),
-                InfoRow(text(R.string.twilight_visual_lower), time(set(SunTimes.Twilight.VISUAL_LOWER))),
-                InfoRow(text(R.string.twilight_horizon), time(set(SunTimes.Twilight.HORIZON))),
-                InfoRow(text(R.string.twilight_visual), time(set(SunTimes.Twilight.VISUAL))),
-                InfoRow(text(R.string.twilight_civil_dusk), range(set(SunTimes.Twilight.HORIZON), set(SunTimes.Twilight.CIVIL))),
-                InfoRow(text(R.string.twilight_blue_hour), range(set(SunTimes.Twilight.BLUE_HOUR), set(SunTimes.Twilight.NIGHT_HOUR))),
-                InfoRow(text(R.string.twilight_nautical_dusk), range(set(SunTimes.Twilight.CIVIL), set(SunTimes.Twilight.NAUTICAL))),
-                InfoRow(text(R.string.twilight_astronomical_dusk), range(set(SunTimes.Twilight.NAUTICAL), set(SunTimes.Twilight.ASTRONOMICAL))),
-            ),
+            twilight = listOf(InfoRow(text(R.string.twilight_morning))) + rows(day.morning) +
+                InfoRow(text(R.string.twilight_evening)) + rows(day.evening),
             moonPosition = listOf(
                 InfoRow(text(R.string.moon_azimuth), direction(moonPosition.azimuth)),
                 InfoRow(text(R.string.moon_altitude), degrees(moonPosition.altitude)),
@@ -13986,10 +13963,6 @@ class ClockReport(private val context: Context) {
             seconds -> "HH:mm:ss"
             else -> "HH:mm"
         }
-    }
-
-    private companion object {
-        const val GOLDEN_HOUR_EDGE = -4.0
     }
 }
 
@@ -16763,6 +16736,73 @@ object TrailNames {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/Twilight.kt
+################################################################################
+package app.simple.positional.util
+
+import androidx.annotation.StringRes
+import app.simple.positional.R
+import org.shredzone.commons.suncalc.SunTimes
+import java.time.Instant
+import java.time.ZonedDateTime
+
+enum class TwilightPhase(@StringRes val label: Int, val color: Long) {
+    ASTRONOMICAL(R.string.twilight_astronomical_dusk, 0xFF1A237E),
+    NAUTICAL(R.string.twilight_nautical_dusk, 0xFF0D47A1),
+    BLUE_HOUR(R.string.twilight_blue_hour, 0xFF1565C0),
+    CIVIL(R.string.twilight_civil_dusk, 0xFF1E88E5),
+    VISUAL(R.string.twilight_visual, 0xFF42A5F5),
+    HORIZON(R.string.twilight_horizon, 0xFF64B5F6),
+    VISUAL_LOWER(R.string.twilight_visual_lower, 0xFF90CAF9),
+    GOLDEN_HOUR(R.string.twilight_golden_hour, 0xFFFFCC80),
+}
+
+data class TwilightSpan(val phase: TwilightPhase, val start: ZonedDateTime?, val end: ZonedDateTime?, val range: Boolean)
+
+data class TwilightDay(val morning: List<TwilightSpan>, val evening: List<TwilightSpan>)
+
+object Twilight {
+    private const val GOLDEN_HOUR_EDGE = -4.0
+    private val angles = listOf(
+        SunTimes.Twilight.ASTRONOMICAL, SunTimes.Twilight.NAUTICAL, SunTimes.Twilight.CIVIL,
+        SunTimes.Twilight.NIGHT_HOUR, SunTimes.Twilight.BLUE_HOUR, SunTimes.Twilight.HORIZON,
+        SunTimes.Twilight.VISUAL, SunTimes.Twilight.VISUAL_LOWER, SunTimes.Twilight.GOLDEN_HOUR,
+    )
+
+    fun compute(latitude: Double, longitude: Double, timezone: String, at: Instant = Instant.now(), altitude: Double = 0.0): TwilightDay {
+        fun base() = SunTimes.compute().timezone(timezone).on(at).latitude(latitude).longitude(longitude).elevation(altitude)
+        val times = angles.associateWith { base().twilight(it).execute() }
+        val golden = base().twilight(GOLDEN_HOUR_EDGE).execute()
+        fun rise(t: SunTimes.Twilight) = times.getValue(t).rise
+        fun set(t: SunTimes.Twilight) = times.getValue(t).set
+        fun span(phase: TwilightPhase, start: ZonedDateTime?, end: ZonedDateTime?) = TwilightSpan(phase, start, end, true)
+        fun moment(phase: TwilightPhase, time: ZonedDateTime?) = TwilightSpan(phase, time, time, false)
+        return TwilightDay(
+            morning = listOf(
+                span(TwilightPhase.ASTRONOMICAL, rise(SunTimes.Twilight.ASTRONOMICAL), rise(SunTimes.Twilight.NAUTICAL)),
+                span(TwilightPhase.NAUTICAL, rise(SunTimes.Twilight.NAUTICAL), rise(SunTimes.Twilight.CIVIL)),
+                span(TwilightPhase.BLUE_HOUR, rise(SunTimes.Twilight.NIGHT_HOUR), rise(SunTimes.Twilight.BLUE_HOUR)),
+                span(TwilightPhase.CIVIL, rise(SunTimes.Twilight.CIVIL), rise(SunTimes.Twilight.HORIZON)),
+                moment(TwilightPhase.VISUAL, rise(SunTimes.Twilight.VISUAL)),
+                moment(TwilightPhase.HORIZON, rise(SunTimes.Twilight.HORIZON)),
+                moment(TwilightPhase.VISUAL_LOWER, rise(SunTimes.Twilight.VISUAL_LOWER)),
+                span(TwilightPhase.GOLDEN_HOUR, golden.rise, rise(SunTimes.Twilight.GOLDEN_HOUR)),
+            ),
+            evening = listOf(
+                span(TwilightPhase.GOLDEN_HOUR, set(SunTimes.Twilight.GOLDEN_HOUR), golden.set),
+                moment(TwilightPhase.VISUAL_LOWER, set(SunTimes.Twilight.VISUAL_LOWER)),
+                moment(TwilightPhase.HORIZON, set(SunTimes.Twilight.HORIZON)),
+                moment(TwilightPhase.VISUAL, set(SunTimes.Twilight.VISUAL)),
+                span(TwilightPhase.CIVIL, set(SunTimes.Twilight.HORIZON), set(SunTimes.Twilight.CIVIL)),
+                span(TwilightPhase.BLUE_HOUR, set(SunTimes.Twilight.BLUE_HOUR), set(SunTimes.Twilight.NIGHT_HOUR)),
+                span(TwilightPhase.NAUTICAL, set(SunTimes.Twilight.CIVIL), set(SunTimes.Twilight.NAUTICAL)),
+                span(TwilightPhase.ASTRONOMICAL, set(SunTimes.Twilight.NAUTICAL), set(SunTimes.Twilight.ASTRONOMICAL)),
+            ),
+        )
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/UTMConverter.kt
 ################################################################################
 package app.simple.positional.util
@@ -17897,38 +17937,20 @@ package app.simple.positional.widgets
 
 import android.content.Context
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
-import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
-import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
 import app.simple.positional.R
-import app.simple.positional.constants.LocationPins
-import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.util.LocaleHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.shredzone.commons.suncalc.SunTimes
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.TimeZone
 
 class SunTimeWidget : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = SunTimeGlance()
@@ -17937,47 +17959,15 @@ class SunTimeWidget : GlanceAppWidgetReceiver() {
 class SunTimeGlance : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         SharedPreferences.init(context)
-        val pin = if (MainPreferences.isCustomCoordinate()) R.drawable.ic_place_custom else LocationPins.getLocationPin()
-        val pattern = if (ClockPreferences.getDefaultClockTimeFormat()) {
-            DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
-        } else {
-            DateTimeFormatter.ofPattern("HH:mm")
-        }
-        val times = withContext(Dispatchers.Default) {
-            val coordinates = if (MainPreferences.isCustomCoordinate()) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
-            val sun = SunTimes.compute()
-                .timezone(TimeZone.getDefault().id)
-                .on(Instant.now())
-                .latitude(coordinates[0].toDouble())
-                .longitude(coordinates[1].toDouble())
-                .execute()
-            listOf(
-                R.drawable.ic_widget_sunrise to sun.rise,
-                R.drawable.ic_widget_sun_noon to sun.noon,
-                R.drawable.ic_widget_sun_set to sun.set,
-                R.drawable.ic_widget_sun_nadir to sun.nadir,
-            ).map { (icon, time) -> icon to (time?.let(pattern::format) ?: "--") }
-        }
-        val updated = context.getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
+        val pattern = WidgetSky.pattern()
+        val times = withContext(Dispatchers.Default) { WidgetSky.sunTimes(pattern) }
+        val pin = WidgetSky.pin()
+        val title = context.getString(R.string.app_name)
+        val updated = WidgetSky.updated(context, pattern)
         provideContent {
             Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).padding(10.dp)) {
-                Row(GlanceModifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Image(ImageProvider(pin), contentDescription = null, modifier = GlanceModifier.size(20.dp))
-                    Text(
-                        updated,
-                        style = TextStyle(color = ColorProvider(R.color.textTertiary)),
-                        modifier = GlanceModifier.defaultWeight().padding(horizontal = 8.dp),
-                    )
-                    Text(context.getString(R.string.app_name), style = TextStyle(color = ColorProvider(R.color.dividerColor), fontSize = 12.sp))
-                }
-                Row(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-                    times.forEach { (icon, time) ->
-                        Column(GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Image(ImageProvider(icon), contentDescription = null, modifier = GlanceModifier.size(36.dp))
-                            Text(time, style = TextStyle(color = ColorProvider(R.color.textTertiary), fontSize = 12.sp))
-                        }
-                    }
-                }
+                WidgetHeader(pin, title, updated)
+                SunTimesRow(times, GlanceModifier.fillMaxSize())
             }
         }
     }
@@ -17988,94 +17978,53 @@ class SunTimeGlance : GlanceAppWidget() {
 ################################################################################
 package app.simple.positional.widgets
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.padding
 import app.simple.positional.R
 import app.simple.positional.constants.LauncherBackground
-import app.simple.positional.constants.LocationPins
-import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import app.simple.positional.util.LocaleHelper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.shredzone.commons.suncalc.SunTimes
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
 
-class SunTimeWidgetArt : AppWidgetProvider() {
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        onWidgetUpdate(context)
+class SunTimeWidgetArt : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = SunTimeArtGlance()
+}
 
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
-    }
-
-    override fun onEnabled(context: Context) {
-        super.onEnabled(context)
-
-        onWidgetUpdate(context)
-    }
-
-    private fun onWidgetUpdate(context: Context) {
-        CoroutineScope(Dispatchers.Default).launch {
-            SharedPreferences.init(context)
-
-            val latitude = if (MainPreferences.isCustomCoordinate()) {
-                getSharedPreferences().getFloat(MainPreferences.latitude, 0.0F).toDouble()
-            } else {
-                getSharedPreferences().getFloat(MainPreferences.lastLatitude, 0.0F).toDouble()
-            }
-
-            val longitude = if (MainPreferences.isCustomCoordinate()) {
-                getSharedPreferences().getFloat(MainPreferences.longitude, 0.0F).toDouble()
-            } else {
-                getSharedPreferences().getFloat(MainPreferences.lastLongitude, 0.0F).toDouble()
-            }
-
-            val pattern: DateTimeFormatter = if (ClockPreferences.getDefaultClockTimeFormat()) {
-                DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
-            } else {
-                DateTimeFormatter.ofPattern("HH:mm")
-            }
-
-            val sunTimes = SunTimes.compute().timezone(Calendar.getInstance().timeZone.id).on(Instant.now()).latitude(latitude).longitude(longitude).execute()
-            val sunRise = pattern.format(sunTimes.rise)
-            val sunNoon = pattern.format(sunTimes.noon)
-            val sunSet = pattern.format(sunTimes.set)
-            val sunNadir = pattern.format(sunTimes.nadir)
-
-            val updateTime = context.getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
-
-            withContext(Dispatchers.Main) {
-                val views = RemoteViews(context.packageName, R.layout.widget_suntime_art)
-                views.setTextViewText(R.id.widget_sunrise, sunRise)
-                views.setTextViewText(R.id.widget_sun_noon, sunNoon)
-                views.setTextViewText(R.id.widget_sunset, sunSet)
-                views.setTextViewText(R.id.widget_sun_nadir, sunNadir)
-
-                views.setTextViewText(R.id.widget_suntime_heading, updateTime)
-
-                views.setImageViewResource(R.id.widget_suntime_art,
-                        LauncherBackground.vectorBackground[LauncherBackground.vectorBackground.indices.random()])
-
-                if (MainPreferences.isCustomCoordinate()) {
-                    views.setImageViewResource(R.id.widget_suntime_icon, R.drawable.ic_place_custom)
-                } else {
-                    views.setImageViewResource(R.id.widget_suntime_icon, LocationPins.locationsPins[GPSPreferences.getPinSkin()])
+class SunTimeArtGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        SharedPreferences.init(context)
+        val pattern = WidgetSky.pattern()
+        val times = withContext(Dispatchers.Default) { WidgetSky.sunTimes(pattern) }
+        val pin = WidgetSky.pin()
+        val title = context.getString(R.string.app_name)
+        val updated = WidgetSky.updated(context, pattern)
+        val art = LauncherBackground.vectorBackground.random()
+        provideContent {
+            Box(
+                GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).cornerRadius(20.dp),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                Image(ImageProvider(art), contentDescription = null, modifier = GlanceModifier.fillMaxWidth(), contentScale = ContentScale.Fit)
+                Column(GlanceModifier.fillMaxSize().padding(10.dp)) {
+                    WidgetHeader(pin, title, updated)
+                    SunTimesRow(times, GlanceModifier.fillMaxWidth().padding(top = 10.dp))
                 }
-
-                val componentName = ComponentName(context, SunTimeWidgetArt::class.java)
-                val manager = AppWidgetManager.getInstance(context)
-                manager.updateAppWidget(componentName, views)
             }
         }
     }
@@ -18086,106 +18035,179 @@ class SunTimeWidgetArt : AppWidgetProvider() {
 ################################################################################
 package app.simple.positional.widgets
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.ImageProvider
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.lazy.LazyColumn
+import androidx.glance.appwidget.lazy.items
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.padding
+import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
-import app.simple.positional.util.HtmlHelper
-import app.simple.positional.util.LocaleHelper
-import kotlinx.coroutines.CoroutineScope
+import app.simple.positional.util.Twilight
+import app.simple.positional.util.TwilightSpan
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.ZonedDateTime
+
+class TwilightWidget : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = TwilightGlance()
+}
+
+private data class TwilightLine(val color: Long, val label: String, val value: String)
+
+class TwilightGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        SharedPreferences.init(context)
+        val pattern = WidgetSky.pattern()
+        val notAvailable = context.getString(R.string.not_available)
+        fun time(value: ZonedDateTime?) = value?.format(pattern) ?: notAvailable
+        fun lines(spans: List<TwilightSpan>) = spans.map {
+            TwilightLine(it.phase.color, context.getString(it.phase.label), if (it.range) "${time(it.start)} ~ ${time(it.end)}" else time(it.start))
+        }
+        val day = withContext(Dispatchers.Default) {
+            val (latitude, longitude) = WidgetSky.coordinates()
+            Twilight.compute(latitude, longitude, ClockPreferences.getTimeZone())
+        }
+        val morning = lines(day.morning)
+        val evening = lines(day.evening)
+        val title = context.getString(R.string.twilight)
+        val morningTitle = context.getString(R.string.twilight_morning)
+        val eveningTitle = context.getString(R.string.twilight_evening)
+        val updated = WidgetSky.updated(context, pattern)
+        provideContent {
+            Column(GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).padding(10.dp)) {
+                WidgetHeader(R.drawable.ic_twilight, title, updated)
+                LazyColumn(GlanceModifier.fillMaxSize().padding(horizontal = 10.dp)) {
+                    item { Heading(morningTitle) }
+                    items(morning) { Line(it) }
+                    item { Heading(eveningTitle) }
+                    items(evening) { Line(it) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Heading(text: String) {
+    Text(
+        text,
+        style = TextStyle(color = ColorProvider(R.color.textPrimary), fontWeight = FontWeight.Bold, fontSize = 15.sp),
+        modifier = GlanceModifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp),
+    )
+}
+
+@Composable
+private fun Line(line: TwilightLine) {
+    val style = TextStyle(color = ColorProvider(R.color.textSecondary), fontSize = 12.sp)
+    Row(GlanceModifier.fillMaxWidth().padding(vertical = 1.dp)) {
+        Text("⬤ ", style = style.copy(color = ColorProvider(Color(line.color))))
+        Text("${line.label} ", style = style.copy(fontWeight = FontWeight.Bold))
+        Text(line.value, style = style, modifier = GlanceModifier.defaultWeight())
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/widgets/WidgetParts.kt
+################################################################################
+package app.simple.positional.widgets
+
+import android.content.Context
+import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
+import app.simple.positional.R
+import app.simple.positional.constants.LocationPins
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.util.LocaleHelper
 import org.shredzone.commons.suncalc.SunTimes
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.TimeZone
 
-class TwilightWidget : AppWidgetProvider() {
-    override fun onUpdate(context: Context?, appWidgetManager: AppWidgetManager?, appWidgetIds: IntArray?) {
-        context?.updateWidget()
-        super.onUpdate(context, appWidgetManager, appWidgetIds)
+internal object WidgetSky {
+    fun coordinates(): Pair<Double, Double> {
+        val c = if (MainPreferences.isCustomCoordinate()) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
+        return c[0].toDouble() to c[1].toDouble()
     }
 
-    override fun onEnabled(context: Context?) {
-        super.onEnabled(context)
-        context?.updateWidget()
+    @DrawableRes
+    fun pin(): Int = if (MainPreferences.isCustomCoordinate()) R.drawable.ic_place_custom else LocationPins.getLocationPin()
+
+    fun pattern(): DateTimeFormatter =
+        if (ClockPreferences.getDefaultClockTimeFormat()) DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
+        else DateTimeFormatter.ofPattern("HH:mm")
+
+    fun updated(context: Context, pattern: DateTimeFormatter) = context.getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
+
+    fun sunTimes(pattern: DateTimeFormatter): List<Pair<Int, String>> {
+        val (latitude, longitude) = coordinates()
+        val sun = SunTimes.compute().timezone(TimeZone.getDefault().id).on(Instant.now()).latitude(latitude).longitude(longitude).execute()
+        return listOf(
+            R.drawable.ic_widget_sunrise to sun.rise,
+            R.drawable.ic_widget_sun_noon to sun.noon,
+            R.drawable.ic_widget_sun_set to sun.set,
+            R.drawable.ic_widget_sun_nadir to sun.nadir,
+        ).map { (icon, time) -> icon to (time?.let(pattern::format) ?: "--") }
     }
+}
 
-    private fun Context.updateWidget() {
-        CoroutineScope(Dispatchers.Default).launch {
-            SharedPreferences.init(this@updateWidget)
-            val preferences = SharedPreferences.getSharedPreferences()
-            val custom = MainPreferences.isCustomCoordinate()
-            val latitude = preferences.getFloat(if (custom) MainPreferences.latitude else MainPreferences.lastLatitude, 0f).toDouble()
-            val longitude = preferences.getFloat(if (custom) MainPreferences.longitude else MainPreferences.lastLongitude, 0f).toDouble()
+@Composable
+internal fun WidgetHeader(@DrawableRes icon: Int, title: String, caption: String) {
+    Row(GlanceModifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Image(ImageProvider(icon), contentDescription = null, modifier = GlanceModifier.size(20.dp))
+        Text(
+            title,
+            style = TextStyle(color = ColorProvider(R.color.textTertiary), fontWeight = FontWeight.Medium),
+            modifier = GlanceModifier.defaultWeight().padding(horizontal = 10.dp),
+        )
+        Text(caption, style = TextStyle(color = ColorProvider(R.color.dividerColor), fontSize = 11.sp))
+    }
+}
 
-            val pattern: DateTimeFormatter = if (ClockPreferences.getDefaultClockTimeFormat()) {
-                DateTimeFormatter.ofPattern("hh:mm a").withLocale(LocaleHelper.getAppLocale())
-            } else {
-                DateTimeFormatter.ofPattern("HH:mm")
-            }
-            val notAvailable = getString(R.string.not_available)
-            val now = Instant.now()
-            val timezone = ClockPreferences.getTimeZone()
-
-            fun base() = SunTimes.compute().timezone(timezone).on(now).latitude(latitude).longitude(longitude)
-            val times = TWILIGHTS.associateWith { base().twilight(it).execute() }
-            val golden = base().twilight(GOLDEN_HOUR_EDGE).execute()
-            fun time(value: ZonedDateTime?) = value?.format(pattern) ?: notAvailable
-            fun rise(twilight: SunTimes.Twilight) = times.getValue(twilight).rise
-            fun set(twilight: SunTimes.Twilight) = times.getValue(twilight).set
-            fun row(color: String, label: Int, value: ZonedDateTime?) =
-                "<b><font color='$color'>$DOT</font> ${getString(label)}</b> ${time(value)}<br>"
-            fun row(color: String, label: Int, from: ZonedDateTime?, to: ZonedDateTime?) =
-                "<b><font color='$color'>$DOT</font> ${getString(label)}</b> ${time(from)} $ARROW ${time(to)}<br>"
-
-            val twilightData = HtmlHelper.fromHtml(
-                "<h3><b>${getString(R.string.twilight_morning)}</b></h3>" +
-                row("#1a237e", R.string.twilight_astronomical_dusk, rise(SunTimes.Twilight.ASTRONOMICAL), rise(SunTimes.Twilight.NAUTICAL)) +
-                row("#0d47a1", R.string.twilight_nautical_dusk, rise(SunTimes.Twilight.NAUTICAL), rise(SunTimes.Twilight.CIVIL)) +
-                row("#1565c0", R.string.twilight_blue_hour, rise(SunTimes.Twilight.NIGHT_HOUR), rise(SunTimes.Twilight.BLUE_HOUR)) +
-                row("#1e88e5", R.string.twilight_civil_dusk, rise(SunTimes.Twilight.CIVIL), rise(SunTimes.Twilight.HORIZON)) +
-                row("#42a5f5", R.string.twilight_visual, rise(SunTimes.Twilight.VISUAL)) +
-                row("#64b5f6", R.string.twilight_horizon, rise(SunTimes.Twilight.HORIZON)) +
-                row("#90caf9", R.string.twilight_visual_lower, rise(SunTimes.Twilight.VISUAL_LOWER)) +
-                row("#ffcc80", R.string.twilight_golden_hour, golden.rise, rise(SunTimes.Twilight.GOLDEN_HOUR)) +
-                "<br><h3>${getString(R.string.twilight_evening)}</h3>" +
-                row("#ffcc80", R.string.twilight_golden_hour, set(SunTimes.Twilight.GOLDEN_HOUR), golden.set) +
-                row("#90caf9", R.string.twilight_visual_lower, set(SunTimes.Twilight.VISUAL_LOWER)) +
-                row("#64b5f6", R.string.twilight_horizon, set(SunTimes.Twilight.HORIZON)) +
-                row("#42a5f5", R.string.twilight_visual, set(SunTimes.Twilight.VISUAL)) +
-                row("#1e88e5", R.string.twilight_civil_dusk, set(SunTimes.Twilight.HORIZON), set(SunTimes.Twilight.CIVIL)) +
-                row("#1565c0", R.string.twilight_blue_hour, set(SunTimes.Twilight.BLUE_HOUR), set(SunTimes.Twilight.NIGHT_HOUR)) +
-                row("#0d47a1", R.string.twilight_nautical_dusk, set(SunTimes.Twilight.CIVIL), set(SunTimes.Twilight.NAUTICAL)) +
-                row("#1a237e", R.string.twilight_astronomical_dusk, set(SunTimes.Twilight.NAUTICAL), set(SunTimes.Twilight.ASTRONOMICAL))
-            )
-            val updateTime = getString(R.string.last_updated) + " • " + pattern.format(ZonedDateTime.now())
-
-            withContext(Dispatchers.Main) {
-                val views = RemoteViews(packageName, R.layout.widget_twilight)
-                views.setTextViewText(R.id.twilight_info, twilightData)
-                views.setTextViewText(R.id.widget_update_time, updateTime)
-                AppWidgetManager.getInstance(this@updateWidget)
-                    .updateAppWidget(ComponentName(this@updateWidget, TwilightWidget::class.java), views)
+@Composable
+internal fun SunTimesRow(times: List<Pair<Int, String>>, modifier: GlanceModifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        times.forEach { (icon, time) ->
+            Column(GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(ImageProvider(icon), contentDescription = null, modifier = GlanceModifier.size(36.dp))
+                Text(time, style = TextStyle(color = ColorProvider(R.color.textTertiary), fontSize = 12.sp), modifier = GlanceModifier.padding(top = 6.dp))
             }
         }
-    }
-
-    private companion object {
-        const val DOT = "⬤"
-        const val ARROW = "<b>~</b>"
-        const val GOLDEN_HOUR_EDGE = -4.0
-        val TWILIGHTS = listOf(
-            SunTimes.Twilight.ASTRONOMICAL, SunTimes.Twilight.NAUTICAL, SunTimes.Twilight.CIVIL,
-            SunTimes.Twilight.NIGHT_HOUR, SunTimes.Twilight.BLUE_HOUR, SunTimes.Twilight.HORIZON,
-            SunTimes.Twilight.VISUAL, SunTimes.Twilight.VISUAL_LOWER, SunTimes.Twilight.GOLDEN_HOUR,
-        )
     }
 }
 
@@ -18413,248 +18435,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/widget_suntime_art.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="400dp"
-    android:background="@color/mainBackground"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:orientation="vertical">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="10dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-            tools:ignore="UseCompoundDrawables">
-            <ImageView
-                android:id="@+id/widget_suntime_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_place_notification"
-                tools:ignore="ContentDescription" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:fontFamily="@font/medium"
-                android:text="@string/app_name"
-                android:textColor="@color/textTertiary" />
-
-            <TextView
-                android:id="@+id/widget_suntime_heading"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="10dp"
-                android:fontFamily="@font/regular"
-                android:text="@string/app_name"
-                android:textColor="@color/dividerColor"
-                android:textSize="@dimen/description_text_size" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                tools:ignore="UseCompoundDrawables">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_widget_sunrise"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/widget_sunrise"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_horizontal"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                tools:ignore="UseCompoundDrawables">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_widget_sun_noon"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/widget_sun_noon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_horizontal"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                tools:ignore="UseCompoundDrawables">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_widget_sun_set"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/widget_sunset"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_horizontal"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                tools:ignore="UseCompoundDrawables">
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_widget_sun_nadir"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/widget_sun_nadir"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:fontFamily="@font/regular"
-                    android:gravity="center_horizontal"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/widget_suntime_art"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:adjustViewBounds="true"
-        android:src="@drawable/launcher_day_07"
-        tools:ignore="ContentDescription" />
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/widget_twilight.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/bg_widget"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:padding="10dp"
-    android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        tools:ignore="UseCompoundDrawables">
-
-        <ImageView
-            android:id="@+id/widget_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/ic_twilight"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp"
-            android:layout_weight="1"
-            android:fontFamily="@font/medium"
-            android:text="@string/twilight"
-            android:textColor="@color/textTertiary" />
-
-        <TextView
-            android:id="@+id/widget_update_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="10dp"
-            android:fontFamily="@font/regular"
-            android:text="@string/app_name"
-            android:textColor="@color/dividerColor"
-            android:textSize="@dimen/description_text_size" />
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/twilight_info"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textColor="@color/textSecondary"
-        android:fontFamily="@font/regular"
-        android:paddingHorizontal="10dp"
-        android:textSize="@dimen/settings_secondary_text_size" />
-
-</LinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/values-hdpi/dimens.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -18669,7 +18449,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="info_graphics_dimension">120dp</dimen>
 
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">20dp</dimen>
 
@@ -18684,10 +18463,7 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">20dp</dimen>
     <dimen name="level_text_size">16sp</dimen>
 
-    <dimen name="settings_secondary_text_size">11sp</dimen>
-
     <dimen name="bottom_nav_height">50dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">22sp</dimen>
     <dimen name="launcher_app_icon_dimen">100dp</dimen>
 
@@ -18752,7 +18528,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="info_graphics_dimension">120dp</dimen>
 
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
 
@@ -18767,13 +18542,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_secondary_text_size">14sp</dimen>
-
     <dimen name="bottom_nav_height">70dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
@@ -18796,7 +18567,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="info_graphics_dimension">120dp</dimen>
 
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
 
@@ -18811,13 +18581,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_secondary_text_size">14sp</dimen>
-
     <dimen name="bottom_nav_height">70dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
@@ -18854,7 +18620,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="info_graphics_dimension">100dp</dimen>
 
     <dimen name="options_container_horizontal_padding">10dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">30dp</dimen>
 
@@ -18869,10 +18634,7 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">20dp</dimen>
     <dimen name="level_text_size">18sp</dimen>
 
-    <dimen name="settings_secondary_text_size">13sp</dimen>
-
     <dimen name="bottom_nav_height">50dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">27sp</dimen>
     <dimen name="launcher_app_icon_dimen">160dp</dimen>
 
@@ -18893,7 +18655,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="info_graphics_dimension">120dp</dimen>
 
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
 
@@ -18908,10 +18669,7 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_secondary_text_size">14sp</dimen>
-
     <dimen name="bottom_nav_height">60dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">175dp</dimen>
 </resources>
@@ -19045,7 +18803,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="info_graphics_dimension">120dp</dimen>
 
     <dimen name="options_container_horizontal_padding">15dp</dimen>
-    <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">40dp</dimen>
 
@@ -19060,13 +18817,9 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="level_dot">30dp</dimen>
     <dimen name="level_text_size">22sp</dimen>
 
-    <dimen name="settings_secondary_text_size">14sp</dimen>
-
     <dimen name="bottom_nav_height">60dp</dimen>
-    <dimen name="all_corner_radius">20dp</dimen>
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
-
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
@@ -19689,21 +19442,24 @@ class TwilightWidget : AppWidgetProvider() {
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/widget_suntime_art"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:minResizeHeight="300dp"
     android:minResizeWidth="150dp"
     android:minWidth="300dp"
     android:minHeight="300dp"
-    android:updatePeriodMillis="1800000" />
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="3600000" />
 
 ################################################################################
 # FILE: app/src/main/res/xml/twilight_widget_info.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:initialLayout="@layout/widget_twilight"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:minWidth="250dp"
+    android:minHeight="180dp"
     android:resizeMode="horizontal|vertical"
-    android:updatePeriodMillis="1800000" />
+    android:updatePeriodMillis="3600000" />
 
 ################################################################################
 # FILE: app/src/test/java/app/simple/positional/constants/HtmlPageTest.kt
@@ -20939,6 +20695,64 @@ class TrailNamesTest {
     @Test
     fun rejectsDuplicatesIgnoringCase() {
         assertFalse(TrailNames.isValid(" evening RUN ", listOf("Evening run")))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/util/TwilightTest.kt
+################################################################################
+package app.simple.positional.util
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.time.ZoneId
+import java.time.ZonedDateTime
+
+class TwilightTest {
+    private val zone = "America/New_York"
+    private val midsummer = ZonedDateTime.of(2026, 6, 21, 0, 0, 0, 0, ZoneId.of(zone)).toInstant()
+    private val day = Twilight.compute(37.0, -76.4, zone, midsummer)
+
+    @Test
+    fun eveningMirrorsMorning() {
+        assertEquals(day.morning.map { it.phase }.reversed(), day.evening.map { it.phase })
+        assertEquals(TwilightPhase.entries.size, day.morning.size)
+    }
+
+    @Test
+    fun rangesStartBeforeTheyEnd() {
+        (day.morning + day.evening).forEach {
+            assertNotNull(it.start)
+            assertNotNull(it.end)
+            if (it.range) assertTrue(it.phase.name, it.start!!.isBefore(it.end!!)) else assertEquals(it.start, it.end)
+        }
+    }
+
+    @Test
+    fun morningGoldenHourPrecedesEvening() {
+        val morning = day.morning.last { it.phase == TwilightPhase.GOLDEN_HOUR }
+        val evening = day.evening.first { it.phase == TwilightPhase.GOLDEN_HOUR }
+        assertTrue(morning.end!!.isBefore(evening.start!!))
+    }
+
+    @Test
+    fun horizonFollowsAstronomicalDawn() {
+        val dawn = day.morning.first { it.phase == TwilightPhase.ASTRONOMICAL }.start!!
+        val sunrise = day.morning.first { it.phase == TwilightPhase.HORIZON }.start!!
+        assertTrue(dawn.isBefore(sunrise))
+    }
+
+    @Test
+    fun polarDayDoesNotThrow() {
+        val polar = Twilight.compute(78.2, 15.6, "Arctic/Longyearbyen", midsummer)
+        assertEquals(polar.morning.size, polar.evening.size)
+    }
+
+    @Test
+    fun phasesHaveDistinctColors() {
+        assertEquals(TwilightPhase.entries.size, TwilightPhase.entries.map { it.color }.toSet().size)
     }
 }
 
