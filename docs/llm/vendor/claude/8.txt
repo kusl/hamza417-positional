@@ -2198,3 +2198,99 @@ Claude finished the response
 
 
 
+24
+57
+
+github action is failing. 
+please fix this and any other defect as well and continue with next phase 
+
+19s
+Run ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig FROM-CACHE
+> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugResources FROM-CACHE
+> Task :app:packageDebugResources FROM-CACHE
+> Task :app:processDebugNavigationResources FROM-CACHE
+> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:generateDebugRFile FROM-CACHE
+> Task :app:kspDebugKotlin FROM-CACHE
+> Task :app:compileDebugKotlin FROM-CACHE
+> Task :app:javaPreCompileDebug FROM-CACHE
+
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:7: error: package androidx.interpolator.view.animation does not exist
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                           ^
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:6: error: package androidx.interpolator.view.animation does not exist
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                           ^
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:26: error: cannot find symbol
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                              ^
+  symbol:   class LinearOutSlowInInterpolator
+  location: class CircleUtils
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:61: error: cannot find symbol
+            valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                              ^
+  symbol:   class LinearOutSlowInInterpolator
+  location: class MarkerUtils
+Error: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java:46: error: cannot find symbol
+        if (context.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)) {
+                                                      ^
+  symbol:   variable actionBarSize
+  location: class attr
+Note: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+5 errors
+> Task :app:compileDebugJavaWithJavac FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792784651829.json
+
+
+FAILURE: Build failed with an exception.
+[Incubating] Problems report is available at: file:///home/runner/work/hamza417-positional/hamza417-positional/build/reports/problems/problems-report.html
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac' (registered by plugin 'com.android.internal.application').
+> Compilation failed; see the compiler output below.
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:7: error: package androidx.interpolator.view.animation does not exist
+  import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                             ^
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:6: error: package androidx.interpolator.view.animation does not exist
+  import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+                                             ^
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java:26: error: cannot find symbol
+              valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                                ^
+    symbol:   class LinearOutSlowInInterpolator
+    location: class CircleUtils
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java:61: error: cannot find symbol
+              valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
+                                                ^
+    symbol:   class LinearOutSlowInInterpolator
+    location: class MarkerUtils
+Error:   /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java:46: error: cannot find symbol
+          if (context.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true)) {
+                                                        ^
+    symbol:   variable actionBarSize
+    location: class attr
+  Note: /home/runner/work/hamza417-positional/hamza417-positional/app/src/main/java/app/simple/positional/util/StatusBarHeight.java uses or overrides a deprecated API.
+  Note: Recompile with -Xlint:deprecation for details.
+  5 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 17s
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.8.2/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+11 actionable tasks: 1 executed, 10 from cache
+Error: Process completed with exit code 1.
+
