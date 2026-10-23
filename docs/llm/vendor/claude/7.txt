@@ -1,0 +1,25 @@
+24
+37
+
+please continue with phase 7
+
+always make sure this readme is uptodate with the latest code changes where possible 
+Use your best judgment
+If only a few files (under five or there about) need to change, give me the full path of the files that need to change and the FULL file 
+if there are a lot of files that need to change 
+    Delivery
+    Whole project as one tar.gz, unambiguous file placement
+    Any files to delete on updates called out explicitly
+    only include files that have changed in the archive going forward 
+No bespoke sed/patch scripts — full files only for anything that changes
+Docs updated alongside code changes
+Low verbosity, no code comments
+I can't emphasize this enough
+NO CODE COMMENTS 
+
+what you should know: 
+we should "fall back" to a free of cost open street maps version of maps or something
+if the google maps key doesn't work for some reason or is out of quota or whatever 
+this will also allow us to cache some map portion I think 
+will this need yet another api key? to download and cache map stuff?
+I think we can work on this after phase 9 is complete but I wanted to let you know ahead of time 
