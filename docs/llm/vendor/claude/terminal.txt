@@ -1,5 +1,3 @@
-[binary omitted]
-
 ################################################################################
 # FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_ten_foreground.png (8299 bytes)
 ################################################################################
@@ -9952,4 +9950,6 @@ rm '.idea/gradle.xml'
 rm '.idea/jarRepositories.xml'
 rm '.idea/misc.xml'
 rm '.idea/vcs.xml'
+kushal@fedora:~/src/kotlin/positional$ git update-index --chmod=+x gradlew export.sh
+kushal@fedora:~/src/kotlin/positional$ git add -A && git add --renormalize .
 kushal@fedora:~/src/kotlin/positional$ 
