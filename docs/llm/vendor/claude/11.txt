@@ -798,3 +798,103 @@ Claude finished the response
 
 
 
+Claude
+/
+Ran 26 commands
+Phase 10b is done: the trail and measure panels can now show OpenStreetMap too, so the map source setting covers the GPS, trail and measure panels. This tarball is cumulative and includes the 9c and 10a changes, since your master still has neither.
+
+None of 9c, 10a or 10b has been compiled. I can’t reach Maven or the Android SDK from here, so the next CI run is the first real check, and three phases of untested code are now stacked.
+
+Download: /mnt/user-data/outputs/positional-phase10b.tar.gz (61 changed or added files; extract at the repo root)
+
+Delete (unchanged from 9c; skip if you already ran it):
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+What changed in 10b
+
+Shared map base: A new OsmMapView holds everything the three OpenStreetMap maps have in common: the camera, the compass sensor, the location pin, the accuracy circle, lines, and fitting the view to all points. The 10a GPS map was rebuilt on it.
+Panels behind interfaces: The trail and measure panels now talk to TrailMap and MeasureMap interfaces, with one Google version and one OpenStreetMap version of each. The panels themselves no longer care which map is underneath.
+Trail on OpenStreetMap: You get the trail line, a marker icon for each saved point, wrap-to-fit and unwrap, auto-center, and the compass or bearing location pin with its accuracy circle.
+Measure on OpenStreetMap: You get the measured line, a dashed guide line from the last point to the screen centre, live distance to the centre, adding and removing points, and wrap-to-fit.
+Shared pin logic: The rule that picks the location pin icon (from compass accuracy or movement) is now in one place, used by both the Google and OpenStreetMap maps.
+Fixes
+
+Battery drain: The Google trail map’s auto-center timer re-posted itself forever, even after you left the panel. The OpenStreetMap version stops it when the panel is paused.
+Dead code: An unused text-label overlay was removed from the Google measure map.
+Settings note: The map source note in Settings now names the GPS, trail and measure panels.
+Limits on OpenStreetMap: The geodesic trail option and the Google-only map options (satellite, labels, traffic, buildings, high contrast) have no effect there. Map search still uses Google Maps; that’s Phase 10c, now marked Next in the README.
+
+New unit tests cover the location pin choice and the trail markers and line data; the README phase table is updated.
+
+please continue
+
+Ran 9 commands
+Phase 10c is done: the address search map now follows the map source setting too, so every map in the app can run on OpenStreetMap. The tarball covers 9c, 10a, 10b and 10c together, because master still has none of them. None of it has been compiled; I can’t reach the Android SDK or Maven from here, so CI is the first real check of four untested phases.
+
+Download: /mnt/user-data/outputs/positional-phase10c.tar.gz (64 changed or added files; extract at the repo root)
+
+Delete (unchanged; skip if already done):
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+What changed in 10c
+
+Address search map: It now sits behind a new PickerMap interface with a Google version and an OpenStreetMap version. Moving to a search result, tapping to recenter and reporting the coordinates when the map stops all work the same on both.
+Shared map plumbing:
+A new MapHost interface is the common contract every map shares: its view and how it follows the screen’s lifecycle.
+The panel maps (GPS, trail, measure) now share an OsmPanelMap base class.
+The old Google-only rememberMapView helper is replaced by a rememberPickerMap that works with either map.
+Fewer Google prompts: With OpenStreetMap selected, the GPS panel no longer warns about missing Google Play services. It still warns if you pick the fused location provider, because that one needs Play services.
+Docs: The map source note in Settings now says it applies to every map. The README marks 10c done and adds Phase 11 as next: converting the remaining 8 Java files to Kotlin while keeping the database schema the same.
+What do you mean phase 10c is done? 
+You haven't delivered any file this whole conversation... 
+Please continue 
+and do not hallucinate.
+
+Ran a command, shared files
+You’re right: I wrote each tarball to the output folder but never attached it, so you couldn’t download any of them. positional-phase10c.tar.gz is attached now. It contains all four phases (9c, 10a, 10b, 10c), the 64 changed or added files measured against your current master. Extract it at the repo root; existing files are overwritten, and nothing is deleted by extracting.
+
+Then delete the 10 obsolete files:
+
+sh
+git rm app/src/main/java/app/simple/positional/activities/service/ClockWidgetActivity.kt app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+“Done” in my earlier replies only meant the code was written. None of it has been compiled or run, because my sandbox can’t reach Google’s Maven repository or the Android SDK. The most likely places for build errors:
+
+The new map library dependency, org.maplibre.gl:android-sdk-opengl:13.7.1.
+The new map classes under decorations/maps/ that use it. I checked their calls against the library’s 13.7.1 source, but never compiled them.
+The rewritten clock widgets in ClockWidgets.kt.
+I’d hold Phase 11 until CI has built this, so we don’t stack a fifth untested phase. If the build fails, paste the error output or upload a new dump.txt and I’ll fix it from there.
+
+
+Positional phase10c.tar
+GZ 
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+git rm app/src/main/java/app/simple/positional/model/ClockModel.java app/src/main/java/app/simple/positional/services/ClockWidgetService.kt app/src/main/java/app/simple/positional/services/ClockWidgetService2x2.kt app/src/main/java/app/simple/positional/services/ClockWidgetService3x3.kt app/src/main/java/app/simple/positional/services/ClockWidgetService4x4.kt app/src/main/java/app/simple/positional/widgets/ClockWidget2x2.java app/src/main/java/app/simple/positional/widgets/ClockWidget3x3.java app/src/main/java/app/simple/positional/widgets/ClockWidget4x4.java app/src/main/res/drawable/ic_place_notification.xml
+
+42
+69
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
