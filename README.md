@@ -2,7 +2,7 @@
 
 ![banner](screenshots/banner.png)
 
-A location, compass, clock, level, trail and measurement toolkit for Android. This is a community fork of [Hamza417/Positional](https://github.com/Hamza417/Positional), distributed only through GitHub Releases. It is not published on Google Play.
+A location, compass, clock, level, trail and measurement toolkit for Android. Community fork distributed only through GitHub Releases; not published on Google Play.
 
 [![Build](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml/badge.svg)](https://github.com/kusl/hamza417-positional/actions/workflows/build.yml)
 [![Release](https://img.shields.io/github/v/release/kusl/hamza417-positional)](https://github.com/kusl/hamza417-positional/releases/latest)
@@ -24,22 +24,41 @@ A location, compass, clock, level, trail and measurement toolkit for Android. Th
 1. Download the latest APK from [Releases](https://github.com/kusl/hamza417-positional/releases/latest), or
 2. Add `https://github.com/kusl/hamza417-positional` to [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
 
-Android 7.0 (API 24) or newer is supported. Silent background updates through Obtainium require Android 12 or newer; older versions get an install prompt.
+Android 7.0 (API 24) or newer. Silent background updates through Obtainium need Android 12 or newer.
 
-The release is signed with this fork's own key. It cannot be installed over the Play Store build of Positional; uninstall that first.
+Releases are signed with this fork's own key and cannot be installed over the Play Store build; uninstall that first.
+
+## Support
+
+Report bugs and requests in this repository's [issues](https://github.com/kusl/hamza417-positional/issues). Do not contact the original author about this fork.
 
 ## Differences from upstream
 
-- No Google Play licensing check, in-app update prompt or rating prompt.
+- No Google Play licensing, update or rating prompts.
+- No links to upstream chat groups, developer profiles or other apps.
+- UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
-- Dead code, unused resources and source comments removed.
-- Unit tests for the math and utility code.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities and UI state mapping.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
+## Compose migration
+
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments through `ComposeView`. Shared theme and components live in `ui/compose/`.
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Compose toolchain, theme, preference components, Settings | Done |
+| 2 | Legal pages and leftover strings cleanup | Next |
+| 3 | Settings dialogs and bottom sheets | Planned |
+| 4 | List screens (trails, measures, directions, locations, time zones) | Planned |
+| 5 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
+| 6 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 7 | Widgets on Glance | Planned |
+
 ## Building
 
-Requirements: JDK 21 and the Android SDK (compile and target SDK 37, Android Gradle Plugin 9.2+).
+Requirements: JDK 21, Android SDK (compile and target SDK 37), Android Gradle Plugin 9.2+, Kotlin 2.4 with the Compose compiler plugin.
 
 ```sh
 ./gradlew testDebugUnitTest assembleDebug
@@ -63,36 +82,33 @@ Optional `local.properties` keys (environment variables of the same name take pr
 1. Unit tests and a debug build.
 2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
 
-Required repository secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
-
-To create the keystore secret:
+Required secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
 
 ```sh
 base64 -w0 release.keystore
 ```
 
-Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper and GitHub Actions. Some AndroidX releases require a newer `compileSdk`; when a Dependabot PR fails at `checkDebugAarMetadata`, raise `compileSdk` in `app/build.gradle` first.
+Dependabot opens weekly update PRs for Gradle dependencies, the Gradle wrapper and GitHub Actions. If a PR fails at `checkDebugAarMetadata`, raise `compileSdk` first.
 
 ## Project layout
 
 ```
 app/src/main/java/app/simple/positional/
   activities/   entry points and sub screens
-  ui/           panel fragments (GPS, compass, clock, level, trail, measure, direction, settings)
-  decorations/  custom views, map wrappers, fast scroller
+  ui/compose/   Compose theme, shared components and screens
+  ui/           panel fragments
+  decorations/  legacy custom views, map wrappers, fast scroller
   database/     Room entities, DAOs and databases
   services/     location and clock widget services
   widgets/      app widget providers
   math/         vectors, quaternions, angles, unit conversion
   util/         formatting and Android helpers
 app/src/test/   JVM unit tests
-docs/llm/       LLM context files (tracked in git, excluded from the dump)
+docs/llm/       LLM context files (tracked, excluded from the dump)
 ```
 
-`export.sh` writes a text dump of the repository to `docs/llm/dump.txt` for use as LLM context. It lists every tracked file except `docs/llm/` and includes the contents of source, build and config files only.
+`export.sh` writes `docs/llm/dump.txt` for LLM context: every tracked file except `docs/llm/`, with contents of source, build and config files only.
 
 ## Credits and license
 
-Original app by [Hamza Rizwan (Hamza417)](https://github.com/Hamza417/Positional). Translations come from the upstream Crowdin project.
-
-Licensed under the [GNU GPL v3](LICENSE). See [PRIVACY.md](PRIVACY.md) for the privacy policy.
+Based on Positional by Hamza Rizwan. Licensed under the [GNU GPL v3](LICENSE). See [PRIVACY.md](PRIVACY.md).

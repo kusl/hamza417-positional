@@ -1,37 +1,29 @@
 package app.simple.positional.ui.panels
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
+import android.provider.Settings as AndroidSettings
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.net.toUri
-import app.simple.positional.R
+import app.simple.positional.BuildConfig
 import app.simple.positional.activities.subactivity.AccentColorsActivity
 import app.simple.positional.activities.subactivity.ArtsActivity
 import app.simple.positional.activities.subactivity.CustomLocationsActivity
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
-import app.simple.positional.callbacks.CoordinatesCallback
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.padding.PaddingAwareNestedScrollView
-import app.simple.positional.decorations.popup.PopupLinearLayout
-import app.simple.positional.decorations.popup.PopupMenuCallback
-import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-import app.simple.positional.decorations.switchview.SwitchView
 import app.simple.positional.dialogs.settings.CoordinatesFormat
 import app.simple.positional.dialogs.settings.Icons
 import app.simple.positional.dialogs.settings.Locales
@@ -40,379 +32,130 @@ import app.simple.positional.dialogs.settings.RoundedCorners
 import app.simple.positional.dialogs.settings.Theme
 import app.simple.positional.dialogs.settings.Units
 import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.popups.settings.LegalNotesPopupMenu
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.LocaleHelper.localeList
+import app.simple.positional.ui.compose.PositionalTheme
+import app.simple.positional.ui.compose.SettingsActions
+import app.simple.positional.ui.compose.SettingsLabels
+import app.simple.positional.ui.compose.SettingsScreen
+import app.simple.positional.ui.compose.SettingsState
 import app.simple.positional.util.PermissionUtils
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
+import app.simple.positional.util.StatusBarHeight
 
-class Settings : ScopedFragment(), CoordinatesCallback, PopupMenuCallback {
-    private var xOff = 0F
-    private var yOff = 0F
-
-    private lateinit var scrollView: PaddingAwareNestedScrollView
-    private lateinit var permission: DynamicCornerLinearLayout
-    private lateinit var unit: DynamicRippleLinearLayout
-    private lateinit var locationProvider: DynamicRippleLinearLayout
-    private lateinit var language: DynamicRippleLinearLayout
-    private lateinit var theme: DynamicRippleLinearLayout
-    private lateinit var accent: DynamicRippleLinearLayout
-    private lateinit var icon: DynamicRippleTextView
-    private lateinit var corner: DynamicRippleTextView
-    private lateinit var skipSplashScreenContainer: DynamicRippleConstraintLayout
-    private lateinit var customLocation: DynamicRippleConstraintLayout
-    private lateinit var appVersion: DynamicRippleLinearLayout
-    private lateinit var legalNotes: DynamicRippleLinearLayout
-    private lateinit var github: DynamicRippleLinearLayout
-    private lateinit var translate: DynamicRippleLinearLayout
-    private lateinit var keepScreenOn: DynamicRippleConstraintLayout
-    private lateinit var coordinatesFormatContainer: DynamicRippleLinearLayout
-    private lateinit var coordinatesFormat: TextView
-    private lateinit var inure: DynamicRippleConstraintLayout
-
-    private lateinit var toggleKeepScreenOn: SwitchView
-    private lateinit var toggleCustomLocation: SwitchView
-    private lateinit var toggleSkipSplashScreen: SwitchView
-
-    private lateinit var specifiedLocationText: TextView
-    private lateinit var currentTheme: TextView
-    private lateinit var currentUnit: TextView
-    private lateinit var currentLanguage: TextView
-    private lateinit var currentLocationProvider: TextView
-    private lateinit var foundIssues: TextView
-    private lateinit var telegramGroup: DynamicRippleTextView
-    private lateinit var myOtherApps: DynamicRippleTextView
-
-    private lateinit var permissionContracts: ActivityResultLauncher<Array<String>>
-    private var opened = false
+class Settings : ScopedFragment(), SettingsActions {
+    private var state by mutableStateOf(SettingsState())
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private var appSettingsOpened = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.values.any { !it } && !appSettingsOpened) {
+                appSettingsOpened = true
+                startActivity(Intent(AndroidSettings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", requireContext().packageName, null)
+                })
+            }
+            refresh()
+        }
+    }
 
-        permissionContracts = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { mutableMap ->
-            mutableMap.entries.forEach {
-                if (it.value) {
-                    Log.d("Permissions", "${it.key} : ${it.value}")
-                } else {
-                    if (!opened) {
-                        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", requireActivity().packageName, null)
-                        })
-
-                        opened = true
-                    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val topInset = StatusBarHeight.getStatusBarHeight(resources)
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                PositionalTheme {
+                    SettingsScreen(state, this@Settings, topInset)
                 }
             }
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_settings, container, false)
-
-        scrollView = view.findViewById(R.id.settings_scroll_view)
-        permission = view.findViewById(R.id.permission_layout)
-        unit = view.findViewById(R.id.settings_units)
-        locationProvider = view.findViewById(R.id.settings_location_provider)
-        language = view.findViewById(R.id.settings_languages)
-        theme = view.findViewById(R.id.settings_theme)
-        accent = view.findViewById(R.id.settings_accent)
-        icon = view.findViewById(R.id.settings_icons)
-        corner = view.findViewById(R.id.settings_corner_radius)
-        skipSplashScreenContainer = view.findViewById(R.id.setting_skip_splash_screen_container)
-        customLocation = view.findViewById(R.id.setting_custom_location)
-        appVersion = view.findViewById(R.id.current_app_version)
-        legalNotes = view.findViewById(R.id.legal_notes)
-        github = view.findViewById(R.id.github)
-        foundIssues = view.findViewById(R.id.found_issues)
-        telegramGroup = view.findViewById(R.id.telegram_group)
-        myOtherApps = view.findViewById(R.id.my_other_apps)
-        translate = view.findViewById(R.id.translate)
-        keepScreenOn = view.findViewById(R.id.setting_keep_screen_on)
-        coordinatesFormatContainer = view.findViewById(R.id.settings_coordinates)
-        coordinatesFormat = view.findViewById(R.id.current_coordinate_format)
-        inure = view.findViewById(R.id.inure)
-
-        toggleKeepScreenOn = view.findViewById(R.id.toggle_screen_on)
-        toggleCustomLocation = view.findViewById(R.id.toggle_custom_location)
-        toggleSkipSplashScreen = view.findViewById(R.id.toggle_skip_splash_screen)
-
-        specifiedLocationText = view.findViewById(R.id.specified_location_text)
-        currentTheme = view.findViewById(R.id.current_theme)
-        currentUnit = view.findViewById(R.id.current_unit)
-        currentLanguage = view.findViewById(R.id.current_language)
-        currentLocationProvider = view.findViewById(R.id.current_location_provider)
-
-        return view
+    override fun onResume() {
+        super.onResume()
+        appSettingsOpened = false
+        refresh()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        if (MainPreferences.isDayNightOn()) {
-            setCurrentThemeValue(4)
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key == MainPreferences.accentColor) {
+            requireActivity().recreate()
         } else {
-            setCurrentThemeValue(AppCompatDelegate.getDefaultNightMode())
-        }
-
-        permissionNotification()
-
-        setCurrentUnit(MainPreferences.isMetric())
-        setCurrentLocation()
-        toggleKeepScreenOn.isChecked = MainPreferences.isScreenOn()
-        toggleSkipSplashScreen.isChecked = MainPreferences.getSkipSplashScreen()
-        isCoordinatesSet(MainPreferences.isCustomCoordinate())
-
-        for (i in localeList.indices) {
-            if (MainPreferences.getAppLanguage() == localeList[i].localeCode) {
-                currentLanguage.text = if (i == 0) getString(R.string.auto_system_default_language) else localeList[i].language
-            }
-        }
-
-        theme.setOnClickListener {
-            Theme().show(parentFragmentManager, "null")
-        }
-
-        accent.setOnClickListener {
-            startActivity(Intent(requireContext(), AccentColorsActivity::class.java))
-        }
-
-        icon.setOnClickListener {
-            Icons.newInstance().show(childFragmentManager, "app_icons")
-        }
-
-        corner.setOnClickListener {
-            RoundedCorners.newInstance().show(parentFragmentManager, "rounded_corners")
-        }
-
-        unit.setOnClickListener {
-            Units().show(parentFragmentManager, "null")
-        }
-
-        locationProvider.setOnClickListener {
-            LocationProvider.newInstance().show(childFragmentManager, "location_provider")
-        }
-
-        language.setOnClickListener {
-            Locales().newInstance().show(childFragmentManager, "locales")
-        }
-
-        customLocation.setOnClickListener {
-            startActivity(Intent(requireActivity(), CustomLocationsActivity::class.java))
-        }
-
-        toggleCustomLocation.setOnCheckedChangeListener { isChecked ->
-            if (toggleCustomLocation.isPressed) {
-                if (isChecked) {
-                    startActivity(Intent(requireActivity(), CustomLocationsActivity::class.java))
-                } else {
-                    MainPreferences.setCustomCoordinates(false)
-                }
-            }
-        }
-
-        keepScreenOn.setOnClickListener {
-            toggleKeepScreenOn.isChecked = !toggleKeepScreenOn.isChecked
-        }
-
-        toggleKeepScreenOn.setOnCheckedChangeListener { isChecked ->
-            MainPreferences.setScreenOn(isChecked)
-
-            if (isChecked) {
-                requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            } else {
-                requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            }
-        }
-
-        appVersion.setOnClickListener {
-            openUrl(RELEASES_URL)
-        }
-
-        legalNotes.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    xOff = event.x
-                    yOff = event.y
-                }
-            }
-
-            false
-        }
-
-        legalNotes.setOnClickListener {
-            val popupMenu = LegalNotesPopupMenu(LayoutInflater.from(requireContext()).inflate(R.layout.popup_legal_notes,
-                PopupLinearLayout(context),
-                true), legalNotes, xOff, yOff)
-            popupMenu.popupMenuCallback = this
-        }
-
-        github.setOnClickListener {
-            openUrl(REPOSITORY_URL)
-        }
-
-        translate.setOnClickListener {
-            val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-            intent.putExtra("source", "translator")
-            startActivity(intent)
-        }
-
-        foundIssues.setOnClickListener {
-            val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-            intent.putExtra("source", "Found Issue")
-            startActivity(intent)
-        }
-
-        telegramGroup.setOnClickListener {
-            openUrl("https://t.me/pstnl")
-        }
-
-        myOtherApps.setOnClickListener {
-            openUrl(UPSTREAM_AUTHOR_URL)
-        }
-
-        toggleSkipSplashScreen.setOnCheckedChangeListener { isChecked ->
-            MainPreferences.setSkipSplashScreen(isChecked)
-        }
-
-        skipSplashScreenContainer.setOnClickListener {
-            toggleSkipSplashScreen.isChecked = !toggleSkipSplashScreen.isChecked
-        }
-
-        skipSplashScreenContainer.setOnLongClickListener {
-            startActivity(Intent(requireContext(), ArtsActivity::class.java))
-            true
-        }
-
-        permission.setOnClickListener {
-            if (PermissionUtils.checkPermission(requireContext())) {
-                permissionNotification()
-            } else {
-                permissionContracts.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.ACCESS_FINE_LOCATION))
-            }
-        }
-
-        coordinatesFormatContainer.setOnClickListener {
-            CoordinatesFormat.newInstance()
-                    .show(childFragmentManager, "coordinates_format")
-        }
-
-        inure.setOnClickListener {
-            openUrl(INURE_URL)
+            refresh()
         }
     }
 
-    private fun setCurrentLocation() {
-        currentLocationProvider.text = when (MainPreferences.getLocationProvider()) {
-            "android" -> "Android Location Provider"
-            "fused" -> "Fused Location Provider"
-            else -> ""
-        }
+    private fun refresh() {
+        state = SettingsState(
+            hasLocationPermission = PermissionUtils.checkPermission(requireContext()),
+            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else AppCompatDelegate.getDefaultNightMode(),
+            isMetric = MainPreferences.isMetric(),
+            coordinatesFormat = MainPreferences.getCoordinatesFormat(),
+            locationProvider = MainPreferences.getLocationProvider(),
+            language = MainPreferences.getAppLanguage() ?: SettingsLabels.LANGUAGE_DEFAULT,
+            isCustomLocation = MainPreferences.isCustomCoordinate(),
+            keepScreenOn = MainPreferences.isScreenOn(),
+            skipSplashScreen = MainPreferences.getSkipSplashScreen(),
+            versionName = BuildConfig.VERSION_NAME,
+        )
     }
 
-    private fun setCurrentThemeValue(themeValue: Int) {
-        try {
-            currentTheme.text = when (themeValue) {
-                AppCompatDelegate.MODE_NIGHT_NO -> getString(R.string.theme_day)
-                AppCompatDelegate.MODE_NIGHT_YES -> getString(R.string.theme_night)
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> getString(R.string.theme_follow_system)
-                4 -> getString(R.string.theme_auto)
-                else -> ""
-            }
-        } catch (e: NullPointerException) {
-            e.printStackTrace()
-        }
+    override fun requestPermission() {
+        permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
     }
 
-    private fun setCurrentUnit(value: Boolean) {
-        currentUnit.text = if (value) getString(R.string.unit_metric) else getString(R.string.unit_imperial)
+    override fun openTheme() = Theme().show(parentFragmentManager, "theme")
+
+    override fun openAccent() = startActivity(Intent(requireContext(), AccentColorsActivity::class.java))
+
+    override fun openIcons() = Icons.newInstance().show(childFragmentManager, "app_icons")
+
+    override fun openCorners() = RoundedCorners.newInstance().show(parentFragmentManager, "rounded_corners")
+
+    override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
+
+    override fun openArts() = startActivity(Intent(requireContext(), ArtsActivity::class.java))
+
+    override fun openUnits() = Units().show(parentFragmentManager, "units")
+
+    override fun openCoordinatesFormat() = CoordinatesFormat.newInstance().show(childFragmentManager, "coordinates_format")
+
+    override fun openLocationProvider() = LocationProvider.newInstance().show(childFragmentManager, "location_provider")
+
+    override fun openCustomLocations() = startActivity(Intent(requireContext(), CustomLocationsActivity::class.java))
+
+    override fun setCustomLocation(enabled: Boolean) {
+        if (enabled) openCustomLocations() else MainPreferences.setCustomCoordinates(false)
     }
 
-    private fun permissionNotification() {
-        if (PermissionUtils.checkPermission(requireContext())) {
-            permission.gone()
+    override fun setKeepScreenOn(enabled: Boolean) {
+        MainPreferences.setScreenOn(enabled)
+        if (enabled) {
+            requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
-            permission.visible(false)
+            requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
-    private fun setCoordinatesFormat() {
-        coordinatesFormat.text = when (MainPreferences.getCoordinatesFormat()) {
-            0 -> getString(R.string.dd_dddddd)
-            1 -> getString(R.string.dd_mm_mmm)
-            2 -> getString(R.string.dd_mm_ss_sss)
-            else -> ""
-        }
+    override fun openLanguages() = Locales().newInstance().show(childFragmentManager, "locales")
+
+    override fun openLegal(page: Int) {
+        startActivity(Intent(requireContext(), WebPageViewerActivity::class.java).putExtra("source", getString(page)))
     }
+
+    override fun openReleases() = openUrl("$REPOSITORY_URL/releases")
+
+    override fun openRepository() = openUrl(REPOSITORY_URL)
+
+    override fun openIssues() = openUrl("$REPOSITORY_URL/issues")
 
     private fun openUrl(url: String) {
         runCatching { startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
     }
 
-    override fun isCoordinatesSet(boolean: Boolean) {
-        try {
-            toggleCustomLocation.isChecked = boolean
-        } catch (_: NullPointerException) {
-        } catch (_: UninitializedPropertyAccessException) {
-        }
-    }
-
-    override fun onMenuItemClicked(source: String) {
-        val intent = Intent(requireActivity(), WebPageViewerActivity::class.java)
-        intent.putExtra("source", source)
-        startActivity(intent)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        toggleCustomLocation.isChecked = MainPreferences.isCustomCoordinate()
-        permissionNotification()
-        opened = false
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MainPreferences.locationProvider -> {
-                setCurrentLocation()
-            }
-
-            MainPreferences.unit -> {
-                setCurrentUnit(MainPreferences.isMetric())
-            }
-
-            MainPreferences.theme -> {
-                setCurrentThemeValue(MainPreferences.getTheme())
-            }
-
-            MainPreferences.accentColor -> {
-                requireActivity().recreate()
-            }
-
-            MainPreferences.isCustomCoordinate -> {
-                toggleCustomLocation.isChecked = MainPreferences.isCustomCoordinate()
-            }
-
-            MainPreferences.coordinatesFormat -> {
-                setCoordinatesFormat()
-            }
-        }
-    }
-
     companion object {
-        fun newInstance(): app.simple.positional.ui.panels.Settings {
-            val args = Bundle()
-            val fragment = app.simple.positional.ui.panels.Settings()
-            fragment.arguments = args
-            return fragment
-        }
-
         private const val REPOSITORY_URL = "https://github.com/kusl/hamza417-positional"
-        private const val RELEASES_URL = "$REPOSITORY_URL/releases"
-        private const val UPSTREAM_AUTHOR_URL = "https://github.com/Hamza417"
-        private const val INURE_URL = "https://github.com/Hamza417/Inure"
+
+        fun newInstance() = Settings()
     }
 }
