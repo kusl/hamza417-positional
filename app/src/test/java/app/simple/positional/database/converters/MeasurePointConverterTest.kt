@@ -10,15 +10,16 @@ class MeasurePointConverterTest {
 
     @Test
     fun roundTrip() {
-        val points = arrayListOf(MeasurePoint(1.5, -2.25, 1), MeasurePoint(-45.0, 170.125, 2))
+        val points = arrayListOf<MeasurePoint?>(MeasurePoint(1.5, -2.25, 1), MeasurePoint(-45.0, 170.125, 2))
         val data = converter.fromMeasurePoints(points)
         assertEquals("1.5,-2.25,1;-45.0,170.125,2;", data)
         assertEquals(points, converter.toMeasurePoints(data))
     }
 
     @Test
-    fun emptyAndNull() {
+    fun emptyNullAndNullElements() {
         assertEquals("", converter.fromMeasurePoints(arrayListOf()))
+        assertEquals("1.0,2.0,1;", converter.fromMeasurePoints(arrayListOf(null, MeasurePoint(1.0, 2.0, 1))))
         assertTrue(converter.toMeasurePoints(null).isEmpty())
         assertTrue(converter.toMeasurePoints("").isEmpty())
     }
