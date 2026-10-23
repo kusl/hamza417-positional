@@ -39,7 +39,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     SharedPreferences.OnSharedPreferenceChangeListener {
     override val view: View get() = this
     protected var map: MapLibreMap? = null
-    protected var callbacks: MapsCallbacks? = null
+    protected var mapCallbacks: MapsCallbacks? = null
     protected var location: Location? = null
     protected var heading = 0f
     protected var headingAccuracy = -1
@@ -58,7 +58,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected abstract fun onCameraIdle(position: CameraPosition)
     protected open fun onStyleReady() {}
     protected open fun onClick(latitude: Double, longitude: Double) {
-        callbacks?.onMapClicked()
+        mapCallbacks?.onMapClicked()
     }
     protected open fun onGesture() {}
     protected open fun onCameraMoved() {}
@@ -108,7 +108,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
             true
         }
         map.addOnMapLongClickListener {
-            callbacks?.onMapLongClicked(LatLng(it.latitude, it.longitude))
+            mapCallbacks?.onMapLongClicked(LatLng(it.latitude, it.longitude))
             true
         }
         map.addOnCameraMoveStartedListener { reason ->
@@ -126,7 +126,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
             layer(OsmStyle.LINE, PropertyFactory.lineColor(accent))
             layer(OsmStyle.GUIDE, PropertyFactory.lineColor(accent))
             onStyleReady()
-            callbacks?.onMapInitialized()
+            mapCallbacks?.onMapInitialized()
         }
     }
 
@@ -252,7 +252,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
 @SuppressLint("ViewConstructor")
 abstract class OsmPanelMap(context: Context) : OsmMapView(context), PanelMap {
     override fun setCallbacks(callbacks: MapsCallbacks) {
-        this.callbacks = callbacks
+        mapCallbacks = callbacks
     }
 }
 

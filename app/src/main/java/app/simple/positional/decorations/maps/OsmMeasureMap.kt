@@ -64,7 +64,7 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         measurePoints.clear()
         measurePoints.addAll(measure.measurePoints)
         drawLines()
-        callbacks?.onLineCountChanged(measurePoints.size)
+        mapCallbacks?.onLineCountChanged(measurePoints.size)
         if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
@@ -73,15 +73,15 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         val point = MeasurePoint(latitude, longitude, measurePoints.size + 1)
         measurePoints.add(point)
         drawLines()
-        callbacks?.onLineAdded(point)
+        mapCallbacks?.onLineAdded(point)
         reportDistance()
     }
 
     override fun removeLast() {
         val last = measurePoints.removeLastOrNull() ?: return
         drawLines()
-        callbacks?.onLineDeleted(last)
-        callbacks?.onLineCountChanged(measurePoints.size)
+        mapCallbacks?.onLineDeleted(last)
+        mapCallbacks?.onLineCountChanged(measurePoints.size)
         reportDistance()
     }
 
@@ -113,7 +113,7 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
     }
 
     private fun reportDistance() {
-        target()?.let { callbacks?.onCameraDistance(LatLng(it.first, it.second)) }
+        target()?.let { mapCallbacks?.onCameraDistance(LatLng(it.first, it.second)) }
     }
 
     private fun drawPuck() {

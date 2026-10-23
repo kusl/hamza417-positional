@@ -68,13 +68,13 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override fun showPoints(points: List<TrailPoint>) {
         this.points = points
         drawPoints()
-        callbacks?.onLineCountChanged(points.size)
+        mapCallbacks?.onLineCountChanged(points.size)
         if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
     override fun removeLast() {
         val last = points.lastOrNull() ?: return
-        callbacks?.onLineDeleted(last)
+        mapCallbacks?.onLineDeleted(last)
         val previous = points.getOrNull(points.size - 2)
         if (TrailPreferences.arePolylinesWrapped() || previous == null) return
         moveTo(previous.latitude, previous.longitude, TrailPreferences.getMapZoom())
