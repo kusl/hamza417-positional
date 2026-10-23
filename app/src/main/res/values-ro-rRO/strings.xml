@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Dacă precizia senzorului busolei dispozitivului este scăzută, mutați dispozitivul în direcția 8 pentru a calibra senzorii.</string>
     <string name="specified_location_notice">Informațiile prezentate mai jos sunt actualizate pentru coordonatele locației specificate.</string>
-    <string name="show_again">Arată din nou</string>
     <string name="search_timezone">Căutare fus orar</string>
     <string name="auto_system_default_language">Automat (implicit sistem)</string>
     <string name="location_permission_denied">"Permisiune locație refuzată!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Setare</string>
     <string name="button_close">Închidere</string>
     <string name="button_grant">Permiteți</string>
-    <string name="button_reset">Resetare</string>
 
     <string name="clock_options">Meniu ceas</string>
     <string name="compass_options">Meniu busolă</string>

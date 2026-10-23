@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Si la precisión del sensor de la brújula de su dispositivo es baja, mueva su dispositivo como dibujando un 8 en el aire, como se ve en la figura, para calibrar los sensores.</string>
     <string name="specified_location_notice">La información mostrada a continuación está siendo actualizada para las coordenadas de ubicación especificadas.</string>
-    <string name="show_again">Volver a mostrar</string>
     <string name="search_timezone">Seleccionar la zona horaria</string>
     <string name="auto_system_default_language">Automático (Predeterminados del sistema)</string>
     <string name="location_permission_denied">"¡Permiso de ubicación denegado!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Establecer</string>
     <string name="button_close">Cerrar</string>
     <string name="button_grant">Permitir</string>
-    <string name="button_reset">Reiniciar</string>
 
     <string name="clock_options">Menú de reloj</string>
     <string name="compass_options">Menú de brújula</string>

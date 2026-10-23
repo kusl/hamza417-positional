@@ -16,7 +16,6 @@ import app.simple.positional.activities.subactivity.TimezonePickerActivity
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.dialogs.app.LocationParameters
-import app.simple.positional.dialogs.clock.ClockNeedle
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
@@ -27,6 +26,7 @@ import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.positionalComposeView
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
+import app.simple.positional.ui.compose.ClockNeedleDialog
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.PanelMenus
@@ -66,7 +66,9 @@ class Time : ScopedFragment() {
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.clock(
-            onNeedles = { ClockNeedle.newInstance().show(parentFragmentManager, "clock_needle") },
+            onNeedles = {
+                dialogs.show { ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) } }
+            },
             onMotionType = ::showMotionTypes,
         )
     }

@@ -12,12 +12,9 @@
     <dimen name="copy_button_dimensions">40dp</dimen>
     <dimen name="info_graphics_dimension">120dp</dimen>
 
-    <dimen name="options_text_margin_start">10dp</dimen>
-    <dimen name="options_item_padding">10dp</dimen>
     <dimen name="options_item_text_size">13sp</dimen>
     <dimen name="options_container_horizontal_padding">15dp</dimen>
     <dimen name="options_container_vertical_padding">10dp</dimen>
-    <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
     <dimen name="app_button_size">44dp</dimen>
@@ -43,9 +40,6 @@
     <dimen name="touch_indicator_size">100dp</dimen>
     <dimen name="popup_text_size">16sp</dimen>
 
-    <dimen name="switch_width">50dp</dimen>
-    <dimen name="switch_padding">5dp</dimen>
-    <dimen name="switch_thumb_dimensions">20dp</dimen>
 
     <dimen name="afs_min_touch_target_size">48dp</dimen>
     <dimen name="fs_md2_popup_min_width">78dp</dimen>

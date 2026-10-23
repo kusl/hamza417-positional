@@ -21,7 +21,6 @@ import app.simple.positional.adapters.bottombar.BottomBarAdapter
 import app.simple.positional.adapters.bottombar.BottomBarItems
 import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.callbacks.PanelsCallback
-import app.simple.positional.callbacks.PermissionCallbacks
 import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
 import app.simple.positional.decorations.transformers.DepthTransformer
 import app.simple.positional.dialogs.app.Panels.Companion.showPanelsDialog
@@ -51,7 +50,6 @@ import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
 class MainActivity : BaseActivity(),
-    PermissionCallbacks,
     BottomBarHost,
     android.content.SharedPreferences.OnSharedPreferenceChangeListener,
     OnMapsSdkInitializedCallback {
@@ -225,7 +223,7 @@ class MainActivity : BaseActivity(),
         }
     }
 
-    override fun onGrantRequest() {
+    private fun onGrantRequest() {
         ActivityCompat.requestPermissions(
             this, arrayOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,

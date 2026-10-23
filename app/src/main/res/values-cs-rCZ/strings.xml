@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Pokud je přesnost senzoru kompasu zařízení nízká, dělejte se zařízením osmičky, aby se senzory zkalibrovaly.</string>
     <string name="specified_location_notice">Níže uvedené informace se aktualizují pro stanovené souřadnice polohy.</string>
-    <string name="show_again">Znovu zobrazit</string>
     <string name="search_timezone">Hledat časová pásma</string>
     <string name="auto_system_default_language">Automaticky (výchozí nastavení)</string>
     <string name="location_permission_denied">"Oprávnění k poloze bylo odepřeno!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Nastavit</string>
     <string name="button_close">Zavřít</string>
     <string name="button_grant">Povolit</string>
-    <string name="button_reset">Resetovat</string>
 
     <string name="clock_options">Nabídka hodin</string>
     <string name="compass_options">Nabídka kompasu</string>

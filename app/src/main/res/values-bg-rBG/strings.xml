@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Ако точността на сензора на компаса на вашето устройство е ниска, движете устройство във фигура осем за калибриране на сензорите.</string>
     <string name="specified_location_notice">Информацията, показана по-долу, се актуализира за посочените координати на местоположението.</string>
-    <string name="show_again">Покажи отново</string>
     <string name="search_timezone">Търси часова зона</string>
     <string name="auto_system_default_language">Автоматично (по подразбиране)</string>
     <string name="location_permission_denied">"Разрешение за местоположение бе отказано!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Задай</string>
     <string name="button_close">Затвори</string>
     <string name="button_grant">Разреши</string>
-    <string name="button_reset">Изчисти</string>
 
     <string name="clock_options">Информация за часовника</string>
     <string name="compass_options">Компас меню</string>

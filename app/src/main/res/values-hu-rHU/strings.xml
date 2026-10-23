@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Ha a készülék iránytű-érzékelőjének pontossága alacsony, mozgassa a készüléket nyolcas irányban az érzékelők kalibrálásához.</string>
     <string name="specified_location_notice">Az alább látható információk a megadott helykoordinátákhoz frissülnek.</string>
-    <string name="show_again">Újra mutassa</string>
     <string name="search_timezone">Időzóna keresése</string>
     <string name="auto_system_default_language">Automatikus (rendszer alapértelmezett)</string>
     <string name="location_permission_denied">"A helymeghatározási engedély megtagadva!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Beállít</string>
     <string name="button_close">Bezárás</string>
     <string name="button_grant">Engedélyez</string>
-    <string name="button_reset">Visszaállítás</string>
 
     <string name="clock_options">Óra menü</string>
     <string name="compass_options">Iránytű menü</string>

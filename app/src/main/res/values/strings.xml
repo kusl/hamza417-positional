@@ -163,7 +163,6 @@
 
     <string name="compass_calibration_notice">If your device compass sensor accuracy is low, move your device in figure eight direction to calibrate the sensors.</string>
     <string name="specified_location_notice">Information shown below are being updated for specified location coordinates.</string>
-    <string name="show_again">Show Again</string>
     <string name="search_timezone">Search Timezones</string>
     <string name="auto_system_default_language">Auto (System Default)</string>
     <string name="location_permission_denied">"Location Permission Denied!"</string>
@@ -173,7 +172,6 @@
     <string name="button_set">Set</string>
     <string name="button_close">Close</string>
     <string name="button_grant">Grant</string>
-    <string name="button_reset">Reset</string>
 
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>

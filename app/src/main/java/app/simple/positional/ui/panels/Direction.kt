@@ -66,7 +66,7 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
-    override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(accuracy)
+    override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(type, accuracy)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {

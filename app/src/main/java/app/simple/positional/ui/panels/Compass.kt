@@ -12,8 +12,10 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
-import app.simple.positional.dialogs.compass.CompassBloom
-import app.simple.positional.dialogs.compass.CompassPhysicalProperties
+import app.simple.positional.activities.subactivity.WebPageViewerActivity
+import app.simple.positional.constants.HtmlPage
+import app.simple.positional.ui.compose.BloomSkinDialog
+import app.simple.positional.ui.compose.PhysicalPropertiesDialog
 import app.simple.positional.extensions.fragment.SensorPanel
 import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
@@ -47,8 +49,12 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
 
     private fun showMenu() = menuSheet.show {
         PanelMenus.compass(
-            onBloomSkins = { CompassBloom().show(parentFragmentManager, "compass_bloom") },
-            onPhysicalProperties = { CompassPhysicalProperties().show(parentFragmentManager, "compass_properties") },
+            onBloomSkins = {
+                dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
+            },
+            onPhysicalProperties = {
+                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { WebPageViewerActivity.open(requireContext(), HtmlPage.PHYSICAL_PROPERTIES) } }
+            },
         )
     }
 
@@ -65,7 +71,7 @@ class Compass : SensorPanel(), HeadingSensor.Listener {
             Sensor.TYPE_ACCELEROMETER -> state.accelerometerAccuracy = accuracy
             Sensor.TYPE_MAGNETIC_FIELD -> state.magnetometerAccuracy = accuracy
         }
-        checkCalibration(accuracy)
+        checkCalibration(type, accuracy)
     }
 
     override fun onReadings(accelerometer: FloatArray, magnetometer: FloatArray) {

@@ -1,14 +1,20 @@
 package app.simple.positional.extensions.fragment
 
+import android.hardware.Sensor
 import android.hardware.SensorManager
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import app.simple.positional.R
-import app.simple.positional.dialogs.compass.CompassCalibration
+import app.simple.positional.ui.compose.CalibrationDialog
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MessageDialog
 
 abstract class SensorPanel : ScopedFragment() {
     protected val dialogs = DialogHost()
     private var calibrationShown = false
+    private var accelerometerAccuracy by mutableIntStateOf(-1)
+    private var magnetometerAccuracy by mutableIntStateOf(-1)
 
     protected fun showSensorError() {
         val message = getString(R.string.sensor_error)
@@ -16,19 +22,17 @@ abstract class SensorPanel : ScopedFragment() {
     }
 
     protected fun showCalibration() {
-        if (!isStateSaved && parentFragmentManager.findFragmentByTag(CALIBRATION_TAG) == null) {
-            CompassCalibration.newInstance().show(parentFragmentManager, CALIBRATION_TAG)
-        }
+        dialogs.show { CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) }
     }
 
-    protected fun checkCalibration(accuracy: Int) {
+    protected fun checkCalibration(type: Int, accuracy: Int) {
+        when (type) {
+            Sensor.TYPE_ACCELEROMETER -> accelerometerAccuracy = accuracy
+            Sensor.TYPE_MAGNETIC_FIELD -> magnetometerAccuracy = accuracy
+        }
         if (!calibrationShown && accuracy <= SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
             calibrationShown = true
             showCalibration()
         }
-    }
-
-    private companion object {
-        const val CALIBRATION_TAG = "calibration_dialog"
     }
 }

@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">यदि आपकी डिवाइस कंपास सेंसर सटीकता कम है, तो सेंसर को कैलिब्रेट करने के लिए अपने डिवाइस को आठ अंक की दिशा में ले जाएं।</string>
     <string name="specified_location_notice">नीचे दी गई जानकारी निर्दिष्ट स्थान निर्देशांक के लिए अपडेट की जा रही है|</string>
-    <string name="show_again">फिर से दिखाएँ</string>
     <string name="search_timezone">समय क्षेत्र खोजें</string>
     <string name="auto_system_default_language">ऑटो (सिस्टम डिफ़ॉल्ट)</string>
     <string name="location_permission_denied">"स्थान अनुमति अस्वीकृत!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">सेट करें</string>
     <string name="button_close">बंद करें</string>
     <string name="button_grant">अनुदान</string>
-    <string name="button_reset">रीसेट करें</string>
 
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>

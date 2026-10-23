@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">നിങ്ങളുടെ സ്മാർട്ട് ഫോണിൽ ദിശ നോക്കുന്ന സെൻസർ ശരിയായി പ്രവർത്തിക്കുന്നില്ലെങ്കിൽ, 8 എന്ന സംഖ്യയുടെ ആകൃതിയിൽ സ്മാർട്ട്ഫോൺ വായുവിൽ ചുഴറ്റുക.</string>
     <string name="specified_location_notice">താഴെ കൊടുക്കുന്ന വിവരങ്ങൾ നിങ്ങൾ നൽകിയിരിക്കുന്ന അക്ഷാംശ-രേഖാംശ രേഖകളോട് അനുബന്ധമായി അപ്ഡേറ്റ് ചെയ്യുന്നു.</string>
-    <string name="show_again">വീണ്ടും കാണിക്കുക</string>
     <string name="search_timezone">വിവിധ ടൈം സോണുകൾ തിരയുക</string>
     <string name="auto_system_default_language">സാധാരണം (സിസ്റ്റം)</string>
     <string name="location_permission_denied">"ലൊക്കേഷൻ അറിയുന്നതിനുള്ള അധികാരം നിഷേധിച്ചിരിക്കുന്നു!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">സ്ഥിരീകരിക്കുക</string>
     <string name="button_close">പുറത്തേക്ക് പോകാം</string>
     <string name="button_grant">അനുവദിക്കുക</string>
-    <string name="button_reset">വീണ്ടും ക്രമീകരിക്കുക</string>
 
     <string name="clock_options">ഘടികാര മെനു</string>
     <string name="compass_options">ദിശനോക്കി മെനു</string>

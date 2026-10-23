@@ -1,5 +1,6 @@
 package app.simple.positional.ui.panels
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModelProvider
@@ -22,8 +24,6 @@ import app.simple.positional.decorations.maps.Maps
 import app.simple.positional.dialogs.app.LocationParameters
 import app.simple.positional.dialogs.gps.CoordinatesExpansion
 import app.simple.positional.dialogs.gps.LocationExpansion
-import app.simple.positional.dialogs.gps.PinCustomization
-import app.simple.positional.dialogs.gps.TargetCoordinates
 import app.simple.positional.extensions.fragment.ScopedFragment
 import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
@@ -44,6 +44,11 @@ import app.simple.positional.ui.compose.positionalComposeView
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PinCustomizationDialog
+import app.simple.positional.ui.compose.CoordinateInput
+import app.simple.positional.ui.compose.CustomLocationForm
+import app.simple.positional.ui.compose.TargetCoordinatesDialog
+import app.simple.positional.activities.subactivity.MapSearchActivity
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.activities.subactivity.WebPageViewerActivity
 import app.simple.positional.constants.HtmlPage
@@ -69,6 +74,17 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     private lateinit var state: GpsState
     private val menuSheet = MenuSheetState()
     private val dialogs = DialogHost()
+    private val targetForm = CustomLocationForm()
+    private val search = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == Activity.RESULT_OK && data != null) {
+            targetForm.fill(
+                data.getStringExtra("address").orEmpty(),
+                CoordinateInput.format(data.getDoubleExtra("latitude", 0.0)),
+                CoordinateInput.format(data.getDoubleExtra("longitude", 0.0)),
+            )
+        }
+    }
     private lateinit var maps: Maps
     private lateinit var viewModel: LocationViewModel
     private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
@@ -254,14 +270,14 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     override fun menu() = menuSheet.show {
-        PanelMenus.gps(onPin = { PinCustomization.newInstance().show(parentFragmentManager, "pin_customization") }) {
+        PanelMenus.gps(onPin = ::pinCustomization) {
             WebPageViewerActivity.open(requireContext(), HtmlPage.MEDIA_KEYS)
         }
     }
 
     override fun customLocation() = LocationParameters.newInstance().show(parentFragmentManager, "location_params")
 
-    override fun pinCustomization() = PinCustomization.newInstance().show(parentFragmentManager, "pin_customization")
+    override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
 
     override fun locate(close: Boolean) {
         if (getLocationStatus(requireContext())) {
@@ -279,7 +295,22 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         maps.setTargetMarker(null)
     }
 
-    override fun targetCoordinates() = TargetCoordinates.newInstance().show(childFragmentManager, "target_coordinates")
+    override fun targetCoordinates() {
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        targetForm.fill("", CoordinateInput.format(target[0].toDouble()), CoordinateInput.format(target[1].toDouble()))
+        dialogs.show {
+            TargetCoordinatesDialog(
+                targetForm,
+                onSearch = { search.launch(Intent(requireContext(), MapSearchActivity::class.java)) },
+                onDismiss = dialogs::dismiss,
+            ) { latitude, longitude ->
+                GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
+                GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
+                GPSPreferences.setTargetMarker(true)
+                dialogs.dismiss()
+            }
+        }
+    }
 
     override fun removeTarget() = GPSPreferences.setTargetMarker(false)
 

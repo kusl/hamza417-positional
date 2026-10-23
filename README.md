@@ -60,8 +60,9 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8b | Trail and measure map panels in Compose on a shared map scaffold; trail points observed through Room `Flow` with one open database per trail; popup windows, tool views and the timeline library removed | Done |
 | 8c | Panel menus (GPS, trail, measure, compass, clock, direction) as one Compose bottom sheet built from `PanelMenus`; sub dialogs no longer reopen menus while being destroyed | Done |
 | 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
-| 8e | Remaining dialogs (location parameters, coordinates and location details, pins, target coordinates, calibration, skins, panels, permission) in Compose | Next |
-| 8f | Single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
+| 8f | Location parameters, location and coordinate details and the panel switcher in Compose | Next |
+| 8g | Single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 

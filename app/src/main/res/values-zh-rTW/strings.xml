@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">若您的裝置指南針感應器精確度過低，將您的裝置向 8 字方向移動以校正感應器。</string>
     <string name="specified_location_notice">下面顯示的資訊正在為指定的位置座標進行更新。</string>
-    <string name="show_again">再次顯示</string>
     <string name="search_timezone">搜尋時區</string>
     <string name="auto_system_default_language">自動 (系統預設)</string>
     <string name="location_permission_denied">"位置權限遭拒！"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">設定</string>
     <string name="button_close">關閉</string>
     <string name="button_grant">授予</string>
-    <string name="button_reset">重設</string>
 
     <string name="clock_options">時鐘選單</string>
     <string name="compass_options">指南針選單</string>

@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Wenn die Genauigkeit Ihres Kompasssensors niedrig ist, bewegen Sie Ihr Gerät entlang der Linie einer 8 zum Kalibrieren.</string>
     <string name="specified_location_notice">Untenstehende Informationen werden für bestimmte Standortkoordinaten aktualisiert.</string>
-    <string name="show_again">Erneut anzeigen</string>
     <string name="search_timezone">Zeitzonen durchsuchen</string>
     <string name="auto_system_default_language">Auto (System-Standard)</string>
     <string name="location_permission_denied">"Standortberechtigung abgelehnt!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Anwenden</string>
     <string name="button_close">Schließen</string>
     <string name="button_grant">Erlauben</string>
-    <string name="button_reset">Wiederherstellen</string>
 
     <string name="clock_options">Uhrenmenü</string>
     <string name="compass_options">Kompassmenü</string>

@@ -164,7 +164,6 @@
 
     <string name="compass_calibration_notice">Se a precisão do sensor de bússola do seu dispositivo estiver baixa, mova o seu dispositivo para oito direções para calibrar os sensores.</string>
     <string name="specified_location_notice">Informações mostradas abaixo estão sendo atualizadas para coordenadas de localização especificadas.</string>
-    <string name="show_again">Mostrar novamente</string>
     <string name="search_timezone">Pesquisar fusos horários</string>
     <string name="auto_system_default_language">Automático (Padrão do Sistem)</string>
     <string name="location_permission_denied">"Permissão de localização recusada!"</string>
@@ -174,7 +173,6 @@
     <string name="button_set">Aplicar</string>
     <string name="button_close">Fechar</string>
     <string name="button_grant">Conceder</string>
-    <string name="button_reset">Redefinir</string>
 
     <string name="clock_options">Menu do Relógio</string>
     <string name="compass_options">Menu da Bússola</string>

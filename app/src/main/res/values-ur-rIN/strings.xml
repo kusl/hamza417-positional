@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">اگر آپ کے آلے کے کمپاس سینسر کی درستگی کم ہے تو ، سینسر کیلیبریٹ کرنے کے لیے اپنے آلے کو آٹھ سمت میں منتقل کریں۔</string>
     <string name="specified_location_notice">ذیل میں دکھائی گئی معلومات کو مخصوص مقام کوآرڈینیٹ کیلئے تازہ کاری کی جارہی ہے۔</string>
-    <string name="show_again">دوبارہ دکھائیں</string>
     <string name="search_timezone">ٹائم زونز تلاش کریں</string>
     <string name="auto_system_default_language">آٹو (سسٹم ڈیفالٹ)</string>
     <string name="location_permission_denied">"مقام کی اجازت سے انکار!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">سیٹ کریں</string>
     <string name="button_close">بند کریں</string>
     <string name="button_grant">عطا</string>
-    <string name="button_reset">ری سیٹ کریں</string>
 
     <string name="clock_options">گھڑی مینو</string>
     <string name="compass_options">کمپاس مینو</string>

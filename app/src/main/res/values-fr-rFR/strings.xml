@@ -157,7 +157,6 @@
 
     <string name="compass_calibration_notice">Si la précision du capteur de la boussole de votre appareil est faible, déplacez votre appareil dans la figure 8 pour calibrer les capteurs.</string>
     <string name="specified_location_notice">Les informations indiquées ci-dessous sont en cours de mise à jour pour les coordonnées de l\'emplacement spécifié.</string>
-    <string name="show_again">Montre encore une fois</string>
     <string name="search_timezone">Trouver des fuseaux horaires</string>
     <string name="auto_system_default_language">Auto (Défaut système)</string>
     <string name="location_permission_denied">"Autorisation de localisation refusée!"</string>
@@ -167,7 +166,6 @@
     <string name="button_set">Set</string>
     <string name="button_close">Fermer</string>
     <string name="button_grant">Accorder</string>
-    <string name="button_reset">Réinitialiser</string>
 
     <string name="clock_options">Menu Horloge</string>
     <string name="compass_options">Menu Boussole</string>
