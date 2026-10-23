@@ -39,24 +39,25 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons and settings state.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette and coordinate input.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments through `ComposeView`. Shared theme, components and dialogs live in `ui/compose/`.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView`. Shared theme, components, dialogs and screens live in `ui/compose/`.
 
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Compose toolchain, theme, preference components, Settings screen | Done |
 | 2 | Fork-owned legal pages, upstream contacts and unused resources removed | Done |
 | 3 | Settings dialogs (theme, icon, corners, units, coordinates, provider, language) | Done |
-| 4 | Accent colors, custom locations and other sub screens | Next |
-| 5 | List screens (trails, measures, directions, time zones) | Planned |
-| 6 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
-| 7 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
-| 8 | Widgets on Glance | Planned |
+| 4 | Accent colors and custom locations screens, Room `Flow` for saved places | Done |
+| 5 | Arts, web page viewer, map search and target address screens | Next |
+| 6 | List screens (trails, measures, directions, time zones) | Planned |
+| 7 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
+| 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
+| 9 | Widgets on Glance | Planned |
 
 ## Building
 

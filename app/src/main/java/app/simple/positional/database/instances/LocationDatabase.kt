@@ -9,19 +9,17 @@ import app.simple.positional.model.Locations
 
 @Database(entities = [Locations::class], exportSchema = false, version = 2)
 abstract class LocationDatabase : RoomDatabase() {
-    abstract fun locationDao(): LocationDao?
+    abstract fun locationDao(): LocationDao
 
     companion object {
+        @Volatile
         private var instance: LocationDatabase? = null
 
-        @Synchronized
-        fun getInstance(context: Context?, DB_NAME: String?): LocationDatabase? {
-            if (instance == null) {
-                instance = Room.databaseBuilder(context!!, LocationDatabase::class.java, DB_NAME!!)
-                        .fallbackToDestructiveMigration()
-                        .build()
-            }
-            return instance
+        fun getInstance(context: Context): LocationDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, LocationDatabase::class.java, "locations.db")
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+                .also { instance = it }
         }
     }
 }
