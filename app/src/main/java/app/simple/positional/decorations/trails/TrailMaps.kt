@@ -45,7 +45,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TrailMaps(context: Context, attributeSet: AttributeSet) : CustomMaps(context, attributeSet),
+class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(context, attributeSet),
     SensorEventListener {
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)

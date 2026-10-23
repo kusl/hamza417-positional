@@ -171,8 +171,6 @@
 
     <string name="clock_options">Menu Horloge</string>
     <string name="compass_options">Menu Boussole</string>
-    <string name="gps_options">Menu GPS</string>
-    <string name="gps_reset_location">Réinitialiser l\'emplacement</string>
     <string name="delete_all">Tout effacer</string>
     <string name="open_specified_location_documentation">Ouvrir la documentation de l\'emplacement spécifié</string>
 
@@ -258,7 +256,6 @@
     <string name="note">Remarque</string>
     <string name="total">Le total:</string>
     <string name="saved_trails">Pistes sauvegardées</string>
-    <string name="starting_point">Point de Départ</string>
     <string name="enter_marker_name">Entrez le nom du marqueur</string>
     <string name="delete">Effacer</string>
     <string name="copy">Copie</string>

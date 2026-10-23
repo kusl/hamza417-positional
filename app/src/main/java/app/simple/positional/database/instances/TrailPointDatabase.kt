@@ -9,20 +9,31 @@ import app.simple.positional.model.TrailPoint
 
 @Database(entities = [TrailPoint::class], exportSchema = true, version = 3)
 abstract class TrailPointDatabase : RoomDatabase() {
-    abstract fun trailDataDao(): TrailPointDao?
+    abstract fun trailDataDao(): TrailPointDao
 
     companion object {
+        private var name: String? = null
         private var instance: TrailPointDatabase? = null
 
         @Synchronized
-        fun getInstance(context: Context?, DB_NAME: String?): TrailPointDatabase? {
-            if (instance == null) {
-                instance =
-                    Room.databaseBuilder(context!!, TrailPointDatabase::class.java, DB_NAME!!)
-                    .fallbackToDestructiveMigration()
-                    .build()
-            }
-            return instance
+        fun getInstance(context: Context, trail: String): TrailPointDatabase {
+            instance?.takeIf { name == trail }?.let { return it }
+            instance?.close()
+            return Room.databaseBuilder(context.applicationContext, TrailPointDatabase::class.java, "$trail.db")
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+                .also {
+                    instance = it
+                    name = trail
+                }
+        }
+
+        @Synchronized
+        fun close(trail: String) {
+            if (name != trail) return
+            instance?.close()
+            instance = null
+            name = null
         }
     }
 }

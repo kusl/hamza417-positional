@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.database.instances.TrailDatabase
+import app.simple.positional.database.instances.TrailPointDatabase
 import app.simple.positional.model.TrailEntry
 import app.simple.positional.preferences.TrailPreferences
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,7 @@ class TrailsViewModel(application: Application) : AndroidViewModel(application) 
     fun deleteTrail(trailEntry: TrailEntry) = persist {
         dao.deleteTrail(trailEntry)
         if (TrailPreferences.getCurrentTrail() == trailEntry.trailName) TrailPreferences.setCurrentTrailName("")
+        TrailPointDatabase.close(trailEntry.trailName)
         getApplication<Application>().deleteDatabase("${trailEntry.trailName}.db")
     }
 

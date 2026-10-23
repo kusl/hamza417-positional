@@ -171,8 +171,6 @@
 
     <string name="clock_options">ഘടികാര മെനു</string>
     <string name="compass_options">ദിശനോക്കി മെനു</string>
-    <string name="gps_options">ജി. പി. എസ്. മെനു</string>
-    <string name="gps_reset_location">ലൊക്കേഷൻ വീണ്ടും ക്രമീകരിക്കുക</string>
     <string name="delete_all">എല്ലാം കളയുക</string>
     <string name="open_specified_location_documentation">പ്രത്യേക ലൊക്കേഷൻ ഡോക്യുമെന്റേഷൻ തുറക്കുക</string>
 
@@ -258,7 +256,6 @@
     <string name="note">കുറിപ്പ്</string>
     <string name="total">തുക:</string>
     <string name="saved_trails">സേവ് ചെയ്തിരിക്കുന്ന ചിഹ്നങ്ങൾ</string>
-    <string name="starting_point">ആരംഭ സ്ഥാനം</string>
     <string name="enter_marker_name">മാർക്കർ നാമം</string>
     <string name="delete">ഡിലീറ്റ്</string>
     <string name="copy">കോപ്പി</string>

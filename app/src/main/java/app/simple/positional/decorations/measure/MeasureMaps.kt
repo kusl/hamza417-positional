@@ -51,7 +51,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MeasureMaps(context: Context, attrs: AttributeSet) : CustomMaps(context, attrs),
+class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(context, attrs),
     SensorEventListener {
     private val accelerometerReadings = FloatArray(3)
     private val magnetometerReadings = FloatArray(3)

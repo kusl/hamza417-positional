@@ -171,8 +171,6 @@
 
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>
-    <string name="gps_options">GPS Menu</string>
-    <string name="gps_reset_location">स्थान रीसेट करें</string>
     <string name="delete_all">सब मिटाएं</string>
     <string name="open_specified_location_documentation">निर्दिष्ट स्थान प्रलेखन खोलें</string>
 
@@ -258,7 +256,6 @@
     <string name="note">टिप्पणियाँ</string>
     <string name="total">कुल:</string>
     <string name="saved_trails">संग्रहीत ट्रेल्स</string>
-    <string name="starting_point">मार्ग की शुरुआत</string>
     <string name="enter_marker_name">मार्कर का नाम दर्ज करें</string>
     <string name="delete">मिटाए</string>
     <string name="copy">कॉपी करें</string>

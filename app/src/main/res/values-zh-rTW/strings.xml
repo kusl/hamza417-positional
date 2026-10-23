@@ -171,8 +171,6 @@
 
     <string name="clock_options">時鐘選單</string>
     <string name="compass_options">指南針選單</string>
-    <string name="gps_options">GPS 選單</string>
-    <string name="gps_reset_location">重設位置</string>
     <string name="delete_all">全部刪除</string>
     <string name="open_specified_location_documentation">開啟指定的位置文件</string>
 
@@ -258,7 +256,6 @@
     <string name="note">說明</string>
     <string name="total">總計:</string>
     <string name="saved_trails">儲存軌跡</string>
-    <string name="starting_point">起點</string>
     <string name="enter_marker_name">輸入標記名稱</string>
     <string name="delete">刪除</string>
     <string name="copy">複製</string>

@@ -171,8 +171,6 @@
 
     <string name="clock_options">Óra menü</string>
     <string name="compass_options">Iránytű menü</string>
-    <string name="gps_options">GPS menü</string>
-    <string name="gps_reset_location">Hely visszaállítása</string>
     <string name="delete_all">Összes törlése</string>
     <string name="open_specified_location_documentation">A megadott hely dokumentációjának megnyitása</string>
 
@@ -258,7 +256,6 @@
     <string name="note">Megjegyzés</string>
     <string name="total">Összesen:</string>
     <string name="saved_trails">Mentett útvonalak</string>
-    <string name="starting_point">Kiindulási pont</string>
     <string name="enter_marker_name">Jelölő nevének a megadása</string>
     <string name="delete">Törlés</string>
     <string name="copy">Másolás</string>

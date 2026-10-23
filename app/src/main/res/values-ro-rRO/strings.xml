@@ -171,8 +171,6 @@
 
     <string name="clock_options">Meniu ceas</string>
     <string name="compass_options">Meniu busolă</string>
-    <string name="gps_options">Meniu GPS</string>
-    <string name="gps_reset_location">Resetare locație</string>
     <string name="delete_all">Ștergeți tot</string>
     <string name="open_specified_location_documentation">Deschide documentația locației specificate</string>
 
@@ -258,7 +256,6 @@
     <string name="note">Notă</string>
     <string name="total">Total:</string>
     <string name="saved_trails">Traseuri salvate</string>
-    <string name="starting_point">Punct de plecare</string>
     <string name="enter_marker_name">Introdu numele marcatorului</string>
     <string name="delete">Ștergere</string>
     <string name="copy">Copiere</string>

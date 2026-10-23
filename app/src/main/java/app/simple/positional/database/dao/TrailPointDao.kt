@@ -6,20 +6,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import app.simple.positional.model.TrailPoint
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TrailPointDao {
-    @Query("SELECT * FROM trail_data ORDER BY time_added COLLATE nocase")
-    fun getAllTrailData(): List<TrailPoint>
-
-    @Query("SELECT * FROM trail_data ORDER BY time_added COLLATE nocase DESC")
-    fun getAllTrailDataDesc(): List<TrailPoint>
+    @Query("SELECT * FROM trail_data ORDER BY time_added")
+    fun observeAll(): Flow<List<TrailPoint>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrailData(trailPoint: TrailPoint)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTrailData(trailData: List<TrailPoint>)
 
     @Delete
     suspend fun deleteTrailData(trailPoint: TrailPoint)

@@ -5,19 +5,17 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.location.Location
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
-import app.simple.positional.callbacks.BottomSheetSlide
+import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.Maps
@@ -51,6 +49,7 @@ import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
+import app.simple.positional.util.MapIntents
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
 import app.simple.positional.util.ParcelUtils.parcelable
 import app.simple.positional.util.ReverseGeocoder
@@ -228,7 +227,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     }
 
     private fun bottomBar(visible: Boolean) {
-        (requireActivity() as? BottomSheetSlide)?.onMapClicked(visible)
+        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
     }
 
     override fun onMapInitialized() {
@@ -352,12 +351,7 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
     override fun navigatePressed() {
         state.pressed = null
         val latLng = pressed ?: return
-        val navigation = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${latLng.latitude},${latLng.longitude}&mode=d"))
-            .setPackage(GOOGLE_MAPS)
-        val generic = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${latLng.latitude},${latLng.longitude}?q=${latLng.latitude},${latLng.longitude}"))
-        runCatching { startActivity(navigation) }
-            .recoverCatching { startActivity(generic) }
-            .onFailure { Toast.makeText(requireContext(), R.string.error, Toast.LENGTH_SHORT).show() }
+        MapIntents.navigate(requireContext(), latLng.latitude, latLng.longitude)
     }
 
     override fun zoom(zoomIn: Boolean) = if (zoomIn) maps.zoomIn() else maps.zoomOut()
@@ -373,7 +367,6 @@ class GPS : ScopedFragment(), GpsActions, MapsCallbacks {
         private const val CAMERA = "camera"
         private const val FULL_SCREEN = "fullscreen"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
-        private const val GOOGLE_MAPS = "com.google.android.apps.maps"
         private const val CLOSE_ZOOM = 18F
         private const val LATE = 5.0
         private const val ADDRESS_DISTANCE = 25.0

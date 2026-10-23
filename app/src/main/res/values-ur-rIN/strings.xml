@@ -171,8 +171,6 @@
 
     <string name="clock_options">گھڑی مینو</string>
     <string name="compass_options">کمپاس مینو</string>
-    <string name="gps_options">GPS مینو</string>
-    <string name="gps_reset_location">مقام کو دوبارہ ترتیب دیںمقام کو دوبارہ ترتیب دیں</string>
     <string name="delete_all">تمام حذف کریں</string>
     <string name="open_specified_location_documentation">مخصوص مقام کی دستاویزات کو کھولیں</string>
 
@@ -258,7 +256,6 @@
     <string name="note">نوٹ</string>
     <string name="total">کل:</string>
     <string name="saved_trails">محفوظ ٹریلز</string>
-    <string name="starting_point">نقطہ اغاز</string>
     <string name="enter_marker_name">مارکر کا نام درج کریں</string>
     <string name="delete">حذف کریں</string>
     <string name="copy">نقل کریں</string>

@@ -108,7 +108,6 @@ dependencies {
 
     implementation 'org.shredzone.commons:commons-suncalc:3.11'
     implementation 'com.github.kylecorry31:Geo-Coordinate-Conversion-Java:360781e5be'
-    implementation 'com.github.vipulasri:timelineview:1.2.2'
 
     implementation 'androidx.room:room-ktx:2.8.5'
     ksp 'androidx.room:room-compiler:2.8.5'

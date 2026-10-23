@@ -45,4 +45,14 @@ class GeoDistanceTest {
         threshold.reset()
         assertTrue(threshold.accept(1.0, 1.0))
     }
+
+    @Test
+    fun pathSumsSegments() {
+        val a = 0.0 to 0.0
+        val b = 1.0 to 0.0
+        val c = 2.0 to 0.0
+        assertEquals(GeoDistance.meters(0.0, 0.0, 2.0, 0.0), GeoDistance.path(listOf(a, b, c)), 1e-6)
+        assertEquals(0.0, GeoDistance.path(listOf(a)), 0.0)
+        assertEquals(0.0, GeoDistance.path(emptyList()), 0.0)
+    }
 }

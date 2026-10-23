@@ -171,8 +171,6 @@
 
     <string name="clock_options">Информация за часовника</string>
     <string name="compass_options">Компас меню</string>
-    <string name="gps_options">GPS меню</string>
-    <string name="gps_reset_location">Нулиране на локацията</string>
     <string name="delete_all">Изтрий всичко</string>
     <string name="open_specified_location_documentation">Отворете документацията за определено местоположение</string>
 
@@ -258,7 +256,6 @@
     <string name="note">Бележка</string>
     <string name="total">Общо:</string>
     <string name="saved_trails">Запазени пътеки</string>
-    <string name="starting_point">Начална точка</string>
     <string name="enter_marker_name">Въведете име на маркер</string>
     <string name="delete">Изтриване</string>
     <string name="copy">Копирай</string>

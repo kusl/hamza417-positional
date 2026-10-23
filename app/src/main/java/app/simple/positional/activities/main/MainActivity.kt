@@ -8,8 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -21,7 +19,7 @@ import androidx.viewpager2.widget.ViewPager2
 import app.simple.positional.R
 import app.simple.positional.adapters.bottombar.BottomBarAdapter
 import app.simple.positional.adapters.bottombar.BottomBarItems
-import app.simple.positional.callbacks.BottomSheetSlide
+import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.callbacks.PanelsCallback
 import app.simple.positional.callbacks.PermissionCallbacks
 import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
@@ -33,7 +31,6 @@ import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.services.FusedLocationService
 import app.simple.positional.services.LocationService
-import app.simple.positional.singleton.FloatingButtonStateCommunicator
 import app.simple.positional.singleton.SharedPreferences
 import app.simple.positional.ui.panels.Compass
 import app.simple.positional.ui.panels.Direction
@@ -55,7 +52,7 @@ import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
 class MainActivity : BaseActivity(),
     PermissionCallbacks,
-    BottomSheetSlide,
+    BottomBarHost,
     android.content.SharedPreferences.OnSharedPreferenceChangeListener,
     OnMapsSdkInitializedCallback {
     private val defaultPermissionRequestCode = 123
@@ -63,10 +60,8 @@ class MainActivity : BaseActivity(),
     private lateinit var bottomBarContainer: DynamicCornerLinearLayout
     private lateinit var label: TextView
     private lateinit var bottomBarAdapter: BottomBarAdapter
-    private lateinit var popupContainer: View
 
     private val handler = Handler(Looper.getMainLooper())
-    private var bottomBarContainerGlobalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -135,14 +130,6 @@ class MainActivity : BaseActivity(),
             })
         }
 
-        bottomBarContainerGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val size = bottomBarContainer.width + bottomBarContainer.marginStart + bottomBarContainer.marginEnd
-            FloatingButtonStateCommunicator.setFloatingButtonSize(size)
-            FloatingButtonStateCommunicator.notifyFloatingButtonStateChange(size)
-        }
-
-        bottomBarContainer.viewTreeObserver.addOnGlobalLayoutListener(bottomBarContainerGlobalLayoutListener)
-
         checkRunTimePermission()
         MainPreferences.setLaunchCount(MainPreferences.getLaunchCount() + 1)
 
@@ -165,17 +152,8 @@ class MainActivity : BaseActivity(),
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
-        bottomBarContainer.viewTreeObserver.removeOnGlobalLayoutListener(bottomBarContainerGlobalLayoutListener)
 
         super.onDestroy()
-    }
-
-    private fun showBottomBarMenu() {
-        bottomBar.visibility = ViewPager2.VISIBLE
-        if (label.text != BottomBarItems.getBottomBarItems(baseContext)[FragmentPreferences.getCurrentPage()].name) {
-            label.visibility = TextView.VISIBLE
-        }
-        bottomBarContainer.removeView(popupContainer)
     }
 
     private fun checkRunTimePermission() {
@@ -314,14 +292,8 @@ class MainActivity : BaseActivity(),
         }
     }
 
-    override fun onBottomSheetSliding(slideOffset: Float, animate: Boolean) {
-        bottomBarContainer.scaleX = 1 - slideOffset
-        bottomBarContainer.scaleY = 1 - slideOffset
-        bottomBarContainer.alpha = 1 - slideOffset
-    }
-
-    override fun onMapClicked(fullScreen: Boolean) {
-        if (fullScreen) {
+    override fun showBottomBar(visible: Boolean) {
+        if (visible) {
             bottomBarContainer.visible(true)
         } else {
             bottomBarContainer.gone(true)

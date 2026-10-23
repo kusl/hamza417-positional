@@ -15,6 +15,9 @@ object GeoDistance {
                 cos(Math.toRadians(fromLatitude)) * cos(Math.toRadians(toLatitude)) * sin(dLon / 2).let { it * it }
         return 2 * EARTH_RADIUS * asin(sqrt(a.coerceIn(0.0, 1.0)))
     }
+
+    fun path(points: List<Pair<Double, Double>>): Double =
+        points.zipWithNext { a, b -> meters(a.first, a.second, b.first, b.second) }.sum()
 }
 
 class MovementThreshold(private val meters: Double) {

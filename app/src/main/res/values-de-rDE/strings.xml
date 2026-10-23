@@ -171,8 +171,6 @@
 
     <string name="clock_options">Uhrenmenü</string>
     <string name="compass_options">Kompassmenü</string>
-    <string name="gps_options">GPS-Menü</string>
-    <string name="gps_reset_location">Standort zurücksetzen</string>
     <string name="delete_all">Alles löschen</string>
     <string name="open_specified_location_documentation">Beschreibung gespeicherter Orte öffnen</string>
 
@@ -258,7 +256,6 @@
     <string name="note">Hinweis</string>
     <string name="total">Gesamt:</string>
     <string name="saved_trails">Gespeicherte Strecken</string>
-    <string name="starting_point">Ausgangspunkt</string>
     <string name="enter_marker_name">Marker-Name eingeben</string>
     <string name="delete">Löschen</string>
     <string name="copy">Kopieren</string>

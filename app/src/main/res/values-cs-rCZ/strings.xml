@@ -171,8 +171,6 @@
 
     <string name="clock_options">Nabídka hodin</string>
     <string name="compass_options">Nabídka kompasu</string>
-    <string name="gps_options">GPS nabídka</string>
-    <string name="gps_reset_location">Resetovat polohu</string>
     <string name="delete_all">Smazat vše</string>
     <string name="open_specified_location_documentation">Otevřít specifikovanou dokumentaci polohy</string>
 
@@ -258,7 +256,6 @@
     <string name="note">Poznámka</string>
     <string name="total">Celkem:</string>
     <string name="saved_trails">Uložené trasy</string>
-    <string name="starting_point">Počáteční bod</string>
     <string name="enter_marker_name">Zadejte název značky</string>
     <string name="delete">Odstranit</string>
     <string name="copy">Kopírovat</string>

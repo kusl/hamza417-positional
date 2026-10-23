@@ -1,529 +1,272 @@
 package app.simple.positional.ui.panels
 
-import android.annotation.SuppressLint
-import android.content.*
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
-import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.*
-import android.widget.ImageView
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.getSystemService
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.TransitionInflater
-import androidx.transition.TransitionManager
+import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.TrailsViewerActivity
-import app.simple.positional.adapters.trail.AdapterTrailPoints
-import app.simple.positional.callbacks.BottomSheetSlide
+import app.simple.positional.callbacks.BottomBarHost
+import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.trails.TrailMaps
-import app.simple.positional.decorations.trails.TrailToolbar
-import app.simple.positional.decorations.trails.TrailTools
 import app.simple.positional.dialogs.trail.AddMarker
 import app.simple.positional.dialogs.trail.AddTrail
 import app.simple.positional.dialogs.trail.TrailMenu
 import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
+import app.simple.positional.math.GeoDistance
+import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.model.TrailPoint
-import app.simple.positional.popups.miscellaneous.DeletePopupMenu
-import app.simple.positional.popups.trail.PopupMarkers
-import app.simple.positional.popups.trail.PopupTrailsDataMenu
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isZero
-import app.simple.positional.util.LocationExtension
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.ui.compose.TrailActions
+import app.simple.positional.ui.compose.TrailPointItem
+import app.simple.positional.ui.compose.TrailScreen
+import app.simple.positional.ui.compose.TrailState
+import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.DistanceText
+import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
+import app.simple.positional.util.MapIntents
 import app.simple.positional.util.ParcelUtils.parcelable
-import app.simple.positional.util.StatusBarHeight
 import app.simple.positional.util.TimeFormatter.formatDate
-import app.simple.positional.util.ViewUtils.invisible
-import app.simple.positional.util.ViewUtils.visible
-import app.simple.positional.viewmodels.factory.TrailDataFactory
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.*
 
-class Trail : ScopedFragment() {
-    private lateinit var toolbar: TrailToolbar
-    private lateinit var tools: TrailTools
-    private lateinit var recyclerView: RecyclerView
-    private var bottomSheetPanel: BottomSheetBehavior<CoordinatorLayout>? = null
-    private lateinit var bottomSheetSlide: BottomSheetSlide
-    private lateinit var expandUp: ImageView
-    private lateinit var art: ImageView
-    private lateinit var dim: View
-
-    private var backPress: OnBackPressedDispatcher? = null
-    private var maps: TrailMaps? = null
-    private val handler = Handler(Looper.getMainLooper())
-    private var location: Location? = null
+class Trail : ScopedFragment(), TrailActions, MapsCallbacks {
+    private val state = TrailState()
+    private val trailData: TrailDataViewModel by viewModels()
+    private val trails: TrailsViewModel by viewModels()
     private lateinit var locationViewModel: LocationViewModel
+    private lateinit var maps: TrailMaps
+    private var location: Location? = null
+    private var camera: CameraPosition? = null
+    private var pending: Triple<Double, Double, Float>? = null
 
-    private var isFullScreen = false
-    private var peekHeight = 0
-    private var x = 0F
-    private var y = 0F
-    private var currentTrail: String? = null
-
-    private lateinit var trailDataViewModel: TrailDataViewModel
-    private val trailsViewModel: TrailsViewModel by viewModels()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_trail, container, false)
-
-        toolbar = view.findViewById(R.id.toolbar)
-        tools = view.findViewById(R.id.trail_tools)
-        recyclerView = view.findViewById(R.id.trail_data_recycler_view)
-
-        kotlin.runCatching {
-            bottomSheetPanel = BottomSheetBehavior.from(view.findViewById(R.id.trail_bottom_sheet))
-        }
-
-        expandUp = view.findViewById(R.id.expand_up)
-        art = view.findViewById(R.id.art)
-        dim = view.findViewById(R.id.dim)
-        bottomSheetSlide = requireActivity() as BottomSheetSlide
-
-        currentTrail = TrailPreferences.getCurrentTrail()
-        trailDataViewModel = ViewModelProvider(this, TrailDataFactory())[TrailDataViewModel::class.java]
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         locationViewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
-
-        maps = view.findViewById(R.id.map_view)
-        maps?.onCreate(savedInstanceState)
-
-        backPress = requireActivity().onBackPressedDispatcher
-
-        updateToolsGravity(view)
-
-        tools.locationIndicatorUpdate(false)
-
-        recyclerView.apply {
-            setPadding(paddingLeft,
-                       paddingTop + StatusBarHeight.getStatusBarHeight(resources),
-                       paddingRight,
-                       paddingBottom)
-
-            alpha = if (isLandscapeOrientation) 1F else 0F
-        }
-
-        peekHeight = bottomSheetPanel?.peekHeight ?: 0
-
-        return view
+        camera = savedInstanceState?.parcelable(CAMERA)
+        state.fullScreen = !isLandscapeOrientation && savedInstanceState?.getBoolean(FULL_SCREEN) == true
+        readPreferences()
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        maps = TrailMaps(requireContext()).apply {
+            alpha = 0f
+            onCreate(null)
+            setOnMapsCallbackListener(this@Trail)
+        }
+        return positionalComposeView { top -> TrailScreen(state, maps, top, isLandscapeOrientation, this) }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+        if (state.fullScreen) bottomBar(visible = false)
 
         locationViewModel.getLocation().observe(viewLifecycleOwner) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.Default) {
-                    location = it
+            location = it
+            MainPreferences.setLastLatitude(it.latitude.toFloat())
+            MainPreferences.setLastLongitude(it.longitude.toFloat())
+            state.fixed = true
+            state.enabled = getLocationStatus(requireContext())
+            maps.setFirstLocation(it)
+            maps.location = it
+            maps.addMarker(LatLng(it.latitude, it.longitude))
+        }
+        locationViewModel.getProvider().observe(viewLifecycleOwner) { state.enabled = getLocationStatus(requireContext()) }
 
-                    MainPreferences.setLastLatitude(location!!.latitude.toFloat())
-                    MainPreferences.setLastLongitude(location!!.longitude.toFloat())
-
-                    withContext(Dispatchers.Main) {
-                        maps?.setFirstLocation(location)
-                        maps?.location = location
-                        maps?.addMarker(LatLng(location!!.latitude, location!!.longitude))
-                        tools.locationIndicatorUpdate(true)
-                    }
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { trailData.trail.collect { state.trail = it } }
+                trailData.points.collect(::showPoints)
             }
         }
-
-        locationViewModel.getProvider().observe(viewLifecycleOwner) {
-            tools.locationIconStatusUpdates()
-        }
-
-        trailDataViewModel.trailPointDescendingWithInfo.observe(viewLifecycleOwner) {
-            val adapter = AdapterTrailPoints(it)
-
-            adapter.setOnTrailsDataCallbackListener(object : AdapterTrailPoints.Companion.AdapterTrailsDataCallbacks {
-                override fun onTrailsDataLongPressed(trailPoint: TrailPoint, view: View, position: Int) {
-                    PopupTrailsDataMenu(view).setOnPopupCallbacksListener(object : PopupTrailsDataMenu.Companion.PopupTrailsCallbacks {
-                        override fun onDelete() {
-                            DeletePopupMenu(view) {
-                                trailDataViewModel.deleteTrailData(trailPoint)
-                            }
-                        }
-
-                        override fun onCopy() {
-                            val builder = StringBuilder().apply {
-                                append(trailPoint.name ?: getString(R.string.not_available))
-                                append("\n\n")
-                                append(trailPoint.note ?: getString(R.string.not_available))
-                                append("\n\n")
-                                append(String.format(Locale.ENGLISH, "geo:%f,%f", trailPoint.latitude, trailPoint.longitude))
-                                append("\n\n")
-                                append(trailPoint.timeAdded.formatDate())
-                            }
-
-                            val clip: ClipData = ClipData.newPlainText("GPS Data", builder)
-                            val clipboard: ClipboardManager =
-                                    requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            clipboard.setPrimaryClip(clip)
-                        }
-
-                        override fun onShare() {
-                            kotlin.runCatching {
-                                startActivity(
-                                        Intent(
-                                                Intent.ACTION_VIEW,
-                                            Uri.parse("geo:${trailPoint.latitude},${trailPoint.longitude}")))
-                            }.getOrElse { throwable ->
-                                Toast.makeText(requireContext(), throwable.message, Toast.LENGTH_SHORT)
-                                        .show()
-                            }
-                        }
-
-                        override fun onNavigate() {
-                            kotlin.runCatching {
-                                val uri: Uri =
-                                    Uri.parse("google.navigation:q=" + trailPoint.latitude.toString() + "," + trailPoint.longitude.toString() + "&mode=d")
-                                val intent = Intent(Intent.ACTION_VIEW, uri)
-                                intent.setPackage("com.google.android.apps.maps")
-                                startActivity(intent)
-                            }.getOrElse {
-                                Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    })
-                }
-
-                override fun onAdd(view: View) {
-                    if (currentTrail!!.isEmpty()) {
-                        addTrail()
-                    } else {
-                        location
-                                ?: Toast.makeText(requireContext(), R.string.location_not_available, Toast.LENGTH_SHORT)
-                                        .show().also {
-                                            return
-                                        }
-
-                        addMarker(view, location!!.latitude, location!!.longitude, location!!.accuracy, view.x, view.y)
-                    }
-                }
-
-                override fun onTrailClicked(latLng: LatLng) {
-                    maps?.moveMapCamera(latLng, 15F, TrailPreferences.getMapTilt())
-
-                    if (bottomSheetPanel?.state == BottomSheetBehavior.STATE_EXPANDED) {
-                        bottomSheetPanel?.state = BottomSheetBehavior.STATE_COLLAPSED
-                    }
-                }
-            })
-
-            if (it.first.isEmpty()) {
-                art.visible(false)
-                recyclerView.adapter = null
-            } else {
-                art.invisible(false)
-                recyclerView.adapter = adapter
-            }
-        }
-
-        bottomSheetPanel?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when (newState) {
-                    BottomSheetBehavior.STATE_EXPANDED  -> {
-                        backPressed(true)
-                    }
-                    BottomSheetBehavior.STATE_COLLAPSED -> {
-                        backPressed(false)
-                        if (backPress!!.hasEnabledCallbacks()) {
-                            backPress?.onBackPressed()
-                        }
-                    }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                recyclerView.alpha = slideOffset
-                expandUp.alpha = 1 - slideOffset
-                dim.alpha = slideOffset
-                if (!isFullScreen) {
-                    bottomSheetSlide.onBottomSheetSliding(slideOffset, true)
-                }
-            }
-        })
-
-        tools.setTrailCallbacksListener(object : TrailTools.Companion.TrailCallbacks {
-            override fun onLocation(reset: Boolean) {
-                if (LocationExtension.getLocationStatus(requireContext())) {
-                    if (location.isNotNull()) {
-                        if (reset) {
-                            maps?.resetCamera(18F)
-                        } else {
-                            maps?.moveMapCamera(LatLng(location!!.latitude, location!!.longitude),
-                                TrailPreferences.getMapZoom(),
-                                TrailPreferences.getMapTilt())
-                        }
-                    }
-                } else {
-                    LocationPrompt.displayLocationSettingsRequest(requireActivity())
-                }
-            }
-
-            override fun onAdd(view: View) {
-                if (currentTrail!!.isEmpty()) {
-                    addTrail()
-                } else {
-                    location
-                        ?: Toast.makeText(requireContext(), R.string.location_not_available, Toast.LENGTH_SHORT)
-                            .show().also {
-                                return
-                            }
-
-                    addMarker(view, location!!.latitude, location!!.longitude, location!!.accuracy, view.x, view.y)
-                }
-            }
-
-            override fun onRemove(remove: View) {
-                DeletePopupMenu(remove) {
-                    maps?.removePolyline()
-                }
-            }
-
-            override fun onWrapUnwrap() {
-                maps?.wrapUnwrap()
-            }
-        })
-
-        toolbar.setOnTrailToolbarEventListener(object : TrailToolbar.Companion.TrailToolsCallbacks {
-            override fun onTrailsClicked() {
-                startActivity(Intent(requireContext(), TrailsViewerActivity::class.java))
-            }
-
-            override fun onAddClicked() {
-                addTrail()
-            }
-
-            override fun onMenuClicked() {
-                TrailMenu.newInstance()
-                    .show(childFragmentManager, "trail_menu")
-            }
-        })
-
-        maps?.setOnMapsCallbackListener(object : MapsCallbacks {
-            override fun onMapInitialized() {
-                if (savedInstanceState.isNotNull()) {
-                    maps?.setCamera(savedInstanceState!!.parcelable("camera"))
-                }
-
-                trailDataViewModel.trailPointAscending.observe(viewLifecycleOwner) {
-                    maps?.addPolylines(it)
-                }
-            }
-
-            override fun onMapClicked() {
-                if (isLandscapeOrientation.invert()) {
-                    setFullScreen()
-                }
-            }
-
-            override fun onMapLongClicked(latLng: LatLng) {
-                if (currentTrail!!.isEmpty()) {
-                    addTrail()
-                } else {
-                    addMarker(maps!!, latLng.latitude, latLng.longitude, 0F, x / 2, y / 2)
-                }
-            }
-
-            override fun onLineDeleted(trailPoint: TrailPoint?) {
-                trailDataViewModel.deleteTrailData(trailPoint)
-            }
-
-            override fun onLineCountChanged(lineCount: Int) {
-                tools.changeWrapButtonState(lineCount.isZero())
-            }
-        })
-
-        dim.setOnTouchListener { _, event ->
-            when (event!!.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    x = event.x
-                    y = event.y
-                }
-            }
-
-            false
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        maps?.onResume()
-        currentTrail = TrailPreferences.getCurrentTrail()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        maps?.onPause()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        maps?.onLowMemory()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat("translation", toolbar.translationY)
-        outState.putBoolean("fullscreen", isFullScreen)
-        outState.putParcelable("camera", maps?.getCamera())
-        outState.putInt("bottom_sheet_state", bottomSheetPanel?.state ?: 4)
         super.onSaveInstanceState(outState)
+        outState.putBoolean(FULL_SCREEN, state.fullScreen)
+        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        if (savedInstanceState.isNotNull()) {
-            isFullScreen = savedInstanceState!!.getBoolean("fullscreen")
-            if (isLandscapeOrientation) {
-                setFullScreen()
-            } else {
-                setFullScreen()
-            }
-            bottomSheetPanel?.state = savedInstanceState.getInt("bottom_sheet_state")
-        }
-        super.onViewStateRestored(savedInstanceState)
+    private fun showPoints(points: List<TrailPoint>) {
+        maps.addPolylines(ArrayList(points))
+        val metric = MainPreferences.isMetric()
+        val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
+        state.summary = listOf(
+            InfoRow(getString(R.string.total), points.size.toString()),
+            InfoRow(getString(R.string.gps_displacement), DistanceText.format(requireContext(), distance, metric)),
+        )
+        state.points = points.asReversed().map { item(it, metric) }
     }
+
+    private fun item(point: TrailPoint, metric: Boolean): TrailPointItem {
+        val (accuracy, unit) = DistanceText.parts(point.accuracy.toDouble(), metric)
+        return TrailPointItem(
+            point = point,
+            icon = TrailIcons.icons.getOrElse(point.iconPosition) { TrailIcons.icons[0] },
+            name = point.name.ifEmpty { "--" },
+            note = point.note.ifEmpty { getString(R.string.not_available) },
+            coordinates = getString(
+                R.string.coordinates_format,
+                DMSConverter.getFormattedLatitude(point.latitude, requireContext()),
+                DMSConverter.getFormattedLongitude(point.longitude, requireContext()),
+            ),
+            accuracy = getString(R.string.trail_data_accuracy, round(accuracy, 1).toString(), getString(unit)),
+            date = point.timeAdded.formatDate(),
+        )
+    }
+
+    private fun readPreferences() {
+        state.toolsLeft = TrailPreferences.isToolsGravityToLeft()
+        state.compass = TrailPreferences.isCompassRotation()
+        state.wrapped = TrailPreferences.arePolylinesWrapped()
+    }
+
+    private fun bottomBar(visible: Boolean) {
+        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
+    }
+
+    private fun requestMarker(latitude: Double, longitude: Double, accuracy: Float) {
+        if (TrailPreferences.getCurrentTrail().isEmpty()) {
+            addTrail()
+            return
+        }
+        pending = Triple(latitude, longitude, accuracy)
+        state.pickingMarker = true
+    }
+
+    override fun onMapInitialized() {
+        camera?.let(maps::setCamera)
+        maps.addPolylines(ArrayList(trailData.points.value))
+    }
+
+    override fun onMapClicked() {
+        if (isLandscapeOrientation) return
+        state.fullScreen = !state.fullScreen
+        bottomBar(!state.fullScreen)
+    }
+
+    override fun onMapLongClicked(latLng: LatLng) = requestMarker(latLng.latitude, latLng.longitude, 0f)
+
+    override fun onLineDeleted(trailPoint: TrailPoint?) = trailData.delete(trailPoint)
+
+    override fun trails() = startActivity(Intent(requireContext(), TrailsViewerActivity::class.java))
+
+    override fun addTrail() {
+        AddTrail.newInstance().also { dialog ->
+            dialog.onNewTrailAddedSuccessfully = { trails.addTrail(it) }
+        }.show(childFragmentManager, "add_trail")
+    }
+
+    override fun menu() = TrailMenu.newInstance().show(childFragmentManager, "trail_menu")
+
+    override fun locate(close: Boolean) {
+        if (!getLocationStatus(requireContext())) {
+            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+            return
+        }
+        val current = location ?: return
+        if (close) {
+            maps.resetCamera(CLOSE_ZOOM)
+        } else {
+            maps.moveMapCamera(LatLng(current.latitude, current.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
+        }
+    }
+
+    override fun addPoint() {
+        val current = location
+        if (current == null && TrailPreferences.getCurrentTrail().isNotEmpty()) {
+            Toast.makeText(requireContext(), R.string.location_not_available, Toast.LENGTH_SHORT).show()
+            return
+        }
+        requestMarker(current?.latitude ?: 0.0, current?.longitude ?: 0.0, current?.accuracy ?: 0f)
+    }
+
+    override fun removeLast() = maps.removePolyline()
+
+    override fun wrap() = maps.wrapUnwrap()
+
+    override fun toggleCompass() = TrailPreferences.setCompassRotation(!TrailPreferences.isCompassRotation())
+
+    override fun toggleToolsSide() = TrailPreferences.setToolsGravityToLeft(!TrailPreferences.isToolsGravityToLeft())
+
+    override fun sheet(open: Boolean) {
+        state.sheet = open
+    }
+
+    override fun markerPicked(icon: Int, quick: Boolean) {
+        val (latitude, longitude, accuracy) = pending ?: return
+        pending = null
+        if (quick) {
+            save(TrailPoint(latitude, longitude, System.currentTimeMillis(), icon, null, null, accuracy))
+        } else {
+            AddMarker.newInstance(icon, LatLng(latitude, longitude), accuracy).also { dialog ->
+                dialog.onNewTrailAddedSuccessfully = ::save
+            }.show(childFragmentManager, "add_marker")
+        }
+    }
+
+    private fun save(point: TrailPoint) {
+        trailData.save(point)
+        if (!TrailPreferences.arePolylinesWrapped()) {
+            maps.moveMapCamera(LatLng(point.latitude, point.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
+        }
+    }
+
+    override fun focus(item: TrailPointItem) {
+        state.sheet = false
+        maps.moveMapCamera(LatLng(item.point.latitude, item.point.longitude), FOCUS_ZOOM, TrailPreferences.getMapTilt())
+    }
+
+    override fun delete(item: TrailPointItem) = trailData.delete(item.point)
+
+    override fun copy(item: TrailPointItem) {
+        val text = listOf(item.name, item.note, "geo:${item.point.latitude},${item.point.longitude}", item.date).joinToString("\n\n")
+        requireContext().getSystemService<ClipboardManager>()?.setPrimaryClip(ClipData.newPlainText(item.name, text))
+    }
+
+    override fun navigate(item: TrailPointItem) = MapIntents.navigate(requireContext(), item.point.latitude, item.point.longitude)
+
+    override fun share(item: TrailPointItem) = MapIntents.open(requireContext(), item.point.latitude, item.point.longitude)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            TrailPreferences.toolsMenuGravity -> {
-                updateToolsGravity(requireView())
-            }
             TrailPreferences.selectedTrail -> {
-                currentTrail = TrailPreferences.getCurrentTrail()
-                trailDataViewModel.setTrailName(currentTrail!!)
-                maps?.clear()
+                maps.clear()
+                trailData.select(TrailPreferences.getCurrentTrail())
             }
+            TrailPreferences.toolsMenuGravity, TrailPreferences.compass, TrailPreferences.wrapped -> readPreferences()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        maps?.onDestroy()
-        handler.removeCallbacksAndMessages(null)
-    }
-
-    private fun setFullScreen() {
-        if (isFullScreen) {
-            toolbar.show()
-            bottomSheetPanel?.peekHeight = peekHeight
-        } else {
-            toolbar.hide()
-            bottomSheetPanel?.peekHeight = 0
-        }
-
-        if (isLandscapeOrientation) {
-            toolbar.show()
-            bottomSheetSlide.onMapClicked(fullScreen = true)
-        } else {
-            bottomSheetSlide.onMapClicked(fullScreen = isFullScreen)
-        }
-
-        isFullScreen = !isFullScreen
-    }
-
-    private fun updateToolsGravity(view: View) {
-        if (isLandscapeOrientation) return
-
-        TransitionManager.beginDelayedTransition(
-                view as ViewGroup,
-                TransitionInflater.from(requireContext())
-                    .inflateTransition(R.transition.tools_transition))
-
-        val params = CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                                                    ViewGroup.LayoutParams.WRAP_CONTENT)
-
-        params.apply {
-            gravity = if (TrailPreferences.isToolsGravityToLeft()) {
-                Gravity.START or Gravity.CENTER_VERTICAL
-            } else {
-                Gravity.END or Gravity.CENTER_VERTICAL
-            }
-
-            marginStart = resources.getDimensionPixelSize(R.dimen.trail_tools_margin)
-            marginEnd = resources.getDimensionPixelSize(R.dimen.trail_tools_margin)
-        }
-
-        tools.layoutParams = params
-    }
-
-    private fun addTrail() {
-        val p0 = AddTrail.newInstance()
-
-        p0.onNewTrailAddedSuccessfully = {
-            trailsViewModel.addTrail(it)
-        }
-
-        p0.show(requireActivity().supportFragmentManager, "add_trail")
-    }
-
-    private fun addMarker(view: View, lat: Double, lon: Double, accuracy: Float, x: Float, y: Float) {
-        PopupMarkers(view, x, y).setOnPopupMarkersCallbackListener(object : PopupMarkers.Companion.PopupMarkersCallbacks {
-            override fun onMarkerClicked(position: Int) {
-                val dialog = AddMarker.newInstance(position, LatLng(lat, lon), accuracy)
-
-                dialog.onNewTrailAddedSuccessfully = {
-                    trailDataViewModel.saveTrailData(currentTrail!!, it)
-                    maps?.addPolyline(it)
-                }
-
-                dialog.show(parentFragmentManager, "add_marker")
-            }
-
-            override fun onMarkerLongClicked(position: Int) {
-                val trailPoint = TrailPoint(
-                    lat,
-                    lon,
-                    System.currentTimeMillis(),
-                    position,
-                    null,
-                    null,
-                    accuracy
-                )
-
-                trailDataViewModel.saveTrailData(currentTrail!!, trailPoint)
-                maps?.addPolyline(trailPoint)
-            }
-        })
-    }
-
-    private fun backPressed(value: Boolean) {
-        backPress?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(value) {
-            override fun handleOnBackPressed() {
-                if (bottomSheetPanel?.state == BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomSheetPanel?.state = BottomSheetBehavior.STATE_COLLAPSED
-                }
-                remove()
-            }
-        })
     }
 
     companion object {
-        fun newInstance(): Trail {
-            val args = Bundle()
-            val fragment = Trail()
-            fragment.arguments = args
-            return fragment
-        }
+        private const val CAMERA = "camera"
+        private const val FULL_SCREEN = "fullscreen"
+        private const val CLOSE_ZOOM = 18F
+        private const val FOCUS_ZOOM = 15F
+
+        fun newInstance() = Trail()
     }
 }

@@ -3,7 +3,6 @@ package app.simple.positional.model;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import java.util.Objects;
 
 @Entity(tableName = "trail_data")
 public class TrailPoint {
@@ -80,7 +79,7 @@ public class TrailPoint {
     }
 
     public String getNote() {
-        return Objects.requireNonNullElse(note, "");
+        return note == null ? "" : note;
     }
 
     public void setNote(String note) {
@@ -88,7 +87,7 @@ public class TrailPoint {
     }
 
     public String getName() {
-        return Objects.requireNonNullElse(name, "");
+        return name == null ? "" : name;
     }
 
     public void setName(String name) {

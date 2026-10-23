@@ -12,10 +12,6 @@ import app.simple.positional.R
 import app.simple.positional.activities.subactivity.DirectionsActivity
 import app.simple.positional.dialogs.direction.DirectionMenu
 import app.simple.positional.extensions.fragment.SensorPanel
-import app.simple.positional.math.MathExtensions.round
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKilometers
-import app.simple.positional.math.UnitConverter.toMiles
 import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
@@ -25,6 +21,7 @@ import app.simple.positional.ui.compose.DirectionState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.positionalComposeView
 import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -94,14 +91,7 @@ class Direction : SensorPanel(), HeadingSensor.Listener {
     private fun updateTarget() {
         val current = location ?: return
         state.bearing = LocationExtension.calculateBearingAngle(current.latitude, current.longitude, target.latitude, target.longitude).toFloat()
-        state.displacement = formatDistance(LocationExtension.measureDisplacement(arrayOf(LatLng(current.latitude, current.longitude), target)))
-    }
-
-    private fun formatDistance(meters: Float): String = when {
-        MainPreferences.isMetric() && meters < 1000 -> "${meters.round(2)} ${getString(R.string.meter)}"
-        MainPreferences.isMetric() -> "${meters.toKilometers().round(2)} ${getString(R.string.kilometer)}"
-        meters < 1000 -> "${meters.toFeet().round(2)} ${getString(R.string.feet)}"
-        else -> "${meters.toMiles().round(2)} ${getString(R.string.miles)}"
+        state.displacement = DistanceText.format(requireContext(), LocationExtension.measureDisplacement(arrayOf(LatLng(current.latitude, current.longitude), target)).toDouble(), MainPreferences.isMetric())
     }
 
     companion object {

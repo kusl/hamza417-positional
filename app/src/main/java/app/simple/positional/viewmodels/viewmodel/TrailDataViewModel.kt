@@ -1,155 +1,53 @@
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import android.text.Spanned
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
-import app.simple.positional.R
 import app.simple.positional.database.instances.TrailPointDatabase
-import app.simple.positional.extensions.viewmodel.WrappedViewModel
-import app.simple.positional.math.MathExtensions.round
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKilometers
-import app.simple.positional.math.UnitConverter.toMiles
 import app.simple.positional.model.TrailPoint
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.HtmlHelper
-import app.simple.positional.util.LocationExtension
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.withContext
 
-class TrailDataViewModel(application: Application) : WrappedViewModel(application) {
-    private var trailName = TrailPreferences.getCurrentTrail()
+@OptIn(ExperimentalCoroutinesApi::class)
+class TrailDataViewModel(application: Application) : AndroidViewModel(application) {
+    private val name = MutableStateFlow(TrailPreferences.getCurrentTrail())
+    val trail: StateFlow<String> = name.asStateFlow()
 
-    val trailPointAscending: MutableLiveData<ArrayList<TrailPoint>> by lazy {
-        MutableLiveData<ArrayList<TrailPoint>>().also {
-            loadTrailData(trailName)
-        }
+    val points: StateFlow<List<TrailPoint>> = name
+        .flatMapLatest { if (it.isEmpty()) flowOf(emptyList()) else dao(it).observeAll() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    fun select(trail: String) {
+        name.value = trail
     }
 
-    private val trailPointDescending: MutableLiveData<ArrayList<TrailPoint>> by lazy {
-        MutableLiveData<ArrayList<TrailPoint>>().also {
-            loadTrailData(trailName)
-        }
+    fun save(point: TrailPoint) = persist { dao(it).insertTrailData(point) }
+
+    fun delete(point: TrailPoint?) {
+        point ?: return
+        persist { dao(it).deleteTrailData(point) }
     }
 
-    val trailPointDescendingWithInfo: MutableLiveData<Pair<ArrayList<TrailPoint>, Triple<String?, Spanned?, Spanned?>>> by lazy {
-        MutableLiveData<Pair<ArrayList<TrailPoint>, Triple<String?, Spanned?, Spanned?>>>().also {
-            loadTrailDataWithInformation(trailName, true)
-        }
+    private fun dao(trail: String) = TrailPointDatabase.getInstance(getApplication(), trail).trailDataDao()
+
+    private fun persist(block: suspend (String) -> Unit) {
+        val trail = name.value
+        if (trail.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) { withContext(NonCancellable) { block(trail) } }
     }
 
-    private fun loadTrailData(trailName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val database = Room.databaseBuilder(getApplication<Application>(),
-                TrailPointDatabase::class.java,
-                    "$trailName.db").fallbackToDestructiveMigration().build()
-
-            val list = database.trailDataDao()?.getAllTrailData()!!
-            val listDesc = database.trailDataDao()?.getAllTrailDataDesc()!!
-            database.close()
-
-            trailPointAscending.postValue(list as ArrayList<TrailPoint>)
-
-            delay(500)
-
-            trailPointDescending.postValue(listDesc as ArrayList<TrailPoint>)
-        }
-    }
-
-    fun saveTrailData(trailName: String, trails: TrailPoint) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val database = Room.databaseBuilder(getApplication<Application>(),
-                TrailPointDatabase::class.java,
-                                                "$trailName.db").fallbackToDestructiveMigration().build()
-
-            database.trailDataDao()?.insertTrailData(trails)!!
-
-            loadTrailDataWithInformation(trailName, false)
-
-            database.close()
-        }
-    }
-
-    fun deleteTrailData(trails: TrailPoint?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            println(measureTimeMillis {
-                trails ?: return@launch
-
-                val database = Room.databaseBuilder(getApplication<Application>(),
-                    TrailPointDatabase::class.java,
-                                                    "$trailName.db").fallbackToDestructiveMigration().build()
-
-                database.trailDataDao()?.deleteTrailData(trails)!!
-
-                loadTrailDataWithInformation(trailName, false)
-                loadTrailData(trailName)
-
-                database.close()
-            })
-        }
-    }
-
-    fun loadTrailDataWithInformation(trailName: String, delay: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val database = Room.databaseBuilder(getApplication<Application>(),
-                TrailPointDatabase::class.java,
-                                                "$trailName.db").fallbackToDestructiveMigration().build()
-
-            val list = database.trailDataDao()?.getAllTrailDataDesc()!!
-
-            database.close()
-
-            val total = HtmlHelper.fromHtml("<b>${getContext().getString(R.string.total)} </b> ${list.size}")
-
-            val builder = StringBuilder().also {
-                it.append("<b>${getContext().getString(R.string.gps_displacement)} </b>")
-
-                val p0 = LocationExtension.measureDisplacement(list)
-
-                if (MainPreferences.isMetric()) {
-                    if (p0 < 1000) {
-                        it.append(p0.round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.meter))
-                    } else {
-                        it.append(p0.toKilometers().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.kilometer))
-                    }
-                } else {
-                    if (p0 < 1000) {
-                        it.append(p0.toDouble().toFeet().toFloat().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.feet))
-                    } else {
-                        it.append(p0.toMiles().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.miles))
-                    }
-                }
-            }
-
-            val pair = Pair(list as ArrayList<TrailPoint>,
-                            Triple(
-                                    trailName,
-                                    total,
-                                    HtmlHelper.fromHtml(builder.toString())
-                            ))
-
-            if (delay) delay(500)
-
-            trailPointDescendingWithInfo.postValue(pair)
-        }
-    }
-
-    fun setTrailName(trailName: String) {
-        this.trailName = trailName
-        loadTrailData(trailName)
-        loadTrailDataWithInformation(trailName, false)
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
     }
 }

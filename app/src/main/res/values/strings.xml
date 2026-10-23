@@ -177,8 +177,6 @@
 
     <string name="clock_options">Clock Menu</string>
     <string name="compass_options">Compass Menu</string>
-    <string name="gps_options">GPS Menu</string>
-    <string name="gps_reset_location">Reset location</string>
     <string name="delete_all">Delete all</string>
     <string name="open_specified_location_documentation">Open specified location documentation</string>
 
@@ -266,7 +264,6 @@
     <string name="note">Note</string>
     <string name="total">Total:</string>
     <string name="saved_trails">Saved Trails</string>
-    <string name="starting_point">Starting Point</string>
     <string name="enter_marker_name">Enter Marker Name</string>
     <string name="delete">Delete</string>
     <string name="copy">Copy</string>

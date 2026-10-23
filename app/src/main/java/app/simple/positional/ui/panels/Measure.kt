@@ -7,379 +7,200 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.activity.OnBackPressedDispatcher
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.transition.TransitionManager
 import app.simple.positional.R
 import app.simple.positional.activities.subactivity.MeasuresActivity
-import app.simple.positional.callbacks.BottomSheetSlide
-import app.simple.positional.decorations.corners.DynamicCornerConstraintLayout
+import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.decorations.measure.MeasureMaps
-import app.simple.positional.decorations.measure.MeasureToolbar
-import app.simple.positional.decorations.measure.MeasureToolbarCallbacks
-import app.simple.positional.decorations.measure.MeasureTools
-import app.simple.positional.decorations.measure.MeasureToolsCallbacks
 import app.simple.positional.dialogs.measure.MeasureAdd
 import app.simple.positional.dialogs.measure.MeasureAdd.Companion.showMeasureAdd
 import app.simple.positional.dialogs.measure.MeasureMenu.Companion.showMeasureMenu
 import app.simple.positional.extensions.fragment.ScopedFragment
+import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
-import app.simple.positional.math.MathExtensions
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKilometers
-import app.simple.positional.math.UnitConverter.toMiles
+import app.simple.positional.math.GeoDistance
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.MeasurePreferences
-import app.simple.positional.singleton.FloatingButtonStateCommunicator
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.LocationExtension
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.ui.compose.MeasureActions
+import app.simple.positional.ui.compose.MeasureScreen
+import app.simple.positional.ui.compose.MeasureState
+import app.simple.positional.ui.compose.positionalComposeView
+import app.simple.positional.util.DistanceText
+import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.ParcelUtils.parcelable
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import app.simple.positional.model.Measure as MeasureModel
 
-class Measure : ScopedFragment(), FloatingButtonStateCommunicator.FloatingButtonStateCallbacks {
-    private lateinit var toolbar: MeasureToolbar
-    private lateinit var tools: MeasureTools
-    private lateinit var crossHair: ImageView
-    private lateinit var bottomContainer: DynamicCornerConstraintLayout
-    private lateinit var name: TextView
-    private lateinit var currentDistance: TextView
-    private lateinit var totalDistance: TextView
-    private lateinit var totalPoints: TextView
-
-    private var location: Location? = null
-    private var backPress: OnBackPressedDispatcher? = null
-    private var maps: MeasureMaps? = null
-    private var bottomSheetSlide: BottomSheetSlide? = null
-
+class Measure : ScopedFragment(), MeasureActions, MapsCallbacks {
+    private val state = MeasureState()
     private lateinit var locationViewModel: LocationViewModel
     private lateinit var measureViewModel: MeasureViewModel
+    private lateinit var maps: MeasureMaps
+    private var location: Location? = null
+    private var camera: CameraPosition? = null
 
-    private var isFullScreen = false
-    private var x = 0F
-    private var y = 0F
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_measure, container, false)
-
-        toolbar = view.findViewById(R.id.toolbar)
-        tools = view.findViewById(R.id.tools)
-        maps = view.findViewById(R.id.map)
-        crossHair = view.findViewById(R.id.cross_hair)
-        bottomContainer = view.findViewById(R.id.bottom_container)
-        name = view.findViewById(R.id.name)
-        currentDistance = view.findViewById(R.id.current_distance)
-        totalDistance = view.findViewById(R.id.total_distance)
-        totalPoints = view.findViewById(R.id.total_points)
-
-        backPress = requireActivity().onBackPressedDispatcher
-        maps?.onCreate(savedInstanceState)
-        bottomSheetSlide = requireActivity() as BottomSheetSlide
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         locationViewModel = ViewModelProvider(requireActivity())[LocationViewModel::class.java]
         measureViewModel = ViewModelProvider(requireActivity())[MeasureViewModel::class.java]
+        camera = savedInstanceState?.parcelable(CAMERA)
+        state.fullScreen = !isLandscapeOrientation && savedInstanceState?.getBoolean(FULL_SCREEN) == true
+        readPreferences()
+    }
 
-        return view
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        maps = MeasureMaps(requireContext()).apply {
+            alpha = 0f
+            onCreate(null)
+            setOnMapsCallbackListener(this@Measure)
+        }
+        return positionalComposeView { top -> MeasureScreen(state, maps, top, this) }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        toolbar.setMeasureToolbarCallbacks(object : MeasureToolbarCallbacks {
-            override fun onAdd(view: View?) {
-                showMeasureAdd().setOnMeasureAddCallbacks(object :
-                    MeasureAdd.Companion.MeasureAddCallbacks {
-                    override fun onSave(name: String, note: String) {
-                        measureViewModel.addMeasure(name, note)
-                    }
-                })
-            }
-
-            override fun onMeasures(view: View?) {
-                startActivity(Intent(requireContext(), MeasuresActivity::class.java))
-            }
-
-            override fun onMenu(view: View?) {
-                showMeasureMenu()
-            }
-        })
-
-        tools.setMeasureToolsCallbacks(object : MeasureToolsCallbacks {
-            override fun onLocation(view: View?, reset: Boolean) {
-                if (LocationExtension.getLocationStatus(requireContext())) {
-                    if (location.isNotNull()) {
-                        if (reset) {
-                            maps?.resetCamera(18F)
-                        } else {
-                            maps?.moveMapCamera(LatLng(location!!.latitude, location!!.longitude),
-                                MeasurePreferences.getMapZoom(),
-                                MeasurePreferences.getMapTilt(),
-                                MeasurePreferences.getMapBearing())
-                        }
-                    }
-                } else {
-                    LocationPrompt.displayLocationSettingsRequest(requireActivity())
-                }
-            }
-
-            override fun onNewAdd(view: View?) {
-                maps?.addPolyline()
-            }
-
-            override fun onClearRecentMarker(view: View?) {
-                maps?.removeRecentPolyline()
-            }
-        })
-
-        maps?.setOnMapsCallbackListener(object : MapsCallbacks {
-            override fun onMapInitialized() {
-                if (savedInstanceState.isNotNull()) {
-                    maps?.setCamera(savedInstanceState!!.parcelable(CAMERA))
-                }
-
-                locationViewModel.getLocation().observe(viewLifecycleOwner) { location ->
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        withContext(Dispatchers.Default) {
-                            this@Measure.location = location
-
-                            withContext(Dispatchers.Main) {
-                                maps?.setFirstLocation(LatLng(location.latitude, location.longitude))
-                                maps?.location = location
-                                maps?.addMarker(LatLng(location.latitude, location.longitude))
-                                tools.locationIndicatorUpdate(true)
-                            }
-                        }
-                    }
-                }
-
-                measureViewModel.getMeasure().observe(viewLifecycleOwner) { measure ->
-                    if (MeasurePreferences.isMeasureSelected() && measure.isNotNull()) {
-                        crossHair.visible(animate = true)
-                        maps?.createMeasurePolylines(measure)
-                        name.text = measure.name
-                        setTotalPoints(measure)
-                        setTotalDistance(measure)
-                        setCurrentDistance(null)
-                        tools.measureMode()
-                        bottomContainer.visible(true)
-                    } else {
-                        clearMeasure()
-                        tools.noMeasureMode()
-                    }
-                }
-            }
-
-            override fun onMapClicked() {
-                if (isLandscapeOrientation.invert()) {
-                    setFullScreen()
-                }
-            }
-
-            override fun onLineAdded(measurePoint: MeasurePoint) {
-                measureViewModel.addMeasurePoint(measurePoint) {
-                    requireActivity().runOnUiThread {
-                        setTotalPoints(it)
-                        setTotalDistance(it)
-                        setCurrentDistance(measurePoint.latLng)
-                    }
-                }
-            }
-
-            override fun onLineDeleted(measurePoint: MeasurePoint?) {
-                measureViewModel.removeMeasurePoint(measurePoint) {
-                    requireActivity().runOnUiThread {
-                        setTotalPoints(it)
-                        setTotalDistance(it)
-                    }
-                }
-            }
-
-            override fun onCameraDistance(latLng: LatLng?) {
-                setCurrentDistance(latLng!!)
-            }
-        })
-    }
-
-    private fun clearMeasure() {
-        maps?.clear()
-        bottomContainer.gone(true)
-        crossHair.gone(true)
-    }
-
-    private fun setTotalPoints(measure: app.simple.positional.model.Measure) {
-        totalPoints.text = buildString {
-            append(getString(R.string.total))
-            append(" ")
-            append(measure.measurePoints?.size.toString())
-        }
-    }
-
-    private fun setTotalDistance(measure: app.simple.positional.model.Measure) {
-        totalDistance.text = buildString {
-            append(getString(R.string.gps_displacement))
-            append(" ")
-
-            val distance: Double = (measure.measurePoints?.map { LatLng(it.latitude, it.longitude) }?.toTypedArray()?.let {
-                LocationExtension.measureDisplacement(it)
-            } ?: 0.0).toDouble()
-
-            if (MainPreferences.isMetric()) {
-                if (distance < 1000) {
-                    append(MathExtensions.round(distance, 2))
-                    append(" ")
-                    append(getString(R.string.meter))
-                } else {
-                    append(MathExtensions.round(distance.toKilometers(), 2))
-                    append(" ")
-                    append(getString(R.string.kilometer))
-                }
-            } else {
-                if (distance < 1609) {
-                    append(distance.toFeet())
-                    append(" ")
-                    append(getString(R.string.feet))
-                } else {
-                    append(MathExtensions.round(distance.toMiles(), 2))
-                    append(" ")
-                    append(getString(R.string.miles))
-                }
-            }
-        }
-    }
-
-    private fun setCurrentDistance(latLng: LatLng?) {
-        runCatching {
-            if (maps?.getMeasurePoints()?.isNotEmpty() == true) {
-                currentDistance.visible(false)
-                val points: Array<LatLng> = arrayOf(maps?.getMeasurePoints()?.lastOrNull()!!.latLng, latLng!!)
-                val distance = LocationExtension.measureDisplacement(points).toDouble()
-
-                currentDistance.text = buildString {
-                    if (MainPreferences.isMetric()) {
-                        if (distance < 1000) {
-                            append(MathExtensions.round(distance, 2))
-                            append(" ")
-                            append(getString(R.string.meter))
-                        } else {
-                            append(MathExtensions.round(distance.toKilometers(), 2))
-                            append(" ")
-                            append(getString(R.string.kilometer))
-                        }
-                    } else {
-                        if (distance < 1609) {
-                            append(MathExtensions.round(distance.toFeet(), 2))
-                            append(" ")
-                            append(getString(R.string.feet))
-                        } else {
-                            append(MathExtensions.round(distance.toMiles(), 2))
-                            append(" ")
-                            append(getString(R.string.miles))
-                        }
-                    }
-                }
-            } else {
-                currentDistance.gone()
-            }
-        }
-    }
-
-    private fun setFullScreen() {
-        if (isFullScreen) {
-            toolbar.show()
-        } else {
-            toolbar.hide()
-        }
-
-        bottomSheetSlide?.onMapClicked(isFullScreen)
-        isFullScreen = !isFullScreen
-    }
-
-    override fun onResume() {
-        super.onResume()
-        maps?.onResume()
-        FloatingButtonStateCommunicator.addFloatingButtonStateCallbacks(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        maps?.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        maps?.onDestroy()
-        FloatingButtonStateCommunicator.removeFloatingButtonStateCallbacks(this)
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        maps?.onLowMemory()
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        super.onSharedPreferenceChanged(sharedPreferences, key)
-        when (key) {
-            MeasurePreferences.LAST_SELECTED_MEASURE -> {
-                if (MeasurePreferences.isMeasureSelected().invert()) {
-                    clearMeasure()
-                }
-            }
-        }
+        viewLifecycleOwner.lifecycle.addObserver(MapLifecycle(maps))
+        if (state.fullScreen) bottomBar(visible = false)
+        locationViewModel.getProvider().observe(viewLifecycleOwner) { state.enabled = getLocationStatus(requireContext()) }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat(TRANSLATION, toolbar.translationY)
-        outState.putBoolean(FULL_SCREEN, isFullScreen)
-        outState.putParcelable(CAMERA, maps?.getCamera())
         super.onSaveInstanceState(outState)
+        outState.putBoolean(FULL_SCREEN, state.fullScreen)
+        if (::maps.isInitialized) outState.putParcelable(CAMERA, maps.getCamera() ?: camera)
     }
 
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        savedInstanceState?.let {
-            isFullScreen = it.getBoolean(FULL_SCREEN)
-            if (isLandscapeOrientation) {
-                setFullScreen()
+    override fun onMapInitialized() {
+        camera?.let(maps::setCamera)
+        locationViewModel.getLocation().observe(viewLifecycleOwner) {
+            location = it
+            state.fixed = true
+            state.enabled = getLocationStatus(requireContext())
+            val latLng = LatLng(it.latitude, it.longitude)
+            maps.setFirstLocation(latLng)
+            maps.location = it
+            maps.addMarker(latLng)
+        }
+        measureViewModel.getMeasure().observe(viewLifecycleOwner) { measure ->
+            if (MeasurePreferences.isMeasureSelected() && measure != null) {
+                maps.createMeasurePolylines(measure)
+                state.selected = true
+                state.name = measure.name.orEmpty()
+                showSummary(measure)
+                state.current = ""
             } else {
-                setFullScreen()
+                clearMeasure()
             }
         }
-
-        super.onViewStateRestored(savedInstanceState)
     }
 
-    override fun onFloatingButtonStateChange(size: Int) {
-        TransitionManager.beginDelayedTransition(bottomContainer)
-        val marginLayoutParams = bottomContainer.layoutParams as FrameLayout.LayoutParams
-        marginLayoutParams.rightMargin = size
-        bottomContainer.layoutParams = marginLayoutParams
-        bottomContainer.requestLayout()
+    override fun onMapClicked() {
+        if (isLandscapeOrientation) return
+        state.fullScreen = !state.fullScreen
+        bottomBar(!state.fullScreen)
+    }
+
+    override fun onLineAdded(measurePoint: MeasurePoint) {
+        measureViewModel.addMeasurePoint(measurePoint) { measure -> view?.post { showSummary(measure) } }
+    }
+
+    override fun onLineDeleted(measurePoint: MeasurePoint?) {
+        measureViewModel.removeMeasurePoint(measurePoint) { measure -> view?.post { showSummary(measure) } }
+    }
+
+    override fun onCameraDistance(latLng: LatLng?) {
+        val last = maps.getMeasurePoints().lastOrNull()
+        state.current = if (latLng == null || last == null) "" else {
+            distance(GeoDistance.meters(last.latitude, last.longitude, latLng.latitude, latLng.longitude))
+        }
+    }
+
+    private fun showSummary(measure: MeasureModel) {
+        val points = measure.measurePoints.orEmpty()
+        state.hasPoints = points.isNotEmpty()
+        state.summary = listOf(
+            InfoRow(getString(R.string.total), points.size.toString()),
+            InfoRow(getString(R.string.gps_displacement), distance(GeoDistance.path(points.map { it.latitude to it.longitude }))),
+        )
+    }
+
+    private fun distance(meters: Double) = DistanceText.format(requireContext(), meters, MainPreferences.isMetric())
+
+    private fun clearMeasure() {
+        maps.clear()
+        state.selected = false
+        state.hasPoints = false
+        state.current = ""
+    }
+
+    private fun readPreferences() {
+        state.toolsLeft = MeasurePreferences.isToolsGravityToLeft()
+        state.compass = MeasurePreferences.isCompassRotation()
+        state.wrapped = MeasurePreferences.arePolylinesWrapped()
+    }
+
+    private fun bottomBar(visible: Boolean) {
+        (requireActivity() as? BottomBarHost)?.showBottomBar(visible)
+    }
+
+    override fun addMeasure() {
+        showMeasureAdd().setOnMeasureAddCallbacks(object : MeasureAdd.Companion.MeasureAddCallbacks {
+            override fun onSave(name: String, note: String) = measureViewModel.addMeasure(name, note)
+        })
+    }
+
+    override fun measures() = startActivity(Intent(requireContext(), MeasuresActivity::class.java))
+
+    override fun menu() {
+        showMeasureMenu()
+    }
+
+    override fun locate(close: Boolean) {
+        if (!getLocationStatus(requireContext())) {
+            LocationPrompt.displayLocationSettingsRequest(requireActivity())
+            return
+        }
+        val current = location ?: return
+        if (close) {
+            maps.resetCamera(CLOSE_ZOOM)
+        } else {
+            maps.moveMapCamera(
+                LatLng(current.latitude, current.longitude),
+                MeasurePreferences.getMapZoom(),
+                MeasurePreferences.getMapTilt(),
+                MeasurePreferences.getMapBearing(),
+            )
+        }
+    }
+
+    override fun addPoint() = maps.addPolyline()
+
+    override fun removeLast() = maps.removeRecentPolyline()
+
+    override fun wrap() = MeasurePreferences.invertPolylinesWrapped()
+
+    override fun toggleCompass() = MeasurePreferences.invertCompassRotation()
+
+    override fun toggleToolsSide() = MeasurePreferences.invertToolsGravity()
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            MeasurePreferences.LAST_SELECTED_MEASURE -> if (!MeasurePreferences.isMeasureSelected()) clearMeasure()
+            MeasurePreferences.TOOLS_GRAVITY, MeasurePreferences.COMPASS_ROTATION, MeasurePreferences.POLYLINES_WRAPPED -> readPreferences()
+        }
     }
 
     companion object {
-        fun newInstance(): Measure {
-            val args = Bundle()
-            val fragment = Measure()
-            fragment.arguments = args
-            return fragment
-        }
-
-        const val TAG = "Measure"
-
         private const val CAMERA = "camera"
         private const val FULL_SCREEN = "fullscreen"
-        private const val TRANSLATION = "translation"
+        private const val CLOSE_ZOOM = 18F
+
+        fun newInstance() = Measure()
     }
 }

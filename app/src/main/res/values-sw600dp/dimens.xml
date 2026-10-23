@@ -7,7 +7,6 @@
 
     <dimen name="info_text_item_margin_horizontal">0dp</dimen>
     <dimen name="info_text_item_margin_vertical">5dp</dimen>
-    <dimen name="expand_up_image_size">30dp</dimen>
     <dimen name="info_text_primary_size">40sp</dimen>
     <dimen name="info_text_secondary_size">18sp</dimen>
     <dimen name="copy_button_dimensions">40dp</dimen>
@@ -22,7 +21,6 @@
     <dimen name="dialog_height">500dp</dimen>
     <dimen name="description_text_size">11sp</dimen>
 
-    <dimen name="top_bar_text_size">31sp</dimen>
     <dimen name="app_button_size">44dp</dimen>
 
     <dimen name="compass_dial">400dp</dimen>
