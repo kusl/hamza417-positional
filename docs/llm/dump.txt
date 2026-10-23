@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T09:37:53-04:00
+Generated: 2026-10-23T09:52:02-04:00
 Branch:    master
-Commit:    3a0a1379 2026-10-23 09:37:45 -0400 add claude response
+Commit:    a4b66053 2026-10-23 09:51:56 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (916 files)
+## TREE (895 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -84,16 +84,8 @@ app/
                   TimezonePickerActivity.kt
                   TrailsViewerActivity.kt
                   WebPageViewerActivity.kt
-              adapters/
-                app/
-                  AdapterPanels.kt
-                bottombar/
-                  BottomBarAdapter.kt
-                  BottomBarCallbacks.java
-                  BottomBarItems.java
               callbacks/
                 BottomBarHost.kt
-                PanelsCallback.java
               constants/
                 ClockSkinsConstants.kt
                 CompassBloom.kt
@@ -117,9 +109,6 @@ app/
                   TrailDatabase.kt
                   TrailPointDatabase.kt
               decorations/
-                corners/
-                  DynamicCornerFrameLayout.java
-                  DynamicCornerLinearLayout.java
                 interpolators/
                   LatLngInterpolator.java
                 maps/
@@ -130,23 +119,15 @@ app/
                   PaddingAwareLinearLayout.java
                 ripple/
                   DynamicRippleButton.java
-                  DynamicRippleLinearLayout.java
                   Utils.java
                 trails/
                   TrailMaps.kt
-                transformers/
-                  DepthTransformer.java
                 utils/
                   CircleUtils.java
-                  LayoutBackground.java
                   MarkerUtils.java
                   Utils.java
                 views/
-                  CustomBottomSheetDialogFragment.kt
                   CustomWebView.kt
-              dialogs/
-                app/
-                  Panels.kt
               extensions/
                 activity/
                   BaseActivity.kt
@@ -173,7 +154,6 @@ app/
                 UnitConverter.kt
                 Vector3.kt
               model/
-                BottomBar.java
                 ClockModel.java
                 DirectionModel.kt
                 Locales.kt
@@ -183,7 +163,6 @@ app/
                 TrailEntry.java
                 TrailPoint.java
               preferences/
-                BottomBarPreferences.kt
                 ClockPreferences.kt
                 CompassPreferences.kt
                 DirectionPreferences.kt
@@ -226,6 +205,7 @@ app/
                   PanelComponents.kt
                   PanelDialogs.kt
                   PanelMenus.kt
+                  PanelSwitcher.kt
                   PositionalTheme.kt
                   Preferences.kt
                   RecordsScreen.kt
@@ -280,7 +260,6 @@ app/
                 TimeFormatter.kt
                 TrailNames.kt
                 UTMConverter.kt
-                ViewUtils.kt
               viewmodels/
                 viewmodel/
                   CustomLocationViewModel.kt
@@ -300,12 +279,8 @@ app/
                 TwilightWidget.kt
       res/
         anim/
-          bottom_sheet_dialog_in.xml
-          bottom_sheet_dialog_out.xml
           dialog_in.xml
           dialog_out.xml
-          grid_list_animation.xml
-          grid_list_animation_controller.xml
           image_in.xml
           launcher_icon.xml
         drawable-night/
@@ -615,10 +590,6 @@ app/
         layout/
           activity_clock_widget.xml
           activity_launcher.xml
-          activity_main.xml
-          adapter_bottom_bar.xml
-          adapter_panel.xml
-          dialog_panel_switcher.xml
           fragment_launcher.xml
           widget_clock.xml
           widget_clock_2x2.xml
@@ -1003,6 +974,7 @@ app/
                   DialogHostTest.kt
                   MapSearchQueryTest.kt
                   MenuSheetStateTest.kt
+                  PanelCatalogTest.kt
                   PhysicsValueTest.kt
                   SettingsLabelsTest.kt
                   SpeedometerDialTest.kt
@@ -1307,7 +1279,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, needle physics, tilt, clock motion, sensor accuracy, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
@@ -1330,7 +1302,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 8d | Error, clock motion, new measure, new trail and new marker dialogs in Compose through a shared `DialogHost`; marker icons picked inline; popup marker grid removed | Done |
 | 8e | Clock needle, bloom skin, pin, physical properties, calibration and target coordinates dialogs in Compose; calibration reads accuracy from the panel sensors instead of registering its own; unused permission dialog, switch view and pager adapters removed | Done |
 | 8f | Location summary, location details (Compose `Canvas` sparklines) and coordinate formats dialogs in Compose; coordinate formats computed only while the dialog is open instead of on every fix; sparkline, fast scroller and recycler view decorations removed | Done |
-| 8g | Panel switcher, single activity with Navigation Compose, drop AppCompat themes | Next |
+| 8g | `MainActivity` in Compose: panels hosted with `AndroidFragment`, floating panel switcher (tap for a grid, swipe to step) replaces the view pager bottom bar and panel dialog; permission request through the Activity Result API; all dialog fragments and bottom sheet styles removed | Done |
+| 8h | Panels as plain composables with Navigation Compose, sub screens in the same graph, fragments and AppCompat themes removed | Next |
 | 9 | Widgets on Glance | Planned |
 | 10 | OpenStreetMap fallback with tile caching when the Maps key is missing or over quota | Planned |
 
@@ -1498,8 +1471,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation 'androidx.core:core-ktx:1.19.1'
     implementation 'androidx.fragment:fragment-ktx:1.9.1'
+    implementation 'androidx.fragment:fragment-compose:1.9.1'
     implementation 'androidx.webkit:webkit:1.16.0'
-    implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
@@ -2141,6 +2114,7 @@ import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.launcher.SplashScreen
 
 class LauncherActivity : BaseActivity() {
@@ -2165,16 +2139,11 @@ class LauncherActivity : BaseActivity() {
 
     private fun setShortcutScreen() {
         when (intent.action) {
-            "open_clock" -> setScreenValue(0, "clock")
-            "open_compass" -> setScreenValue(1, "compass")
-            "action_map_panel_full", "open_gps" -> setScreenValue(3, "location")
-            "open_level" -> setScreenValue(5, "level")
+            "open_clock" -> FragmentPreferences.setCurrentTag(PanelCatalog.CLOCK)
+            "open_compass" -> FragmentPreferences.setCurrentTag(PanelCatalog.COMPASS)
+            "action_map_panel_full", "open_gps" -> FragmentPreferences.setCurrentTag(PanelCatalog.LOCATION)
+            "open_level" -> FragmentPreferences.setCurrentTag(PanelCatalog.LEVEL)
         }
-    }
-
-    private fun setScreenValue(value: Int, tag: String) {
-        FragmentPreferences.setCurrentPage(value)
-        FragmentPreferences.setCurrentTag(tag)
     }
 }
 
@@ -2184,36 +2153,36 @@ class LauncherActivity : BaseActivity() {
 package app.simple.positional.activities.main
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.view.marginEnd
-import androidx.core.view.marginStart
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
+import androidx.core.content.ContextCompat
+import androidx.fragment.compose.AndroidFragment
 import app.simple.positional.R
-import app.simple.positional.adapters.bottombar.BottomBarAdapter
-import app.simple.positional.adapters.bottombar.BottomBarItems
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.callbacks.PanelsCallback
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.transformers.DepthTransformer
-import app.simple.positional.dialogs.app.Panels.Companion.showPanelsDialog
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.preferences.BottomBarPreferences
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.services.FusedLocationService
 import app.simple.positional.services.LocationService
-import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
+import app.simple.positional.ui.compose.PanelCatalog
+import app.simple.positional.ui.compose.PanelSwitcher
+import app.simple.positional.ui.compose.setPositionalContent
 import app.simple.positional.ui.panels.Compass
 import app.simple.positional.ui.panels.Direction
 import app.simple.positional.ui.panels.GPS
@@ -2222,327 +2191,114 @@ import app.simple.positional.ui.panels.Measure
 import app.simple.positional.ui.panels.Settings
 import app.simple.positional.ui.panels.Time
 import app.simple.positional.ui.panels.Trail
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt.displayLocationSettingsRequest
-import app.simple.positional.util.ViewUtils
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
 import com.google.android.gms.maps.MapsInitializer
-import com.google.android.gms.maps.OnMapsSdkInitializedCallback
 
-class MainActivity : BaseActivity(),
-    BottomBarHost,
-    android.content.SharedPreferences.OnSharedPreferenceChangeListener,
-    OnMapsSdkInitializedCallback {
-    private val defaultPermissionRequestCode = 123
-    private lateinit var bottomBar: ViewPager2
-    private lateinit var bottomBarContainer: DynamicCornerLinearLayout
-    private lateinit var label: TextView
-    private lateinit var bottomBarAdapter: BottomBarAdapter
+class MainActivity : BaseActivity(), BottomBarHost, SharedPreferences.OnSharedPreferenceChangeListener {
+    private var panel by mutableStateOf(PanelCatalog.LOCATION)
+    private var barVisible by mutableStateOf(true)
 
-    private val handler = Handler(Looper.getMainLooper())
+    private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+        if (result.values.any { it }) {
+            showPrompt()
+            startLocation()
+        } else {
+            Toast.makeText(this, R.string.no_location_permission_alert, Toast.LENGTH_LONG).show()
+        }
+    }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MapsInitializer.initialize(baseContext, MapsInitializer.Renderer.LATEST, this)
-        setContentView(R.layout.activity_main)
-
-        bottomBar = findViewById(R.id.bottom_bar)
-        bottomBarContainer = findViewById(R.id.bottom_bar_container)
-        label = findViewById(R.id.label)
-
-        bottomBarAdapter = BottomBarAdapter(BottomBarItems.getBottomBarItems(baseContext)) {
-            supportFragmentManager.showPanelsDialog(PanelsCallback { _, string, position ->
-                bottomBar.setCurrentItem(position, true)
-                openFragment(string!!)
-                FragmentPreferences.setCurrentPage(position)
-                FragmentPreferences.setCurrentTag(string)
-            })
+        MapsInitializer.initialize(applicationContext, MapsInitializer.Renderer.LATEST) { }
+        panel = PanelCatalog.resolve(FragmentPreferences.getCurrentTag())
+        setPositionalContent {
+            Box(Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
+                key(panel) { PanelFragment(panel) }
+                PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
+            }
         }
-
-        label.setOnClickListener {
-        }
-
-        bottomBarAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.ALLOW
-
-        ViewUtils.addShadow(bottomBarContainer)
-
-        bottomBar.apply {
-            adapter = bottomBarAdapter
-            orientation = ViewPager2.ORIENTATION_VERTICAL
-            setCurrentItem(FragmentPreferences.getCurrentPage(), false)
-            setPageTransformer(DepthTransformer())
-
-            label.text =
-                BottomBarItems.getBottomBarItems(baseContext)[FragmentPreferences.getCurrentPage()].name
-
-            postDelayed({
-                label.visibility = TextView.GONE
-            }, 1000)
-
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageScrollStateChanged(state: Int) {
-                    super.onPageScrollStateChanged(state)
-                    if (state == ViewPager2.SCROLL_STATE_IDLE) {
-                        val position = bottomBar.currentItem
-                        val name = BottomBarItems.getBottomBarItems(baseContext)[position].tag
-                        FragmentPreferences.setCurrentPage(position)
-                        FragmentPreferences.setCurrentTag(name)
-                        openFragment(name)
-
-                        postDelayed({
-                            label.visibility = TextView.GONE
-                        }, 500)
-                    }
-
-                    if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
-                        label.visibility = TextView.VISIBLE
-                        label.alpha = 1f
-                    }
-                }
-
-                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                    super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-                    label.text = BottomBarItems.getBottomBarItems(baseContext)[position].name
-                }
-            })
-        }
-
-        checkRunTimePermission()
+        checkLocationPermission()
         MainPreferences.setLaunchCount(MainPreferences.getLaunchCount() + 1)
-
-        if (savedInstanceState.isNull()) {
-            openFragment(FragmentPreferences.getCurrentTag())
-        }
     }
 
     override fun onResume() {
         super.onResume()
-        SharedPreferences.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-        runService()
+        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+        startLocation()
     }
 
     override fun onPause() {
         super.onPause()
-        SharedPreferences.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-        stopService()
+        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        stopLocation()
     }
 
-    override fun onDestroy() {
-        handler.removeCallbacksAndMessages(null)
-
-        super.onDestroy()
+    private fun select(tag: String) {
+        panel = tag
+        barVisible = true
+        FragmentPreferences.setCurrentTag(tag)
     }
 
-    private fun checkRunTimePermission() {
-        if (ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(
-                    applicationContext,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            if (MainPreferences.getShowPermissionDialog()) {
-                onGrantRequest()
-            } else {
-                Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_LONG).show()
-            }
-        } else {
-            showPrompt()
-        }
+    override fun showBottomBar(visible: Boolean) {
+        barVisible = visible
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == defaultPermissionRequestCode) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showPrompt()
-                runService()
-            } else {
-                Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_LONG).show()
-                Toast.makeText(this, R.string.no_location_permission_alert, Toast.LENGTH_LONG)
-                        .show()
-            }
-        }
+    private fun hasLocationPermission() = locationPermissions.any {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun runService() {
-        try {
-            when (MainPreferences.getLocationProvider()) {
-                "android" -> startService(Intent(applicationContext, LocationService::class.java))
-                "fused" -> startService(
-                    Intent(
-                        applicationContext,
-                        FusedLocationService::class.java
-                    )
-                )
-            }
-        } catch (ignored: IllegalStateException) {
-        }
-    }
-
-    private fun stopService() {
-        try {
-            when (MainPreferences.getLocationProvider()) {
-                "android" -> stopService(Intent(applicationContext, LocationService::class.java))
-                "fused" -> stopService(Intent(applicationContext, FusedLocationService::class.java))
-            }
-        } catch (ignored: IllegalStateException) {
+    private fun checkLocationPermission() {
+        when {
+            hasLocationPermission() -> showPrompt()
+            MainPreferences.getShowPermissionDialog() -> permissions.launch(locationPermissions)
+            else -> Toast.makeText(this, R.string.location_permission_denied, Toast.LENGTH_LONG).show()
         }
     }
 
     private fun showPrompt() {
-        if (!getLocationStatus(this)) {
-            displayLocationSettingsRequest(this)
-        }
+        if (!getLocationStatus(this)) displayLocationSettingsRequest(this)
     }
 
-    private fun onGrantRequest() {
-        ActivityCompat.requestPermissions(
-            this, arrayOf(
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ), defaultPermissionRequestCode
-        )
+    private fun locationService(provider: String = MainPreferences.getLocationProvider()) =
+        if (provider == FUSED) FusedLocationService::class.java else LocationService::class.java
+
+    private fun startLocation() {
+        runCatching { startService(Intent(applicationContext, locationService())) }
     }
 
-    private fun openFragment(tag: String) {
-        getFragment(tag).let {
-            supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.dialog_in, R.anim.dialog_out)
-                    .replace(R.id.containers, it, tag)
-                    .commit()
-        }
+    private fun stopLocation() {
+        runCatching { stopService(Intent(applicationContext, locationService())) }
     }
 
-    private fun getFragment(name: String): Fragment {
-        when (name) {
-            BottomBarItems.CLOCK -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.CLOCK) as Time?
-                       ?: Time.newInstance()
-            }
-
-            BottomBarItems.COMPASS -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.COMPASS) as Compass?
-                       ?: Compass.newInstance()
-            }
-
-            BottomBarItems.DIRECTION -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.DIRECTION) as Direction?
-                       ?: Direction.newInstance()
-            }
-
-            BottomBarItems.LOCATION -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.LOCATION) as GPS?
-                       ?: GPS.newInstance()
-            }
-
-            BottomBarItems.TRAIL -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.TRAIL) as Trail?
-                       ?: Trail.newInstance()
-            }
-
-            BottomBarItems.MEASURE -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.MEASURE) as Measure?
-                       ?: Measure.newInstance()
-            }
-
-            BottomBarItems.LEVEL -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.LEVEL) as Level?
-                       ?: Level.newInstance()
-            }
-
-            BottomBarItems.SETTINGS -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.SETTINGS) as Settings?
-                       ?: Settings.newInstance()
-            }
-
-            else -> {
-                return supportFragmentManager.findFragmentByTag(BottomBarItems.LOCATION) as GPS?
-                       ?: GPS.newInstance()
-            }
-        }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key != MainPreferences.locationProvider) return
+        val current = MainPreferences.getLocationProvider()
+        runCatching {
+            stopService(Intent(applicationContext, locationService(if (current == FUSED) ANDROID else FUSED)))
+            startService(Intent(applicationContext, locationService(current)))
+        }.onFailure { Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show() }
     }
 
-    override fun showBottomBar(visible: Boolean) {
-        if (visible) {
-            bottomBarContainer.visible(true)
-        } else {
-            bottomBarContainer.gone(true)
-        }
+    private companion object {
+        const val FUSED = "fused"
+        const val ANDROID = "android"
+        val locationPermissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
+}
 
-    override fun onSharedPreferenceChanged(
-        sharedPreferences: android.content.SharedPreferences?,
-        key: String?
-    ) {
-        when (key) {
-            MainPreferences.locationProvider -> {
-                try {
-                    when (MainPreferences.getLocationProvider()) {
-                        "fused" -> {
-                            stopService(Intent(applicationContext, LocationService::class.java))
-                            startService(
-                                Intent(
-                                    applicationContext,
-                                    FusedLocationService::class.java
-                                )
-                            )
-                        }
-
-                        "android" -> {
-                            stopService(
-                                Intent(
-                                    applicationContext,
-                                    FusedLocationService::class.java
-                                )
-                            )
-                            startService(Intent(applicationContext, LocationService::class.java))
-                        }
-                    }
-                } catch (e: IllegalStateException) {
-                    Toast.makeText(applicationContext, e.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            BottomBarPreferences.clockPanel,
-            BottomBarPreferences.compassPanel,
-            BottomBarPreferences.gpsPanel,
-            BottomBarPreferences.trailPanel,
-            BottomBarPreferences.levelPanel,
-            BottomBarPreferences.settingsPanel -> {
-                bottomBarAdapter.setBottomBarItems(
-                    BottomBarItems.getBottomBarItems(
-                        applicationContext
-                    )
-                )
-            }
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putFloat("translation", bottomBar.translationY)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        if (savedInstanceState.isNotNull()) {
-            bottomBar.translationY = savedInstanceState.getFloat("translation")
-        }
-        super.onRestoreInstanceState(savedInstanceState)
-    }
-
-    override fun onMapsSdkInitialized(p0: MapsInitializer.Renderer) {
-        Log.d("Map Initialized", p0.name)
+@Composable
+private fun PanelFragment(tag: String) {
+    val modifier = Modifier.fillMaxSize()
+    when (tag) {
+        PanelCatalog.CLOCK -> AndroidFragment<Time>(modifier)
+        PanelCatalog.COMPASS -> AndroidFragment<Compass>(modifier)
+        PanelCatalog.DIRECTION -> AndroidFragment<Direction>(modifier)
+        PanelCatalog.TRAIL -> AndroidFragment<Trail>(modifier)
+        PanelCatalog.MEASURE -> AndroidFragment<Measure>(modifier)
+        PanelCatalog.LEVEL -> AndroidFragment<Level>(modifier)
+        PanelCatalog.SETTINGS -> AndroidFragment<Settings>(modifier)
+        else -> AndroidFragment<GPS>(modifier)
     }
 }
 
@@ -3227,166 +2983,12 @@ class WebPageViewerActivity : BaseActivity() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/app/AdapterPanels.kt
-################################################################################
-package app.simple.positional.adapters.app
-
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleLinearLayout
-import app.simple.positional.model.BottomBar
-
-class AdapterPanels(private val items: ArrayList<BottomBar>, private val onClick: (View, String, Int) -> Unit) : RecyclerView.Adapter<AdapterPanels.Holder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(LayoutInflater.from(parent.context)
-                .inflate(R.layout.adapter_panel, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        val item = items[position]
-
-        holder.icon.setImageResource(item.icon)
-        holder.label.text = item.name
-
-        holder.container.setOnClickListener {
-            onClick(it, item.tag, position)
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return items.size
-    }
-
-    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val icon: ImageView = itemView.findViewById(R.id.icon)
-        val label: TextView = itemView.findViewById(R.id.label)
-        val container: DynamicRippleLinearLayout = itemView.findViewById(R.id.container)
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarAdapter.kt
-################################################################################
-package app.simple.positional.adapters.bottombar
-
-import android.annotation.SuppressLint
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.model.BottomBar
-import app.simple.positional.preferences.FragmentPreferences
-
-class BottomBarAdapter(private var list: ArrayList<BottomBar>, val onClick: (View) -> Unit) : RecyclerView.Adapter<BottomBarAdapter.Holder>() {
-    private var currentTag = FragmentPreferences.getCurrentTag()
-    private var lastItem = FragmentPreferences.getCurrentPage()
-    private var bottomBarCallbacks: BottomBarCallbacks? = null
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_bottom_bar, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: Holder, @SuppressLint("RecyclerView") position: Int) {
-        holder.icon.setImageResource(list[position].icon)
-
-        holder.icon.setOnClickListener {
-            onClick(it)
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return list.size
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun setBottomBarItems(list: ArrayList<BottomBar>) {
-        this.list = list
-
-        lastItem = list.size - 1
-
-        notifyDataSetChanged()
-    }
-
-    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val icon: ImageView = itemView.findViewById(R.id.bottom_bar_item)
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarCallbacks.java
-################################################################################
-package app.simple.positional.adapters.bottombar;
-
-import org.jetbrains.annotations.NotNull;
-
-public interface BottomBarCallbacks {
-    void onItemClicked(int position, @NotNull String name);
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java
-################################################################################
-package app.simple.positional.adapters.bottombar;
-
-import android.content.Context;
-import androidx.core.content.ContextCompat;
-
-import java.util.ArrayList;
-import app.simple.positional.R;
-import app.simple.positional.constants.LocationPins;
-import app.simple.positional.model.BottomBar;
-
-public class BottomBarItems {
-    public static final String CLOCK = "clock";
-    public static final String COMPASS = "compass";
-    public static final String DIRECTION = "direction";
-    public static final String LOCATION = "location";
-    public static final String TRAIL = "trail";
-    public static final String MEASURE = "Measure";
-    public static final String LEVEL = "level";
-    public static final String SETTINGS = "settings";
-
-    public static ArrayList<BottomBar> getBottomBarItems(Context context) {
-        ArrayList<BottomBar> list = new ArrayList<>();
-
-        list.add(new BottomBar(R.drawable.ic_clock, CLOCK, context.getString(R.string.clock), ContextCompat.getColor(context, R.color.time_bb_color)));
-        list.add(new BottomBar(R.drawable.ic_compass, COMPASS, context.getString(R.string.compass), ContextCompat.getColor(context, R.color.compass_bb_color)));
-        list.add(new BottomBar(R.drawable.ic_near_me, DIRECTION, context.getString(R.string.direction), ContextCompat.getColor(context, R.color.direction_bb_color)));
-        list.add(new BottomBar(LocationPins.INSTANCE.getLocationPin(), LOCATION, context.getString(R.string.gps_location), ContextCompat.getColor(context, R.color.location_bb_color)));
-        list.add(new BottomBar(R.drawable.ic_trail_line, TRAIL, context.getString(R.string.trail), ContextCompat.getColor(context, R.color.trail_bb_color)));
-        list.add(new BottomBar(R.drawable.ic_square_foot, MEASURE, context.getString(R.string.measure), ContextCompat.getColor(context, R.color.measure_bb_color)));
-        list.add(new BottomBar(R.drawable.ic_level, LEVEL, context.getString(R.string.level), ContextCompat.getColor(context, R.color.level_bb_color)));
-        list.add(new BottomBar(R.drawable.ic_settings, SETTINGS, context.getString(R.string.settings), ContextCompat.getColor(context, R.color.settings_bb_color)));
-
-        return list;
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/callbacks/BottomBarHost.kt
 ################################################################################
 package app.simple.positional.callbacks
 
 interface BottomBarHost {
     fun showBottomBar(visible: Boolean)
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/callbacks/PanelsCallback.java
-################################################################################
-package app.simple.positional.callbacks;
-
-import android.view.View;
-
-public interface PanelsCallback {
-    void onPanelClick(View view, String string, int position);
 }
 
 ################################################################################
@@ -4134,83 +3736,6 @@ abstract class TrailPointDatabase : RoomDatabase() {
             instance = null
             name = null
         }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerFrameLayout.java
-################################################################################
-package app.simple.positional.decorations.corners;
-
-import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.FrameLayout;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import app.simple.positional.decorations.utils.LayoutBackground;
-
-public class DynamicCornerFrameLayout extends FrameLayout {
-    public DynamicCornerFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs);
-    }
-
-    public DynamicCornerFrameLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(attrs);
-    }
-
-    public DynamicCornerFrameLayout(Context context) {
-        super(context);
-        init(null);
-    }
-
-    private void init(AttributeSet attrs) {
-        if (!isInEditMode()) {
-            LayoutBackground.setBackground(getContext(), this, attrs);
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerLinearLayout.java
-################################################################################
-package app.simple.positional.decorations.corners;
-
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.util.AttributeSet;
-import android.widget.LinearLayout;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import app.simple.positional.R;
-import app.simple.positional.decorations.utils.LayoutBackground;
-
-public class DynamicCornerLinearLayout extends LinearLayout {
-    public DynamicCornerLinearLayout(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        if (!isInEditMode()) {
-            LayoutBackground.setBackground(context, this, attrs);
-        }
-    }
-
-    public DynamicCornerLinearLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        if (!isInEditMode()) {
-            LayoutBackground.setBackground(context, this, attrs);
-        }
-    }
-
-    public DynamicCornerLinearLayout(Context context) {
-        super(context);
-        setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.mainBackground)));
-        setOrientation(LinearLayout.VERTICAL);
-        if (!isInEditMode()) {
-            LayoutBackground.setBackground(context, this, null);
-        }
-
-        int padding = context.getResources().getDimensionPixelOffset(R.dimen.popup_padding);
-        setPadding(padding, padding, padding, padding);
     }
 }
 
@@ -5667,27 +5192,6 @@ public class DynamicRippleButton extends androidx.appcompat.widget.AppCompatButt
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayout.java
-################################################################################
-package app.simple.positional.decorations.ripple;
-
-import android.content.Context;
-import android.graphics.Color;
-import android.util.AttributeSet;
-import android.widget.LinearLayout;
-import androidx.annotation.Nullable;
-
-public class DynamicRippleLinearLayout extends LinearLayout {
-    public DynamicRippleLinearLayout(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        if (!isInEditMode()) {
-            setBackgroundColor(Color.TRANSPARENT);
-            setBackground(Utils.getRippleDrawable(getContext(), getBackground()));
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/ripple/Utils.java
 ################################################################################
 package app.simple.positional.decorations.ripple;
@@ -6313,36 +5817,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/transformers/DepthTransformer.java
-################################################################################
-package app.simple.positional.decorations.transformers;
-
-import android.view.View;
-import androidx.annotation.NonNull;
-import androidx.viewpager2.widget.ViewPager2;
-
-public class DepthTransformer implements ViewPager2.PageTransformer {
-    @Override
-    public void transformPage(@NonNull View page, float position) {
-        if (position < -1) {
-            page.setAlpha(0);
-        } else if (position <= 0) {
-            page.setAlpha(1);
-            page.setTranslationZ(0);
-            page.setScaleX(1);
-            page.setScaleY(1);
-        } else if (position <= 1) {
-            page.setTranslationZ(-position * page.getHeight());
-            page.setAlpha(1 - Math.abs(position));
-            page.setScaleX(1 - Math.abs(position));
-            page.setScaleY(1 - Math.abs(position));
-        } else {
-            page.setAlpha(0);
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java
 ################################################################################
 package app.simple.positional.decorations.utils;
@@ -6423,178 +5897,6 @@ public class CircleUtils {
 
         float result = fraction * rotation + start;
         return (result + 360) % 360;
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/utils/LayoutBackground.java
-################################################################################
-package app.simple.positional.decorations.utils;
-
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
-import androidx.appcompat.widget.AppCompatButton;
-
-import com.google.android.material.shape.CornerFamily;
-import com.google.android.material.shape.MaterialShapeDrawable;
-import com.google.android.material.shape.ShapeAppearanceModel;
-import app.simple.positional.R;
-import app.simple.positional.preferences.MainPreferences;
-
-public class LayoutBackground {
-    public static void setBackground(Context context, ViewGroup viewGroup, AttributeSet attrs) {
-        TypedArray theme = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DynamicCornerLayout, 0, 0);
-
-        boolean roundTopCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundTopCorners, false);
-        boolean roundBottomCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundBottomCorners, false);
-
-        ShapeAppearanceModel shapeAppearanceModel;
-
-        if (roundBottomCorners && roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else if (roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setTopLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .setTopRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else if (roundBottomCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setBottomLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .setBottomRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-
-        viewGroup.setBackground(new MaterialShapeDrawable(shapeAppearanceModel));
-    }
-
-    public static void setBackground(Context context, View viewGroup, AttributeSet attrs) {
-        TypedArray theme = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DynamicCornerLayout, 0, 0);
-
-        boolean roundTopCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundTopCorners, false);
-        boolean roundBottomCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundBottomCorners, false);
-
-        ShapeAppearanceModel shapeAppearanceModel;
-
-        if (roundBottomCorners && roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else if (roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setTopLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .setTopRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else if (roundBottomCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setBottomLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .setBottomRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-
-        viewGroup.setBackground(new MaterialShapeDrawable(shapeAppearanceModel));
-    }
-
-    public static void setBackground(Context context, AppCompatButton appCompatButton, AttributeSet attrs) {
-        TypedArray theme = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DynamicCornerLayout, 0, 0);
-
-        boolean roundTopCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundTopCorners, false);
-        boolean roundBottomCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundBottomCorners, false);
-
-        ShapeAppearanceModel shapeAppearanceModel;
-
-        if (roundBottomCorners && roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else if (roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setTopLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .setTopRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else if (roundBottomCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setBottomLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .setBottomRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-        else {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius())
-                    .build();
-        }
-
-        appCompatButton.setBackground(new MaterialShapeDrawable(shapeAppearanceModel));
-    }
-
-    public static void setBackground(Context context, ViewGroup viewGroup, AttributeSet attrs, float factor) {
-        TypedArray theme = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DynamicCornerLayout, 0, 0);
-
-        boolean roundTopCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundTopCorners, false);
-        boolean roundBottomCorners = theme.getBoolean(R.styleable.DynamicCornerLayout_roundBottomCorners, false);
-
-        ShapeAppearanceModel shapeAppearanceModel;
-
-        if (roundBottomCorners && roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius() / factor)
-                    .build();
-        }
-        else if (roundTopCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setTopLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius() / factor)
-                    .setTopRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius() / factor)
-                    .build();
-        }
-        else if (roundBottomCorners) {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setBottomLeftCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius() / factor)
-                    .setBottomRightCorner(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius() / factor)
-                    .build();
-        }
-        else {
-            shapeAppearanceModel = new ShapeAppearanceModel()
-                    .toBuilder()
-                    .setAllCorners(CornerFamily.ROUNDED, MainPreferences.INSTANCE.getCornerRadius() / factor)
-                    .build();
-        }
-
-        viewGroup.setBackground(new MaterialShapeDrawable(shapeAppearanceModel));
     }
 }
 
@@ -6774,66 +6076,6 @@ public class Utils {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/views/CustomBottomSheetDialogFragment.kt
-################################################################################
-package app.simple.positional.decorations.views
-
-import android.content.SharedPreferences
-import android.os.Bundle
-import android.view.View
-import android.widget.FrameLayout
-import app.simple.positional.R
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import com.google.android.material.R.id.design_bottom_sheet
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-
-open class CustomBottomSheetDialogFragment : BottomSheetDialogFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_FRAME, R.style.CustomBottomSheetDialogTheme)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        dialog?.window?.attributes?.windowAnimations = R.style.BottomDialogAnimation
-        dialog?.window?.setDimAmount(0.3f)
-
-        dialog?.setOnShowListener { dialog ->
-            val sheetDialog = dialog as BottomSheetDialog
-
-            val bottomSheet = sheetDialog.findViewById<View>(design_bottom_sheet) as FrameLayout
-
-            BottomSheetBehavior.from(bottomSheet).state = BottomSheetBehavior.STATE_EXPANDED
-
-            BottomSheetBehavior.from(bottomSheet).addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
-                    }
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                }
-            })
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/views/CustomWebView.kt
 ################################################################################
 @file:Suppress("LeakingThis")
@@ -6858,88 +6100,6 @@ open class CustomWebView @JvmOverloads constructor(context: Context, attributeSe
             @Suppress("DEPRECATION")
             WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
         }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/app/Panels.kt
-################################################################################
-package app.simple.positional.dialogs.app
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.FragmentManager
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.adapters.app.AdapterPanels
-import app.simple.positional.adapters.bottombar.BottomBarItems
-import app.simple.positional.callbacks.PanelsCallback
-import app.simple.positional.decorations.views.CustomBottomSheetDialogFragment
-import app.simple.positional.model.BottomBar
-import app.simple.positional.util.StatusBarHeight
-
-class Panels : CustomBottomSheetDialogFragment() {
-    private lateinit var recyclerView: RecyclerView
-    private var panelsCallback: PanelsCallback? = null
-    private var bottomBarItems: ArrayList<BottomBar>? = null
-
-    private var isLandscape = false
-    private var spanCount = 4
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_panel_switcher, container, false)
-
-        recyclerView = view.findViewById(R.id.recycler_view)
-        isLandscape = StatusBarHeight.isLandscape(requireContext())
-
-        spanCount = when {
-            isLandscape -> LANDSCAPE_SPAN_COUNT
-            else -> PORTRAIT_SPAN_COUNT
-        }
-
-        bottomBarItems = BottomBarItems.getBottomBarItems(requireContext())
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), spanCount)
-        recyclerView.adapter = AdapterPanels(bottomBarItems!!) { view1, name, position ->
-            panelsCallback?.onPanelClick(view1, name, position)
-            dismiss()
-        }
-    }
-
-    fun setPanelsCallback(panelsCallback: PanelsCallback) {
-        this.panelsCallback = panelsCallback
-    }
-
-    companion object {
-        fun newInstance(): Panels {
-            val args = Bundle()
-            val fragment = Panels()
-            fragment.arguments = args
-            return fragment
-        }
-
-        fun FragmentManager.showPanelsDialog(panelsCallback: PanelsCallback): Panels {
-            val dialog = newInstance()
-            dialog.apply {
-                setPanelsCallback(panelsCallback)
-            }
-            dialog.show(this, TAG)
-            return dialog
-        }
-
-        private const val TAG = "Panels"
-        private const val PORTRAIT_SPAN_COUNT = 4
-        private const val LANDSCAPE_SPAN_COUNT = 7
     }
 }
 
@@ -8144,57 +7304,6 @@ data class Vector3(val x: Float, val y: Float, val z: Float) {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/BottomBar.java
-################################################################################
-package app.simple.positional.model;
-
-public class BottomBar {
-    private int icon;
-    private String tag;
-    private String name;
-    private int color;
-
-    public BottomBar(int icon, String tag, String name, int color) {
-        this.icon = icon;
-        this.tag = tag;
-        this.name = name;
-        this.color = color;
-    }
-
-    public int getIcon() {
-        return icon;
-    }
-
-    public void setIcon(int icon) {
-        this.icon = icon;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/model/ClockModel.java
 ################################################################################
 package app.simple.positional.model;
@@ -8662,21 +7771,6 @@ public class TrailPoint {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/preferences/BottomBarPreferences.kt
-################################################################################
-package app.simple.positional.preferences
-
-
-object BottomBarPreferences {
-    const val clockPanel = "clock_panel"
-    const val compassPanel = "compass_panel"
-    const val gpsPanel = "gps_panel"
-    const val trailPanel = "trail_panel"
-    const val levelPanel = "level_panel"
-    const val settingsPanel = "settings_panel"
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/preferences/ClockPreferences.kt
 ################################################################################
 package app.simple.positional.preferences
@@ -8892,16 +7986,7 @@ package app.simple.positional.preferences
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
 object FragmentPreferences {
-    private const val currentPage = "current_page"
     private const val currentTag = "current_tag"
-
-    fun setCurrentPage(value: Int) {
-        getSharedPreferences().edit().putInt(currentPage, value).apply()
-    }
-
-    fun getCurrentPage(): Int {
-        return getSharedPreferences().getInt(currentPage, 2)
-    }
 
     fun setCurrentTag(value: String) {
         getSharedPreferences().edit().putString(currentTag, value).apply()
@@ -13117,6 +12202,193 @@ object PanelMenus {
         )
     }
 }
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/PanelSwitcher.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import app.simple.positional.constants.LocationPins
+import kotlinx.coroutines.delay
+
+@Immutable
+data class PanelItem(val tag: String, @param:DrawableRes val icon: Int, @param:StringRes val label: Int, @param:ColorRes val color: Int)
+
+object PanelCatalog {
+    const val CLOCK = "clock"
+    const val COMPASS = "compass"
+    const val DIRECTION = "direction"
+    const val LOCATION = "location"
+    const val TRAIL = "trail"
+    const val MEASURE = "Measure"
+    const val LEVEL = "level"
+    const val SETTINGS = "settings"
+
+    val tags = listOf(CLOCK, COMPASS, DIRECTION, LOCATION, TRAIL, MEASURE, LEVEL, SETTINGS)
+
+    fun resolve(tag: String?): String = tag?.takeIf { it in tags } ?: LOCATION
+
+    fun step(tag: String, delta: Int): String {
+        val index = tags.indexOf(resolve(tag))
+        return tags[Math.floorMod(index + delta, tags.size)]
+    }
+
+    fun items(): List<PanelItem> = listOf(
+        PanelItem(CLOCK, R.drawable.ic_clock, R.string.clock, R.color.time_bb_color),
+        PanelItem(COMPASS, R.drawable.ic_compass, R.string.compass, R.color.compass_bb_color),
+        PanelItem(DIRECTION, R.drawable.ic_near_me, R.string.direction, R.color.direction_bb_color),
+        PanelItem(LOCATION, LocationPins.getLocationPin(), R.string.gps_location, R.color.location_bb_color),
+        PanelItem(TRAIL, R.drawable.ic_trail_line, R.string.trail, R.color.trail_bb_color),
+        PanelItem(MEASURE, R.drawable.ic_square_foot, R.string.measure, R.color.measure_bb_color),
+        PanelItem(LEVEL, R.drawable.ic_level, R.string.level, R.color.level_bb_color),
+        PanelItem(SETTINGS, R.drawable.ic_settings, R.string.settings, R.color.settings_bb_color),
+    )
+}
+
+@Composable
+fun PanelSwitcher(current: String, visible: Boolean, onSelect: (String) -> Unit, modifier: Modifier = Modifier) {
+    val items = remember(current) { PanelCatalog.items() }
+    val item = items.first { it.tag == PanelCatalog.resolve(current) }
+    var picker by remember { mutableStateOf(false) }
+    var label by remember { mutableStateOf(true) }
+    LaunchedEffect(current) {
+        label = true
+        delay(LABEL_TIME)
+        label = false
+    }
+    val threshold = with(LocalDensity.current) { SWIPE.dp.toPx() }
+    AnimatedVisibility(visible, modifier = modifier, enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) {
+        Surface(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .padding(dimensionResource(R.dimen.floating_button_margin)),
+            shape = RoundedCornerShape(cornerRadius()),
+            color = MaterialTheme.colorScheme.primary,
+            shadowElevation = 12.dp,
+        ) {
+            Row(
+                modifier = Modifier
+                    .clickable { picker = true }
+                    .pointerInput(current) {
+                        var drag = 0f
+                        detectVerticalDragGestures(
+                            onDragStart = { drag = 0f },
+                            onDragEnd = { if (kotlin.math.abs(drag) > threshold) onSelect(PanelCatalog.step(current, if (drag < 0) 1 else -1)) },
+                        ) { change, amount ->
+                            change.consume()
+                            drag += amount
+                        }
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AnimatedVisibility(label) {
+                    Text(stringResource(item.label), color = Color.White, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 16.dp))
+                }
+                Box(Modifier.size(dimensionResource(R.dimen.bottom_nav_height)), contentAlignment = Alignment.Center) {
+                    Icon(painterResource(item.icon), contentDescription = stringResource(item.label), tint = Color.White, modifier = Modifier.size(26.dp))
+                }
+            }
+        }
+    }
+    if (picker) PanelPicker(items, current, onDismiss = { picker = false }) {
+        picker = false
+        onSelect(it)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PanelPicker(items: List<PanelItem>, current: String, onDismiss: () -> Unit, onSelect: (String) -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        LazyVerticalGrid(
+            GridCells.Adaptive(CELL.dp),
+            modifier = Modifier.navigationBarsPadding().padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(items, key = { it.tag }) { item ->
+                Column(
+                    Modifier
+                        .clickable { onSelect(item.tag) }
+                        .padding(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Box(
+                        Modifier
+                            .size(52.dp)
+                            .background(colorResource(item.color).copy(alpha = if (item.tag == current) 1f else 0.85f), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(painterResource(item.icon), contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
+                    }
+                    Text(
+                        stringResource(item.label),
+                        style = MaterialTheme.typography.labelLarge,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+private const val LABEL_TIME = 1200L
+private const val SWIPE = 24
+private const val CELL = 88
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/compose/PositionalTheme.kt
@@ -18357,141 +17629,6 @@ object UTMConverter {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/util/ViewUtils.kt
-################################################################################
-package app.simple.positional.util
-
-import android.animation.Animator
-import android.content.Context
-import android.view.View
-import android.view.WindowManager
-import android.view.animation.AccelerateInterpolator
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
-import app.simple.positional.R
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-
-object ViewUtils {
-    fun dimBehind(contentView: View) {
-        val container = contentView.rootView
-        val windowManager = contentView.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val layoutParams = container.layoutParams as WindowManager.LayoutParams
-        layoutParams.flags = layoutParams.flags or WindowManager.LayoutParams.FLAG_DIM_BEHIND
-        layoutParams.dimAmount = 0.3f
-        windowManager.updateViewLayout(container, layoutParams)
-    }
-
-    fun addShadow(contentView: View) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-            contentView.outlineAmbientShadowColor = contentView.context.resolveAttrColor(R.attr.colorAppAccent)
-            contentView.outlineSpotShadowColor = contentView.context.resolveAttrColor(R.attr.colorAppAccent)
-        }
-    }
-
-    fun View.gone() {
-        clearAnimation()
-        visibility = View.GONE
-    }
-
-    fun View.gone(animate: Boolean) {
-        clearAnimation()
-
-        if (animate) {
-            this.animate()
-                .scaleY(0F)
-                .scaleX(0F)
-                .alpha(0F)
-                .setInterpolator(AccelerateInterpolator())
-                .setDuration(this.resources.getInteger(R.integer.animation_duration).toLong())
-                .setListener(object : Animator.AnimatorListener {
-                    override fun onAnimationStart(animation: Animator) {
-                    }
-
-                    override fun onAnimationEnd(animation: Animator) {
-                        this@gone.visibility = View.GONE
-                    }
-
-                    override fun onAnimationCancel(animation: Animator) {
-                    }
-
-                    override fun onAnimationRepeat(animation: Animator) {
-                    }
-                })
-                .start()
-        } else {
-            this.visibility = View.GONE
-        }
-    }
-
-    fun View.invisible(animate: Boolean) {
-        clearAnimation()
-
-        if (animate) {
-            this.animate()
-                .scaleY(0F)
-                .scaleX(0F)
-                .alpha(0F)
-                .setInterpolator(AccelerateInterpolator())
-                .setDuration(this.resources.getInteger(R.integer.animation_duration).toLong())
-                .setListener(object : Animator.AnimatorListener {
-                    override fun onAnimationStart(animation: Animator) {
-                        }
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            this@invisible.visibility = View.INVISIBLE
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator) {
-                        }
-                    })
-                    .start()
-        } else {
-            this.visibility = View.INVISIBLE
-        }
-    }
-
-    fun View.visible(animate: Boolean) {
-        clearAnimation()
-
-        if (animate) {
-            this.animate()
-                .scaleY(1F)
-                .scaleX(1F)
-                .alpha(1F)
-                .setInterpolator(LinearOutSlowInInterpolator())
-                .setDuration(this.resources.getInteger(R.integer.animation_duration).toLong())
-                .setListener(object : Animator.AnimatorListener {
-                    override fun onAnimationStart(animation: Animator) {
-                        this@visible.visibility = View.VISIBLE
-                        }
-
-                        override fun onAnimationEnd(animation: Animator) {
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator) {
-                        }
-                    })
-                    .start()
-        } else {
-            this.visibility = View.VISIBLE
-        }
-    }
-
-    fun View.setVisibility(visibility: Boolean) {
-        if (visibility) {
-            visible(true)
-        } else {
-            gone(true)
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/CustomLocationViewModel.kt
 ################################################################################
 package app.simple.positional.viewmodels.viewmodel
@@ -19849,41 +18986,6 @@ class TwilightWidget : AppWidgetProvider() {
 }
 
 ################################################################################
-# FILE: app/src/main/res/anim/bottom_sheet_dialog_in.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/decelerate_cubic"
-    android:shareInterpolator="true">
-
-    <translate
-        android:fromYDelta="300"
-        android:toYDelta="0" />
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/bottom_sheet_dialog_out.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/decelerate_cubic"
-    android:shareInterpolator="true">
-
-    <translate
-        android:fromYDelta="0"
-        android:toYDelta="300" />
-
-    <alpha
-        android:fromAlpha="1"
-        android:toAlpha="0" />
-</set>
-
-################################################################################
 # FILE: app/src/main/res/anim/dialog_in.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -19926,37 +19028,6 @@ class TwilightWidget : AppWidgetProvider() {
         android:fromAlpha="1"
         android:toAlpha="0" />
 </set>
-
-################################################################################
-# FILE: app/src/main/res/anim/grid_list_animation.xml
-################################################################################
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/decelerate_cubic"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale="0"
-        android:fromYScale="0"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/grid_list_animation_controller.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
-    android:animation="@anim/grid_list_animation"
-    android:animationOrder="normal"
-    android:delay="15%" />
 
 ################################################################################
 # FILE: app/src/main/res/anim/image_in.xml
@@ -20395,145 +19466,6 @@ class TwilightWidget : AppWidgetProvider() {
     android:layout_height="match_parent"
     android:background="@color/mainBackground"
     tools:ignore="MergeRootFrame" />
-
-################################################################################
-# FILE: app/src/main/res/layout/activity_main.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <FrameLayout
-        android:id="@+id/containers"
-        android:background="@color/mainBackground"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-        android:id="@+id/bottom_bar_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/floating_button_margin"
-        android:animateLayoutChanges="true"
-        android:background="?attr/colorAppAccent"
-        android:backgroundTint="?attr/colorAppAccent"
-        android:elevation="20dp"
-        android:minWidth="@dimen/bottom_nav_height"
-        tools:ignore="ContentDescription">
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/bottom_bar"
-            android:layout_width="@dimen/bottom_nav_height"
-            android:layout_height="@dimen/bottom_nav_height"
-            android:animateLayoutChanges="true"
-            android:clipChildren="true"
-            android:clipToPadding="false"
-            android:layoutAnimation="@anim/grid_list_animation_controller"
-            android:minWidth="@dimen/bottom_nav_height"
-            android:overScrollMode="never"
-            android:paddingHorizontal="10dp"
-            app:roundTopCorners="true" />
-
-        <TextView
-            android:id="@+id/label"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:layout_marginHorizontal="10dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/medium"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:minWidth="75dp"
-            android:textColor="@android:color/white"
-            android:textSize="@dimen/popup_text_size" />
-
-    </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
-</merge>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_bottom_bar.xml
-################################################################################
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/bottom_bar_item"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    android:padding="10dp"
-    android:scaleType="fitCenter"
-    android:src="@drawable/ic_clock"
-    app:tint="@android:color/white"
-    tools:ignore="ContentDescription" />
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_panel.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.ripple.DynamicRippleLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:id="@+id/container"
-    android:padding="@dimen/toolbar_padding">
-
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:layout_marginBottom="15dp"
-        android:importantForAccessibility="no"
-        app:tint="@color/iconRegular" />
-
-    <TextView
-        android:id="@+id/label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/bold"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/description_text_size"
-        android:gravity="center" />
-
-</app.simple.positional.decorations.ripple.DynamicRippleLinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_panel_switcher.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
-    android:padding="@dimen/options_container_horizontal_padding">
-
-    <app.simple.positional.decorations.corners.DynamicCornerFrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/mainBackground"
-        android:clipChildren="true"
-        android:clipToPadding="false"
-        android:elevation="40dp">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:padding="@dimen/options_container_horizontal_padding" />
-
-
-    </app.simple.positional.decorations.corners.DynamicCornerFrameLayout>
-
-</FrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/fragment_launcher.xml
@@ -21302,7 +20234,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="launcher_app_title">22sp</dimen>
     <dimen name="launcher_app_icon_dimen">100dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">12sp</dimen>
 
 </resources>
 
@@ -21369,26 +20300,6 @@ class TwilightWidget : AppWidgetProvider() {
         <item name="rippleColor">@color/rippleColor</item>
         <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
     </style>
-
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/dialog_in</item>
-        <item name="android:windowExitAnimation">@anim/dialog_out</item>
-    </style>
-
-    <style name="CustomBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
-    </style>
-
-    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:windowMinWidthMajor">100%</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="android:colorEdgeEffect">@color/colorAccent</item>
-    </style>
 </resources>
 
 ################################################################################
@@ -21429,14 +20340,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">16sp</dimen>
 
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
     <dimen name="toolbar_padding">16dp</dimen>
-    <dimen name="popup_padding">10dp</dimen>
 </resources>
 
 ################################################################################
@@ -21477,14 +20386,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">16sp</dimen>
 
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
     <dimen name="toolbar_padding">16dp</dimen>
-    <dimen name="popup_padding">10dp</dimen>
 </resources>
 
 ################################################################################
@@ -21557,7 +20464,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="launcher_app_title">27sp</dimen>
     <dimen name="launcher_app_icon_dimen">160dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">13sp</dimen>
 
 </resources>
 
@@ -21599,7 +20505,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">175dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">16sp</dimen>
 </resources>
 
 ################################################################################
@@ -21610,12 +20515,6 @@ class TwilightWidget : AppWidgetProvider() {
     <attr name="colorAppAccent" format="color" />
     <attr name="colorAppAccentLight" format="color" />
     <attr name="colorAccentRipple" format="color" />
-
-    <declare-styleable name="DynamicCornerLayout">
-        <attr name="roundTopCorners" format="boolean" />
-        <attr name="roundBottomCorners" format="boolean" />
-        <attr name="roundAllCorners" format="boolean" />
-    </declare-styleable>
 </resources>
 
 ################################################################################
@@ -21761,14 +20660,12 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="launcher_app_title">31sp</dimen>
     <dimen name="launcher_app_icon_dimen">200dp</dimen>
     <dimen name="touch_indicator_size">100dp</dimen>
-    <dimen name="popup_text_size">16sp</dimen>
 
 
     <dimen name="trail_tools_padding">5dp</dimen>
     <dimen name="trail_tools_margin">10dp</dimen>
 
     <dimen name="toolbar_padding">16dp</dimen>
-    <dimen name="popup_padding">10dp</dimen>
     <dimen name="floating_button_margin">20dp</dimen>
 </resources>
 
@@ -22152,34 +21049,6 @@ class TwilightWidget : AppWidgetProvider() {
         <item name="rippleColor">@color/rippleColor</item>
         <item name="android:navigationBarColor">@color/toolbarBackground</item>
         <item name="android:colorEdgeEffect">?attr/colorAppAccent</item>
-    </style>
-
-    <style name="CustomBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
-    </style>
-
-    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:windowMinWidthMajor">100%</item>
-        <item name="android:windowMinWidthMinor">100%</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
-        <item name="android:colorEdgeEffect">@color/colorAccent</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
-        <item name="android:windowEnterAnimation">@anim/bottom_sheet_dialog_in</item>
-        <item name="android:windowExitAnimation">@anim/bottom_sheet_dialog_out</item>
-    </style>
-
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/dialog_in</item>
-        <item name="android:windowExitAnimation">@anim/dialog_out</item>
-    </style>
-
-    <style name="BottomDialogAnimation">
-        <item name="android:windowEnterAnimation">@anim/bottom_sheet_dialog_in</item>
-        <item name="android:windowExitAnimation">@anim/bottom_sheet_dialog_out</item>
     </style>
 </resources>
 
@@ -23162,6 +22031,35 @@ class MenuSheetStateTest {
         assertNull(state.items)
         state.refresh()
         assertNull(state.items)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/PanelCatalogTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class PanelCatalogTest {
+    @Test
+    fun unknownTagsFallBackToLocation() {
+        assertEquals(PanelCatalog.LOCATION, PanelCatalog.resolve(null))
+        assertEquals(PanelCatalog.LOCATION, PanelCatalog.resolve("missing"))
+        assertEquals(PanelCatalog.MEASURE, PanelCatalog.resolve("Measure"))
+    }
+
+    @Test
+    fun stepWrapsAround() {
+        assertEquals(PanelCatalog.COMPASS, PanelCatalog.step(PanelCatalog.CLOCK, 1))
+        assertEquals(PanelCatalog.SETTINGS, PanelCatalog.step(PanelCatalog.CLOCK, -1))
+        assertEquals(PanelCatalog.CLOCK, PanelCatalog.step(PanelCatalog.SETTINGS, 1))
+    }
+
+    @Test
+    fun tagsAreUnique() {
+        assertEquals(PanelCatalog.tags.size, PanelCatalog.tags.toSet().size)
     }
 }
 

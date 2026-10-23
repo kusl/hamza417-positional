@@ -537,4 +537,37 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.920s
 user	0m0.396s
 sys	0m0.551s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/adapters/app/AdapterPanels.kt app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarAdapter.kt app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarCallbacks.java app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java app/src/main/java/app/simple/positional/callbacks/PanelsCallback.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerFrameLayout.java app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerLinearLayout.java app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayout.java app/src/main/java/app/simple/positional/decorations/transformers/DepthTransformer.java app/src/main/java/app/simple/positional/decorations/utils/LayoutBackground.java app/src/main/java/app/simple/positional/decorations/views/CustomBottomSheetDialogFragment.kt app/src/main/java/app/simple/positional/dialogs/app/Panels.kt app/src/main/java/app/simple/positional/model/BottomBar.java app/src/main/java/app/simple/positional/preferences/BottomBarPreferences.kt app/src/main/java/app/simple/positional/util/ViewUtils.kt app/src/main/res/anim/bottom_sheet_dialog_in.xml app/src/main/res/anim/bottom_sheet_dialog_out.xml app/src/main/res/anim/grid_list_animation.xml app/src/main/res/anim/grid_list_animation_controller.xml app/src/main/res/layout/activity_main.xml app/src/main/res/layout/adapter_bottom_bar.xml app/src/main/res/layout/adapter_panel.xml app/src/main/res/layout/dialog_panel_switcher.xml
+rm 'app/src/main/java/app/simple/positional/adapters/app/AdapterPanels.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarCallbacks.java'
+rm 'app/src/main/java/app/simple/positional/adapters/bottombar/BottomBarItems.java'
+rm 'app/src/main/java/app/simple/positional/callbacks/PanelsCallback.java'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerFrameLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerLinearLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/transformers/DepthTransformer.java'
+rm 'app/src/main/java/app/simple/positional/decorations/utils/LayoutBackground.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/CustomBottomSheetDialogFragment.kt'
+rm 'app/src/main/java/app/simple/positional/dialogs/app/Panels.kt'
+rm 'app/src/main/java/app/simple/positional/model/BottomBar.java'
+rm 'app/src/main/java/app/simple/positional/preferences/BottomBarPreferences.kt'
+rm 'app/src/main/java/app/simple/positional/util/ViewUtils.kt'
+rm 'app/src/main/res/anim/bottom_sheet_dialog_in.xml'
+rm 'app/src/main/res/anim/bottom_sheet_dialog_out.xml'
+rm 'app/src/main/res/anim/grid_list_animation.xml'
+rm 'app/src/main/res/anim/grid_list_animation_controller.xml'
+rm 'app/src/main/res/layout/activity_main.xml'
+rm 'app/src/main/res/layout/adapter_bottom_bar.xml'
+rm 'app/src/main/res/layout/adapter_panel.xml'
+rm 'app/src/main/res/layout/dialog_panel_switcher.xml'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-09-51-59
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.907s
+user	0m0.381s
+sys	0m0.527s
 kushal@fedora:~/src/kotlin/positional$ 
+
+
