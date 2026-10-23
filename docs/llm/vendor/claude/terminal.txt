@@ -1,186 +1,3 @@
-################################################################################
-# FILE: app/src/main/res/mipmap-xhdpi/ic_launcher_two_round.png (11812 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_default_background.png (13416 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_default_foreground.png (6685 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_default.png (9858 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_default_round.png (15788 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eight_background.png (2845 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eight_foreground.png (7308 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eight.png (4156 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eight_round.png (7638 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eleven_background.png (6720 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eleven_foreground.png (6538 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eleven.png (7382 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_eleven_round.png (12479 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_five_background.png (4843 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_five_foreground.png (7282 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_five.png (9795 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_five_round.png (14539 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_four_background.png (4603 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_four_foreground.png (6540 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_four.png (8775 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_four_round.png (13283 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_legacy_foreground.png (35307 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_legacy.png (15486 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_legacy_round.png (23057 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_nine_background.png (2845 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_nine_foreground.png (11279 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_nine.png (5041 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_nine_round.png (8690 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_seven_background.png (2845 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_seven_foreground.png (3638 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_seven.png (3076 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_seven_round.png (6442 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_six_background.png (2845 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_six_foreground.png (9844 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_six.png (4783 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_six_round.png (8400 bytes)
-################################################################################
-[binary omitted]
-
-################################################################################
-# FILE: app/src/main/res/mipmap-xxhdpi/ic_launcher_ten_background.png (10741 bytes)
-################################################################################
 [binary omitted]
 
 ################################################################################
@@ -9952,4 +9769,187 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m4.579s
 user	0m2.041s
 sys	0m2.692s
+kushal@fedora:~/src/kotlin/positional$ git rm -r --ignore-unmatch \
+  .github/workflows/crowdin_merge.yml \
+  .imgbotconfig \
+  app/src/debug/res/values/google_maps_api.xml \
+  app/src/main/aidl \
+  app/src/main/assets/html/error_compass_sensor.html \
+  app/src/main/assets/html/error_level_sensor.html \
+  app/src/main/assets/html/error_play_services.html \
+  app/src/main/assets/html/license_failed.html \
+  app/src/main/assets/html/widget_alert.html \
+  app/src/main/assets/svg \
+  app/src/main/ic_launcher-playstore.png \
+  app/src/main/ic_launcher_default-playstore.png \
+  app/src/main/ic_launcher_eight-playstore.png \
+  app/src/main/ic_launcher_eleven-playstore.png \
+  app/src/main/ic_launcher_five-playstore.png \
+  app/src/main/ic_launcher_four-playstore.png \
+  app/src/main/ic_launcher_nine-playstore.png \
+  app/src/main/ic_launcher_seven-playstore.png \
+  app/src/main/ic_launcher_six-playstore.png \
+  app/src/main/ic_launcher_ten-playstore.png \
+  app/src/main/ic_launcher_three-playstore.png \
+  app/src/main/ic_launcher_two-playstore.png \
+  app/src/main/java/app/simple/positional/adapters/measure/AdapterMeasurePoints.kt \
+  app/src/main/java/app/simple/positional/behaviors/CustomBottomSheetBehavior.java \
+  app/src/main/java/app/simple/positional/callbacks/LicenceStatusCallback.kt \
+  app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerCoordinatorLayout.java \
+  app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerEditText.java \
+  app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerRecyclerView.java \
+  app/src/main/java/app/simple/positional/decorations/fastscroll/AutoMirrorDrawable.java \
+  app/src/main/java/app/simple/positional/decorations/fastscroll/FixItemDecorationRecyclerView.java \
+  app/src/main/java/app/simple/positional/decorations/fastscroll/FixOnItemTouchListenerRecyclerView.java \
+  app/src/main/java/app/simple/positional/decorations/interpolators/BetterBounceInterpolator.java \
+  app/src/main/java/app/simple/positional/decorations/maps/MapsStateManager.java \
+  app/src/main/java/app/simple/positional/decorations/popup/PopupFrameLayout.java \
+  app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleFrameLayout.java \
+  app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayoutWithFactor.java \
+  app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleRelativeLayout.java \
+  app/src/main/java/app/simple/positional/decorations/views/CustomCoordinatorLayout.java \
+  app/src/main/java/app/simple/positional/decorations/views/CustomSwitchCompat.java \
+  app/src/main/java/app/simple/positional/dialogs/gps/MovementExpansion.kt \
+  app/src/main/java/app/simple/positional/licensing \
+  app/src/main/java/app/simple/positional/math/DrawMoonBitmap.kt \
+  app/src/main/java/app/simple/positional/math/SunMoonCalculator.java \
+  app/src/main/java/app/simple/positional/popups/miscellaneous/PopupFragments.kt \
+  app/src/main/java/app/simple/positional/preferences/WidgetPreferences.kt \
+  app/src/main/java/app/simple/positional/ui/launcher/License.kt \
+  app/src/main/java/app/simple/positional/util/AppUtils.kt \
+  app/src/main/java/app/simple/positional/util/CalenderUtils.kt \
+  app/src/main/java/app/simple/positional/viewmodels/viewmodel/LicenseViewModel.kt \
+  app/src/main/res/drawable/ic_block.xml \
+  app/src/main/res/drawable/ic_flag_add.xml \
+  app/src/main/res/drawable/ic_open_in_new.xml \
+  app/src/main/res/drawable/ic_point.xml \
+  app/src/main/res/drawable/ic_share.xml \
+  app/src/main/res/drawable/moon_phase_01.xml \
+  app/src/main/res/drawable/moon_phase_03.xml \
+  app/src/main/res/drawable/moon_phase_04.xml \
+  app/src/main/res/drawable/moon_phase_05.xml \
+  app/src/main/res/drawable/moon_phase_06.xml \
+  app/src/main/res/drawable/moon_phase_07.xml \
+  app/src/main/res/drawable/moon_phase_08.xml \
+  app/src/main/res/drawable/x_moon_first_quarter.xml \
+  app/src/main/res/drawable/x_moon_full.xml \
+  app/src/main/res/drawable/x_moon_last_quarter.xml \
+  app/src/main/res/drawable/x_moon_new.xml \
+  app/src/main/res/drawable/x_moon_waning_crescent.xml \
+  app/src/main/res/drawable/x_moon_waning_gibbous.xml \
+  app/src/main/res/drawable/x_moon_waxing_crescent.xml \
+  app/src/main/res/drawable/x_moon_waxing_gibbous.xml \
+  app/src/main/res/layout/adapter_measure_footer.xml \
+  app/src/main/res/layout/adapter_measure_point.xml \
+  app/src/main/res/layout/adapter_measure_point_header.xml \
+  app/src/main/res/layout/adapter_panel_editor.xml \
+  app/src/main/res/layout/adpater_trail_icons.xml \
+  app/src/main/res/layout/dialog_map_search.xml \
+  app/src/main/res/layout/expansion_dialog_movement.xml \
+  app/src/main/res/layout/fragment_license.xml \
+  app/src/release \
+  crowdin.yml
+git rm -r --cached .idea
+rm '.github/workflows/crowdin_merge.yml'
+rm '.imgbotconfig'
+rm 'app/src/debug/res/values/google_maps_api.xml'
+rm 'app/src/main/aidl/com/android/vending/licensing/ILicenseResultListener.aidl'
+rm 'app/src/main/aidl/com/android/vending/licensing/ILicensingService.aidl'
+rm 'app/src/main/assets/html/error_compass_sensor.html'
+rm 'app/src/main/assets/html/error_level_sensor.html'
+rm 'app/src/main/assets/html/error_play_services.html'
+rm 'app/src/main/assets/html/license_failed.html'
+rm 'app/src/main/assets/html/widget_alert.html'
+rm 'app/src/main/assets/svg/icon.svg'
+rm 'app/src/main/ic_launcher-playstore.png'
+rm 'app/src/main/ic_launcher_default-playstore.png'
+rm 'app/src/main/ic_launcher_eight-playstore.png'
+rm 'app/src/main/ic_launcher_eleven-playstore.png'
+rm 'app/src/main/ic_launcher_five-playstore.png'
+rm 'app/src/main/ic_launcher_four-playstore.png'
+rm 'app/src/main/ic_launcher_nine-playstore.png'
+rm 'app/src/main/ic_launcher_seven-playstore.png'
+rm 'app/src/main/ic_launcher_six-playstore.png'
+rm 'app/src/main/ic_launcher_ten-playstore.png'
+rm 'app/src/main/ic_launcher_three-playstore.png'
+rm 'app/src/main/ic_launcher_two-playstore.png'
+rm 'app/src/main/java/app/simple/positional/adapters/measure/AdapterMeasurePoints.kt'
+rm 'app/src/main/java/app/simple/positional/behaviors/CustomBottomSheetBehavior.java'
+rm 'app/src/main/java/app/simple/positional/callbacks/LicenceStatusCallback.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerCoordinatorLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerEditText.java'
+rm 'app/src/main/java/app/simple/positional/decorations/corners/DynamicCornerRecyclerView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/AutoMirrorDrawable.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/FixItemDecorationRecyclerView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/fastscroll/FixOnItemTouchListenerRecyclerView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/interpolators/BetterBounceInterpolator.java'
+rm 'app/src/main/java/app/simple/positional/decorations/maps/MapsStateManager.java'
+rm 'app/src/main/java/app/simple/positional/decorations/popup/PopupFrameLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleFrameLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleLinearLayoutWithFactor.java'
+rm 'app/src/main/java/app/simple/positional/decorations/ripple/DynamicRippleRelativeLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/CustomCoordinatorLayout.java'
+rm 'app/src/main/java/app/simple/positional/decorations/views/CustomSwitchCompat.java'
+rm 'app/src/main/java/app/simple/positional/dialogs/gps/MovementExpansion.kt'
+rm 'app/src/main/java/app/simple/positional/licensing/AESObfuscator.java'
+rm 'app/src/main/java/app/simple/positional/licensing/APKExpansionPolicy.java'
+rm 'app/src/main/java/app/simple/positional/licensing/DeviceLimiter.java'
+rm 'app/src/main/java/app/simple/positional/licensing/LicenseChecker.java'
+rm 'app/src/main/java/app/simple/positional/licensing/LicenseCheckerCallback.java'
+rm 'app/src/main/java/app/simple/positional/licensing/LicenseValidator.java'
+rm 'app/src/main/java/app/simple/positional/licensing/NullDeviceLimiter.java'
+rm 'app/src/main/java/app/simple/positional/licensing/Obfuscator.java'
+rm 'app/src/main/java/app/simple/positional/licensing/Policy.java'
+rm 'app/src/main/java/app/simple/positional/licensing/PreferenceObfuscator.java'
+rm 'app/src/main/java/app/simple/positional/licensing/ResponseData.java'
+rm 'app/src/main/java/app/simple/positional/licensing/ServerManagedPolicy.java'
+rm 'app/src/main/java/app/simple/positional/licensing/ValidationException.java'
+rm 'app/src/main/java/app/simple/positional/licensing/util/Base64.java'
+rm 'app/src/main/java/app/simple/positional/licensing/util/Base64DecoderException.java'
+rm 'app/src/main/java/app/simple/positional/licensing/util/URIQueryDecoder.java'
+rm 'app/src/main/java/app/simple/positional/math/DrawMoonBitmap.kt'
+rm 'app/src/main/java/app/simple/positional/math/SunMoonCalculator.java'
+rm 'app/src/main/java/app/simple/positional/popups/miscellaneous/PopupFragments.kt'
+rm 'app/src/main/java/app/simple/positional/preferences/WidgetPreferences.kt'
+rm 'app/src/main/java/app/simple/positional/ui/launcher/License.kt'
+rm 'app/src/main/java/app/simple/positional/util/AppUtils.kt'
+rm 'app/src/main/java/app/simple/positional/util/CalenderUtils.kt'
+rm 'app/src/main/java/app/simple/positional/viewmodels/viewmodel/LicenseViewModel.kt'
+rm 'app/src/main/res/drawable/ic_block.xml'
+rm 'app/src/main/res/drawable/ic_flag_add.xml'
+rm 'app/src/main/res/drawable/ic_open_in_new.xml'
+rm 'app/src/main/res/drawable/ic_point.xml'
+rm 'app/src/main/res/drawable/ic_share.xml'
+rm 'app/src/main/res/drawable/moon_phase_01.xml'
+rm 'app/src/main/res/drawable/moon_phase_03.xml'
+rm 'app/src/main/res/drawable/moon_phase_04.xml'
+rm 'app/src/main/res/drawable/moon_phase_05.xml'
+rm 'app/src/main/res/drawable/moon_phase_06.xml'
+rm 'app/src/main/res/drawable/moon_phase_07.xml'
+rm 'app/src/main/res/drawable/moon_phase_08.xml'
+rm 'app/src/main/res/drawable/x_moon_first_quarter.xml'
+rm 'app/src/main/res/drawable/x_moon_full.xml'
+rm 'app/src/main/res/drawable/x_moon_last_quarter.xml'
+rm 'app/src/main/res/drawable/x_moon_new.xml'
+rm 'app/src/main/res/drawable/x_moon_waning_crescent.xml'
+rm 'app/src/main/res/drawable/x_moon_waning_gibbous.xml'
+rm 'app/src/main/res/drawable/x_moon_waxing_crescent.xml'
+rm 'app/src/main/res/drawable/x_moon_waxing_gibbous.xml'
+rm 'app/src/main/res/layout/adapter_measure_footer.xml'
+rm 'app/src/main/res/layout/adapter_measure_point.xml'
+rm 'app/src/main/res/layout/adapter_measure_point_header.xml'
+rm 'app/src/main/res/layout/adapter_panel_editor.xml'
+rm 'app/src/main/res/layout/adpater_trail_icons.xml'
+rm 'app/src/main/res/layout/dialog_map_search.xml'
+rm 'app/src/main/res/layout/expansion_dialog_movement.xml'
+rm 'app/src/main/res/layout/fragment_license.xml'
+rm 'app/src/release/res/values/google_maps_api.xml'
+rm 'crowdin.yml'
+rm '.idea/codeStyles/Project.xml'
+rm '.idea/compiler.xml'
+rm '.idea/dictionaries/Hamzu.xml'
+rm '.idea/gradle.xml'
+rm '.idea/jarRepositories.xml'
+rm '.idea/misc.xml'
+rm '.idea/vcs.xml'
 kushal@fedora:~/src/kotlin/positional$ 
