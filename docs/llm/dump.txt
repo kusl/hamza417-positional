@@ -1,7 +1,7 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-22T20:31:29-04:00
+Generated: 2026-10-22T20:32:52-04:00
 Branch:    master
-Commit:    b4bc4e4c 2026-10-22 20:31:25 -0400 run scripts
+Commit:    9537338e 2026-10-22 20:32:45 -0400 don't ignore docs/llm
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
@@ -43400,7 +43400,6 @@ captures/
 local.properties
 *.keystore
 *.jks
-docs/llm/
 
 ################################################################################
 # FILE: gradle.properties
