@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T03:04:38-04:00
+Generated: 2026-10-23T03:20:27-04:00
 Branch:    master
-Commit:    24cc6528 2026-10-23 03:04:26 -0400 add prompt
+Commit:    2d1a77fa 2026-10-23 03:20:20 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (1083 files)
+## TREE (1057 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -93,19 +93,13 @@ app/
                   BottomBarItems.java
                 clock/
                   ClockNeedleSkinsAdapter.kt
-                  TimeZoneAdapter.kt
                 compass/
                   BloomSkinAdapter.kt
-                direction/
-                  AdapterDirections.kt
                 maps/
                   PinSkinAdapter.kt
-                measure/
-                  AdapterMeasures.kt
                 trail/
                   AdapterPopupMarkers.kt
                   AdapterTrailPoints.kt
-                  AdapterTrails.kt
               callbacks/
                 BottomSheetSlide.kt
                 PanelsCallback.java
@@ -181,9 +175,6 @@ app/
                   DynamicRippleLinearLayout.java
                   DynamicRippleTextView.java
                   Utils.java
-                searchview/
-                  SearchView.java
-                  SearchViewEventListener.java
                 switchview/
                   SwitchCallbacks.java
                   SwitchFrameLayout.kt
@@ -229,7 +220,6 @@ app/
                   CompassPhysicalProperties.kt
                 direction/
                   DirectionMenu.kt
-                  DirectionTarget.kt
                 gps/
                   CoordinatesExpansion.kt
                   GPSMenu.kt
@@ -268,7 +258,7 @@ app/
               model/
                 BottomBar.java
                 ClockModel.java
-                DirectionModel.java
+                DirectionModel.kt
                 Locales.kt
                 Locations.kt
                 Measure.java
@@ -276,9 +266,6 @@ app/
                 TrailEntry.java
                 TrailPoint.java
               popups/
-                directions/
-                  PopupDirectionAddMenu.kt
-                  PopupDirectionsMenu.kt
                 location/
                   PopupCoordinateBox.kt
                   PopupLocationMenu.kt
@@ -287,7 +274,6 @@ app/
                 trail/
                   PopupMarkers.kt
                   PopupTrailsDataMenu.kt
-                  PopupTrailsMenu.kt
               preferences/
                 BottomBarPreferences.kt
                 ClockPreferences.kt
@@ -298,7 +284,6 @@ app/
                 LevelPreferences.kt
                 MainPreferences.kt
                 MeasurePreferences.kt
-                SearchPreferences.kt
                 TrailPreferences.kt
               services/
                 ClockWidgetService.kt
@@ -323,11 +308,15 @@ app/
                   ArtsScreen.kt
                   ChoiceDialog.kt
                   CustomLocationScreen.kt
+                  DirectionsScreen.kt
                   MapSearchScreen.kt
                   PositionalTheme.kt
                   Preferences.kt
+                  RecordsScreen.kt
+                  SavedListScreen.kt
                   SettingsDialogs.kt
                   SettingsScreen.kt
+                  TimeZoneScreen.kt
                 launcher/
                   SplashScreen.kt
                 panels/
@@ -339,11 +328,6 @@ app/
                   Settings.kt
                   Time.kt
                   Trail.kt
-                subpanels/
-                  Directions.kt
-                  Measures.kt
-                  TimeZones.kt
-                  Trails.kt
               util/
                 AppIcons.kt
                 ArrayHelper.kt
@@ -370,6 +354,7 @@ app/
                 TextViewUtils.kt
                 ThemeSetter.kt
                 TimeFormatter.kt
+                TrailNames.kt
                 UTMConverter.kt
                 ViewUtils.kt
               viewmodels/
@@ -402,8 +387,6 @@ app/
           image_in.xml
           image_out.xml
           launcher_icon.xml
-          list_animation_controller.xml
-          list_item_animation.xml
           marker_grid_anim.xml
           marker_grid_controller.xml
         drawable-night/
@@ -750,22 +733,15 @@ app/
           activity_clock_widget.xml
           activity_launcher.xml
           activity_main.xml
-          activity_sub.xml
           adapter_bloom_skin.xml
           adapter_bottom_bar.xml
           adapter_clock_needle.xml
-          adapter_directions.xml
-          adapter_header_directions.xml
-          adapter_measures_header.xml
           adapter_panel.xml
           adapter_pins.xml
           adapter_popup_markers.xml
-          adapter_timezone.xml
           adapter_trail_data.xml
           adapter_trail_data_footer.xml
           adapter_trail_data_header.xml
-          adapter_trails.xml
-          adapter_trails_header.xml
           bottom_sheet_gps.xml
           bottom_sheet_trail.xml
           dialog_clock_menu.xml
@@ -777,7 +753,6 @@ app/
           dialog_compass_physical_properties.xml
           dialog_custom_location_shortcut.xml
           dialog_direction_menu.xml
-          dialog_direction_target.xml
           dialog_error.xml
           dialog_gps_menu.xml
           dialog_measure_add.xml
@@ -794,15 +769,11 @@ app/
           fragment_clock.xml
           fragment_compass.xml
           fragment_direction.xml
-          fragment_directions.xml
           fragment_gps.xml
           fragment_launcher.xml
           fragment_level.xml
           fragment_measure.xml
-          fragment_measures_list.xml
-          fragment_timezone_list.xml
           fragment_trail.xml
-          fragment_trails_list.xml
           generic_compass_rose.xml
           info_panel_clock.xml
           info_panel_compass.xml
@@ -810,13 +781,9 @@ app/
           info_panel_gps.xml
           popup_coordinates_box.xml
           popup_delete_confirmation.xml
-          popup_directions.xml
-          popup_directions_add_menu.xml
           popup_location_map.xml
           popup_trail_markers.xml
-          popup_trails.xml
           popup_trails_data.xml
-          search_view.xml
           speedometer.xml
           switch_view.xml
           toolbar_clock.xml
@@ -1204,11 +1171,13 @@ app/
                   CoordinateInputTest.kt
                   MapSearchQueryTest.kt
                   SettingsLabelsTest.kt
+                  TimeZoneCatalogTest.kt
               util/
                 AppIconsTest.kt
                 ArrayHelperTest.kt
                 ConditionUtilsTest.kt
                 DirectionTest.kt
+                TrailNamesTest.kt
 build.gradle
 export.sh
 gradle.properties
@@ -1501,13 +1470,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog and address search.
+- Dead code, unused resources and source comments removed; unit tests for math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog and trail name rules.
 
 The map panels use the Google Maps SDK and Google Play services location. Without a Maps API key the map tiles stay blank and every other panel works.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView`. Shared theme, components, dialogs and screens live in `ui/compose/`.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the existing fragments and activities through `ComposeView` (`setPositionalContent` for full-screen activities). Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1516,8 +1485,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in the
 | 3 | Settings dialogs (theme, icon, corners, units, coordinates, provider, language) | Done |
 | 4 | Accent colors and custom locations screens, Room `Flow` for saved places | Done |
 | 5 | Arts pager, help and legal page viewer, map search with debounced geocoding; unused target address screen removed | Done |
-| 6 | List screens (trails, measures, directions, time zones) | Next |
-| 7 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Planned |
+| 6 | Trails, measures, directions and time zone screens; Room `Flow` and singleton databases; search view and list adapters removed | Done |
+| 7 | Sensor panels (level, compass, clock, direction) on Compose `Canvas` | Next |
 | 8 | Map panels, single activity with Navigation Compose, drop AppCompat themes | Planned |
 | 9 | Widgets on Glance | Planned |
 
@@ -3053,22 +3022,102 @@ class CustomLocationsActivity : BaseActivity(), CustomLocationActions {
 ################################################################################
 package app.simple.positional.activities.subactivity
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.core.net.toUri
 import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.Directions
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.model.DirectionModel
+import app.simple.positional.preferences.DirectionPreferences
+import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.ui.compose.DirectionsActions
+import app.simple.positional.ui.compose.DirectionsScreen
+import app.simple.positional.ui.compose.setPositionalContent
+import app.simple.positional.viewmodels.viewmodel.DirectionsViewModel
 
-class DirectionsActivity : BaseActivity() {
+class DirectionsActivity : BaseActivity(), DirectionsActions {
+    private val viewModel: DirectionsViewModel by viewModels()
+
+    private val searchLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == RESULT_OK && data != null) {
+            val form = viewModel.form
+            form.fill(
+                address = data.getStringExtra("address").orEmpty().ifEmpty { form.address },
+                latitude = data.getDoubleExtra("latitude", 0.0).toString(),
+                longitude = data.getDoubleExtra("longitude", 0.0).toString(),
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
-
-        if (savedInstanceState.isNull()) {
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.sub_container, Directions.newInstance())
-                    .commit()
+        setPositionalContent { topInset ->
+            val directions by viewModel.directions.collectAsState()
+            DirectionsScreen(directions, viewModel.editing != null, viewModel.form, topInset, this)
         }
+    }
+
+    override fun create() {
+        val target = DirectionPreferences.getTargetCoordinates()
+        viewModel.open(DirectionPreferences.getTargetLabel(), target[0].toDouble(), target[1].toDouble())
+    }
+
+    override fun createFromTarget() {
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        viewModel.open(null, target[0].toDouble(), target[1].toDouble())
+    }
+
+    override fun set(direction: DirectionModel) = select(direction, useMapsTarget = false)
+
+    override fun edit(direction: DirectionModel) =
+        viewModel.open(direction.name, direction.latitude, direction.longitude, direction.dateAdded)
+
+    override fun useAsTarget(direction: DirectionModel) {
+        val last = MainPreferences.getLastCoordinates()
+        GPSPreferences.setTargetMarker(true)
+        GPSPreferences.setTargetMarkerLatitude(direction.latitude.toFloat())
+        GPSPreferences.setTargetMarkerLongitude(direction.longitude.toFloat())
+        GPSPreferences.setTargetMarkerStartLatitude(last[0])
+        GPSPreferences.setTargetMarkerStartLongitude(last[1])
+        select(direction, useMapsTarget = true)
+    }
+
+    override fun navigate(direction: DirectionModel) {
+        val coordinates = "${direction.latitude},${direction.longitude}"
+        runCatching {
+            startActivity(Intent(Intent.ACTION_VIEW, "google.navigation:q=$coordinates&mode=d".toUri()).setPackage(GOOGLE_MAPS))
+        }.recoverCatching {
+            startActivity(Intent(Intent.ACTION_VIEW, "geo:$coordinates?q=$coordinates".toUri()))
+        }.onFailure {
+            Toast.makeText(this, R.string.failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun delete(direction: DirectionModel) = viewModel.delete(direction)
+
+    override fun search() = searchLauncher.launch(Intent(this, MapSearchActivity::class.java))
+
+    override fun save(latitude: Double, longitude: Double) = viewModel.save(latitude, longitude)
+
+    override fun dismissEditor() = viewModel.close()
+
+    private fun select(direction: DirectionModel, useMapsTarget: Boolean) {
+        DirectionPreferences.setTargetLatitude(direction.latitude.toFloat())
+        DirectionPreferences.setTargetLongitude(direction.longitude.toFloat())
+        DirectionPreferences.setTargetLabel(direction.name.orEmpty())
+        DirectionPreferences.setUseMapsTarget(useMapsTarget)
+        finish()
+    }
+
+    private companion object {
+        const val GOOGLE_MAPS = "com.google.android.apps.maps"
     }
 }
 
@@ -3192,21 +3241,49 @@ class MapSearchActivity : BaseActivity(), MapSearchActions {
 package app.simple.positional.activities.subactivity
 
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.Measures
+import app.simple.positional.model.Measure
+import app.simple.positional.preferences.MeasurePreferences
+import app.simple.positional.ui.compose.Record
+import app.simple.positional.ui.compose.RecordActions
+import app.simple.positional.ui.compose.RecordsScreen
+import app.simple.positional.ui.compose.setPositionalContent
+import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 
-class MeasuresActivity : BaseActivity() {
+class MeasuresActivity : BaseActivity(), RecordActions<Measure> {
+    private val viewModel: MeasureViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
-
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.sub_container, Measures.Companion.newInstance(), Measures.Companion.TAG)
-                    .commit()
+        setPositionalContent { topInset ->
+            val measures by viewModel.measures.collectAsState()
+            val records = remember(measures) {
+                val selected = MeasurePreferences.getLastSelectedMeasure()
+                measures?.map { Record(it.dateCreated, it, it.name.orEmpty(), it.note.orEmpty(), it.dateCreated, it.dateCreated == selected) }
+            }
+            RecordsScreen(stringResource(R.string.saved_measures), records, topInset, this)
         }
     }
+
+    override fun open(record: Measure) {
+        MeasurePreferences.setLastSelectedMeasure(record.dateCreated)
+        finish()
+    }
+
+    override fun add(name: String, note: String) {
+        viewModel.addMeasure(name, note)
+        finish()
+    }
+
+    override fun delete(record: Measure) = viewModel.deleteMeasure(record)
+
+    override fun isValidName(name: String) = name.isNotBlank()
 }
 
 ################################################################################
@@ -3215,21 +3292,22 @@ class MeasuresActivity : BaseActivity() {
 package app.simple.positional.activities.subactivity
 
 import android.os.Bundle
-import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.TimeZones
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.ui.compose.TimeZoneScreen
+import app.simple.positional.ui.compose.setPositionalContent
+import app.simple.positional.util.LocaleHelper
 
 class TimezonePickerActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
-
-        if (savedInstanceState.isNull()) {
-            supportFragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.dialog_in, R.anim.dialog_out)
-                    .replace(R.id.sub_container, TimeZones.newInstance(), "timezone")
-                    .commit()
+        val selected = ClockPreferences.getTimeZone()
+        val twelveHour = ClockPreferences.getDefaultClockTimeFormat()
+        setPositionalContent { topInset ->
+            TimeZoneScreen(selected, twelveHour, LocaleHelper.getAppLocale(), topInset) {
+                ClockPreferences.setTimeZone(it)
+                finish()
+            }
         }
     }
 }
@@ -3240,22 +3318,49 @@ class TimezonePickerActivity : BaseActivity() {
 package app.simple.positional.activities.subactivity
 
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import app.simple.positional.R
 import app.simple.positional.extensions.activity.BaseActivity
-import app.simple.positional.ui.subpanels.Trails
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.model.TrailEntry
+import app.simple.positional.preferences.TrailPreferences
+import app.simple.positional.ui.compose.Record
+import app.simple.positional.ui.compose.RecordActions
+import app.simple.positional.ui.compose.RecordsScreen
+import app.simple.positional.ui.compose.setPositionalContent
+import app.simple.positional.util.TrailNames
+import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 
-class TrailsViewerActivity : BaseActivity() {
+class TrailsViewerActivity : BaseActivity(), RecordActions<TrailEntry> {
+    private val viewModel: TrailsViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sub)
-
-        if (savedInstanceState.isNull()) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.sub_container, Trails.newInstance(), "trails")
-                .commit()
+        setPositionalContent { topInset ->
+            val trails by viewModel.trails.collectAsState()
+            val records = remember(trails) {
+                val current = TrailPreferences.getCurrentTrail()
+                trails?.map { Record(it.keyTag, it, it.trailName.orEmpty(), it.trailNote.orEmpty(), it.dateCreated, it.trailName == current) }
+            }
+            RecordsScreen(stringResource(R.string.saved_trails), records, topInset, this)
         }
     }
+
+    override fun open(record: TrailEntry) {
+        TrailPreferences.setCurrentTrailName(record.trailName)
+        finish()
+    }
+
+    override fun add(name: String, note: String) =
+        viewModel.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
+
+    override fun delete(record: TrailEntry) = viewModel.deleteTrail(record)
+
+    override fun isValidName(name: String) =
+        TrailNames.isValid(name, viewModel.trails.value.orEmpty().map { it.trailName })
 }
 
 ################################################################################
@@ -3510,113 +3615,6 @@ class ClockNeedleSkinsAdapter(context: Context) : PagerAdapter() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/clock/TimeZoneAdapter.kt
-################################################################################
-package app.simple.positional.adapters.clock
-
-import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.Typeface
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.TextAppearanceSpan
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.decorations.fastscroll.PopupTextProvider
-import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.LocaleHelper
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.*
-
-class TimeZoneAdapter(var timeZones: MutableList<Pair<String, String>>, var searchText: String) :
-        RecyclerView.Adapter<RecyclerView.ViewHolder>(),
-        PopupTextProvider {
-    lateinit var context: Context
-    private var currentSelectedTimezone = ""
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        timeZones.sortBy { it.first }
-        context = parent.context
-        currentSelectedTimezone = ClockPreferences.getTimeZone()
-        return Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_timezone, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is Holder) {
-            holder.timeZone.text = timeZones[position].first
-            holder.offset.text = timeZones[position].second
-
-            searchTimeZones(holder.timeZone, timeZones[position].first)
-            searchTimeZones(holder.offset, timeZones[position].second)
-
-            holder.timeZone.setTextColor(if (timeZones[position].first == currentSelectedTimezone) {
-                holder.indicator.visibility = View.VISIBLE
-                holder.itemView.context.resolveAttrColor(R.attr.colorAppAccent)
-            } else {
-                holder.indicator.visibility = View.INVISIBLE
-                ContextCompat.getColor(holder.itemView.context, R.color.textPrimary)
-            })
-
-            holder.format.text = formattedTime(timeZones[position].first)
-
-            holder.layout.setOnClickListener {
-                ClockPreferences.setTimeZone(timeZones[position].first)
-                currentSelectedTimezone = timeZones[position].first
-                notifyDataSetChanged()
-            }
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return timeZones.size
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val timeZone: TextView = itemView.findViewById(R.id.time_zone_adapter_text)
-        val offset: TextView = itemView.findViewById(R.id.time_zone_adapter_offset)
-        val indicator: ImageView = itemView.findViewById(R.id.time_zone_indicator)
-        val format: TextView = itemView.findViewById(R.id.time_zone_adapter_format)
-        val layout: DynamicRippleConstraintLayout = itemView.findViewById(R.id.time_zone_adapter_item_container)
-    }
-
-    private fun formattedTime(timezone: String): String {
-        return Instant.now().atZone(ZoneId.of(timezone))
-                .format(DateTimeFormatter.ofPattern("hh:mm a"))
-    }
-
-    private fun searchTimeZones(textView: TextView, string: String) {
-        if (string == "") return
-        val sb = SpannableStringBuilder(string)
-        val startPos =
-            string.lowercase(Locale.getDefault()).indexOf(searchText.lowercase(Locale.getDefault()))
-        val endPos = startPos + searchText.length
-
-        if (startPos != -1) {
-            val colorKeyword = ColorStateList(arrayOf(intArrayOf()), intArrayOf(ContextCompat.getColor(context, R.color.iconRegular)))
-            val highlightSpan = TextAppearanceSpan(null, Typeface.NORMAL, -1, colorKeyword, null)
-            sb.setSpan(highlightSpan, startPos, endPos, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
-        }
-
-        textView.text = sb
-    }
-
-    override fun getPopupText(position: Int): String {
-        return timeZones[position].first.substring(0, 1).uppercase(LocaleHelper.getAppLocale())
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/adapters/compass/BloomSkinAdapter.kt
 ################################################################################
 package app.simple.positional.adapters.compass
@@ -3665,106 +3663,6 @@ class BloomSkinAdapter(context: Context) : PagerAdapter() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/direction/AdapterDirections.kt
-################################################################################
-package app.simple.positional.adapters.direction
-
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-import app.simple.positional.model.DirectionModel
-import app.simple.positional.util.ConditionUtils.isZero
-import app.simple.positional.util.DMSConverter
-import app.simple.positional.util.HtmlHelper
-import app.simple.positional.util.TimeFormatter.formatDate
-import com.google.android.gms.maps.model.LatLng
-
-class AdapterDirections constructor(val list: MutableList<DirectionModel>) : RecyclerView.Adapter<VerticalListViewHolder>() {
-    private var adapterDirectionsCallbacks: AdapterDirectionsCallbacks? = null
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {
-        return when (viewType) {
-            VerticalListViewHolder.TYPE_HEADER -> {
-                Header(LayoutInflater.from(parent.context).inflate(R.layout.adapter_header_directions, parent, false))
-            }
-            VerticalListViewHolder.TYPE_ITEM -> {
-                Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_directions, parent, false))
-            }
-            else -> {
-                throw IllegalArgumentException()
-            }
-        }
-    }
-
-    override fun onBindViewHolder(holder: VerticalListViewHolder, position_: Int) {
-        if (holder is Holder) {
-            val position = position_ - 1
-
-            holder.name.text = list[position].name
-            holder.latLng.text = DMSConverter.getDMS(LatLng(list[position].latitude, list[position].longitude), holder.itemView.context)
-            holder.date.text = list[position].dateAdded.formatDate()
-
-            holder.container.setOnClickListener {
-                adapterDirectionsCallbacks?.onDirectionClicked(list[position])
-            }
-
-            holder.container.setOnLongClickListener {
-                adapterDirectionsCallbacks?.onDirectionLongPressed(list[position])
-                true
-            }
-
-            holder.menu.setOnClickListener {
-                adapterDirectionsCallbacks?.onMenuPressed(list[position], it)
-            }
-        } else if (holder is Header) {
-            holder.total.text = HtmlHelper.fromHtml("<b>${holder.itemView.context.getString(R.string.total)}</b> ${list.size}")
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return list.size.plus(1)
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return if (position.isZero()) {
-            VerticalListViewHolder.TYPE_HEADER
-        } else {
-            VerticalListViewHolder.TYPE_ITEM
-        }
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val name: TextView = itemView.findViewById(R.id.direction_name)
-        val latLng: TextView = itemView.findViewById(R.id.direction_lat_lng)
-        val date: TextView = itemView.findViewById(R.id.direction_date)
-        val menu: DynamicRippleImageButton = itemView.findViewById(R.id.menu)
-        val container: DynamicRippleConstraintLayout = itemView.findViewById(R.id.adapter_direction_container)
-    }
-
-    inner class Header(itemView: View) : VerticalListViewHolder(itemView) {
-        val total : TextView = itemView.findViewById(R.id.adapter_total)
-    }
-
-    fun setOnDirectionCallbacksListener(adapterDirectionsCallbacks: AdapterDirectionsCallbacks) {
-        this.adapterDirectionsCallbacks = adapterDirectionsCallbacks
-    }
-
-    companion object {
-        interface AdapterDirectionsCallbacks {
-            fun onDirectionClicked(directionModel: DirectionModel)
-            fun onDirectionLongPressed(directionModel: DirectionModel)
-            fun onMenuPressed(directionModel: DirectionModel, view: View)
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/adapters/maps/PinSkinAdapter.kt
 ################################################################################
 package app.simple.positional.adapters.maps
@@ -3807,125 +3705,6 @@ class PinSkinAdapter(context: Context) : PagerAdapter() {
     override fun restoreState(state: Parcelable?, loader: ClassLoader?) {}
     override fun saveState(): Parcelable? {
         return null
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/measure/AdapterMeasures.kt
-################################################################################
-package app.simple.positional.adapters.measure
-
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-import app.simple.positional.model.Measure
-import app.simple.positional.preferences.MeasurePreferences
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.ConditionUtils.isZero
-import app.simple.positional.util.HtmlHelper
-import app.simple.positional.util.TimeFormatter.formatDate
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
-
-class AdapterMeasures(private val list: ArrayList<Measure>) :
-    RecyclerView.Adapter<VerticalListViewHolder>() {
-    private lateinit var adapterMeasuresCallback: AdapterMeasuresCallback
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {
-        return when (viewType) {
-            VerticalListViewHolder.TYPE_ITEM -> {
-                Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_trails, parent, false))
-            }
-            VerticalListViewHolder.TYPE_HEADER -> {
-                Header(LayoutInflater.from(parent.context).inflate(R.layout.adapter_measures_header, parent, false))
-            }
-            else -> {
-                throw RuntimeException("there is no type that matches the type $viewType + make sure your using types correctly")
-            }
-        }
-    }
-
-    override fun onBindViewHolder(holder: VerticalListViewHolder, holderPosition: Int) {
-        val position = holderPosition.minus(1)
-
-        if (holder is Holder) {
-            holder.name.text = list[position].name
-            holder.note.text = list[position].note
-            holder.date.text = list[position].dateCreated.formatDate()
-
-            if (holder.note.text.isEmpty()) {
-                holder.note.gone(false)
-            } else {
-                holder.note.visible(false)
-            }
-
-            if (list[position].dateCreated == MeasurePreferences.getLastSelectedMeasure()) {
-                holder.name.setTextColor(holder.itemView.context.resolveAttrColor(R.attr.colorAppAccent))
-            } else {
-                holder.name.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.textPrimary))
-            }
-
-            holder.menu.setOnClickListener {
-                adapterMeasuresCallback.onMeasureMenuClicked(list[position], it, position)
-            }
-
-            holder.container.setOnClickListener {
-                adapterMeasuresCallback.onMeasureClicked(list[position])
-            }
-        } else if (holder is Header) {
-            holder.total.text = HtmlHelper.fromHtml("<b>${holder.itemView.context.getString(R.string.total)}</b> ${list.size}")
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return list.size.plus(1)
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return when {
-            position.isZero() -> VerticalListViewHolder.TYPE_HEADER
-            else -> VerticalListViewHolder.TYPE_ITEM
-        }
-    }
-
-    fun deleteMeasure(position: Int) {
-        list.removeAt(position)
-        notifyItemRemoved(position.plus(1))
-        notifyItemChanged(0)
-    }
-
-    fun isEmpty(): Boolean {
-        return list.isEmpty()
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val name: TextView = itemView.findViewById(R.id.trails_name)
-        val note: TextView = itemView.findViewById(R.id.trails_note)
-        val date: TextView = itemView.findViewById(R.id.trails_date)
-        val menu: DynamicRippleImageButton = itemView.findViewById(R.id.menu)
-        val container: DynamicRippleConstraintLayout = itemView.findViewById(R.id.adapter_trails_container)
-    }
-
-    inner class Header(itemView: View) : VerticalListViewHolder(itemView) {
-        val total: TextView = itemView.findViewById(R.id.total)
-    }
-
-    fun setOnAdapterMeasuresCallbackListener(adapterMeasuresCallback: AdapterMeasuresCallback) {
-        this.adapterMeasuresCallback = adapterMeasuresCallback
-    }
-
-    companion object {
-        interface AdapterMeasuresCallback {
-            fun onMeasureClicked(measure: Measure)
-            fun onMeasureMenuClicked(measure: Measure, view: View, position: Int)
-        }
     }
 }
 
@@ -4170,113 +3949,6 @@ class AdapterTrailPoints(private val trailPoint: Pair<ArrayList<TrailPoint>, Tri
             fun onTrailsDataLongPressed(trailPoint: TrailPoint, view: View, position: Int)
             fun onAdd(view: View)
             fun onTrailClicked(latLng: LatLng)
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/adapters/trail/AdapterTrails.kt
-################################################################################
-package app.simple.positional.adapters.trail
-
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.viewholders.VerticalListViewHolder
-import app.simple.positional.model.TrailEntry
-import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.ConditionUtils.isZero
-import app.simple.positional.util.HtmlHelper
-import app.simple.positional.util.TimeFormatter.formatDate
-
-class AdapterTrails(private val list: ArrayList<TrailEntry>) :
-    RecyclerView.Adapter<VerticalListViewHolder>() {
-    private lateinit var adapterTrailsCallback: AdapterTrailsCallback
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VerticalListViewHolder {
-        return when (viewType) {
-            VerticalListViewHolder.TYPE_ITEM -> {
-                Holder(LayoutInflater.from(parent.context).inflate(R.layout.adapter_trails, parent, false))
-            }
-            VerticalListViewHolder.TYPE_HEADER -> {
-                Header(LayoutInflater.from(parent.context).inflate(R.layout.adapter_trails_header, parent, false))
-            }
-            else -> {
-                throw RuntimeException("there is no type that matches the type $viewType + make sure your using types correctly")
-            }
-        }
-    }
-
-    override fun onBindViewHolder(holder: VerticalListViewHolder, holderPosition: Int) {
-        val position = holderPosition - 1
-
-        when (holder) {
-            is Holder -> {
-                holder.name.text = list[position].trailName
-                holder.note.text = list[position].trailNote
-                holder.date.text = list[position].dateCreated.formatDate()
-
-                if (list[position].trailName == TrailPreferences.getCurrentTrail()) {
-                    holder.name.setTextColor(holder.itemView.context.resolveAttrColor(R.attr.colorAppAccent))
-                } else {
-                    holder.name.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.textPrimary))
-                }
-
-                holder.menu.setOnClickListener {
-                    adapterTrailsCallback.onTrailMenu(list[position], it)
-                }
-
-                holder.container.setOnClickListener {
-                    adapterTrailsCallback.onTrailClicked(list[position].trailName)
-                }
-            }
-            is Header -> {
-                holder.total.text = HtmlHelper.fromHtml("<b>${holder.itemView.context.getString(R.string.total)}</b> ${list.size}")
-            }
-        }
-    }
-
-    override fun getItemCount(): Int {
-        return if (list.isEmpty()) {
-            0
-        } else {
-            list.size + 1
-        }
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return if (position.isZero()) {
-            VerticalListViewHolder.TYPE_HEADER
-        } else VerticalListViewHolder.TYPE_ITEM
-    }
-
-    inner class Holder(itemView: View) : VerticalListViewHolder(itemView) {
-        val name: TextView = itemView.findViewById(R.id.trails_name)
-        val note: TextView = itemView.findViewById(R.id.trails_note)
-        val date: TextView = itemView.findViewById(R.id.trails_date)
-        val menu: DynamicRippleImageButton = itemView.findViewById(R.id.menu)
-        val container: DynamicRippleConstraintLayout = itemView.findViewById(R.id.adapter_trails_container)
-    }
-
-    inner class Header(itemView: View) : VerticalListViewHolder(itemView) {
-        val total: TextView = itemView.findViewById(R.id.adapter_trails_total)
-    }
-
-    fun setOnAdapterTrailsCallbackListener(adapterTrailsCallback: AdapterTrailsCallback) {
-        this.adapterTrailsCallback = adapterTrailsCallback
-    }
-
-    companion object {
-        interface AdapterTrailsCallback {
-            fun onTrailClicked(name: String)
-            fun onTrailMenu(trailEntry: TrailEntry, anchor: View)
         }
     }
 }
@@ -4827,25 +4499,24 @@ class MeasurePointConverter {
 ################################################################################
 package app.simple.positional.database.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import app.simple.positional.model.DirectionModel
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DirectionDao {
-    @Query("SELECT * FROM directions ORDER BY date_added COLLATE nocase DESC LIMIT 999")
-    fun getAllDirections(): MutableList<DirectionModel>
+    @Query("SELECT * FROM directions ORDER BY date_added DESC LIMIT 999")
+    fun observeAll(): Flow<List<DirectionModel>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDirection(direction: DirectionModel)
 
-    @Update
-    suspend fun updateDirection(direction: DirectionModel)
-
     @Delete
     suspend fun deleteDirection(direction: DirectionModel)
-
-    @Query("DELETE FROM directions")
-    fun nukeTable()
 }
 
 ################################################################################
@@ -4888,11 +4559,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import app.simple.positional.model.Measure
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MeasureDao {
-    @Query("SELECT * FROM measures ORDER BY date_added COLLATE nocase DESC")
-    fun getAllMeasures(): MutableList<Measure>
+    @Query("SELECT * FROM measures ORDER BY date_added DESC")
+    fun observeAll(): Flow<List<Measure>>
 
     @Query("SELECT * FROM measures WHERE date_added = :date")
     fun getMeasureById(date: Long): Measure?
@@ -4905,9 +4577,6 @@ interface MeasureDao {
 
     @Update
     suspend fun updateMeasure(measure: Measure)
-
-    @Query("DELETE FROM measures")
-    fun nukeTable()
 }
 
 ################################################################################
@@ -4920,25 +4589,19 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import app.simple.positional.model.TrailEntry
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TrailDao {
-    @Query("SELECT * FROM trails ORDER BY date_added COLLATE nocase DESC")
-    fun getAllTrails(): MutableList<TrailEntry>
+    @Query("SELECT * FROM trails ORDER BY date_added DESC")
+    fun observeAll(): Flow<List<TrailEntry>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrail(trailEntry: TrailEntry)
 
-    @Update
-    suspend fun updateTrail(trailEntry: TrailEntry)
-
     @Delete
     suspend fun deleteTrail(trailEntry: TrailEntry)
-
-    @Query("DELETE FROM trails")
-    fun nukeTable()
 }
 
 ################################################################################
@@ -4951,7 +4614,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import app.simple.positional.model.TrailPoint
 
 @Dao
@@ -4968,14 +4630,8 @@ interface TrailPointDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTrailData(trailData: List<TrailPoint>)
 
-    @Update
-    suspend fun updateTrailData(trailPoint: TrailPoint)
-
     @Delete
     suspend fun deleteTrailData(trailPoint: TrailPoint)
-
-    @Query("DELETE FROM trail_data")
-    fun nukeTable()
 }
 
 ################################################################################
@@ -4992,25 +4648,17 @@ import app.simple.positional.model.DirectionModel
 
 @Database(entities = [DirectionModel::class], exportSchema = true, version = 1)
 abstract class DirectionDatabase : RoomDatabase() {
-    abstract fun directionDao(): DirectionDao?
+    abstract fun directionDao(): DirectionDao
 
     companion object {
+        @Volatile
         private var instance: DirectionDatabase? = null
 
-        @Synchronized
-        fun getInstance(context: Context?, DB_NAME: String? = "directions"): DirectionDatabase? {
-            if (instance == null || !instance!!.isOpen) {
-                instance = Room.databaseBuilder(context!!, DirectionDatabase::class.java, DB_NAME!!)
-                        .fallbackToDestructiveMigration()
-                        .build()
-            }
-
-            return instance
-        }
-
-        fun close() {
-            instance?.close()
-            instance = null
+        fun getInstance(context: Context): DirectionDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, DirectionDatabase::class.java, "directions")
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+                .also { instance = it }
         }
     }
 }
@@ -5061,26 +4709,17 @@ import app.simple.positional.model.Measure
 @Database(entities = [Measure::class], exportSchema = true, version = 1)
 @TypeConverters(MeasurePointConverter::class)
 abstract class MeasureDatabase : RoomDatabase() {
-    abstract fun measureDao(): MeasureDao?
+    abstract fun measureDao(): MeasureDao
 
     companion object {
+        @Volatile
         private var instance: MeasureDatabase? = null
-        private const val DB_NAME = "measure_db"
 
-        @Synchronized
-        fun getInstance(context: Context, databaseName: String = this.DB_NAME): MeasureDatabase? {
-            if (instance == null) {
-                instance = Room.databaseBuilder(context, MeasureDatabase::class.java, databaseName)
-                    .fallbackToDestructiveMigration()
-                    .build()
-            }
-
-            return instance
-        }
-
-        fun destroyInstance() {
-            instance?.close()
-            instance = null
+        fun getInstance(context: Context): MeasureDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, MeasureDatabase::class.java, "measure_db")
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
+                .also { instance = it }
         }
     }
 }
@@ -5099,18 +4738,18 @@ import app.simple.positional.model.TrailEntry
 
 @Database(entities = [TrailEntry::class], exportSchema = false, version = 1)
 abstract class TrailDatabase : RoomDatabase() {
-    abstract fun trailDao(): TrailDao?
+    abstract fun trailDao(): TrailDao
 
     companion object {
+        const val NAME = "%%_trails"
+
+        @Volatile
         private var instance: TrailDatabase? = null
 
-        @Synchronized
-        fun getInstance(context: Context?, DB_NAME: String?): TrailDatabase? {
-            if (instance == null) {
-                instance = Room.databaseBuilder(context!!, TrailDatabase::class.java, DB_NAME!!)
-                    .build()
-            }
-            return instance
+        fun getInstance(context: Context): TrailDatabase = instance ?: synchronized(this) {
+            instance ?: Room.databaseBuilder(context.applicationContext, TrailDatabase::class.java, "$NAME.db")
+                .build()
+                .also { instance = it }
         }
     }
 }
@@ -9514,165 +9153,6 @@ public class Utils {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/searchview/SearchView.java
-################################################################################
-package app.simple.positional.decorations.searchview;
-
-import android.animation.LayoutTransition;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.AttributeSet;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
-import app.simple.positional.R;
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout;
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton;
-import app.simple.positional.preferences.SearchPreferences;
-import app.simple.positional.util.ViewUtils;
-
-public class SearchView extends DynamicCornerLinearLayout {
-    private EditText editText;
-    private SearchViewEventListener searchViewEventListener;
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
-    public SearchView(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        initViews();
-        setProperties();
-    }
-
-    private void setProperties() {
-        setElevation(30F);
-        setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.toolbarBackground)));
-        setOrientation(LinearLayout.HORIZONTAL);
-        setLayoutTransition(new LayoutTransition());
-        setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        ViewUtils.INSTANCE.addShadow(this);
-    }
-
-    @SuppressLint ("ClickableViewAccessibility")
-    private void initViews() {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.search_view, this, true);
-
-        editText = view.findViewById(R.id.search_view_text_input_layout);
-        DynamicRippleImageButton clear = view.findViewById(R.id.search_clear);
-
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (searchViewEventListener != null) {
-                    searchViewEventListener.onSearchTextChanged(s.toString(), count);
-                }
-
-                if (count > 0) {
-                    clear.animate().alpha(1F)
-                            .scaleX(1F)
-                            .scaleY(1F)
-                            .setInterpolator(new LinearOutSlowInInterpolator())
-                            .setDuration(getResources().getInteger(R.integer.animation_duration))
-                            .start();
-
-                    clear.setClickable(true);
-                }
-                else {
-                    clear.animate().alpha(0F)
-                            .scaleX(0F)
-                            .scaleY(0F)
-                            .setInterpolator(new AccelerateInterpolator())
-                            .setDuration(getResources().getInteger(R.integer.animation_duration))
-                            .start();
-
-                    clear.setClickable(false);
-                }
-
-                SearchPreferences.INSTANCE.setLastSearchKeyword(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        clear.setOnClickListener(v -> {
-            editText.getText().clear();
-        });
-    }
-
-    public void setKeywords(String string) {
-        editText.setText(string);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        editText.clearAnimation();
-    }
-
-    private final Runnable clearText = new Runnable() {
-        @Override
-        public void run() {
-            if (editText.getText().length() > 0) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(editText.getText());
-                stringBuilder.deleteCharAt(editText.getText().length() - 1);
-                editText.setText(stringBuilder);
-                handler.postDelayed(this, 25L);
-            }
-            else {
-                editText.getText().clear();
-                handler.removeCallbacks(this);
-            }
-        }
-    };
-
-    public void animateElevation(float elevation) {
-        if (getElevation() == elevation) {
-            return;
-        }
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(getElevation(), elevation);
-        valueAnimator.setInterpolator(new LinearOutSlowInInterpolator());
-        valueAnimator.setDuration(getResources().getInteger(R.integer.animation_duration));
-        valueAnimator.addUpdateListener(animation -> setElevation((float) animation.getAnimatedValue()));
-        valueAnimator.start();
-    }
-
-    public void setSearchViewEventListener(SearchViewEventListener searchViewEventListener) {
-        this.searchViewEventListener = searchViewEventListener;
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/searchview/SearchViewEventListener.java
-################################################################################
-package app.simple.positional.decorations.searchview;
-
-import android.view.View;
-import org.jetbrains.annotations.NotNull;
-
-public interface SearchViewEventListener {
-    default void onSearchMenuPressed(@NotNull View button) {
-    }
-
-    void onSearchTextChanged(@NotNull String keywords, int count);
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/switchview/SwitchCallbacks.java
 ################################################################################
 package app.simple.positional.decorations.switchview;
@@ -13255,176 +12735,6 @@ class DirectionMenu : CustomBottomSheetDialogFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/dialogs/direction/DirectionTarget.kt
-################################################################################
-package app.simple.positional.dialogs.direction
-
-import android.app.Activity
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.EditText
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.widget.doOnTextChanged
-import app.simple.positional.R
-import app.simple.positional.activities.subactivity.MapSearchActivity
-import app.simple.positional.decorations.ripple.DynamicRippleButton
-import app.simple.positional.decorations.ripple.DynamicRippleImageButton
-import app.simple.positional.decorations.views.CustomDialogFragment
-import app.simple.positional.model.DirectionModel
-import app.simple.positional.preferences.DirectionPreferences
-import app.simple.positional.util.ConditionUtils.isNull
-import app.simple.positional.util.LocationExtension
-import app.simple.positional.util.ParcelUtils.parcelable
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
-
-class DirectionTarget : CustomDialogFragment() {
-    private lateinit var label: EditText
-    private lateinit var latitude: EditText
-    private lateinit var longitude: EditText
-    private lateinit var search: DynamicRippleImageButton
-    private lateinit var save: DynamicRippleButton
-    private lateinit var cancel: DynamicRippleButton
-
-    private var isValidLatitude = false
-    private var isValidLongitude = false
-
-    private var directionModel: DirectionModel? = null
-    private var directionTargetCallbacks: DirectionTargetCallbacks? = null
-
-    private val registerForActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                result.data?.let { intent ->
-                    intent.getStringExtra("address")?.let { address ->
-                        intent.getDoubleExtra("latitude", 0.0).let { latitude ->
-                            intent.getDoubleExtra("longitude", 0.0).let { longitude ->
-                                this.latitude.setText(latitude.toString())
-                                this.longitude.setText(longitude.toString())
-                                label.setText(address)
-                            }
-                        }
-                    }
-                }
-            }
-
-            Activity.RESULT_CANCELED -> {
-                Log.d("DirectionTarget", "Search cancelled")
-            }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.dialog_direction_target, container, false)
-
-        label = view.findViewById(R.id.target_label)
-        latitude = view.findViewById(R.id.target_latitude)
-        longitude = view.findViewById(R.id.target_longitude)
-        search = view.findViewById(R.id.search)
-        save = view.findViewById(R.id.save)
-        cancel = view.findViewById(R.id.cancel)
-
-        directionModel = requireArguments().parcelable("DirectionModel")
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        label.doOnTextChanged { _, _, _, _ ->
-            saveButtonState()
-        }
-
-        latitude.doOnTextChanged { text, _, _, _ ->
-            isValidLatitude = kotlin.runCatching {
-                LocationExtension.isValidLatitude(text.toString().toDouble())
-            }.getOrElse {
-                false
-            }
-
-            saveButtonState()
-        }
-
-        longitude.doOnTextChanged { text, _, _, _ ->
-            isValidLongitude = kotlin.runCatching {
-                LocationExtension.isValidLongitude(text.toString().toDouble())
-            }.getOrElse {
-                false
-            }
-
-            saveButtonState()
-        }
-
-        save.setOnClickListener {
-            if (directionModel.isNull()) {
-                directionModel = DirectionModel()
-                directionModel?.dateAdded = System.currentTimeMillis()
-            }
-
-            directionModel?.latitude = DirectionPreferences.setTargetLatitude(latitude.text.toString().toFloat()).toDouble()
-            directionModel?.longitude = DirectionPreferences.setTargetLongitude(longitude.text.toString().toFloat()).toDouble()
-            directionModel?.name = DirectionPreferences.setTargetLabel(label.text.toString())
-
-            directionTargetCallbacks?.onDirectionAdded(directionModel!!).also {
-                dismiss()
-            }
-        }
-
-        cancel.setOnClickListener {
-            dismiss()
-        }
-
-        search.setOnClickListener {
-            registerForActivityResult.launch(Intent(requireContext(), MapSearchActivity::class.java))
-        }
-
-        if (directionModel.isNull()) {
-            with(DirectionPreferences.getTargetCoordinates()) {
-                latitude.setText(this[0].toString())
-                longitude.setText(this[1].toString())
-            }
-
-            label.setText(DirectionPreferences.getTargetLabel())
-        } else {
-            latitude.setText(directionModel?.latitude?.toString())
-            longitude.setText(directionModel?.longitude?.toString())
-            label.setText(directionModel?.name)
-        }
-    }
-
-    private fun saveButtonState() {
-        if (isValidLatitude && isValidLongitude && label.text.isNotEmpty()) {
-            save.visible(false)
-        } else {
-            save.gone()
-        }
-    }
-
-    fun setOnDirectionTargetListener(directionTargetCallbacks: DirectionTargetCallbacks) {
-        this.directionTargetCallbacks = directionTargetCallbacks
-    }
-
-    companion object {
-        fun newInstance(directionModel: DirectionModel? = null): DirectionTarget {
-            val args = Bundle()
-            args.putParcelable("DirectionModel", directionModel)
-            val fragment = DirectionTarget()
-            fragment.arguments = args
-            return fragment
-        }
-
-        interface DirectionTargetCallbacks {
-            fun onDirectionAdded(directionModel: DirectionModel)
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/dialogs/gps/CoordinatesExpansion.kt
 ################################################################################
 package app.simple.positional.dialogs.gps
@@ -14509,15 +13819,17 @@ import android.view.WindowManager
 import android.widget.EditText
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.decorations.ripple.DynamicRippleButton
 import app.simple.positional.decorations.views.CustomDialogFragment
 import app.simple.positional.model.TrailEntry
 import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.ConditionUtils.isZero
-import app.simple.positional.util.ViewUtils.gone
-import app.simple.positional.util.ViewUtils.visible
+import app.simple.positional.util.TrailNames
+import app.simple.positional.util.ViewUtils.setVisibility
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 
 class AddTrail : CustomDialogFragment() {
     private lateinit var nameInputEditText: EditText
@@ -14526,7 +13838,7 @@ class AddTrail : CustomDialogFragment() {
     private lateinit var cancel: DynamicRippleButton
 
     private val trailsViewModel: TrailsViewModel by viewModels()
-    private var list = arrayListOf<TrailEntry>()
+    private var existing: List<String> = emptyList()
 
     var onNewTrailAddedSuccessfully: (trailEntry: TrailEntry) -> Unit = {}
 
@@ -14541,7 +13853,7 @@ class AddTrail : CustomDialogFragment() {
         nameInputEditText.setText(TrailPreferences.getLastTrailName())
         noteInputEditText.setText(TrailPreferences.getLastTrailNote())
 
-        kotlin.runCatching {
+        runCatching {
             nameInputEditText.requestFocus()
             dialog!!.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
         }.getOrElse {
@@ -14554,30 +13866,17 @@ class AddTrail : CustomDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        trailsViewModel.trails.observe(viewLifecycleOwner, {
-            list.addAll(it)
-        })
+        updateSave()
 
-        if (TrailPreferences.getLastTrailName().isNotBlank()) {
-            saveButtonState(TrailPreferences.getLastTrailName())
+        viewLifecycleOwner.lifecycleScope.launch {
+            trailsViewModel.trails.filterNotNull().collect { trails ->
+                existing = trails.map { it.trailName }
+                updateSave()
+            }
         }
 
         nameInputEditText.doOnTextChanged { text, _, _, _ ->
-            kotlin.runCatching {
-                if (list.isEmpty()) {
-                    saveButtonState(text!!.toString())
-                } else {
-                    for (i in list) {
-                        if (i.trailName.lowercase() == text.toString().lowercase() || text.toString().lowercase() == "%%_trails" || text?.length!!.isZero()) {
-                            save.gone()
-                            break
-                        } else {
-                            save.visible(true)
-                        }
-                    }
-                }
-            }
-
+            updateSave()
             TrailPreferences.setLastTrailName(text.toString())
         }
 
@@ -14586,14 +13885,10 @@ class AddTrail : CustomDialogFragment() {
         }
 
         save.setOnClickListener {
-            val trails = TrailEntry(
+            val trail = TrailEntry(
                 System.currentTimeMillis(),
-                nameInputEditText.text.toString(),
-                if (noteInputEditText.text.toString().isNotEmpty()) {
-                    noteInputEditText.text.toString()
-                } else {
-                    getString(R.string.not_available)
-                }
+                nameInputEditText.text.toString().trim(),
+                noteInputEditText.text.toString().trim(),
             )
 
             TrailPreferences.setLastTrailNote("")
@@ -14601,7 +13896,7 @@ class AddTrail : CustomDialogFragment() {
 
             dismiss()
 
-            onNewTrailAddedSuccessfully.invoke(trails)
+            onNewTrailAddedSuccessfully.invoke(trail)
         }
 
         cancel.setOnClickListener {
@@ -14609,12 +13904,8 @@ class AddTrail : CustomDialogFragment() {
         }
     }
 
-    private fun saveButtonState(text: String) {
-        if (text.lowercase() == "%%_trails" || text.length.isZero()) {
-            save.gone()
-        } else {
-            save.visible(true)
-        }
+    private fun updateSave() {
+        save.setVisibility(TrailNames.isValid(nameInputEditText.text.toString(), existing))
     }
 
     companion object {
@@ -16181,107 +15472,21 @@ public class ClockModel {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/DirectionModel.java
+# FILE: app/src/main/java/app/simple/positional/model/DirectionModel.kt
 ################################################################################
-package app.simple.positional.model;
+package app.simple.positional.model
 
-import android.os.Parcel;
-import android.os.Parcelable;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "directions")
-public class DirectionModel implements Parcelable {
-    @ColumnInfo(name = "latitude")
-    private double latitude;
-
-    @ColumnInfo(name = "longitude")
-    private double longitude;
-
-    @ColumnInfo(name = "name")
-    private String name;
-
-    @PrimaryKey
-    @ColumnInfo(name = "date_added")
-    private long dateAdded;
-
-    public DirectionModel(double latitude, double longitude, String name, long dateAdded) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.name = name;
-        this.dateAdded = dateAdded;
-    }
-
-    @Ignore
-    public DirectionModel() {
-    }
-
-    protected DirectionModel(Parcel in) {
-        latitude = in.readDouble();
-        longitude = in.readDouble();
-        name = in.readString();
-        dateAdded = in.readLong();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeDouble(latitude);
-        dest.writeDouble(longitude);
-        dest.writeString(name);
-        dest.writeLong(dateAdded);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<DirectionModel> CREATOR = new Creator<>() {
-        @Override
-        public DirectionModel createFromParcel(Parcel in) {
-            return new DirectionModel(in);
-        }
-
-        @Override
-        public DirectionModel[] newArray(int size) {
-            return new DirectionModel[size];
-        }
-    };
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public long getDateAdded() {
-        return dateAdded;
-    }
-
-    public void setDateAdded(long dateAdded) {
-        this.dateAdded = dateAdded;
-    }
-}
+data class DirectionModel(
+    @ColumnInfo(name = "latitude") val latitude: Double,
+    @ColumnInfo(name = "longitude") val longitude: Double,
+    @ColumnInfo(name = "name") val name: String?,
+    @PrimaryKey @ColumnInfo(name = "date_added") val dateAdded: Long,
+)
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/model/Locales.kt
@@ -16645,117 +15850,6 @@ public class TrailPoint {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/popups/directions/PopupDirectionAddMenu.kt
-################################################################################
-package app.simple.positional.popups.directions
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import app.simple.positional.R
-import app.simple.positional.decorations.popup.BasePopupWindow
-import app.simple.positional.decorations.popup.PopupLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-
-class PopupDirectionAddMenu(view: View): BasePopupWindow() {
-    private var popupDirectionsAddCallbacks: PopupDirectionsAddCallbacks? = null
-
-    init {
-        val contentView = LayoutInflater.from(view.context).inflate(R.layout.popup_directions_add_menu, PopupLinearLayout(view.context))
-        init(contentView, view, Gravity.END or Gravity.CENTER_VERTICAL, 2)
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_new).setOnClickListener {
-            popupDirectionsAddCallbacks?.onNew().also {
-                dismiss()
-            }
-        }
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_save_from_target).setOnClickListener {
-            popupDirectionsAddCallbacks?.onSaveFromTarget().also {
-                dismiss()
-            }
-        }
-    }
-
-    fun setOnPopupCallbacksListener(popupDirectionsCallbacks: PopupDirectionsAddCallbacks) {
-        this.popupDirectionsAddCallbacks = popupDirectionsCallbacks
-    }
-
-    companion object {
-        interface PopupDirectionsAddCallbacks {
-            fun onNew()
-            fun onSaveFromTarget()
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/popups/directions/PopupDirectionsMenu.kt
-################################################################################
-package app.simple.positional.popups.directions
-
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import app.simple.positional.R
-import app.simple.positional.decorations.popup.BasePopupWindow
-import app.simple.positional.decorations.popup.PopupLinearLayout
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-
-class PopupDirectionsMenu(anchor: View) : BasePopupWindow() {
-    private var popupDirectionsCallbacks: PopupDirectionsCallbacks? = null
-
-    init {
-        val contentView = LayoutInflater.from(anchor.context).inflate(R.layout.popup_directions, PopupLinearLayout(anchor.context))
-        init(contentView, anchor, Gravity.END or Gravity.CENTER_VERTICAL, 2)
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_set).setOnClickListener {
-            popupDirectionsCallbacks?.onSet().also {
-                dismiss()
-            }
-        }
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_delete).setOnClickListener {
-            popupDirectionsCallbacks?.onDelete().also {
-                dismiss()
-            }
-        }
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_edit).setOnClickListener {
-            popupDirectionsCallbacks?.onEdit().also {
-                dismiss()
-            }
-        }
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_use_as_target).setOnClickListener {
-            popupDirectionsCallbacks?.onUseAsTarget().also {
-                dismiss()
-            }
-        }
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_navigate).setOnClickListener {
-            popupDirectionsCallbacks?.onNavigate().also {
-                dismiss()
-            }
-        }
-    }
-
-    fun setOnPopupCallbacksListener(popupDirectionsCallbacks: PopupDirectionsCallbacks) {
-        this.popupDirectionsCallbacks = popupDirectionsCallbacks
-    }
-
-    companion object {
-        interface PopupDirectionsCallbacks {
-            fun onSet()
-            fun onDelete()
-            fun onEdit()
-            fun onUseAsTarget()
-            fun onNavigate()
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/popups/location/PopupCoordinateBox.kt
 ################################################################################
 package app.simple.positional.popups.location
@@ -17022,48 +16116,6 @@ class PopupTrailsDataMenu(anchor: View) : BasePopupWindow() {
             fun onCopy()
             fun onShare()
             fun onNavigate()
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/popups/trail/PopupTrailsMenu.kt
-################################################################################
-package app.simple.positional.popups.trail
-
-import android.view.Gravity
-import android.view.View
-import app.simple.positional.R
-import app.simple.positional.decorations.popup.BasePopupWindow
-import app.simple.positional.decorations.ripple.DynamicRippleTextView
-
-class PopupTrailsMenu(contentView: View, anchor: View) : BasePopupWindow() {
-    private lateinit var popupTrailsCallbacks: PopupTrailsCallbacks
-
-    init {
-        init(contentView, anchor, Gravity.END or Gravity.CENTER_VERTICAL, 2)
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_show_on_map).setOnClickListener {
-            popupTrailsCallbacks.onShowOnMap().also {
-                dismiss()
-            }
-        }
-
-        contentView.findViewById<DynamicRippleTextView>(R.id.menu_delete).setOnClickListener {
-            popupTrailsCallbacks.onDelete().also {
-                dismiss()
-            }
-        }
-    }
-
-    fun setOnPopupCallbacksListener(popupDeleteCallbacks: PopupTrailsCallbacks) {
-        this.popupTrailsCallbacks = popupDeleteCallbacks
-    }
-
-    companion object {
-        interface PopupTrailsCallbacks {
-            fun onShowOnMap()
-            fun onDelete()
         }
     }
 }
@@ -17898,25 +16950,6 @@ object MeasurePreferences {
 
     fun getLastLatLng(): LatLng {
         return LatLng(getLastLatitude(), getLastLongitude())
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/preferences/SearchPreferences.kt
-################################################################################
-package app.simple.positional.preferences
-
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-
-object SearchPreferences {
-    private const val lastSearchKeyword = "last_time_zone_search_keyword"
-
-    fun setLastSearchKeyword(keyword: String) {
-        getSharedPreferences().edit().putString(lastSearchKeyword, keyword).apply()
-    }
-
-    fun getLastSearchKeyword(): String {
-        return getSharedPreferences().getString(lastSearchKeyword, "")!!
     }
 }
 
@@ -19811,9 +18844,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19821,7 +18852,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -19918,20 +18948,10 @@ fun CustomLocationScreen(form: CustomLocationForm, locations: List<Locations>?, 
         }
     }
     if (confirmDelete) {
-        AlertDialog(
-            onDismissRequest = { confirmDelete = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    confirmDelete = false
-                    actions.deleteAll()
-                }) { Text(stringResource(R.string.sure)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { confirmDelete = false }) { Text(stringResource(android.R.string.cancel)) }
-            },
-            title = { Text(stringResource(R.string.delete_all), style = MaterialTheme.typography.titleLarge) },
-            containerColor = MaterialTheme.colorScheme.background,
-        )
+        ConfirmDialog(stringResource(R.string.delete_all), onDismiss = { confirmDelete = false }) {
+            confirmDelete = false
+            actions.deleteAll()
+        }
     }
 }
 
@@ -19977,11 +18997,6 @@ private fun Header(form: CustomLocationForm, actions: CustomLocationActions, onD
 }
 
 @Composable
-private fun MenuEntry(label: Int, onClick: () -> Unit) {
-    DropdownMenuItem(text = { Text(stringResource(label), style = MaterialTheme.typography.titleMedium) }, onClick = onClick)
-}
-
-@Composable
 internal fun CoordinateField(value: String, label: Int, modifier: Modifier, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
@@ -20014,10 +19029,154 @@ private fun LocationCard(location: Locations, actions: CustomLocationActions) {
             Text(latitude, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(longitude, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        IconButton(onClick = { actions.delete(location) }) {
-            Icon(painterResource(R.drawable.ic_clear), contentDescription = stringResource(R.string.delete), tint = colorResource(R.color.iconColor))
+        IconAction(R.drawable.ic_clear, stringResource(R.string.delete)) { actions.delete(location) }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/DirectionsScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import app.simple.positional.model.DirectionModel
+import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.TimeFormatter.formatDate
+import com.google.android.gms.maps.model.LatLng
+
+interface DirectionsActions {
+    fun create()
+    fun createFromTarget()
+    fun set(direction: DirectionModel)
+    fun edit(direction: DirectionModel)
+    fun useAsTarget(direction: DirectionModel)
+    fun navigate(direction: DirectionModel)
+    fun delete(direction: DirectionModel)
+    fun search()
+    fun save(latitude: Double, longitude: Double)
+    fun dismissEditor()
+}
+
+@Composable
+fun DirectionsScreen(directions: List<DirectionModel>?, editing: Boolean, form: CustomLocationForm, topInset: Dp, actions: DirectionsActions) {
+    var addMenu by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<DirectionModel?>(null) }
+    SavedListScreen(
+        title = stringResource(R.string.targets),
+        entries = directions,
+        topInset = topInset,
+        key = { it.dateAdded },
+        action = {
+            Box {
+                AddButton { addMenu = true }
+                DropdownMenu(expanded = addMenu, onDismissRequest = { addMenu = false }) {
+                    MenuEntry(R.string.create_new) {
+                        addMenu = false
+                        actions.create()
+                    }
+                    MenuEntry(R.string.save_from_target) {
+                        addMenu = false
+                        actions.createFromTarget()
+                    }
+                }
+            }
+        },
+    ) { direction -> DirectionRow(direction, actions) { pendingDelete = direction } }
+    if (editing) DirectionTargetDialog(form, actions)
+    pendingDelete?.let { direction ->
+        ConfirmDialog(stringResource(R.string.delete), onDismiss = { pendingDelete = null }) {
+            pendingDelete = null
+            actions.delete(direction)
         }
     }
+}
+
+@Composable
+private fun DirectionRow(direction: DirectionModel, actions: DirectionsActions, onDelete: () -> Unit) {
+    val context = LocalContext.current
+    var menu by remember { mutableStateOf(false) }
+    val coordinates = remember(direction.latitude, direction.longitude) {
+        DMSConverter.getDMS(LatLng(direction.latitude, direction.longitude), context)
+    }
+    val date = remember(direction.dateAdded) { direction.dateAdded.formatDate() }
+    val pick = { block: () -> Unit ->
+        menu = false
+        block()
+    }
+    SavedItem(direction.name.orEmpty(), listOf(coordinates, date), highlighted = false, onClick = { actions.set(direction) }) {
+        Box {
+            IconAction(R.drawable.ic_menu, null) { menu = true }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                MenuEntry(R.string.button_set) { pick { actions.set(direction) } }
+                MenuEntry(R.string.edit) { pick { actions.edit(direction) } }
+                MenuEntry(R.string.use_as_target) { pick { actions.useAsTarget(direction) } }
+                MenuEntry(R.string.navigate) { pick { actions.navigate(direction) } }
+                MenuEntry(R.string.delete) { pick(onDelete) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DirectionTargetDialog(form: CustomLocationForm, actions: DirectionsActions) {
+    val coordinates = CoordinateInput.parse(form.latitude, form.longitude)
+    AlertDialog(
+        onDismissRequest = actions::dismissEditor,
+        confirmButton = {
+            TextButton(
+                enabled = coordinates != null && form.address.isNotBlank(),
+                onClick = { coordinates?.let { (latitude, longitude) -> actions.save(latitude, longitude) } },
+            ) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = { TextButton(onClick = actions::dismissEditor) { Text(stringResource(android.R.string.cancel)) } },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.target), style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                IconAction(R.drawable.ic_search, null, actions::search)
+            }
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = form.address,
+                    onValueChange = { form.address = it },
+                    label = { Text(stringResource(R.string.name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                    CoordinateField(form.latitude, R.string.specified_hint_latitude, Modifier.weight(1f)) { form.latitude = it }
+                    Spacer(Modifier.width(10.dp))
+                    CoordinateField(form.longitude, R.string.specified_hint_longitude, Modifier.weight(1f)) { form.longitude = it }
+                }
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
 }
 
 ################################################################################
@@ -20130,6 +19289,7 @@ fun MapSearchScreen(form: CustomLocationForm, suggestions: List<Address>, map: V
 package app.simple.positional.ui.compose
 
 import android.content.Context
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -20138,15 +19298,19 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
 import app.simple.positional.R
+import app.simple.positional.util.StatusBarHeight
 
 object PositionalFonts {
     val regular = FontFamily(Font(R.font.regular))
@@ -20190,6 +19354,15 @@ fun PositionalTheme(content: @Composable () -> Unit) {
         surfaceContainerHighest = switchOff,
     )
     MaterialTheme(colorScheme = colors, typography = typography, content = content)
+}
+
+fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -> Unit) {
+    val topInset = StatusBarHeight.getStatusBarHeight(resources)
+    setContentView(ComposeView(this).apply {
+        setContent {
+            PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
+        }
+    })
 }
 
 ################################################################################
@@ -20280,6 +19453,236 @@ fun SwitchPreference(
         onLongClick = onLongClick,
         trailing = { Switch(checked = checked, onCheckedChange = null) },
         onClick = { onCheckedChange(!checked) },
+    )
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/RecordsScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import app.simple.positional.R
+import app.simple.positional.util.TimeFormatter.formatDate
+
+@Immutable
+data class Record<T>(val key: Any, val value: T, val name: String, val note: String, val date: Long, val selected: Boolean)
+
+interface RecordActions<T> {
+    fun open(record: T)
+    fun add(name: String, note: String)
+    fun delete(record: T)
+    fun isValidName(name: String): Boolean
+}
+
+@Composable
+fun <T> RecordsScreen(title: String, records: List<Record<T>>?, topInset: Dp, actions: RecordActions<T>) {
+    var adding by rememberSaveable { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<Record<T>?>(null) }
+    SavedListScreen(
+        title = title,
+        entries = records,
+        topInset = topInset,
+        key = { it.key },
+        action = { AddButton { adding = true } },
+    ) { record ->
+        val date = remember(record.date) { record.date.formatDate() }
+        SavedItem(record.name, listOf(record.note, date), record.selected, onClick = { actions.open(record.value) }) {
+            IconAction(R.drawable.ic_clear, stringResource(R.string.delete)) { pendingDelete = record }
+        }
+    }
+    if (adding) {
+        NameNoteDialog(stringResource(R.string.create_new), actions::isValidName, onDismiss = { adding = false }) { name, note ->
+            adding = false
+            actions.add(name, note)
+        }
+    }
+    pendingDelete?.let { record ->
+        ConfirmDialog(stringResource(R.string.delete), onDismiss = { pendingDelete = null }) {
+            pendingDelete = null
+            actions.delete(record.value)
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/SavedListScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+
+@Composable
+fun <T> SavedListScreen(
+    title: String,
+    entries: List<T>?,
+    topInset: Dp,
+    key: (T) -> Any,
+    action: @Composable () -> Unit,
+    row: @Composable (T) -> Unit,
+) {
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Box(Modifier.fillMaxSize()) {
+            LazyColumn(
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = topInset, bottom = 96.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                item {
+                    Column(Modifier.padding(horizontal = 4.dp, vertical = 16.dp)) {
+                        Text(title, style = MaterialTheme.typography.headlineMedium)
+                        if (entries != null) {
+                            Text(
+                                "${stringResource(R.string.total)} ${entries.size}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+                if (entries != null) items(entries, key = key) { row(it) }
+            }
+            if (entries?.isEmpty() == true) {
+                Image(painterResource(R.drawable.art_lost), contentDescription = null, modifier = Modifier.size(200.dp).align(Alignment.Center))
+            }
+            Box(Modifier.align(Alignment.BottomEnd).padding(24.dp)) { action() }
+        }
+    }
+}
+
+@Composable
+fun AddButton(onClick: () -> Unit) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    ) {
+        Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.create_new))
+    }
+}
+
+@Composable
+fun SavedItem(title: String, lines: List<String>, highlighted: Boolean, onClick: () -> Unit, trailing: @Composable () -> Unit) {
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .border(Dp.Hairline, MaterialTheme.colorScheme.outline, shape)
+            .clickable(onClick = onClick)
+            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = if (highlighted) MaterialTheme.colorScheme.primary else Color.Unspecified)
+            lines.filter { it.isNotBlank() }.forEach {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        trailing()
+    }
+}
+
+@Composable
+fun IconAction(icon: Int, description: String?, onClick: () -> Unit) {
+    IconButton(onClick = onClick) {
+        Icon(painterResource(icon), contentDescription = description, tint = colorResource(R.color.iconColor))
+    }
+}
+
+@Composable
+internal fun MenuEntry(label: Int, onClick: () -> Unit) {
+    DropdownMenuItem(text = { Text(stringResource(label), style = MaterialTheme.typography.titleMedium) }, onClick = onClick)
+}
+
+@Composable
+fun ConfirmDialog(title: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.sure)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } },
+        title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        containerColor = MaterialTheme.colorScheme.background,
+    )
+}
+
+@Composable
+fun NameNoteDialog(title: String, isValid: (String) -> Boolean, onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+    var name by rememberSaveable { mutableStateOf("") }
+    var note by rememberSaveable { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(enabled = isValid(name.trim()), onClick = { onSave(name.trim(), note.trim()) }) { Text(stringResource(R.string.save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(android.R.string.cancel)) } },
+        title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = { note = it },
+                    label = { Text(stringResource(R.string.note)) },
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
     )
 }
 
@@ -20769,6 +20172,129 @@ private fun AboutSection(state: SettingsState, actions: SettingsActions) {
         PreferenceItem(title = stringResource(R.string.app_version), summary = state.versionName, onClick = actions::openReleases)
         PreferenceItem(title = "GitHub", summary = stringResource(R.string.desc_git), onClick = actions::openRepository)
         PreferenceItem(title = stringResource(R.string.found_an_issue), onClick = actions::openIssues)
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/ui/compose/TimeZoneScreen.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.simple.positional.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+@Immutable
+data class TimeZoneEntry(val id: String, val offset: String, val time: String)
+
+object TimeZoneCatalog {
+    fun entries(now: Instant, twelveHour: Boolean, locale: Locale): List<TimeZoneEntry> {
+        val offset = DateTimeFormatter.ofPattern("xxx", locale)
+        val time = DateTimeFormatter.ofPattern(if (twelveHour) "hh:mm a" else "HH:mm", locale)
+        return ZoneId.getAvailableZoneIds().sorted().map { id ->
+            val zoned = now.atZone(ZoneId.of(id))
+            TimeZoneEntry(id, zoned.format(offset), zoned.format(time))
+        }
+    }
+
+    fun filter(entries: List<TimeZoneEntry>, query: String): List<TimeZoneEntry> {
+        val text = query.trim()
+        if (text.isEmpty()) return entries
+        return entries.filter { it.id.contains(text, ignoreCase = true) || it.offset.contains(text) }
+    }
+}
+
+@Composable
+fun TimeZoneScreen(selected: String, twelveHour: Boolean, locale: Locale, topInset: Dp, onSelect: (String) -> Unit) {
+    val all by produceState<List<TimeZoneEntry>?>(null) {
+        value = withContext(Dispatchers.Default) { TimeZoneCatalog.entries(Instant.now(), twelveHour, locale) }
+    }
+    var query by rememberSaveable { mutableStateOf("") }
+    val visible = remember(all, query) { all?.let { TimeZoneCatalog.filter(it, query) }.orEmpty() }
+    val state = rememberLazyListState()
+    LaunchedEffect(all) {
+        visible.indexOfFirst { it.id == selected }.takeIf { it > 0 }?.let { state.scrollToItem(it) }
+    }
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(Modifier.fillMaxSize().padding(top = topInset)) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                label = { Text(stringResource(R.string.search_timezone)) },
+                singleLine = true,
+                leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null, tint = colorResource(R.color.iconColor)) },
+                trailingIcon = { if (query.isNotEmpty()) IconAction(R.drawable.ic_clear, null) { query = "" } },
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+            )
+            LazyColumn(state = state, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                items(visible, key = { it.id }) { entry -> TimeZoneRow(entry, entry.id == selected) { onSelect(entry.id) } }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimeZoneRow(entry: TimeZoneEntry, selected: Boolean, onClick: () -> Unit) {
+    val accent = MaterialTheme.colorScheme.primary
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(12.dp)) {
+            if (selected) Icon(painterResource(R.drawable.ic_circle_stroke), contentDescription = null, tint = accent)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(entry.id, style = MaterialTheme.typography.titleMedium, color = if (selected) accent else Color.Unspecified)
+            Text(entry.offset, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text(entry.time, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -24729,541 +24255,6 @@ class Trail : ScopedFragment() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/subpanels/Directions.kt
-################################################################################
-package app.simple.positional.ui.subpanels
-
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.fragment.app.viewModels
-import app.simple.positional.R
-import app.simple.positional.adapters.direction.AdapterDirections
-import app.simple.positional.decorations.views.CustomRecyclerView
-import app.simple.positional.dialogs.direction.DirectionTarget
-import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.model.DirectionModel
-import app.simple.positional.popups.directions.PopupDirectionAddMenu
-import app.simple.positional.popups.directions.PopupDirectionsMenu
-import app.simple.positional.popups.miscellaneous.DeletePopupMenu
-import app.simple.positional.preferences.DirectionPreferences
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.viewmodels.viewmodel.DirectionsViewModel
-import com.google.android.material.card.MaterialCardView
-
-class Directions : ScopedFragment() {
-    private lateinit var recyclerView: CustomRecyclerView
-    private lateinit var add: MaterialCardView
-    private val directionsViewModel: DirectionsViewModel by viewModels()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_directions, container, false)
-
-        recyclerView = view.findViewById(R.id.directions_recycler_view)
-        add = view.findViewById(R.id.add)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        add.radius = MainPreferences.getCornerRadius().toFloat()
-
-        add.setOnClickListener {
-            PopupDirectionAddMenu(it).setOnPopupCallbacksListener(object : PopupDirectionAddMenu.Companion.PopupDirectionsAddCallbacks {
-                override fun onNew() {
-                    val p0 = DirectionTarget.newInstance()
-
-                    p0.setOnDirectionTargetListener(object : DirectionTarget.Companion.DirectionTargetCallbacks {
-                        override fun onDirectionAdded(directionModel: DirectionModel) {
-                            directionsViewModel.addDirection(directionModel)
-                        }
-                    })
-
-                    p0.show(childFragmentManager, "direction_target")
-                }
-
-                override fun onSaveFromTarget() {
-                    val directionModel = DirectionModel(
-                            GPSPreferences.getTargetMarkerCoordinates()[0].toDouble(),
-                            GPSPreferences.getTargetMarkerCoordinates()[1].toDouble(),
-                            "",
-                            System.currentTimeMillis())
-
-                    val p0 = DirectionTarget.newInstance(directionModel)
-
-                    p0.setOnDirectionTargetListener(object : DirectionTarget.Companion.DirectionTargetCallbacks {
-                        override fun onDirectionAdded(directionModel: DirectionModel) {
-                            directionsViewModel.addDirection(directionModel)
-                        }
-                    })
-
-                    p0.show(childFragmentManager, "direction_target")
-                }
-            })
-        }
-
-        directionsViewModel.getDirections().observe(viewLifecycleOwner) {
-            val adapter = AdapterDirections(it)
-
-            adapter.setOnDirectionCallbacksListener(object : AdapterDirections.Companion.AdapterDirectionsCallbacks {
-                override fun onDirectionClicked(directionModel: DirectionModel) {
-                    set(directionModel)
-                }
-
-                override fun onDirectionLongPressed(directionModel: DirectionModel) {
-                }
-
-                override fun onMenuPressed(directionModel: DirectionModel, view: View) {
-                    PopupDirectionsMenu(view).setOnPopupCallbacksListener(object : PopupDirectionsMenu.Companion.PopupDirectionsCallbacks {
-                        override fun onSet() {
-                            set(directionModel)
-                        }
-
-                        override fun onDelete() {
-                            DeletePopupMenu(view) {
-                                directionsViewModel.deleteDirection(directionModel)
-                            }
-                        }
-
-                        override fun onEdit() {
-                            val p0 = DirectionTarget.newInstance(directionModel)
-
-                            p0.setOnDirectionTargetListener(object : DirectionTarget.Companion.DirectionTargetCallbacks {
-                                override fun onDirectionAdded(directionModel: DirectionModel) {
-                                    directionsViewModel.addDirection(directionModel)
-                                }
-                            })
-
-                            p0.show(childFragmentManager, "direction_target")
-                        }
-
-                        override fun onUseAsTarget() {
-                            GPSPreferences.setTargetMarker(true)
-                            GPSPreferences.setTargetMarkerLatitude(directionModel.latitude.toFloat())
-                            GPSPreferences.setTargetMarkerLongitude(directionModel.longitude.toFloat())
-                            GPSPreferences.setTargetMarkerStartLatitude(MainPreferences.getLastCoordinates()[0])
-                            GPSPreferences.setTargetMarkerStartLongitude(MainPreferences.getLastCoordinates()[1])
-                            set(directionModel, useMapsTarget = true)
-                        }
-
-                        override fun onNavigate() {
-                            kotlin.runCatching {
-                                val uri: Uri = Uri.parse("google.navigation:q=" + directionModel.latitude.toString() + "," + directionModel.longitude.toString() + "&mode=d")
-                                val intent = Intent(Intent.ACTION_VIEW, uri)
-                                intent.setPackage("com.google.android.apps.maps")
-                                startActivity(intent)
-                            }.getOrElse {
-                                Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    })
-                }
-            })
-
-            recyclerView.adapter = adapter
-        }
-    }
-
-    private fun set(directionModel: DirectionModel, useMapsTarget: Boolean = false) {
-        DirectionPreferences.setTargetLatitude(directionModel.latitude.toFloat())
-        DirectionPreferences.setTargetLongitude(directionModel.longitude.toFloat())
-        DirectionPreferences.setTargetLabel(directionModel.name)
-        DirectionPreferences.setUseMapsTarget(useMapsTarget)
-
-        requireActivity().onBackPressedDispatcher.onBackPressed()
-    }
-
-    companion object {
-        fun newInstance(): Directions {
-            val args = Bundle()
-            val fragment = Directions()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/subpanels/Measures.kt
-################################################################################
-package app.simple.positional.ui.subpanels
-
-import android.content.SharedPreferences
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.fragment.app.viewModels
-import app.simple.positional.R
-import app.simple.positional.adapters.measure.AdapterMeasures
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.views.CustomRecyclerView
-import app.simple.positional.dialogs.measure.MeasureAdd
-import app.simple.positional.dialogs.measure.MeasureAdd.Companion.showMeasureAdd
-import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.model.Measure
-import app.simple.positional.popups.miscellaneous.DeletePopupMenu
-import app.simple.positional.popups.trail.PopupTrailsMenu
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.preferences.MeasurePreferences
-import app.simple.positional.util.ViewUtils
-import app.simple.positional.util.ViewUtils.invisible
-import app.simple.positional.util.ViewUtils.visible
-import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
-import com.google.android.material.card.MaterialCardView
-
-class Measures : ScopedFragment() {
-    private lateinit var recyclerView: CustomRecyclerView
-    private lateinit var adapterMeasures: AdapterMeasures
-    private lateinit var add: MaterialCardView
-    private lateinit var art: ImageView
-
-    private val measureViewModel: MeasureViewModel by viewModels()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_measures_list, container, false)
-
-        recyclerView = view.findViewById(R.id.recycler_view)
-        add = view.findViewById(R.id.add)
-        art = view.findViewById(R.id.art)
-
-        add.apply {
-            radius = MainPreferences.getCornerRadius().toFloat()
-            cardElevation = 50F
-            ViewUtils.addShadow(this)
-        }
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        measureViewModel.getMeasureEntries().observe(viewLifecycleOwner) {
-            adapterMeasures = AdapterMeasures(it)
-            recyclerView.adapter = adapterMeasures
-
-            adapterMeasures.setOnAdapterMeasuresCallbackListener(object : AdapterMeasures.Companion.AdapterMeasuresCallback {
-                override fun onMeasureClicked(measure: Measure) {
-                    MeasurePreferences.setLastSelectedMeasure(measure.dateCreated)
-                }
-
-                override fun onMeasureMenuClicked(measure: Measure, view: View, position: Int) {
-                    val popup = PopupTrailsMenu(
-                        layoutInflater.inflate(R.layout.popup_trails,
-                            DynamicCornerLinearLayout(requireContext())), view)
-
-                    popup.setOnPopupCallbacksListener(object : PopupTrailsMenu.Companion.PopupTrailsCallbacks {
-                        override fun onShowOnMap() {
-                            MeasurePreferences.setLastSelectedMeasure(measure.dateCreated)
-                        }
-
-                        override fun onDelete() {
-                            DeletePopupMenu(view) {
-                                measureViewModel.deleteMeasure(measure) {
-                                    requireActivity().runOnUiThread {
-                                        adapterMeasures.deleteMeasure(position).also {
-                                            if (adapterMeasures.isEmpty()) {
-                                                art.visible(true)
-                                            } else {
-                                                art.invisible(true)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    })
-                }
-            })
-
-            if (it.isNullOrEmpty()) {
-                art.visible(true)
-            } else {
-                art.invisible(true)
-            }
-        }
-
-        add.setOnClickListener {
-            showMeasureAdd().setOnMeasureAddCallbacks(object :
-                MeasureAdd.Companion.MeasureAddCallbacks {
-                override fun onSave(name: String, note: String) {
-                    measureViewModel.addMeasure(name, note)
-                }
-            })
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        super.onSharedPreferenceChanged(sharedPreferences, key)
-        when (key) {
-            MeasurePreferences.LAST_SELECTED_MEASURE -> {
-                if (MeasurePreferences.isMeasureSelected()) {
-                    requireActivity().finish()
-                }
-            }
-        }
-    }
-
-    companion object {
-        fun newInstance(): Measures {
-            val args = Bundle()
-            val fragment = Measures()
-            fragment.arguments = args
-            return fragment
-        }
-
-        const val TAG = "Measures"
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/subpanels/TimeZones.kt
-################################################################################
-package app.simple.positional.ui.subpanels
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.lifecycle.lifecycleScope
-import app.simple.positional.R
-import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.adapters.clock.TimeZoneAdapter
-import app.simple.positional.decorations.searchview.SearchView
-import app.simple.positional.decorations.views.CustomRecyclerView
-import app.simple.positional.preferences.SearchPreferences
-import app.simple.positional.util.LocaleHelper
-import app.simple.positional.util.StatusBarHeight
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.*
-
-class TimeZones : ScopedFragment() {
-    private lateinit var timeZoneAdapter: TimeZoneAdapter
-    private lateinit var recyclerView: CustomRecyclerView
-    private lateinit var searchView: SearchView
-
-    private var timeZones: MutableList<Pair<String, String>> = mutableListOf()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_timezone_list, container, false)
-
-        recyclerView = view.findViewById(R.id.timezones_rv)
-        searchView = view.findViewById(R.id.search_view)
-
-        val p0 = ZoneOffset.getAvailableZoneIds().toList()
-
-        for (i in p0.indices) {
-            timeZones.add(Pair(p0[i], getOffset(p0[i])))
-        }
-
-        val params = searchView.layoutParams as ViewGroup.MarginLayoutParams
-        params.setMargins(params.leftMargin,
-                StatusBarHeight.getStatusBarHeight(resources) + params.topMargin,
-                params.rightMargin,
-                params.bottomMargin)
-
-        recyclerView.setPadding(recyclerView.paddingLeft,
-                recyclerView.paddingTop + params.topMargin + params.height + params.bottomMargin,
-                recyclerView.paddingRight,
-                recyclerView.paddingBottom + params.bottomMargin)
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        timeZoneAdapter = TimeZoneAdapter(timeZones, SearchPreferences.getLastSearchKeyword())
-
-        searchView.setSearchViewEventListener { keywords, count ->
-            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
-                var filtered: MutableList<Pair<String, String>> = arrayListOf()
-
-                if (count > 0) {
-                    kotlin.runCatching {
-                        for (str in timeZones) {
-                            if (str.first.lowercase(Locale.getDefault()).contains(
-                                            keywords.lowercase(
-                                                    Locale.getDefault()
-                                            )
-                                    ) ||
-                                    str.second.lowercase(Locale.getDefault()).contains(
-                                            keywords.lowercase(
-                                                    Locale.getDefault()
-                                            )
-                                    )
-                            ) {
-                                filtered.add(str)
-                            }
-                        }
-                    }
-                } else {
-                    filtered = timeZones
-                }
-
-                filtered.sortBy { it.first }
-
-                withContext(Dispatchers.Main) {
-                    timeZoneAdapter.timeZones = filtered
-                    timeZoneAdapter.searchText = keywords
-                    timeZoneAdapter.notifyDataSetChanged()
-                }
-            }
-        }
-
-        searchView.setKeywords(SearchPreferences.getLastSearchKeyword())
-        recyclerView.adapter = timeZoneAdapter
-    }
-
-    private fun getOffset(timezone: String): String {
-        val zoneId = ZoneId.of(timezone)
-        val zonedDateTime: ZonedDateTime = Instant.now().atZone(zoneId)
-        return zonedDateTime.format(DateTimeFormatter.ofPattern("XXX").withLocale(LocaleHelper.getAppLocale())).replace("Z", "+00:00")
-    }
-
-    companion object {
-        fun newInstance(): TimeZones {
-            val args = Bundle()
-            val fragment = TimeZones()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/ui/subpanels/Trails.kt
-################################################################################
-package app.simple.positional.ui.subpanels
-
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.RecyclerView
-import app.simple.positional.R
-import app.simple.positional.adapters.trail.AdapterTrails
-import app.simple.positional.decorations.corners.DynamicCornerLinearLayout
-import app.simple.positional.decorations.views.CustomRecyclerView
-import app.simple.positional.dialogs.trail.AddTrail
-import app.simple.positional.extensions.fragment.ScopedFragment
-import app.simple.positional.model.TrailEntry
-import app.simple.positional.popups.miscellaneous.DeletePopupMenu
-import app.simple.positional.popups.trail.PopupTrailsMenu
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.ViewUtils
-import app.simple.positional.util.ViewUtils.invisible
-import app.simple.positional.util.ViewUtils.visible
-import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
-import com.google.android.material.card.MaterialCardView
-
-class Trails : ScopedFragment() {
-    private lateinit var recyclerView: CustomRecyclerView
-    private lateinit var adapterTrails: AdapterTrails
-    private lateinit var add: MaterialCardView
-    private lateinit var art: ImageView
-    private val trailViewModel: TrailsViewModel by viewModels()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_trails_list, container, false)
-
-        recyclerView = view.findViewById(R.id.trails_recycler_view)
-        add = view.findViewById(R.id.add)
-        art = view.findViewById(R.id.art)
-
-        add.apply {
-            radius = MainPreferences.getCornerRadius().toFloat()
-            cardElevation = 50F
-            ViewUtils.addShadow(this)
-        }
-
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        add.setOnClickListener {
-            val p0 = AddTrail.newInstance()
-
-            p0.onNewTrailAddedSuccessfully = {
-                trailViewModel.addTrail(it)
-            }
-
-            p0.show(parentFragmentManager, "add_trail")
-        }
-
-        trailViewModel.getTrails().observe(viewLifecycleOwner) {
-            adapterTrails = AdapterTrails(it)
-            adapterTrails.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.ALLOW
-
-            adapterTrails.setOnAdapterTrailsCallbackListener(object : AdapterTrails.Companion.AdapterTrailsCallback {
-                override fun onTrailClicked(name: String) {
-                    TrailPreferences.setCurrentTrailName(name)
-                    requireActivity().finish()
-                }
-
-                override fun onTrailMenu(trailEntry: TrailEntry, anchor: View) {
-                    val popup = PopupTrailsMenu(
-                            layoutInflater.inflate(R.layout.popup_trails,
-                                    DynamicCornerLinearLayout(requireContext())), anchor)
-
-                    popup.setOnPopupCallbacksListener(object : PopupTrailsMenu.Companion.PopupTrailsCallbacks {
-                        override fun onShowOnMap() {
-                            TrailPreferences.setCurrentTrailName(trailEntry.trailName).also {
-                                requireActivity().finish()
-                            }
-                        }
-
-                        override fun onDelete() {
-                            DeletePopupMenu(anchor) {
-                                trailViewModel.deleteTrail(trailEntry)
-                            }
-                        }
-                    })
-                }
-            })
-
-            if (it.isNullOrEmpty()) {
-                art.visible(true)
-            } else {
-                art.invisible(true)
-            }
-
-            recyclerView.adapter = adapterTrails
-        }
-    }
-
-    companion object {
-        fun newInstance(): Trails {
-            val args = Bundle()
-            val fragment = Trails()
-            fragment.arguments = args
-            return fragment
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/AppIcons.kt
 ################################################################################
 package app.simple.positional.util
@@ -26720,6 +25711,23 @@ object TimeFormatter {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/TrailNames.kt
+################################################################################
+package app.simple.positional.util
+
+import app.simple.positional.database.instances.TrailDatabase
+
+object TrailNames {
+    fun isValid(name: String, existing: Collection<String>): Boolean {
+        val trimmed = name.trim()
+        return trimmed.isNotEmpty() &&
+            trimmed.none { it == '/' || it == '\\' } &&
+            !trimmed.equals(TrailDatabase.NAME, ignoreCase = true) &&
+            existing.none { it.equals(trimmed, ignoreCase = true) }
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/UTMConverter.kt
 ################################################################################
 package app.simple.positional.util
@@ -27008,53 +26016,57 @@ class CustomLocationViewModel(application: Application) : AndroidViewModel(appli
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.database.instances.DirectionDatabase
-import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.model.DirectionModel
-import kotlinx.coroutines.Dispatchers
+import app.simple.positional.ui.compose.CoordinateInput
+import app.simple.positional.ui.compose.CustomLocationForm
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class DirectionsViewModel(application: Application) : WrappedViewModel(application) {
-    private val directions: MutableLiveData<MutableList<DirectionModel>> by lazy {
-        MutableLiveData<MutableList<DirectionModel>>().also {
-            loadDirections()
-        }
+class DirectionsViewModel(application: Application) : AndroidViewModel(application) {
+    private val dao = DirectionDatabase.getInstance(application).directionDao()
+
+    val form = CustomLocationForm()
+
+    var editing by mutableStateOf<Long?>(null)
+        private set
+
+    val directions: StateFlow<List<DirectionModel>?> = dao.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
+
+    fun open(name: String?, latitude: Double, longitude: Double, dateAdded: Long = System.currentTimeMillis()) {
+        form.fill(name.orEmpty(), CoordinateInput.format(latitude), CoordinateInput.format(longitude))
+        editing = dateAdded
     }
 
-    val added: MutableLiveData<Int> = MutableLiveData()
-
-    fun getDirections(): LiveData<MutableList<DirectionModel>> {
-        return directions
+    fun close() {
+        editing = null
     }
 
-    private fun loadDirections() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val db = DirectionDatabase.getInstance(getApplication())
-            directions.postValue(db?.directionDao()?.getAllDirections())
-            db?.close()
-        }
+    fun save(latitude: Double, longitude: Double) {
+        val dateAdded = editing ?: return
+        val direction = DirectionModel(latitude, longitude, form.address.trim(), dateAdded)
+        persist { dao.insertDirection(direction) }
+        close()
     }
 
-    fun addDirection(directionModel: DirectionModel) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val db = DirectionDatabase.getInstance(getApplication())
-            db?.directionDao()?.insertDirection(directionModel)
-            directions.postValue(db?.directionDao()?.getAllDirections())
-            added.postValue((added.value ?: -1).plus(1))
-            db?.close()
-        }
+    fun delete(direction: DirectionModel) = persist { dao.deleteDirection(direction) }
+
+    private fun persist(block: suspend () -> Unit) {
+        viewModelScope.launch { withContext(NonCancellable) { block() } }
     }
 
-    fun deleteDirection(directionModel: DirectionModel) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val db = DirectionDatabase.getInstance(getApplication())
-            db?.directionDao()?.deleteDirection(directionModel)
-            directions.postValue(db?.directionDao()?.getAllDirections())
-            db?.close()
-        }
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
     }
 }
 
@@ -27603,14 +26615,18 @@ import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MeasurePreferences
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MeasureViewModel(application: Application) : WrappedViewModel(application) {
-    private val measureEntries: MutableLiveData<ArrayList<Measure>> by lazy {
-        MutableLiveData<ArrayList<Measure>>().also {
-            loadMeasureEntries()
-        }
-    }
+    private val dao = MeasureDatabase.getInstance(application).measureDao()
+
+    val measures: StateFlow<List<Measure>?> = dao.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
     private val measure: MutableLiveData<Measure> by lazy {
         MutableLiveData<Measure>().also {
@@ -27618,79 +26634,54 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         }
     }
 
-    fun getMeasureEntries(): LiveData<ArrayList<Measure>> {
-        return measureEntries
-    }
-
     fun getMeasure(): LiveData<Measure> {
         return measure
     }
 
-    private fun loadMeasureEntries() {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val entries = measureDatabase.measureDao()?.getAllMeasures()
-            measureEntries.postValue(entries as ArrayList<Measure>)
-        }
-    }
-
     private fun loadMeasure(id: Long) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val measure = measureDatabase.measureDao()?.getMeasureById(id)
-            this@MeasureViewModel.measure.postValue(measure)
+        viewModelScope.launch(Dispatchers.IO) {
+            measure.postValue(dao.getMeasureById(id))
         }
     }
 
     fun addMeasure(name: String, note: String) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val measure = Measure(name, note)
-            measureDatabase.measureDao()?.insertMeasure(measure)
-            MeasurePreferences.setLastSelectedMeasure(measure.dateCreated)
-            loadMeasure(measure.dateCreated)
+        viewModelScope.launch(Dispatchers.IO) {
+            val created = Measure(name, note)
+            withContext(NonCancellable) {
+                dao.insertMeasure(created)
+                MeasurePreferences.setLastSelectedMeasure(created.dateCreated)
+            }
+            loadMeasure(created.dateCreated)
         }
     }
 
     fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            val measure = measure.value
-            measure?.let {
-                measure.measurePoints?.add(measurePoint)
-                measureDatabase.measureDao()?.updateMeasure(measure)
-                onAdded(measure)
+        viewModelScope.launch(Dispatchers.IO) {
+            measure.value?.let {
+                it.measurePoints?.add(measurePoint)
+                dao.updateMeasure(it)
+                onAdded(it)
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        MeasureDatabase.destroyInstance()
     }
 
     fun removeMeasurePoint(measurePoint: MeasurePoint?, onRemoved: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            measurePoint?.let {
-                val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-                val measure = measure.value
-                measure?.let {
-                    measurePoint.let {
-                        measure.measurePoints?.remove(it)
-                        measureDatabase.measureDao()?.updateMeasure(measure)
-                        onRemoved(measure)
-                    }
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            val current = measure.value
+            if (measurePoint != null && current != null) {
+                current.measurePoints?.remove(measurePoint)
+                dao.updateMeasure(current)
+                onRemoved(current)
             }
         }
     }
 
-    fun deleteMeasure(measure: Measure, onDeleted: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val measureDatabase = MeasureDatabase.getInstance(getApplication<Application>().applicationContext)!!
-            measureDatabase.measureDao()?.deleteMeasure(measure)
-            MeasurePreferences.setLastSelectedMeasure(-1)
-            onDeleted(measure)
+    fun deleteMeasure(measure: Measure) {
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(NonCancellable) {
+                dao.deleteMeasure(measure)
+                if (MeasurePreferences.getLastSelectedMeasure() == measure.dateCreated) MeasurePreferences.setLastSelectedMeasure(-1)
+            }
         }
     }
 
@@ -27703,8 +26694,8 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         }
     }
 
-    companion object {
-        private const val TAG = "MeasureViewModel"
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
     }
 }
 
@@ -27874,97 +26865,41 @@ package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
 import app.simple.positional.database.instances.TrailDatabase
-import app.simple.positional.database.instances.TrailPointDatabase
 import app.simple.positional.model.TrailEntry
 import app.simple.positional.preferences.TrailPreferences
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TrailsViewModel(application: Application) : AndroidViewModel(application) {
-    val trails: MutableLiveData<ArrayList<TrailEntry>> by lazy {
-        MutableLiveData<ArrayList<TrailEntry>>().also {
-            loadTrails()
-        }
+    private val dao = TrailDatabase.getInstance(application).trailDao()
+
+    val trails: StateFlow<List<TrailEntry>?> = dao.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
+
+    fun addTrail(trailEntry: TrailEntry) = persist {
+        dao.insertTrail(trailEntry)
+        TrailPreferences.setCurrentTrailName(trailEntry.trailName)
     }
 
-    fun getTrails(): LiveData<ArrayList<TrailEntry>> {
-        return trails
+    fun deleteTrail(trailEntry: TrailEntry) = persist {
+        dao.deleteTrail(trailEntry)
+        if (TrailPreferences.getCurrentTrail() == trailEntry.trailName) TrailPreferences.setCurrentTrailName("")
+        getApplication<Application>().deleteDatabase("${trailEntry.trailName}.db")
     }
 
-    fun loadTrails() {
-        viewModelScope.launch(Dispatchers.IO) {
-            delay(500)
-
-            val database = Room.databaseBuilder(getApplication<Application>().applicationContext,
-                                                TrailDatabase::class.java,
-                                                "%%_trails.db").build()
-
-            trails.postValue(database.trailDao()?.getAllTrails() as ArrayList<TrailEntry>)
-
-            database.close()
-        }
+    private fun persist(block: suspend () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) { withContext(NonCancellable) { block() } }
     }
 
-    fun addTrail(trailEntry: TrailEntry) {
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                val db = Room.databaseBuilder(getApplication<Application>().applicationContext,
-                                              TrailDatabase::class.java,
-                                              "%%_trails.db").build()
-
-                db.trailDao()?.insertTrail(trailEntry)
-
-                TrailPreferences.setCurrentTrailName(trailEntry.trailName)
-
-                this@TrailsViewModel.trails.postValue(db.trailDao()!!
-                    .getAllTrails() as ArrayList<TrailEntry>?)
-
-                db.close()
-            }
-        }
-    }
-
-    fun deleteTrail(trailEntry: TrailEntry) {
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                val db = Room.databaseBuilder(getApplication<Application>().applicationContext,
-                                              TrailDatabase::class.java,
-                                              "%%_trails.db").build()
-
-                db.trailDao()?.deleteTrail(trailEntry)
-
-                if (TrailPreferences.getCurrentTrail() == trailEntry.trailName) {
-                    TrailPreferences.setCurrentTrailName("")
-                }
-
-                this@TrailsViewModel.trails.postValue(db.trailDao()!!
-                    .getAllTrails() as ArrayList<TrailEntry>?)
-
-                db.close()
-
-                clearResidualFiles(trailEntry.trailName)
-            }
-        }
-    }
-
-    private fun clearResidualFiles(name: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val db = Room.databaseBuilder(getApplication<Application>().applicationContext,
-                TrailPointDatabase::class.java,
-                                          "$name.db").build()
-
-            db.trailDataDao()?.nukeTable()
-
-            db.close()
-
-            getApplication<Application>().applicationContext.deleteDatabase("$name.db")
-        }
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
     }
 }
 
@@ -28725,41 +27660,6 @@ class TwilightWidget : AppWidgetProvider() {
         android:fromXDelta="0"
         android:fromYDelta="-200"
         android:toXDelta="0"
-        android:toYDelta="0" />
-
-    <alpha
-        android:fromAlpha="0"
-        android:toAlpha="1" />
-
-</set>
-
-################################################################################
-# FILE: app/src/main/res/anim/list_animation_controller.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
-    android:animation="@anim/list_item_animation"
-    android:animationOrder="normal"
-    android:delay="15%" />
-
-################################################################################
-# FILE: app/src/main/res/anim/list_item_animation.xml
-################################################################################
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:duration="@integer/animation_duration"
-    android:interpolator="@android:interpolator/decelerate_cubic"
-    android:shareInterpolator="true">
-
-    <scale
-        android:fromXScale="0.8"
-        android:fromYScale="0.8"
-        android:pivotX="50%"
-        android:pivotY="50%"
-        android:toXScale="1"
-        android:toYScale="1" />
-
-    <translate
-        android:fromYDelta="200"
         android:toYDelta="0" />
 
     <alpha
@@ -30193,15 +29093,6 @@ class TwilightWidget : AppWidgetProvider() {
 </merge>
 
 ################################################################################
-# FILE: app/src/main/res/layout/activity_sub.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/sub_container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
-
-################################################################################
 # FILE: app/src/main/res/layout/adapter_bloom_skin.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -30309,151 +29200,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/adapter_directions.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:id="@+id/adapter_direction_container"
-    android:padding="@dimen/options_container_horizontal_padding"
-    android:layout_height="wrap_content">
-
-    <TextView
-        android:id="@+id/direction_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="8dp"
-        android:fontFamily="@font/medium"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/trail_name_text_size"
-        app:layout_constraintBottom_toTopOf="@id/direction_lat_lng"
-        app:layout_constraintEnd_toStartOf="@+id/menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/direction_lat_lng"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:fontFamily="@font/regular"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/description_text_size"
-        app:layout_constraintBottom_toTopOf="@id/direction_date"
-        app:layout_constraintEnd_toStartOf="@+id/menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/direction_name" />
-
-    <TextView
-        android:id="@+id/direction_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
-        android:fontFamily="@font/regular"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/description_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/direction_lat_lng" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/menu"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:tint="@color/iconColor"
-        android:src="@drawable/ic_menu"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_header_directions.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/options_container_horizontal_padding"
-    tools:ignore="UseCompoundDrawables">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/medium"
-        android:text="@string/targets"
-        android:textColor="?attr/colorAppAccent"
-        android:textSize="@dimen/info_text_primary_size" />
-
-    <TextView
-        android:id="@+id/adapter_total"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/light"
-        android:textColor="@color/textSecondary"
-        android:textSize="@dimen/info_text_secondary_size"
-        app:layout_constraintBottom_toBottomOf="@id/adapter_trail_data_trail_distance"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/adapter_trail_data_trail_name" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginTop="@dimen/options_container_horizontal_padding"
-        android:background="@color/dividerColor" />
-
-</LinearLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_measures_header.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/options_container_horizontal_padding"
-    tools:ignore="UseCompoundDrawables">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:fontFamily="@font/medium"
-        android:text="@string/saved_measures"
-        android:textColor="?attr/colorAppAccent"
-        android:textSize="@dimen/info_text_primary_size" />
-
-    <TextView
-        android:id="@+id/total"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/light"
-        android:textColor="@color/textSecondary"
-        android:textSize="@dimen/info_text_secondary_size" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginTop="@dimen/options_container_horizontal_padding"
-        android:background="@color/dividerColor" />
-
-</LinearLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/adapter_panel.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -30513,77 +29259,6 @@ class TwilightWidget : AppWidgetProvider() {
     android:layout_margin="5dp"
     android:tint="@color/iconColor"
     android:layout_height="50dp" />
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_timezone.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/time_zone_adapter_item_container"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginHorizontal="10dp"
-    android:background="@drawable/ripple_btn"
-    android:clickable="true"
-    android:focusable="true"
-    android:layoutDirection="ltr"
-    android:orientation="horizontal"
-    android:padding="15dp">
-
-    <ImageView
-        android:id="@+id/time_zone_indicator"
-        android:layout_width="8dp"
-        android:layout_height="8dp"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_circle_stroke"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
-
-    <TextView
-        android:id="@+id/time_zone_adapter_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="@font/medium"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/info_text_secondary_size"
-        app:layout_constraintBottom_toTopOf="@+id/time_zone_adapter_offset"
-        app:layout_constraintEnd_toStartOf="@+id/time_zone_adapter_format"
-        app:layout_constraintStart_toEndOf="@+id/time_zone_indicator"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/time_zone_adapter_offset"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="@font/regular"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/settings_primary_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/time_zone_adapter_format"
-        app:layout_constraintStart_toEndOf="@+id/time_zone_indicator"
-        app:layout_constraintTop_toBottomOf="@id/time_zone_adapter_text" />
-
-    <TextView
-        android:id="@+id/time_zone_adapter_format"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/regular"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/settings_primary_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/adapter_trail_data.xml
@@ -30799,111 +29474,6 @@ class TwilightWidget : AppWidgetProvider() {
         app:layout_constraintTop_toBottomOf="@+id/adapter_trail_data_trail_distance" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_trails.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:id="@+id/adapter_trails_container"
-    android:padding="@dimen/options_container_horizontal_padding"
-    android:layout_height="wrap_content">
-
-    <TextView
-        android:id="@+id/trails_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:fontFamily="@font/medium"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/trail_name_text_size"
-        app:layout_constraintBottom_toTopOf="@id/trails_note"
-        app:layout_constraintEnd_toStartOf="@+id/menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/trails_note"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:fontFamily="@font/regular"
-        android:textColor="@color/textTertiary"
-        android:textSize="@dimen/options_item_text_size"
-        app:layout_constraintBottom_toTopOf="@id/trails_date"
-        app:layout_constraintEnd_toStartOf="@+id/menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/trails_name" />
-
-    <TextView
-        android:id="@+id/trails_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:fontFamily="@font/regular"
-        android:textColor="?attr/colorAppAccent"
-        android:textSize="@dimen/description_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/trails_note" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:id="@+id/menu"
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:tint="@color/iconColor"
-        android:src="@drawable/ic_menu"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-</app.simple.positional.decorations.ripple.DynamicRippleConstraintLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/adapter_trails_header.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="@dimen/options_container_horizontal_padding"
-    tools:ignore="UseCompoundDrawables">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/medium"
-        android:text="@string/saved_trails"
-        android:layout_gravity="center_vertical"
-        android:textColor="?attr/colorAppAccent"
-        android:textSize="@dimen/info_text_primary_size" />
-
-    <TextView
-        android:id="@+id/adapter_trails_total"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/light"
-        android:textColor="@color/textSecondary"
-        android:textSize="@dimen/info_text_secondary_size"
-        app:layout_constraintBottom_toBottomOf="@id/adapter_trail_data_trail_distance"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/adapter_trail_data_trail_name" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_marginTop="@dimen/options_container_horizontal_padding"
-        android:background="@color/dividerColor" />
-
-</LinearLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/bottom_sheet_gps.xml
@@ -31986,179 +30556,6 @@ class TwilightWidget : AppWidgetProvider() {
     </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
 </app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
 
-
-################################################################################
-# FILE: app/src/main/res/layout/dialog_direction_target.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<app.simple.positional.decorations.corners.DynamicCornerLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:backgroundTint="@color/mainBackground"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/popup_padding"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/medium"
-            android:text="@string/target"
-            android:textColor="@color/textTertiary"
-            android:textSize="@dimen/description_text_size" />
-
-        <EditText
-            android:id="@+id/target_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:autofillHints="@string/note"
-            android:background="@drawable/text_field"
-            android:fontFamily="@font/regular"
-            android:inputType="textAutoComplete"
-            android:maxLength="60"
-            android:maxLines="1"
-            android:minHeight="50dp"
-            android:paddingHorizontal="@dimen/popup_padding"
-            android:saveEnabled="true"
-            android:textColor="@color/textSecondary"
-            android:textColorHighlight="?attr/colorAppAccentLight"
-            android:textColorHint="@color/textTertiary"
-            android:textCursorDrawable="@drawable/text_cursor"
-            tools:ignore="LabelFor" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/popup_padding"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/specified_hint_latitude"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/description_text_size" />
-
-                <EditText
-                    android:id="@+id/target_latitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:autofillHints="@string/note"
-                    android:background="@drawable/text_field"
-                    android:fontFamily="@font/regular"
-                    android:inputType="numberDecimal"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:minHeight="50dp"
-                    android:paddingHorizontal="@dimen/popup_padding"
-                    android:saveEnabled="true"
-                    android:textColor="@color/textSecondary"
-                    android:textColorHighlight="?attr/colorAppAccentLight"
-                    android:textColorHint="@color/textTertiary"
-                    android:textCursorDrawable="@drawable/text_cursor"
-                    tools:ignore="LabelFor" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/popup_padding"
-                    android:fontFamily="@font/medium"
-                    android:text="@string/specified_hint_longitude"
-                    android:textColor="@color/textTertiary"
-                    android:textSize="@dimen/description_text_size" />
-
-                <EditText
-                    android:id="@+id/target_longitude"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:autofillHints="@string/note"
-                    android:background="@drawable/text_field"
-                    android:fontFamily="@font/regular"
-                    android:inputType="numberDecimal"
-                    android:maxLength="40"
-                    android:maxLines="1"
-                    android:minHeight="50dp"
-                    android:paddingHorizontal="@dimen/popup_padding"
-                    android:saveEnabled="true"
-                    android:textColor="@color/textSecondary"
-                    android:textColorHighlight="?attr/colorAppAccentLight"
-                    android:textColorHint="@color/textTertiary"
-                    android:textCursorDrawable="@drawable/text_cursor"
-                    tools:ignore="LabelFor" />
-
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:animateLayoutChanges="true"
-        android:orientation="horizontal">
-
-        <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-            android:id="@+id/search"
-            android:layout_width="@dimen/app_button_size"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_marginEnd="5dp"
-            android:src="@drawable/ic_search" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_gravity="center_vertical"
-            android:text="@string/button_cancel"
-            android:textAllCaps="false"
-            android:textColor="@color/textPrimary" />
-
-        <app.simple.positional.decorations.ripple.DynamicRippleButton
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/app_button_size"
-            android:layout_gravity="center_vertical"
-            android:text="@string/save"
-            android:textColor="@color/textPrimary"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-</app.simple.positional.decorations.corners.DynamicCornerLinearLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/dialog_error.xml
@@ -34378,65 +32775,6 @@ class TwilightWidget : AppWidgetProvider() {
 </LinearLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/fragment_directions.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/mainBackground"
-    android:orientation="vertical">
-
-    <ImageView
-        android:id="@+id/art"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:scaleY="0"
-        android:scaleX="0"
-        android:visibility="invisible"
-        android:layout_gravity="center"
-        android:src="@drawable/art_lost"
-        tools:ignore="ContentDescription" />
-
-    <app.simple.positional.decorations.views.CustomRecyclerView
-        android:id="@+id/directions_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:layoutAnimation="@anim/list_animation_controller"
-        app:statusBarPaddingRequired="true" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/add"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="25dp"
-        android:background="?attr/colorAppAccent"
-        app:cardElevation="5dp"
-        android:clickable="true"
-        android:checkable="true"
-        app:cardBackgroundColor="?attr/colorAppAccent"
-        app:rippleColor="@color/indicator"
-        android:focusable="true">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="15dp"
-            android:src="@drawable/ic_add"
-            app:tint="@android:color/white"
-            tools:ignore="ContentDescription" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-</FrameLayout>
-
-################################################################################
 # FILE: app/src/main/res/layout/fragment_gps.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -34747,94 +33085,6 @@ class TwilightWidget : AppWidgetProvider() {
 </FrameLayout>
 
 ################################################################################
-# FILE: app/src/main/res/layout/fragment_measures_list.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <ImageView
-        android:id="@+id/art"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:scaleY="0"
-        android:scaleX="0"
-        android:visibility="invisible"
-        android:layout_gravity="center"
-        android:src="@drawable/art_lost"
-        tools:ignore="ContentDescription" />
-
-    <app.simple.positional.decorations.views.CustomRecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:layoutAnimation="@anim/list_animation_controller"
-        app:statusBarPaddingRequired="true" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/add"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="25dp"
-        android:background="?attr/colorAppAccent"
-        app:cardElevation="5dp"
-        android:clickable="true"
-        android:checkable="true"
-        app:cardBackgroundColor="?attr/colorAppAccent"
-        app:rippleColor="@color/indicator"
-        android:focusable="true">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="15dp"
-            android:src="@drawable/ic_add"
-            app:tint="@android:color/white"
-            tools:ignore="ContentDescription" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-</FrameLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/fragment_timezone_list.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/mainBackground"
-    android:clipChildren="false"
-    android:clipToPadding="false">
-
-    <app.simple.positional.decorations.searchview.SearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_margin="15dp" />
-
-    <app.simple.positional.decorations.views.CustomRecyclerView
-        android:id="@+id/timezones_rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:layoutAnimation="@anim/list_animation_controller"
-        android:overScrollMode="always"
-        android:scrollbars="none"
-        app:statusBarPaddingRequired="false" />
-</FrameLayout>
-
-
-################################################################################
 # FILE: app/src/main/res/layout/fragment_trail.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -34881,64 +33131,6 @@ class TwilightWidget : AppWidgetProvider() {
     <include layout="@layout/bottom_sheet_trail" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-################################################################################
-# FILE: app/src/main/res/layout/fragment_trails_list.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <ImageView
-        android:id="@+id/art"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:scaleY="0"
-        android:scaleX="0"
-        android:visibility="invisible"
-        android:layout_gravity="center"
-        android:src="@drawable/art_lost"
-        tools:ignore="ContentDescription" />
-
-    <app.simple.positional.decorations.views.CustomRecyclerView
-        android:id="@+id/trails_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:padding="@dimen/options_container_horizontal_padding"
-        android:layoutAnimation="@anim/list_animation_controller"
-        app:statusBarPaddingRequired="true" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/add"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="25dp"
-        android:background="?attr/colorAppAccent"
-        app:cardElevation="5dp"
-        android:clickable="true"
-        android:checkable="true"
-        app:cardBackgroundColor="?attr/colorAppAccent"
-        app:rippleColor="@color/indicator"
-        android:focusable="true">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="15dp"
-            android:src="@drawable/ic_add"
-            app:tint="@android:color/white"
-            tools:ignore="ContentDescription" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-</FrameLayout>
 
 ################################################################################
 # FILE: app/src/main/res/layout/generic_compass_rose.xml
@@ -36232,131 +34424,6 @@ class TwilightWidget : AppWidgetProvider() {
 </merge>
 
 ################################################################################
-# FILE: app/src/main/res/layout/popup_directions.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:clipChildren="true"
-    android:clipToPadding="true"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding"
-    tools:parentTag="android.widget.LinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_set"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/button_set"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_delete"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/delete"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/edit"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_use_as_target"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/use_as_target"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_navigate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/navigate"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-</merge>
-
-################################################################################
-# FILE: app/src/main/res/layout/popup_directions_add_menu.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:clipChildren="true"
-    android:clipToPadding="true"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding"
-    tools:parentTag="android.widget.LinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_new"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/create_new"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_save_from_target"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/save_from_target"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-</merge>
-
-################################################################################
 # FILE: app/src/main/res/layout/popup_location_map.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -36431,49 +34498,6 @@ class TwilightWidget : AppWidgetProvider() {
 </merge>
 
 ################################################################################
-# FILE: app/src/main/res/layout/popup_trails.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/mainBackground"
-    android:clipChildren="true"
-    android:clipToPadding="true"
-    android:orientation="vertical"
-    android:padding="@dimen/popup_padding"
-    tools:parentTag="app.simple.positional.decorations.popup.PopupLinearLayout">
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_show_on_map"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/show_on_map"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleTextView
-        android:id="@+id/menu_delete"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="@font/medium"
-        android:paddingHorizontal="30dp"
-        android:paddingVertical="20dp"
-        android:text="@string/delete"
-        android:textColor="@color/textPrimary"
-        android:textSize="@dimen/popup_text_size" />
-
-</merge>
-
-################################################################################
 # FILE: app/src/main/res/layout/popup_trails_data.xml
 ################################################################################
 <?xml version="1.0" encoding="utf-8"?>
@@ -36526,56 +34550,6 @@ class TwilightWidget : AppWidgetProvider() {
         android:text="@string/navigate"
         android:textColor="@color/textPrimary"
         android:textSize="@dimen/popup_text_size" />
-
-</merge>
-
-################################################################################
-# FILE: app/src/main/res/layout/search_view.xml
-################################################################################
-<?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:backgroundTint="@color/toolbarBackground"
-    android:orientation="horizontal"
-    tools:parentTag="android.widget.LinearLayout">
-
-    <EditText
-        android:id="@+id/search_view_text_input_layout"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_weight="1"
-        android:background="@android:color/transparent"
-        android:drawableStart="@drawable/ic_search"
-        android:drawablePadding="10dp"
-        android:layout_gravity="center_vertical"
-        android:hint="@string/search_timezone"
-        android:gravity="center_vertical"
-        android:importantForAutofill="no"
-        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-+:"
-        android:inputType="textFilter"
-        android:maxLength="20"
-        android:textColorHighlight="?attr/colorAppAccentLight"
-        android:textCursorDrawable="@drawable/text_cursor"
-        android:maxLines="1"
-        android:paddingStart="10dp"
-        android:paddingEnd="20dp"
-        android:textColor="@color/textPrimary"
-        android:textColorHint="@color/textSecondary"
-        app:drawableTint="@color/iconColor" />
-
-    <app.simple.positional.decorations.ripple.DynamicRippleImageButton
-        android:layout_width="@dimen/app_button_size"
-        android:layout_height="@dimen/app_button_size"
-        android:layout_gravity="center_vertical"
-        android:layout_marginHorizontal="8dp"
-        android:src="@drawable/ic_clear"
-        android:alpha="0"
-        android:clickable="false"
-        android:tint="@color/iconRegular"
-        android:id="@+id/search_clear" />
 
 </merge>
 
@@ -37915,7 +35889,6 @@ class TwilightWidget : AppWidgetProvider() {
     <color name="editTextBackground">#3C3C3C</color>
 
     <color name="iconRegular">#808080</color>
-    <color name="indicator">#3A3A3A</color>
 
     <color name="switch_off">#B5404040</color>
 
@@ -38037,7 +36010,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="toolbar_title_padding">8dp</dimen>
     <dimen name="toolbar_padding">16dp</dimen>
     <dimen name="popup_padding">10dp</dimen>
-    <dimen name="trail_name_text_size">24sp</dimen>
 </resources>
 
 ################################################################################
@@ -38112,7 +36084,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="toolbar_title_padding">8dp</dimen>
     <dimen name="toolbar_padding">16dp</dimen>
     <dimen name="popup_padding">10dp</dimen>
-    <dimen name="trail_name_text_size">24sp</dimen>
 </resources>
 
 ################################################################################
@@ -38324,7 +36295,6 @@ class TwilightWidget : AppWidgetProvider() {
     <color name="editTextBackground">#F6F6F6</color>
 
     <color name="iconRegular">#9A9A9A</color>
-    <color name="indicator">#F3F3F3</color>
 
     <color name="time_bb_color">#cb4335</color>
     <color name="compass_bb_color">#76448a</color>
@@ -38485,7 +36455,6 @@ class TwilightWidget : AppWidgetProvider() {
     <dimen name="toolbar_title_padding">8dp</dimen>
     <dimen name="toolbar_padding">16dp</dimen>
     <dimen name="popup_padding">10dp</dimen>
-    <dimen name="trail_name_text_size">24sp</dimen>
     <dimen name="floating_button_margin">20dp</dimen>
 </resources>
 
@@ -38833,7 +36802,6 @@ class TwilightWidget : AppWidgetProvider() {
     <string name="starting_point">Starting Point</string>
     <string name="enter_marker_name">Enter Marker Name</string>
     <string name="delete">Delete</string>
-    <string name="show_on_map">Show on Map</string>
     <string name="copy">Copy</string>
     <string name="trail_data_accuracy">Within %1$s %2$s of the location</string>
     <string name="target">Target</string>
@@ -39708,6 +37676,50 @@ class SettingsLabelsTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/ui/compose/TimeZoneCatalogTest.kt
+################################################################################
+package app.simple.positional.ui.compose
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.time.Instant
+import java.util.Locale
+
+class TimeZoneCatalogTest {
+    private val now = Instant.parse("2026-01-15T12:30:00Z")
+    private val entries = TimeZoneCatalog.entries(now, twelveHour = false, locale = Locale.US)
+
+    @Test
+    fun entriesAreSortedAndUnique() {
+        val ids = entries.map { it.id }
+        assertEquals(ids.sorted(), ids)
+        assertEquals(ids.size, ids.toSet().size)
+    }
+
+    @Test
+    fun utcUsesExplicitZeroOffset() {
+        val utc = entries.first { it.id == "UTC" }
+        assertEquals("+00:00", utc.offset)
+        assertEquals("12:30", utc.time)
+    }
+
+    @Test
+    fun twelveHourFormatUsesMeridiem() {
+        val utc = TimeZoneCatalog.entries(now, twelveHour = true, locale = Locale.US).first { it.id == "UTC" }
+        assertEquals("12:30 PM", utc.time)
+    }
+
+    @Test
+    fun filterMatchesIdIgnoringCaseAndOffset() {
+        assertTrue(TimeZoneCatalog.filter(entries, "  tokyo ").any { it.id == "Asia/Tokyo" })
+        assertTrue(TimeZoneCatalog.filter(entries, "+09:00").all { it.offset.contains("+09:00") })
+        assertEquals(entries, TimeZoneCatalog.filter(entries, "   "))
+        assertTrue(TimeZoneCatalog.filter(entries, "no such zone").isEmpty())
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/util/AppIconsTest.kt
 ################################################################################
 package app.simple.positional.util
@@ -39811,6 +37823,36 @@ class DirectionTest {
             225.0 to 5, 270.0 to 6, 315.0 to 7, 349.0 to 7, Double.NaN to -1
         )
         cases.forEach { (azimuth, sector) -> assertEquals("azimuth $azimuth", sector, Direction.sector(azimuth)) }
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/util/TrailNamesTest.kt
+################################################################################
+package app.simple.positional.util
+
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class TrailNamesTest {
+    @Test
+    fun acceptsNewNames() {
+        assertTrue(TrailNames.isValid("Morning walk", listOf("Evening run")))
+        assertTrue(TrailNames.isValid("  Hike  ", emptyList()))
+    }
+
+    @Test
+    fun rejectsBlankReservedAndPathNames() {
+        assertFalse(TrailNames.isValid("   ", emptyList()))
+        assertFalse(TrailNames.isValid("%%_TRAILS", emptyList()))
+        assertFalse(TrailNames.isValid("a/b", emptyList()))
+        assertFalse(TrailNames.isValid("a\\b", emptyList()))
+    }
+
+    @Test
+    fun rejectsDuplicatesIgnoringCase() {
+        assertFalse(TrailNames.isValid(" evening RUN ", listOf("Evening run")))
     }
 }
 

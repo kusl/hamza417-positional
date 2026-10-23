@@ -176,4 +176,50 @@ user	0m0.614s
 sys	0m0.773s
 kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
 2026-10-23-03-04-41
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/ui/subpanels/Directions.kt app/src/main/java/app/simple/positional/ui/subpanels/Measures.kt app/src/main/java/app/simple/positional/ui/subpanels/TimeZones.kt app/src/main/java/app/simple/positional/ui/subpanels/Trails.kt app/src/main/java/app/simple/positional/adapters/clock/TimeZoneAdapter.kt app/src/main/java/app/simple/positional/adapters/direction/AdapterDirections.kt app/src/main/java/app/simple/positional/adapters/measure/AdapterMeasures.kt app/src/main/java/app/simple/positional/adapters/trail/AdapterTrails.kt app/src/main/java/app/simple/positional/dialogs/direction/DirectionTarget.kt app/src/main/java/app/simple/positional/popups/directions/PopupDirectionAddMenu.kt app/src/main/java/app/simple/positional/popups/directions/PopupDirectionsMenu.kt app/src/main/java/app/simple/positional/popups/trail/PopupTrailsMenu.kt app/src/main/java/app/simple/positional/decorations/searchview/SearchView.java app/src/main/java/app/simple/positional/decorations/searchview/SearchViewEventListener.java app/src/main/java/app/simple/positional/preferences/SearchPreferences.kt app/src/main/java/app/simple/positional/model/DirectionModel.java app/src/main/res/layout/activity_sub.xml app/src/main/res/layout/adapter_directions.xml app/src/main/res/layout/adapter_header_directions.xml app/src/main/res/layout/adapter_measures_header.xml app/src/main/res/layout/adapter_timezone.xml app/src/main/res/layout/adapter_trails.xml app/src/main/res/layout/adapter_trails_header.xml app/src/main/res/layout/fragment_directions.xml app/src/main/res/layout/fragment_measures_list.xml app/src/main/res/layout/fragment_timezone_list.xml app/src/main/res/layout/fragment_trails_list.xml app/src/main/res/layout/dialog_direction_target.xml app/src/main/res/layout/popup_directions.xml app/src/main/res/layout/popup_directions_add_menu.xml app/src/main/res/layout/popup_trails.xml app/src/main/res/layout/search_view.xml app/src/main/res/anim/list_animation_controller.xml app/src/main/res/anim/list_item_animation.xml
+rm 'app/src/main/java/app/simple/positional/adapters/clock/TimeZoneAdapter.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/direction/AdapterDirections.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/measure/AdapterMeasures.kt'
+rm 'app/src/main/java/app/simple/positional/adapters/trail/AdapterTrails.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/searchview/SearchView.java'
+rm 'app/src/main/java/app/simple/positional/decorations/searchview/SearchViewEventListener.java'
+rm 'app/src/main/java/app/simple/positional/dialogs/direction/DirectionTarget.kt'
+rm 'app/src/main/java/app/simple/positional/model/DirectionModel.java'
+rm 'app/src/main/java/app/simple/positional/popups/directions/PopupDirectionAddMenu.kt'
+rm 'app/src/main/java/app/simple/positional/popups/directions/PopupDirectionsMenu.kt'
+rm 'app/src/main/java/app/simple/positional/popups/trail/PopupTrailsMenu.kt'
+rm 'app/src/main/java/app/simple/positional/preferences/SearchPreferences.kt'
+rm 'app/src/main/java/app/simple/positional/ui/subpanels/Directions.kt'
+rm 'app/src/main/java/app/simple/positional/ui/subpanels/Measures.kt'
+rm 'app/src/main/java/app/simple/positional/ui/subpanels/TimeZones.kt'
+rm 'app/src/main/java/app/simple/positional/ui/subpanels/Trails.kt'
+rm 'app/src/main/res/anim/list_animation_controller.xml'
+rm 'app/src/main/res/anim/list_item_animation.xml'
+rm 'app/src/main/res/layout/activity_sub.xml'
+rm 'app/src/main/res/layout/adapter_directions.xml'
+rm 'app/src/main/res/layout/adapter_header_directions.xml'
+rm 'app/src/main/res/layout/adapter_measures_header.xml'
+rm 'app/src/main/res/layout/adapter_timezone.xml'
+rm 'app/src/main/res/layout/adapter_trails.xml'
+rm 'app/src/main/res/layout/adapter_trails_header.xml'
+rm 'app/src/main/res/layout/dialog_direction_target.xml'
+rm 'app/src/main/res/layout/fragment_directions.xml'
+rm 'app/src/main/res/layout/fragment_measures_list.xml'
+rm 'app/src/main/res/layout/fragment_timezone_list.xml'
+rm 'app/src/main/res/layout/fragment_trails_list.xml'
+rm 'app/src/main/res/layout/popup_directions.xml'
+rm 'app/src/main/res/layout/popup_directions_add_menu.xml'
+rm 'app/src/main/res/layout/popup_trails.xml'
+rm 'app/src/main/res/layout/search_view.xml'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-03-20-10
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m1.240s
+user	0m0.526s
+sys	0m0.744s
 kushal@fedora:~/src/kotlin/positional$ 
+
+
+
+
