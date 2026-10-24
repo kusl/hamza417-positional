@@ -163,14 +163,6 @@ object GPSPreferences {
         )
     }
 
-    fun setTargetMarkerStartLatitude(@NotNull value: Float) {
-        getSharedPreferences().edit().putFloat(mapTargetMarkerStartLatitude, value).apply()
-    }
-
-    fun setTargetMarkerStartLongitude(@NotNull value: Float) {
-        getSharedPreferences().edit().putFloat(mapTargetMarkerStartLongitude, value).apply()
-    }
-
     fun getTargetMarkerStartCoordinates(): FloatArray {
         return floatArrayOf(
                 getSharedPreferences().getFloat(mapTargetMarkerStartLatitude, 48.8584f),
@@ -178,8 +170,13 @@ object GPSPreferences {
         )
     }
 
-    fun setTargetMarker(boolean: Boolean) {
-        getSharedPreferences().edit().putBoolean(mapTargetMarker, boolean).apply()
+    fun setTargetMarker(boolean: Boolean, restart: Boolean = false) {
+        val editor = getSharedPreferences().edit().putBoolean(mapTargetMarker, boolean)
+        if (boolean && (restart || !isTargetMarkerSet())) {
+            val start = MainPreferences.getLastCoordinates()
+            editor.putFloat(mapTargetMarkerStartLatitude, start[0]).putFloat(mapTargetMarkerStartLongitude, start[1])
+        }
+        editor.apply()
     }
 
     fun isTargetMarkerSet(): Boolean {

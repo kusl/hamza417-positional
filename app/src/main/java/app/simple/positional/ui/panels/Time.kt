@@ -28,6 +28,7 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.ZoneId
@@ -77,7 +78,7 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
     }
 
     init {
-        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) {
+        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
             if (state.customLocation) return@observe
             latitude = it.latitude
             longitude = it.longitude

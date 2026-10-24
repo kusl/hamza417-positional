@@ -60,6 +60,7 @@ import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -126,19 +127,19 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
             showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
         }
 
-        viewModel.getLocation().observe(owner, ::onLocation)
-        viewModel.getProvider().observe(owner) {
+        observe(viewModel.location.filterNotNull(), ::onLocation)
+        observe(viewModel.provider.filterNotNull()) {
             state.enabled = getLocationStatus(activity)
             state.provider = providerRows(it)
         }
-        viewModel.latency.observe(owner) {
-            val unit = getString(if (it.second) R.string.seconds else R.string.milliseconds)
-            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.first} $unit", it.second && it.first.toDouble() > LATE)
+        observe(viewModel.latency.filterNotNull()) {
+            val unit = getString(if (it.inSeconds) R.string.seconds else R.string.milliseconds)
+            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.value} $unit", it.isLate)
             publishLocationRows()
         }
-        viewModel.targetData.observe(owner) { state.target = it.toAnnotatedString() }
-        viewModel.accuracyGraphData.observe(owner) { accuracySeries = it.toList() }
-        viewModel.altitudeGraphData.observe(owner) { altitudeSeries = it.toList() }
+        observe(viewModel.target.filterNotNull()) { state.target = it.toAnnotatedString() }
+        observe(viewModel.accuracySeries) { accuracySeries = it }
+        observe(viewModel.altitudeSeries) { altitudeSeries = it }
     }
 
     override fun onCleared() {
@@ -228,9 +229,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     private fun bottomBar(visible: Boolean) {
         (activity as? BottomBarHost)?.showBottomBar(visible)
-    }
-
-    override fun onMapInitialized() {
     }
 
     override fun onMapClicked() {
@@ -397,7 +395,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         private const val PENDING = "-"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
         private const val CLOSE_ZOOM = 18F
-        private const val LATE = 5.0
         private const val ADDRESS_DISTANCE = 25.0
         private val gpsKeys = setOf(
             GPSPreferences.pinSkin,

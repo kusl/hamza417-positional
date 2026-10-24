@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.PermissionUtils
 
 class LocationService : Service(), LocationListener {
@@ -79,7 +78,7 @@ class LocationService : Service(), LocationListener {
                 }
             }
 
-            if (location.isNull()) {
+            if (location == null) {
                 handler.post(locationUpdater)
             } else {
                 location?.provider = "Last Location"

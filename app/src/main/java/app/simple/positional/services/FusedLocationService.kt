@@ -12,7 +12,6 @@ import android.os.Build
 import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
-import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.PermissionUtils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -56,9 +55,7 @@ class FusedLocationService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 super.onLocationResult(result)
-                if (result.lastLocation.isNotNull()) {
-                    broadcastLocation(result.lastLocation!!)
-                }
+                result.lastLocation?.let(::broadcastLocation)
             }
         }
 
@@ -90,7 +87,7 @@ class FusedLocationService : Service() {
     private fun requestLastLocation() {
         if (PermissionUtils.checkPermission(applicationContext)) {
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                if (it.isSuccessful && it.result.isNotNull()) {
+                if (it.isSuccessful && it.result != null) {
                     it.result.provider = "Last Location"
                     broadcastLocation(it.result)
                 }

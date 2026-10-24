@@ -21,6 +21,7 @@ import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import kotlinx.coroutines.flow.filterNotNull
 import com.google.android.gms.maps.model.LatLng
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
@@ -51,7 +52,7 @@ class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSen
     init {
         if (!sensor.isAvailable) showSensorError()
         loadTarget()
-        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) {
+        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
             location = it
             updateTarget()
         }

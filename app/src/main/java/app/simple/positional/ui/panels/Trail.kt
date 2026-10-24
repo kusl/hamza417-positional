@@ -15,10 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
@@ -52,7 +49,7 @@ import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filterNotNull
 
 class Trail(activity: ComponentActivity) : PanelController(activity), TrailActions, MapsCallbacks {
     private val state = TrailState()
@@ -81,7 +78,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
-        locationViewModel.getLocation().observe(owner) {
+        observe(locationViewModel.location.filterNotNull()) {
             location = it
             MainPreferences.setLastLatitude(it.latitude.toFloat())
             MainPreferences.setLastLongitude(it.longitude.toFloat())
@@ -89,14 +86,9 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
         }
-        locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
-
-        owner.lifecycleScope.launch {
-            owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { trailData.trail.collect { state.trail = it } }
-                trailData.points.collect(::showPoints)
-            }
-        }
+        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(trailData.trail) { state.trail = it }
+        observe(trailData.points, ::showPoints)
     }
 
 
@@ -145,10 +137,6 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         }
         pending = Triple(latitude, longitude, accuracy)
         state.pickingMarker = true
-    }
-
-    override fun onMapInitialized() {
-        maps.showPoints(trailData.points.value)
     }
 
     override fun onMapClicked() {

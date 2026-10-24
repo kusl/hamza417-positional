@@ -5,8 +5,6 @@ import app.simple.positional.model.TrailPoint
 import com.google.android.gms.maps.model.LatLng
 
 interface MapsCallbacks {
-    fun onMapInitialized() {}
-
     fun onMapClicked() {}
 
     fun onMapLongClicked(latLng: LatLng) {}

@@ -1,7 +1,6 @@
 package app.simple.positional.preferences
 
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import com.google.android.gms.maps.model.LatLng
 
 object MeasurePreferences {
     const val COMPASS_ROTATION = "measure_compass_rotation"
@@ -119,10 +118,6 @@ object MeasurePreferences {
         return getSharedPreferences().getLong(LAST_SELECTED_MEASURE, -1)
     }
 
-    fun isMeasureSelected(): Boolean {
-        return getLastSelectedMeasure() != -1L
-    }
-
     fun setLastLatitude(latitude: Double) {
         getSharedPreferences().edit().putFloat(LAST_LATITUDE, latitude.toFloat()).apply()
     }
@@ -137,9 +132,5 @@ object MeasurePreferences {
 
     fun getLastLongitude(): Double {
         return getSharedPreferences().getFloat(LAST_LONGITUDE, 0F).toDouble()
-    }
-
-    fun getLastLatLng(): LatLng {
-        return LatLng(getLastLatitude(), getLastLongitude())
     }
 }

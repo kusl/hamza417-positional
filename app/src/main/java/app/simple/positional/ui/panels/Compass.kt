@@ -24,6 +24,7 @@ import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import kotlinx.coroutines.flow.filterNotNull
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
@@ -54,7 +55,7 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     init {
         if (!sensor.isAvailable) showSensorError()
-        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) { showField(it) }
+        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull(), ::showField)
     }
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)

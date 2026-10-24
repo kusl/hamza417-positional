@@ -1,14 +1,12 @@
 package app.simple.positional.decorations.utils
 
 import android.animation.ValueAnimator
-import android.location.Location
 import android.view.animation.PathInterpolator
 import androidx.core.graphics.ColorUtils
 import app.simple.positional.math.MapInterpolation
 import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.Polyline
 
 private const val DURATION = 1000L
 
@@ -24,11 +22,8 @@ private fun LatLng.toward(end: LatLng, fraction: Float): LatLng {
     return LatLng(latitude, longitude)
 }
 
-private fun Location.latLng() = LatLng(latitude, longitude)
-
-fun Marker.animateTo(location: Location, rotation: Float?): ValueAnimator {
+fun Marker.animateTo(end: LatLng, rotation: Float?): ValueAnimator {
     val start = position
-    val end = location.latLng()
     val startRotation = this.rotation
     return animate { fraction ->
         position = start.toward(end, fraction)
@@ -36,11 +31,9 @@ fun Marker.animateTo(location: Location, rotation: Float?): ValueAnimator {
     }
 }
 
-fun Circle.animateTo(location: Location): ValueAnimator {
+fun Circle.animateTo(end: LatLng, endRadius: Double): ValueAnimator {
     val start = center
-    val end = location.latLng()
     val startRadius = radius
-    val endRadius = location.accuracy.toDouble()
     return animate { fraction ->
         center = start.toward(end, fraction)
         radius = MapInterpolation.linear(fraction, startRadius, endRadius)
@@ -54,8 +47,4 @@ fun Circle.animateColors(fill: Int, stroke: Int): ValueAnimator {
         fillColor = ColorUtils.blendARGB(startFill, fill, fraction)
         strokeColor = ColorUtils.blendARGB(startStroke, stroke, fraction)
     }
-}
-
-fun Polyline.animateSegment(start: LatLng, end: LatLng): ValueAnimator = animate { fraction ->
-    points = listOf(start, start.toward(end, fraction))
 }

@@ -15,6 +15,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.navigation.AppNavigator
 import app.simple.positional.ui.navigation.Routes
@@ -23,6 +25,8 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
     private val registry = LifecycleRegistry(this)
@@ -73,6 +77,10 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
 
     protected fun search(onResult: (SearchResult) -> Unit) {
         (activity as? AppNavigator)?.search(onResult)
+    }
+
+    protected fun <T> observe(flow: Flow<T>, action: (T) -> Unit) {
+        lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { action(it) } } }
     }
 
     protected fun <I, O> register(contract: ActivityResultContract<I, O>, callback: (O) -> Unit): ActivityResultLauncher<I> =

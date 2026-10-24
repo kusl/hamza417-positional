@@ -1,356 +1,152 @@
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
-import android.location.Geocoder
 import android.location.Location
+import android.os.SystemClock
 import android.text.Spanned
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.text.TextUtils
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.Latency
 import app.simple.positional.math.MathExtensions.round
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKilometers
-import app.simple.positional.math.UnitConverter.toMiles
+import app.simple.positional.math.SeriesStats
 import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.services.LocationBus
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.ArrayHelper.isLastValueSame
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.services.LocationBus
 import app.simple.positional.util.Direction
+import app.simple.positional.util.DistanceText
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
-import app.simple.positional.util.NetworkCheck
+import app.simple.positional.util.ReverseGeocoder
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.IOException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
     private val listener = object : LocationBus.Listener {
         override fun onLocation(location: Location) = onNewLocation(location)
 
         override fun onProvider(provider: String?) {
-            this@LocationViewModel.provider.postValue(provider?.uppercase(Locale.getDefault()))
+            mutableProvider.value = provider?.uppercase(Locale.getDefault())
         }
     }
 
-    private val accuracyData = ArrayList<Float>()
-    private val altitudeData = ArrayList<Float>()
+    private val mutableLocation = MutableStateFlow<Location?>(null)
+    private val mutableProvider = MutableStateFlow<String?>(null)
+    private val mutableLatency = MutableStateFlow<Latency?>(null)
+    private val mutableAccuracy = MutableStateFlow(emptyList<Float>())
+    private val mutableAltitude = MutableStateFlow(emptyList<Float>())
+    private val targetPoint = MutableStateFlow(currentTarget())
+    private var lastFix = SystemClock.elapsedRealtime()
 
-    private val location = MutableLiveData<Location>()
-    private val provider = MutableLiveData<String>()
+    val location: StateFlow<Location?> = mutableLocation.asStateFlow()
+    val provider: StateFlow<String?> = mutableProvider.asStateFlow()
+    val latency: StateFlow<Latency?> = mutableLatency.asStateFlow()
+    val accuracySeries: StateFlow<List<Float>> = mutableAccuracy.asStateFlow()
+    val altitudeSeries: StateFlow<List<Float>> = mutableAltitude.asStateFlow()
 
-    val latency = MutableLiveData<Pair<Number, Boolean>>()
-    val targetData = MutableLiveData<Spanned>()
+    private val targetAddress = targetPoint.transformLatest<LatLng?, String?> { point ->
+        emit(null)
+        if (point != null) emit(ReverseGeocoder.addressLine(getApplication<Application>(), point.latitude, point.longitude))
+    }
 
-    val accuracyGraphData = MutableLiveData<ArrayList<Float>>()
-    val altitudeGraphData = MutableLiveData<ArrayList<Float>>()
-
-    private var lastLatencyInMilliseconds: Number = System.currentTimeMillis().toDouble()
-    private var targetAddress: String? = null
+    val target: StateFlow<Spanned?> = combine(mutableLocation.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
     init {
         LocationBus.register(listener)
     }
 
-    private fun onNewLocation(newLocation: Location) {
-        location.postValue(newLocation)
-        measureLatency()
-        graphData(newLocation)
-        if (GPSPreferences.isTargetMarkerSet().invert()) {
-            GPSPreferences.setTargetMarkerStartLatitude(newLocation.latitude.toFloat())
-            GPSPreferences.setTargetMarkerStartLongitude(newLocation.longitude.toFloat())
-        }
-        val target = GPSPreferences.getTargetMarkerCoordinates()
-        val origin = if (MainPreferences.isCustomCoordinate()) {
-            MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
-        } else {
-            LatLng(newLocation.latitude, newLocation.longitude)
-        }
-        targetData(LatLng(target[0].toDouble(), target[1].toDouble()), origin, newLocation.speed)
+    private fun onNewLocation(fix: Location) {
+        val now = SystemClock.elapsedRealtime()
+        mutableLatency.value = Latency(now - lastFix)
+        lastFix = now
+        mutableAccuracy.update { SeriesStats.append(it, fix.accuracy) }
+        mutableAltitude.update { SeriesStats.append(it, fix.altitude.toFloat()) }
+        mutableLocation.value = fix
     }
 
-    fun getLocation(): LiveData<Location> {
-        return location
-    }
+    private fun currentTarget(): LatLng? =
+        if (GPSPreferences.isTargetMarkerSet()) GPSPreferences.getTargetMarkerCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) } else null
 
-    fun getProvider(): LiveData<String> {
-        return provider
-    }
-
-    private fun measureLatency() {
-        kotlin.runCatching {
-            var currentLatency: Number
-
-            with(System.currentTimeMillis()) {
-                currentLatency = this.toDouble() - lastLatencyInMilliseconds.toDouble()
-                lastLatencyInMilliseconds = this.toDouble()
-            }
-
-            val inSeconds: Boolean
-
-            currentLatency = if (currentLatency.toDouble() > 999) {
-                inSeconds = true
-                round(currentLatency.toDouble() / 1000.0, 3)
+    private fun targetText(fix: Location, target: LatLng?, address: String?): Spanned {
+        val context = getContext()
+        val missing = context.getString(R.string.not_available)
+        val values = if (target == null) List(ROWS.size) { missing } else {
+            val origin = if (MainPreferences.isCustomCoordinate()) {
+                MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
             } else {
-                inSeconds = false
-                currentLatency.toInt()
+                LatLng(fix.latitude, fix.longitude)
             }
-
-            latency.postValue(Pair(currentLatency, inSeconds))
+            val start = GPSPreferences.getTargetMarkerStartCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+            val metric = MainPreferences.isMetric()
+            val distance = LocationExtension.measureDisplacement(arrayOf(target, origin)).toDouble()
+            val bearing = (LocationExtension.calculateBearingAngle(origin.latitude, origin.longitude, target.latitude, target.longitude) % 360 + 360) % 360
+            listOf(
+                DistanceText.format(context, distance, metric),
+                DistanceText.format(context, LocationExtension.measureDisplacement(arrayOf(start, origin)).toDouble(), metric),
+                "${round(bearing, 2)}°",
+                Direction.getDirectionNameFromAzimuth(context, bearing),
+                if (fix.speed > 0f) eta(context, (distance / fix.speed).toLong()) else missing,
+            )
         }
+        val rows = ROWS.zip(values) { label, value -> "<b>${context.getString(label)} </b>$value" } +
+            "<b>${context.getString(R.string.gps_address)}: </b>${address?.let(TextUtils::htmlEncode) ?: missing}"
+        return HtmlHelper.fromHtml(rows.joinToString("<br>"))
     }
 
-    fun targetData(target: LatLng, current: LatLng, speed: Float) {
-        viewModelScope.launch(Dispatchers.IO) {
-            with(StringBuilder()) {
-                append(targetDisplacement(target, current))
-                append(targetDisplacementFromOrigin(current))
-                append(targetBearing(target, current))
-                append(targetDirection(target, current))
-                append(targetETA(target, current, speed))
-                append(targetAddress(target))
-
-                targetData.postValue(HtmlHelper.fromHtml(this.toString()))
-            }
-        }
-    }
-
-    private fun targetDisplacement(target: LatLng, current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_displacement_from_dest)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.measureDisplacement(arrayOf(target, current))
-
-                if (MainPreferences.isMetric()) {
-                    if (p0 < 1000) {
-                        it.append(p0.round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.meter))
-                    } else {
-                        it.append(p0.toKilometers().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.kilometer))
-                    }
-                } else {
-                    if (p0 < 1000) {
-                        it.append(p0.toDouble().toFeet().toFloat().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.feet))
-                    } else {
-                        it.append(p0.toMiles().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.miles))
-                    }
-                }
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetDisplacementFromOrigin(current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            val target = LatLng(GPSPreferences.getTargetMarkerStartCoordinates()[0].toDouble(),
-                GPSPreferences.getTargetMarkerStartCoordinates()[1].toDouble())
-
-            it.append("<b>${getString(R.string.gps_displacement_from_origin)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.measureDisplacement(arrayOf(target, current))
-
-                if (MainPreferences.isMetric()) {
-                    if (p0 < 1000) {
-                        it.append(p0.round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.meter))
-                    } else {
-                        it.append(p0.toKilometers().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.kilometer))
-                    }
-                } else {
-                    if (p0 < 1000) {
-                        it.append(p0.toDouble().toFeet().toFloat().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.feet))
-                    } else {
-                        it.append(p0.toMiles().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.miles))
-                    }
-                }
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetDirection(target: LatLng, current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_direction)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.calculateBearingAngle(
-                    current.latitude,
-                    current.longitude,
-                    target.latitude,
-                    target.longitude
-                )
-
-                it.append(Direction.getDirectionNameFromAzimuth(getContext(), (p0 % 360 + 360) % 360))
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetBearing(target: LatLng, current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_bearing)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.calculateBearingAngle(
-                    current.latitude,
-                    current.longitude,
-                    target.latitude,
-                    target.longitude
-                )
-
-                it.append(round((p0 % 360 + 360) % 360, 2))
-                it.append("°")
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetETA(target: LatLng, current: LatLng, speed: Float): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.eta)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet() && speed != 0.0F) {
-                val p0 = LocationExtension.measureDisplacement(arrayOf(target, current))
-
-                val time = (p0 / speed).toLong()
-                println("time: $time")
-                val txt = when {
-                    TimeUnit.SECONDS.toSeconds(time) < 60 -> {
-                        getString(R.string.eta_seconds, TimeUnit.SECONDS.toSeconds(time).toString())
-                    }
-
-                    TimeUnit.SECONDS.toMinutes(time) < 60 -> {
-                        getString(R.string.eta_minutes, TimeUnit.SECONDS.toMinutes(time).toString())
-                    }
-
-                    TimeUnit.SECONDS.toHours(time) < 24 -> {
-                        getString(R.string.eta_hours,
-                            TimeUnit.SECONDS.toHours(time).toString(),
-                            (TimeUnit.SECONDS.toMinutes(time) % 60).toString())
-                    }
-
-                    else -> {
-                        getString(R.string.eta_days,
-                            TimeUnit.SECONDS.toDays(time).toString(),
-                            (TimeUnit.SECONDS.toHours(time) % 24).toString(),
-                            (TimeUnit.SECONDS.toMinutes(time) % 60).toString())
-                    }
-                }
-
-                it.append(txt)
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetAddress(target: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_address)}: </b>")
-
-            if (targetAddress.isNull()) {
-                if (GPSPreferences.isTargetMarkerSet()) {
-                    targetAddress = try {
-                        if (!NetworkCheck.isNetworkAvailable(getApplication())) {
-                            null
-                        } else {
-                            val geocoder = Geocoder(getApplication(), Locale.getDefault())
-
-                            @Suppress("DEPRECATION")
-                            with(geocoder.getFromLocation(target.latitude, target.longitude, 1)) {
-                                if (!this.isNullOrEmpty()) {
-                                    this[0].getAddressLine(0)
-                                } else {
-                                    getString(R.string.not_available)
-                                }
-                            }
-                        }
-                    } catch (e: IOException) {
-                        null
-                    } catch (e: NullPointerException) {
-                        null
-                    } catch (e: IllegalArgumentException) {
-                        null
-                    }
-                }
-
-                if (targetAddress.isNull()) {
-                    it.append(getString(R.string.not_available))
-                } else {
-                    it.append(targetAddress)
-                }
-            } else {
-                it.append(targetAddress)
-            }
-        }
-    }
-
-    private fun graphData(location: Location) {
-        accuracyGraphData.postValue(ArrayList(manipulateDataForGraph(accuracyData, location.accuracy)))
-        altitudeGraphData.postValue(ArrayList(manipulateDataForGraph(altitudeData, location.altitude.toFloat())))
-    }
-
-    private fun manipulateDataForGraph(arrayList: ArrayList<Float>, value: Float): ArrayList<Float> {
-        if (arrayList.isLastValueSame(value))
-            return arrayList
-
-        if (arrayList.size >= 45)
-            arrayList.removeAt(0)
-
-        arrayList.add(value)
-        return arrayList
+    private fun eta(context: Context, seconds: Long): String = when {
+        seconds < MINUTE -> context.getString(R.string.eta_seconds, seconds.toString())
+        seconds < HOUR -> context.getString(R.string.eta_minutes, (seconds / MINUTE).toString())
+        seconds < DAY -> context.getString(R.string.eta_hours, (seconds / HOUR).toString(), (seconds / MINUTE % 60).toString())
+        else -> context.getString(
+            R.string.eta_days,
+            (seconds / DAY).toString(),
+            (seconds / HOUR % 24).toString(),
+            (seconds / MINUTE % 60).toString(),
+        )
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        super.onSharedPreferenceChanged(sharedPreferences, key)
         when (key) {
-            GPSPreferences.isTargetMarkerMode,
+            GPSPreferences.mapTargetMarker,
             GPSPreferences.mapTargetMarkerLatitude,
-            GPSPreferences.mapTargetMarkerLongitude -> {
-                targetAddress = null
-            }
+            GPSPreferences.mapTargetMarkerLongitude -> targetPoint.value = currentTarget()
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         LocationBus.unregister(listener)
+    }
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+        const val MINUTE = 60L
+        const val HOUR = 3_600L
+        const val DAY = 86_400L
+        val ROWS = listOf(
+            R.string.gps_displacement_from_dest,
+            R.string.gps_displacement_from_origin,
+            R.string.gps_bearing,
+            R.string.gps_direction,
+            R.string.eta,
+        )
     }
 }

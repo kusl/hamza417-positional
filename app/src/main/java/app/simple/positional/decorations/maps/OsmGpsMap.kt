@@ -30,7 +30,7 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
     override fun onCameraIdle(position: CameraPosition) {
         GPSPreferences.setMapZoom(position.zoom.toFloat())
         GPSPreferences.setMapTilt(position.tilt.toFloat())
-        GPSPreferences.setMapBearing(position.bearing.toFloat())
+        if (!compassRotation) GPSPreferences.setMapBearing(position.bearing.toFloat())
     }
 
     override fun onGesture() {
@@ -58,7 +58,7 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
         drawTarget()
         if (first) {
             moveCamera(camera(location.latitude, location.longitude, GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), bearing()))
-        } else if (isMapMovementEnabled && !animating && !GPSPreferences.isTargetMarkerMode()) {
+        } else if (isMapMovementEnabled && !animating && !GPSPreferences.isTargetMarkerMode() && (!compassRotation || current()?.let { !isVisible(it.first, it.second) } == true)) {
             follow(GPSPreferences.getMapZoom())
         }
     }

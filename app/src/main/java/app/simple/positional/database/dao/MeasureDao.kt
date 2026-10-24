@@ -15,7 +15,10 @@ interface MeasureDao {
     fun observeAll(): Flow<List<Measure>>
 
     @Query("SELECT * FROM measures WHERE date_added = :date")
-    fun getMeasureById(date: Long): Measure?
+    fun observeById(date: Long): Flow<Measure?>
+
+    @Query("SELECT * FROM measures WHERE date_added = :date")
+    suspend fun getMeasureById(date: Long): Measure?
 
     @Delete
     suspend fun deleteMeasure(measure: Measure)

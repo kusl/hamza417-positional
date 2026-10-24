@@ -28,6 +28,7 @@ import app.simple.positional.util.LocationPrompt
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.flow.filterNotNull
 import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
@@ -36,6 +37,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     private val measureViewModel: MeasureViewModel
     private val maps: MeasureMap
     private var location: Location? = null
+    private var shown: Long? = null
 
     init {
         locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
@@ -55,28 +57,29 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     init {
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
-        locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
-    }
-
-
-    override fun onMapInitialized() {
-        locationViewModel.getLocation().observe(owner) {
+        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(locationViewModel.location.filterNotNull()) {
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
         }
-        measureViewModel.getMeasure().observe(owner) { measure ->
-            if (MeasurePreferences.isMeasureSelected() && measure != null) {
-                maps.showMeasure(measure)
-                state.selected = true
-                state.name = measure.name.orEmpty()
-                showSummary(measure)
-                state.current = ""
-            } else {
-                clearMeasure()
-            }
+        observe(measureViewModel.measure, ::showMeasure)
+    }
+
+    private fun showMeasure(measure: MeasureModel?) {
+        if (measure == null) {
+            clearMeasure()
+            return
         }
+        if (measure.dateCreated != shown || maps.points != measure.points) {
+            maps.showMeasure(measure)
+            state.current = ""
+        }
+        shown = measure.dateCreated
+        state.selected = true
+        state.name = measure.name.orEmpty()
+        showSummary(measure)
     }
 
     override fun onMapClicked() {
@@ -86,11 +89,11 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     override fun onLineAdded(measurePoint: MeasurePoint) {
-        measureViewModel.addMeasurePoint(measurePoint) { measure -> activity.runOnUiThread { showSummary(measure) } }
+        measureViewModel.addMeasurePoint(measurePoint)
     }
 
     override fun onLineDeleted(measurePoint: MeasurePoint?) {
-        measureViewModel.removeMeasurePoint(measurePoint) { measure -> activity.runOnUiThread { showSummary(measure) } }
+        measureViewModel.removeMeasurePoint(measurePoint)
     }
 
     override fun onCameraDistance(latLng: LatLng?) {
@@ -112,6 +115,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     private fun distance(meters: Double) = DistanceText.format(activity, meters, MainPreferences.isMetric())
 
     private fun clearMeasure() {
+        shown = null
         maps.clear()
         state.selected = false
         state.hasPoints = false
@@ -167,7 +171,6 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            MeasurePreferences.LAST_SELECTED_MEASURE -> if (!MeasurePreferences.isMeasureSelected()) clearMeasure()
             MeasurePreferences.TOOLS_GRAVITY, MeasurePreferences.COMPASS_ROTATION, MeasurePreferences.POLYLINES_WRAPPED -> readPreferences()
         }
     }

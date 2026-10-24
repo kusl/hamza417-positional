@@ -126,7 +126,6 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
             layer(OsmStyle.LINE, PropertyFactory.lineColor(accent))
             layer(OsmStyle.GUIDE, PropertyFactory.lineColor(accent))
             onStyleReady()
-            mapCallbacks?.onMapInitialized()
         }
     }
 
@@ -195,6 +194,9 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     }
 
     protected fun target(): Pair<Double, Double>? = map?.cameraPosition?.target?.let { it.latitude to it.longitude }
+
+    protected fun isVisible(latitude: Double, longitude: Double): Boolean =
+        map?.projection?.visibleRegion?.latLngBounds?.contains(LibreLatLng(latitude, longitude)) ?: true
 
     protected fun screenPointOf(latitude: Double, longitude: Double): Point? =
         map?.projection?.toScreenLocation(LibreLatLng(latitude, longitude))?.let { Point(it.x.roundToInt(), it.y.roundToInt()) }

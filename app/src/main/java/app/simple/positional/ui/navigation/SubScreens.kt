@@ -167,12 +167,9 @@ fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
                 viewModel.open(direction.name, direction.latitude, direction.longitude, direction.dateAdded)
 
             override fun useAsTarget(direction: DirectionModel) {
-                val last = MainPreferences.getLastCoordinates()
-                GPSPreferences.setTargetMarker(true)
                 GPSPreferences.setTargetMarkerLatitude(direction.latitude.toFloat())
                 GPSPreferences.setTargetMarkerLongitude(direction.longitude.toFloat())
-                GPSPreferences.setTargetMarkerStartLatitude(last[0])
-                GPSPreferences.setTargetMarkerStartLongitude(last[1])
+                GPSPreferences.setTargetMarker(true, restart = true)
                 select(direction, useMapsTarget = true)
             }
 
@@ -308,4 +305,3 @@ private fun app.simple.positional.ui.compose.CustomLocationForm.fill(result: Sea
     latitude = result.latitude.toString(),
     longitude = result.longitude.toString(),
 )
-
