@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T02:32:52-04:00
+Generated: 2026-10-24T02:38:19-04:00
 Branch:    master
-Commit:    1d4941fd 2026-10-24 02:32:18 -0400 add prompt
+Commit:    5973d629 2026-10-24 02:38:13 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (880 files)
+## TREE (883 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -247,9 +247,11 @@ app/
                   DirectionViewModel.kt
                   DirectionsViewModel.kt
                   GpsViewModel.kt
+                  LevelViewModel.kt
                   LocationViewModel.kt
                   MapSearchViewModel.kt
                   MeasureViewModel.kt
+                  SettingsViewModel.kt
                   TrailDataViewModel.kt
                   TrailsViewModel.kt
               widgets/
@@ -965,6 +967,7 @@ app/
                 TwilightTest.kt
               viewmodels/
                 viewmodel/
+                  SettingsViewModelTest.kt
                   SkyPositionTest.kt
               widgets/
                 DayNightTest.kt
@@ -1263,7 +1266,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
@@ -1301,7 +1304,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 13 | Location providers as lifecycle-bound flows (`AndroidLocationSource`, `FusedLocationSource`) replacing the started services and `LocationBus`; fused updates every second instead of every 100 ms; the Android provider registers once instead of re-registering every second and switches provider on `PROVIDERS_CHANGED`; approximate location permission is honoured; last position saved in one write after moving 50 m instead of three writes per fix | Done |
 | 14a | Panel dialogs as state (`PanelDialog` values rendered by each panel) instead of stored composables; map search result returned through the previous back stack entry's `SavedStateHandle`, so it survives configuration changes; sub screens collect with `collectAsStateWithLifecycle`; clock second hand drawn at full size again; empty trail art scaled to width | Done |
 | 14b | Panel info in view models (`ClockViewModel`, `CompassViewModel`, `DirectionViewModel`, `GpsViewModel`, trail and measure summaries) built on `Dispatchers.Default` and collected with `collectAsStateWithLifecycle`, so it survives rotation and panel switches; GPS address lookup moved into the view model; sun and moon report recomputed once a minute or after moving 1 km instead of on every fix; the clock no longer turns on location with a custom location; view models react to unit, coordinate format and clock format changes through `SharedPreferences.changes`; localized context cached per language | Done |
-| 15 | Settings and level panel state in view models; panel controllers limited to sensors, maps and actions | Next |
+| 15 | Settings and level panel state in view models (`SettingsViewModel`, `LevelViewModel`) built from `SharedPreferences.changes` and collected with `collectAsStateWithLifecycle`; preference writes moved out of the panel controllers, which keep only permission requests, activity recreation, window flags and navigation; the settings screen no longer rebuilds its state (and queries every launcher alias) on unrelated preference changes | Done |
+| 16 | Remaining panel preference listeners (compass, clock, direction, GPS, trail, measure) as view model flows | Next |
 
 ## Building
 
@@ -6515,13 +6519,13 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
 object MainPreferences {
     private const val launchCount = "launch_count"
-    private const val dayNightMode = "is_day_night_mode"
+    const val dayNightMode = "is_day_night_mode"
     private const val showAgain = "show_permission_dialog_again"
     private const val address = "specified_address"
-    private const val screenOn = "keep_the_screen_on"
-    private const val appLanguage = "current_language_locale"
-    private const val appCornerRadius = "corner_radius"
-    private const val skipSplashScreen = "skip_splash_screen"
+    const val screenOn = "keep_the_screen_on"
+    const val appLanguage = "current_language_locale"
+    const val appCornerRadius = "corner_radius"
+    const val skipSplashScreen = "skip_splash_screen"
     private const val currentArt = "current_art_position"
     private const val isMaterialYouAccent = "is_material_you_accent"
     private const val lastLatitude = "last_latitude"
@@ -12900,41 +12904,33 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.math.Tilt
-import app.simple.positional.preferences.LevelPreferences
 import app.simple.positional.sensors.GravitySensor
 import app.simple.positional.ui.compose.LevelScreen
+import app.simple.positional.viewmodels.viewmodel.LevelViewModel
 
 class Level(activity: ComponentActivity) : SensorPanel(activity) {
     private var tilt by mutableStateOf(Tilt.zero)
-    private var square by mutableStateOf(false)
-    private val sensor: GravitySensor
+    private val viewModel = ViewModelProvider(activity)[LevelViewModel::class.java]
+    private val sensor = GravitySensor(activity) { tilt = it }
 
     init {
-        sensor = GravitySensor(activity) { tilt = it }
         lifecycle.addObserver(sensor)
-        square = LevelPreferences.isSquareStyle()
+        if (!sensor.isAvailable) showSensorError()
     }
 
     @Composable
     override fun Content(topInset: Dp) {
-        LevelScreen({ tilt }, square, topInset) { LevelPreferences.setSquareStyle(!square) }
+        val square by viewModel.square.collectAsStateWithLifecycle()
+        LevelScreen({ tilt }, square, topInset, viewModel::toggleStyle)
     }
-
-    init {
-        if (!sensor.isAvailable) showSensorError()
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == LevelPreferences.isSquareStyle) square = LevelPreferences.isSquareStyle()
-    }
-
 }
 
 ################################################################################
@@ -13134,25 +13130,21 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.Dp
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.Dp
 import androidx.core.net.toUri
-import app.simple.positional.BuildConfig
-import app.simple.positional.ui.navigation.Routes
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.SettingsActions
-import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.ui.compose.SettingsScreen
-import app.simple.positional.ui.compose.SettingsState
-import app.simple.positional.util.AppIcons
-import app.simple.positional.util.PermissionUtils
+import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.viewmodels.viewmodel.SettingsViewModel
 
 class Settings(activity: ComponentActivity) : PanelController(activity), SettingsActions {
-    private var state by mutableStateOf(SettingsState())
+    private val viewModel = ViewModelProvider(activity)[SettingsViewModel::class.java]
     private var appSettingsOpened = false
     private val permissionLauncher = register(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.any { !it } && !appSettingsOpened) {
@@ -13161,43 +13153,22 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
                 data = Uri.fromParts("package", activity.packageName, null)
             })
         }
-        refresh()
+        viewModel.refresh()
     }
 
     @Composable
     override fun Content(topInset: Dp) {
+        val state by viewModel.state.collectAsStateWithLifecycle()
         SettingsScreen(state, this, topInset)
     }
 
     override fun onResume() {
         appSettingsOpened = false
-        refresh()
+        viewModel.refresh()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == MainPreferences.accentColor) {
-            activity.recreate()
-        } else {
-            refresh()
-        }
-    }
-
-    private fun refresh() {
-        state = SettingsState(
-            hasLocationPermission = PermissionUtils.checkPermission(activity),
-            themeMode = if (MainPreferences.isDayNightOn()) SettingsLabels.THEME_AUTO else MainPreferences.getTheme(),
-            isMetric = MainPreferences.isMetric(),
-            coordinatesFormat = MainPreferences.getCoordinatesFormat(),
-            locationProvider = MainPreferences.getLocationProvider(),
-            mapSource = MainPreferences.getMapSource(),
-            language = MainPreferences.getAppLanguage() ?: SettingsLabels.LANGUAGE_DEFAULT,
-            isCustomLocation = MainPreferences.isCustomCoordinate(),
-            keepScreenOn = MainPreferences.isScreenOn(),
-            skipSplashScreen = MainPreferences.getSkipSplashScreen(),
-            iconIndex = AppIcons.current(activity),
-            cornerRadius = MainPreferences.getCornerRadius() * 5,
-            versionName = BuildConfig.VERSION_NAME,
-        )
+        if (key == MainPreferences.accentColor) activity.recreate()
     }
 
     override fun requestPermission() {
@@ -13205,44 +13176,38 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     }
 
     override fun setThemeMode(mode: Int) {
-        MainPreferences.setDayNight(mode == SettingsLabels.THEME_AUTO)
-        if (mode != SettingsLabels.THEME_AUTO) MainPreferences.setTheme(mode)
+        viewModel.setThemeMode(mode)
         activity.recreate()
     }
 
     override fun openAccent() = navigate(Routes.ACCENT)
 
-    override fun setIcon(index: Int) {
-        AppIcons.select(activity, index)
-        refresh()
-    }
+    override fun setIcon(index: Int) = viewModel.setIcon(index)
 
     override fun setCornerRadius(value: Int) {
-        if (value == MainPreferences.getCornerRadius() * 5) return
-        MainPreferences.setCornerRadius(value)
-        activity.recreate()
+        if (viewModel.setCornerRadius(value)) activity.recreate()
     }
 
-    override fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
+    override fun setSkipSplashScreen(enabled: Boolean) = viewModel.setSkipSplashScreen(enabled)
 
     override fun openArts() = navigate(Routes.ARTS)
 
-    override fun setMetric(metric: Boolean) = MainPreferences.setUnit(metric)
+    override fun setMetric(metric: Boolean) = viewModel.setMetric(metric)
 
-    override fun setCoordinatesFormat(format: Int) = MainPreferences.setCoordinatesFormat(format)
+    override fun setCoordinatesFormat(format: Int) = viewModel.setCoordinatesFormat(format)
 
-    override fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
+    override fun setLocationProvider(provider: String) = viewModel.setLocationProvider(provider)
 
-    override fun setMapSource(source: Int) = MainPreferences.setMapSource(source)
+    override fun setMapSource(source: Int) = viewModel.setMapSource(source)
 
     override fun openCustomLocations() = navigate(Routes.CUSTOM_LOCATIONS)
 
     override fun setCustomLocation(enabled: Boolean) {
-        if (enabled) openCustomLocations() else MainPreferences.setCustomCoordinates(false)
+        if (enabled) openCustomLocations() else viewModel.disableCustomLocation()
     }
 
     override fun setKeepScreenOn(enabled: Boolean) {
-        MainPreferences.setScreenOn(enabled)
+        viewModel.setKeepScreenOn(enabled)
         if (enabled) {
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
@@ -13251,9 +13216,7 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     }
 
     override fun setLanguage(code: String) {
-        if (code == MainPreferences.getAppLanguage()) return
-        MainPreferences.setAppLanguage(code)
-        activity.recreate()
+        if (viewModel.setLanguage(code)) activity.recreate()
     }
 
     override fun openLegal(page: Int) {
@@ -15440,6 +15403,32 @@ class GpsViewModel(application: Application, source: LocationViewModel) : Wrappe
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/LevelViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.preferences.LevelPreferences
+import app.simple.positional.singleton.SharedPreferences
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+
+class LevelViewModel : ViewModel() {
+    val square: StateFlow<Boolean> = SharedPreferences.changes(LevelPreferences.isSquareStyle)
+        .map { LevelPreferences.isSquareStyle() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), LevelPreferences.isSquareStyle())
+
+    fun toggleStyle() = LevelPreferences.setSquareStyle(!LevelPreferences.isSquareStyle())
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/LocationViewModel.kt
 ################################################################################
 package app.simple.positional.viewmodels.viewmodel
@@ -15792,6 +15781,119 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
 
     private companion object {
         const val STOP_TIMEOUT = 5_000L
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/SettingsViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.BuildConfig
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.ui.compose.SettingsLabels
+import app.simple.positional.ui.compose.SettingsState
+import app.simple.positional.util.AppIcons
+import app.simple.positional.util.PermissionUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val refreshes = MutableStateFlow(0)
+
+    val state: StateFlow<SettingsState> = combine(SharedPreferences.changes(*keys), refreshes) { _, _ -> read() }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), read())
+
+    fun refresh() {
+        refreshes.value++
+    }
+
+    fun setThemeMode(mode: Int) {
+        MainPreferences.setDayNight(mode == SettingsLabels.THEME_AUTO)
+        if (mode != SettingsLabels.THEME_AUTO) MainPreferences.setTheme(mode)
+    }
+
+    fun setIcon(index: Int) {
+        AppIcons.select(getApplication(), index)
+        refresh()
+    }
+
+    fun setCornerRadius(value: Int): Boolean {
+        if (value == cornerRadius(MainPreferences.getCornerRadius())) return false
+        MainPreferences.setCornerRadius(value)
+        return true
+    }
+
+    fun setLanguage(code: String): Boolean {
+        if (code == MainPreferences.getAppLanguage()) return false
+        MainPreferences.setAppLanguage(code)
+        return true
+    }
+
+    fun setSkipSplashScreen(enabled: Boolean) = MainPreferences.setSkipSplashScreen(enabled)
+
+    fun setMetric(metric: Boolean) = MainPreferences.setUnit(metric)
+
+    fun setCoordinatesFormat(format: Int) = MainPreferences.setCoordinatesFormat(format)
+
+    fun setLocationProvider(provider: String) = MainPreferences.setLocationProvider(provider)
+
+    fun setMapSource(source: Int) = MainPreferences.setMapSource(source)
+
+    fun disableCustomLocation() = MainPreferences.setCustomCoordinates(false)
+
+    fun setKeepScreenOn(enabled: Boolean) = MainPreferences.setScreenOn(enabled)
+
+    private fun read(): SettingsState {
+        val context = getApplication<Application>()
+        return SettingsState(
+            hasLocationPermission = PermissionUtils.checkPermission(context),
+            themeMode = themeMode(MainPreferences.isDayNightOn(), MainPreferences.getTheme()),
+            isMetric = MainPreferences.isMetric(),
+            coordinatesFormat = MainPreferences.getCoordinatesFormat(),
+            locationProvider = MainPreferences.getLocationProvider(),
+            mapSource = MainPreferences.getMapSource(),
+            language = MainPreferences.getAppLanguage() ?: SettingsLabels.LANGUAGE_DEFAULT,
+            isCustomLocation = MainPreferences.isCustomCoordinate(),
+            keepScreenOn = MainPreferences.isScreenOn(),
+            skipSplashScreen = MainPreferences.getSkipSplashScreen(),
+            iconIndex = AppIcons.current(context),
+            cornerRadius = cornerRadius(MainPreferences.getCornerRadius()),
+            versionName = BuildConfig.VERSION_NAME,
+        )
+    }
+
+    companion object {
+        private const val STOP_TIMEOUT = 5_000L
+        private const val CORNER_STEP = 5
+
+        private val keys = arrayOf(
+            MainPreferences.dayNightMode,
+            MainPreferences.theme,
+            MainPreferences.unit,
+            MainPreferences.coordinatesFormat,
+            MainPreferences.locationProvider,
+            MainPreferences.mapSource,
+            MainPreferences.appLanguage,
+            MainPreferences.isCustomCoordinate,
+            MainPreferences.screenOn,
+            MainPreferences.skipSplashScreen,
+            MainPreferences.appCornerRadius,
+        )
+
+        fun themeMode(dayNight: Boolean, theme: Int): Int = if (dayNight) SettingsLabels.THEME_AUTO else theme
+
+        fun cornerRadius(stored: Int): Int = stored * CORNER_STEP
     }
 }
 
@@ -19202,6 +19304,36 @@ class TwilightTest {
     @Test
     fun phasesHaveDistinctColors() {
         assertEquals(TwilightPhase.entries.size, TwilightPhase.entries.map { it.color }.toSet().size)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/viewmodels/viewmodel/SettingsViewModelTest.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import app.simple.positional.ui.compose.SettingsLabels
+import app.simple.positional.util.NightMode
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class SettingsViewModelTest {
+    @Test
+    fun autoThemeWinsOverStoredTheme() {
+        assertEquals(SettingsLabels.THEME_AUTO, SettingsViewModel.themeMode(true, NightMode.YES))
+    }
+
+    @Test
+    fun storedThemeShownWhenAutoIsOff() {
+        assertEquals(NightMode.YES, SettingsViewModel.themeMode(false, NightMode.YES))
+        assertEquals(NightMode.FOLLOW_SYSTEM, SettingsViewModel.themeMode(false, NightMode.FOLLOW_SYSTEM))
+    }
+
+    @Test
+    fun cornerRadiusIsStoredInFifths() {
+        assertEquals(SettingsLabels.CORNER_DEFAULT, SettingsViewModel.cornerRadius(30))
+        assertEquals(SettingsLabels.CORNER_MIN, SettingsViewModel.cornerRadius(5))
+        assertEquals(SettingsLabels.CORNER_MAX, SettingsViewModel.cornerRadius(80))
     }
 }
 
