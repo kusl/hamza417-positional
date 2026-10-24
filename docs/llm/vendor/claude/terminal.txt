@@ -52,4 +52,41 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m0.930s
 user	0m0.380s
 sys	0m0.501s
+kushal@fedora:~/src/kotlin/positional$ free -h; swapon --show;
+               total        used        free      shared  buff/cache   available
+Mem:            14Gi        12Gi       581Mi        64Mi       2.2Gi       2.8Gi
+Swap:          8.0Gi       5.9Gi       2.1Gi
+NAME       TYPE      SIZE USED PRIO
+/dev/zram0 partition   8G 5.9G  100
+kushal@fedora:~/src/kotlin/positional$ smem -tk | sort -k5 -h | tail -20
+bash: smem: command not found...
+Install package 'smem' to provide command 'smem'? [N/y] y
+
+Proceed with changes? [N/y] y
+
+ 6809 kushal   /usr/bin/python3 /usr/share    60.8M     1.1M     1.6M    19.4M 
+259401 kushal   /usr/lib64/firefox/firefox    118.6M    60.9M    64.1M   126.3M 
+16152 kushal   /app/extra/chrome --disable    71.4M    84.5M    98.2M   134.2M 
+16242 kushal   /app/extra/chrome --type=gp    76.5M    24.3M    29.6M    50.1M 
+ 6496 kushal   /usr/lib64/firefox/firefox    180.6M    79.6M    82.1M   138.6M 
+ 6843 kushal   /usr/lib64/firefox/firefox    177.4M   103.1M   105.9M   163.2M 
+16412 kushal   /app/extra/chrome --type=zy   103.8M   458.1M   479.9M   527.0M 
+ 4285 kushal   /usr/bin/gnome-software --g   151.2M    85.5M    87.2M   109.8M 
+118232 kushal   ./steamwebhelper -nocrashdi   179.9M    25.3M    32.6M    51.6M 
+261867 kushal   /usr/lib64/firefox/firefox      7.6M   214.0M   228.4M   325.0M 
+ 3898 kushal   /usr/bin/gnome-shell --mode   249.0M   150.6M   160.0M   197.8M 
+118345 kushal   /home/kushal/.local/share/S   340.9M   265.6M   273.7M   288.5M 
+10061 kushal   /opt/VSCode-linux-x64/code    102.9M   287.7M   298.2M   330.4M 
+ 6684 kushal   /usr/lib64/firefox/firefox     61.5M   340.9M   350.1M   433.6M 
+ 6451 kushal   /usr/lib64/firefox/firefox    472.7M   421.9M   425.5M   489.5M 
+ 5854 kushal   /usr/lib64/firefox/firefox    301.4M   449.4M   470.3M   607.3M 
+ 6521 kushal   /usr/lib64/firefox/firefox    258.9M   490.6M   493.7M   555.5M 
+230687 kushal   /usr/lib64/firefox/firefox     44.4M   549.7M   560.2M   646.9M 
+ 7077 kushal   /usr/lib64/firefox/firefox    496.1M     2.7G     2.7G     2.8G 
+  191 1                                        5.9G     7.7G     8.0G    11.1G 
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.960s
+user	0m0.373s
+sys	0m0.571s
 kushal@fedora:~/src/kotlin/positional$ 
