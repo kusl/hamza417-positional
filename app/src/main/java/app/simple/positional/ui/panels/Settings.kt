@@ -2,7 +2,6 @@ package app.simple.positional.ui.panels
 
 import android.Manifest
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.Settings as AndroidSettings
 import android.view.WindowManager
@@ -16,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.SettingsActions
 import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.navigation.Routes
@@ -44,10 +42,6 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     override fun onResume() {
         appSettingsOpened = false
         viewModel.refresh()
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == MainPreferences.accentColor) activity.recreate()
     }
 
     override fun requestPermission() {

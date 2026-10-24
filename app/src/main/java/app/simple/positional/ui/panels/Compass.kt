@@ -1,37 +1,36 @@
 package app.simple.positional.ui.panels
 
+import android.hardware.Sensor
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.simple.positional.viewmodels.viewmodel.CompassViewModel
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
-import android.hardware.Sensor
-import android.os.SystemClock
-import app.simple.positional.constants.CompassBloom.compassBloomRes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.ui.compose.BloomSkinDialog
-import app.simple.positional.ui.compose.PhysicalPropertiesDialog
 import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.sensors.HeadingSensor
+import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
-import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.ui.compose.PhysicalPropertiesDialog
+import app.simple.positional.ui.compose.axisRows
+import app.simple.positional.viewmodels.viewmodel.CompassSettings
+import app.simple.positional.viewmodels.viewmodel.CompassViewModel
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
-    private val sensor: HeadingSensor
+    private val sensor = HeadingSensor(activity, this)
     private val viewModel = panelModel(CompassViewModel::class, ::CompassViewModel)
     private var lastReadings = 0L
 
     init {
-        sensor = HeadingSensor(activity, this)
         lifecycle.addObserver(sensor)
-        applyPreferences()
+        bind(viewModel.settings, ::applySettings)
+        if (!sensor.isAvailable) showSensorError()
     }
 
     @Composable
@@ -55,10 +54,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     private enum class CompassDialog : PanelDialog { Bloom, Physics }
 
-    init {
-        if (!sensor.isAvailable) showSensorError()
-    }
-
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
     override fun onAccuracy(type: Int, accuracy: Int) {
@@ -77,29 +72,15 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
         state.magnetometer = axisRows(magnetometer)
     }
 
-    private fun applyPreferences() {
-        sensor.gimbalLock = CompassPreferences.isUsingGimbalLock()
-        state.physics = CompassPreferences.isUsingPhysicalProperties()
-        state.directionCode = CompassPreferences.getDirectionCode()
-        state.bloom = if (CompassPreferences.isFlowerBloomOn()) compassBloomRes.getOrNull(CompassPreferences.getFlowerBloomTheme()) else null
-        state.configure(CompassPreferences.getRotationalInertia(), CompassPreferences.getDampingCoefficient(), CompassPreferences.getMagneticCoefficient())
+    private fun applySettings(settings: CompassSettings) {
+        sensor.gimbalLock = settings.gimbalLock
+        state.physics = settings.physics
+        state.directionCode = settings.directionCode
+        state.bloom = settings.bloom
+        state.configure(settings.inertia, settings.damping, settings.magnetic)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in compassKeys) applyPreferences()
-    }
-
-    companion object {
-        private const val READINGS_INTERVAL = 250L
-        private val compassKeys = setOf(
-            CompassPreferences.direction_code,
-            CompassPreferences.flowerBloom,
-            CompassPreferences.flowerBloomTheme,
-            CompassPreferences.dampingCoefficient,
-            CompassPreferences.magneticCoefficient,
-            CompassPreferences.rotationalInertia,
-            CompassPreferences.usePhysicalProperties,
-            CompassPreferences.useGimbalLock,
-        )
+    private companion object {
+        const val READINGS_INTERVAL = 250L
     }
 }

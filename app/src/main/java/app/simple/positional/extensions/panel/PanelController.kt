@@ -2,7 +2,6 @@ package app.simple.positional.extensions.panel
 
 import android.app.Application
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -25,7 +24,6 @@ import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.navigation.AppNavigator
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.ui.navigation.SearchResult
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.ErrorDialog
 import app.simple.positional.ui.compose.MessageDialog
@@ -34,10 +32,11 @@ import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
-abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner {
     private val registry = LifecycleRegistry(this)
     private val launchers = mutableListOf<ActivityResultLauncher<*>>()
     private var destroyed = false
@@ -58,10 +57,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected val locationModel: LocationViewModel by lazy { ViewModelProvider(activity)[LocationViewModel::class.java] }
     protected val isLandscapeOrientation: Boolean = activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    init {
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-    }
-
     @Composable
     abstract fun Content(topInset: Dp)
 
@@ -70,8 +65,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected open fun onPause() {}
 
     protected open fun onCleared() {}
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
 
     protected fun getString(@StringRes id: Int): String = activity.getString(id)
 
@@ -103,6 +96,11 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { action(it) } } }
     }
 
+    protected fun <T> bind(flow: StateFlow<T>, action: (T) -> Unit) {
+        action(flow.value)
+        observe(flow, action)
+    }
+
     protected fun <I, O> register(contract: ActivityResultContract<I, O>, callback: (O) -> Unit): ActivityResultLauncher<I> =
         activity.activityResultRegistry.register("${javaClass.name}#${launchers.size}", contract, callback).also { launchers += it }
 
@@ -120,7 +118,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     fun destroy() {
         if (destroyed) return
         destroyed = true
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
         launchers.forEach { it.unregister() }
         if (registry.currentState.isAtLeast(Lifecycle.State.CREATED)) registry.currentState = Lifecycle.State.DESTROYED
         onCleared()

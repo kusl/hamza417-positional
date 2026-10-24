@@ -6,7 +6,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.SharedPreferences
 import android.location.Location
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -38,6 +37,7 @@ import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.TrailNames
+import app.simple.positional.viewmodels.viewmodel.MapTools
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -52,10 +52,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private var pending: Triple<Double, Double, Float>? = null
 
     init {
-        readPreferences()
-    }
-
-    init {
+        bind(trailData.tools, ::applySettings)
         maps = TrailMap.create(activity).apply { setCallbacks(this@Trail) }
     }
 
@@ -79,10 +76,10 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         observe(trailData.points, maps::showPoints)
     }
 
-    private fun readPreferences() {
-        state.toolsLeft = TrailPreferences.isToolsGravityToLeft()
-        state.compass = TrailPreferences.isCompassRotation()
-        state.wrapped = TrailPreferences.arePolylinesWrapped()
+    private fun applySettings(tools: MapTools) {
+        state.toolsLeft = tools.toolsLeft
+        state.compass = tools.compass
+        state.wrapped = tools.wrapped
     }
 
     private fun bottomBar(visible: Boolean) {
@@ -235,18 +232,8 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     override fun share(item: TrailPointItem) = MapIntents.open(activity, item.point.latitude, item.point.longitude)
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            TrailPreferences.selectedTrail -> {
-                maps.clear()
-                trailData.select(TrailPreferences.getCurrentTrail())
-            }
-            TrailPreferences.toolsMenuGravity, TrailPreferences.compass, TrailPreferences.wrapped -> readPreferences()
-        }
-    }
-
-    companion object {
-        private const val CLOSE_ZOOM = 18F
-        private const val FOCUS_ZOOM = 15F
+    private companion object {
+        const val CLOSE_ZOOM = 18F
+        const val FOCUS_ZOOM = 15F
     }
 }

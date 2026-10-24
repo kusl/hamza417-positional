@@ -93,11 +93,6 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
         animateTo(camera(latitude, longitude, zoom, TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
     }
 
-    override fun clear() {
-        points = emptyList()
-        drawPoints()
-    }
-
     private fun wrap(animate: Boolean) {
         if (!TrailPreferences.arePolylinesWrapped()) restore = map?.cameraPosition
         if (fit(points.map { it.latitude to it.longitude }, animate)) TrailPreferences.setWrapStatus(true)

@@ -1,6 +1,5 @@
 package app.simple.positional.ui.panels
 
-import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -8,13 +7,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
-import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
-import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
@@ -24,6 +18,7 @@ import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.viewmodels.viewmodel.ClockSettings
 import app.simple.positional.viewmodels.viewmodel.ClockViewModel
 
 class Time(activity: ComponentActivity) : PanelController(activity) {
@@ -31,7 +26,7 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
     private val viewModel = panelModel(ClockViewModel::class, ::ClockViewModel)
 
     init {
-        applyPreferences()
+        bind(viewModel.settings, ::applySettings)
     }
 
     @Composable
@@ -78,32 +73,21 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
 
     private enum class ClockDialog : PanelDialog { Location, Needles, Motion }
 
-    private fun applyPreferences() {
-        state.motion = ClockMotion.of(ClockPreferences.getMovementType())
-        state.face24 = ClockPreferences.isClockFace24Hour()
-        state.needles = clockNeedleSkins.getOrElse(ClockPreferences.getClockNeedleTheme()) { clockNeedleSkins[0] }.toList()
-        state.pin = LocationPins.locationsPins.getOrElse(GPSPreferences.getPinSkin()) { R.drawable.ic_pin_01 }
-        state.customLocation = MainPreferences.isCustomCoordinate()
+    private fun applySettings(settings: ClockSettings) {
+        state.motion = settings.motion
+        state.face24 = settings.face24
+        state.needles = settings.needles
+        state.pin = settings.pin
+        state.customLocation = settings.customLocation
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in clockKeys) applyPreferences()
-    }
-
-    companion object {
-        private val motionTypes = listOf(
+    private companion object {
+        val motionTypes = listOf(
             "smooth" to R.string.motion_type_smooth,
             "tick" to R.string.motion_type_tick,
             "oscillate" to R.string.tick_oscillate,
             "tick_smooth" to R.string.tick_smooth,
             "mechanical" to R.string.mechanical,
-        )
-        private val clockKeys = setOf(
-            ClockPreferences.clockNeedleMovementType,
-            ClockPreferences.clockNeedle,
-            ClockPreferences.is24HourFace,
-            MainPreferences.isCustomCoordinate,
-            GPSPreferences.pinSkin,
         )
     }
 }

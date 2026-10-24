@@ -1,11 +1,12 @@
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.ClockMotion
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences.changes
 import app.simple.positional.ui.compose.ClockTime
@@ -15,10 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -36,25 +35,40 @@ data class SkyPosition(val latitude: Double, val longitude: Double, val altitude
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClockViewModel(application: Application, location: LocationViewModel) : WrappedViewModel(application) {
-    private val custom = MutableStateFlow(customPosition())
-    private val mutableZone = MutableStateFlow(storedZone())
+    private val custom = preference(MainPreferences.isCustomCoordinate, MainPreferences.latitude, MainPreferences.longitude, read = ::customPosition)
 
-    val zone: StateFlow<ZoneId> = mutableZone.asStateFlow()
+    val zone: StateFlow<ZoneId> = preference(ClockPreferences.timezone, read = ::storedZone)
+
+    val settings: StateFlow<ClockSettings> = preference(
+        ClockPreferences.clockNeedleMovementType,
+        ClockPreferences.clockNeedle,
+        ClockPreferences.is24HourFace,
+        MainPreferences.isCustomCoordinate,
+        GPSPreferences.pinSkin,
+    ) {
+        ClockSettings(
+            motion = ClockMotion.of(ClockPreferences.getMovementType()),
+            face24 = ClockPreferences.isClockFace24Hour(),
+            needles = ClockSettings.needles(ClockPreferences.getClockNeedleTheme()),
+            pin = ClockSettings.pin(GPSPreferences.getPinSkin()),
+            customLocation = MainPreferences.isCustomCoordinate(),
+        )
+    }
 
     val position: StateFlow<SkyPosition> = custom
         .flatMapLatest { fixed ->
             if (fixed != null) flowOf(fixed) else location.location.filterNotNull().map { SkyPosition(it.latitude, it.longitude, it.altitude) }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), custom.value ?: storedPosition())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), customPosition() ?: storedPosition())
 
-    val time: StateFlow<ClockTime> = combine(mutableZone, changes(ClockPreferences.isUsingAmPm)) { zone, _ -> zone }
+    val time: StateFlow<ClockTime> = combine(zone, changes(ClockPreferences.isUsingAmPm)) { zone, _ -> zone }
         .flatMapLatest { zone -> ticker(SECOND) { report().time(zone) } }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), ClockTime())
 
     val sky: StateFlow<SkyReport?> = combine(
         position.distinctUntilChanged { old, new -> old.isNear(new, SKY_DISTANCE) },
-        mutableZone,
+        zone,
         changes(MainPreferences.unit, ClockPreferences.isUsingAmPm, ClockPreferences.isUsingSecondsPrecision),
     ) { position, zone, _ -> position to zone }
         .flatMapLatest { (position, zone) -> ticker(MINUTE) { report().sky(position.latitude, position.longitude, position.altitude, zone) } }
@@ -67,13 +81,6 @@ class ClockViewModel(application: Application, location: LocationViewModel) : Wr
         while (true) {
             emit(value())
             delay(period - System.currentTimeMillis() % period)
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            ClockPreferences.timezone -> mutableZone.value = storedZone()
-            MainPreferences.isCustomCoordinate, MainPreferences.latitude, MainPreferences.longitude -> custom.value = customPosition()
         }
     }
 

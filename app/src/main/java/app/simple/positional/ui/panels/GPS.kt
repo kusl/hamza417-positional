@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.SharedPreferences
 import android.location.Location
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
@@ -15,7 +14,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.GpsMap
 import app.simple.positional.extensions.panel.PanelController
@@ -28,6 +26,7 @@ import app.simple.positional.ui.compose.GpsScreen
 import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
+import app.simple.positional.viewmodels.viewmodel.GpsSettings
 import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
@@ -62,7 +61,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     init {
         state.fullScreen = !isLandscapeOrientation && consumeFullScreenShortcut()
-        readPreferences()
+        bind(viewModel.settings, ::applySettings)
     }
 
     init {
@@ -98,17 +97,13 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         }
     }
 
-    private fun readPreferences() {
-        state.pin = LocationPins.getLocationPin()
-        state.targetMode = GPSPreferences.isTargetMarkerMode()
-        state.targetSet = GPSPreferences.isTargetMarkerSet()
-        state.toolsLeft = GPSPreferences.isToolsGravityLeft()
-        state.volumeKeys = GPSPreferences.isUsingVolumeKeys()
-        state.rotation = when {
-            GPSPreferences.isCompassRotation() -> MapRotation.Compass
-            GPSPreferences.isBearingRotation() -> MapRotation.Bearing
-            else -> MapRotation.North
-        }
+    private fun applySettings(settings: GpsSettings) {
+        state.pin = settings.pin
+        state.targetMode = settings.targetMode
+        state.targetSet = settings.targetSet
+        state.toolsLeft = settings.toolsLeft
+        state.volumeKeys = settings.volumeKeys
+        state.rotation = settings.rotation
     }
 
     private fun consumeFullScreenShortcut(): Boolean {
@@ -298,22 +293,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun recenter() = maps.resetCamera(GPSPreferences.getMapZoom())
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in gpsKeys) readPreferences()
-    }
-
-    companion object {
-        private const val FULL_SCREEN_ACTION = "action_map_panel_full"
-        private const val CLOSE_ZOOM = 18F
-        private val gpsKeys = setOf(
-            GPSPreferences.pinSkin,
-            GPSPreferences.toolsGravity,
-            GPSPreferences.isTargetMarkerMode,
-            GPSPreferences.mapTargetMarker,
-            GPSPreferences.compassRotation,
-            GPSPreferences.useBearingRotation,
-            GPSPreferences.isNorthOnly,
-            GPSPreferences.useVolumeKeys,
-        )
+    private companion object {
+        const val FULL_SCREEN_ACTION = "action_map_panel_full"
+        const val CLOSE_ZOOM = 18F
     }
 }

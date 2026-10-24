@@ -22,7 +22,6 @@ import app.simple.positional.util.TimeFormatter.formatDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -35,7 +34,11 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TrailDataViewModel(application: Application) : WrappedViewModel(application) {
-    private val name = MutableStateFlow(TrailPreferences.getCurrentTrail())
+    private val name = preference(TrailPreferences.selectedTrail) { TrailPreferences.getCurrentTrail() }
+
+    val tools: StateFlow<MapTools> = preference(TrailPreferences.toolsMenuGravity, TrailPreferences.compass, TrailPreferences.wrapped) {
+        MapTools(TrailPreferences.isToolsGravityToLeft(), TrailPreferences.isCompassRotation(), TrailPreferences.arePolylinesWrapped())
+    }
 
     val points: StateFlow<List<TrailPoint>> = name
         .flatMapLatest { if (it.isEmpty()) flowOf(emptyList()) else dao(it).observeAll() }
@@ -46,10 +49,6 @@ class TrailDataViewModel(application: Application) : WrappedViewModel(applicatio
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), TrailInfo())
-
-    fun select(trail: String) {
-        name.value = trail
-    }
 
     fun save(point: TrailPoint) = persist { dao(it).insertTrailData(point) }
 
@@ -91,7 +90,7 @@ class TrailDataViewModel(application: Application) : WrappedViewModel(applicatio
     private fun dao(trail: String) = TrailPointDatabase.getInstance(getApplication(), trail).trailDataDao()
 
     private fun persist(block: suspend (String) -> Unit) {
-        val trail = name.value
+        val trail = TrailPreferences.getCurrentTrail()
         if (trail.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) { withContext(NonCancellable) { block(trail) } }
     }

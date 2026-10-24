@@ -2,7 +2,6 @@ package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import android.os.SystemClock
 import android.text.Spanned
@@ -46,13 +45,13 @@ import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-    private val providerSetting = MutableStateFlow(MainPreferences.getLocationProvider())
+    private val providerSetting = preference(MainPreferences.locationProvider) { MainPreferences.getLocationProvider() }
     private val restarts = MutableStateFlow(0)
     private val saved = MovementThreshold(SAVE_DISTANCE)
     private val mutableLatency = MutableStateFlow<Latency?>(null)
     private val mutableAccuracy = MutableStateFlow(emptyList<Float>())
     private val mutableAltitude = MutableStateFlow(emptyList<Float>())
-    private val targetPoint = MutableStateFlow(currentTarget())
+    private val targetPoint = preference(GPSPreferences.mapTargetMarker, GPSPreferences.mapTargetMarkerLatitude, GPSPreferences.mapTargetMarkerLongitude, read = ::currentTarget)
     private var lastFix = SystemClock.elapsedRealtime()
 
     private val events = combine(providerSetting, restarts) { provider, _ -> provider }
@@ -133,15 +132,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
             (seconds / HOUR % 24).toString(),
             (seconds / MINUTE % 60).toString(),
         )
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MainPreferences.locationProvider -> providerSetting.value = MainPreferences.getLocationProvider()
-            GPSPreferences.mapTargetMarker,
-            GPSPreferences.mapTargetMarkerLatitude,
-            GPSPreferences.mapTargetMarkerLongitude -> targetPoint.value = currentTarget()
-        }
     }
 
     private companion object {

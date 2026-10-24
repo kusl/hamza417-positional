@@ -1,6 +1,5 @@
 package app.simple.positional.ui.panels
 
-import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -8,7 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.extensions.panel.SensorPanel
-import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.ui.compose.DirectionPanel
 import app.simple.positional.ui.compose.DirectionState
@@ -18,12 +16,11 @@ import app.simple.positional.viewmodels.viewmodel.DirectionViewModel
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = DirectionState()
-    private val sensor: HeadingSensor
+    private val sensor = HeadingSensor(activity, this)
     private val viewModel = panelModel(DirectionViewModel::class, ::DirectionViewModel)
 
     init {
-        sensor = HeadingSensor(activity, this)
-        sensor.gimbalLock = DirectionPreferences.isGimbalLock()
+        bind(viewModel.gimbalLock) { sensor.gimbalLock = it }
         lifecycle.addObserver(sensor)
         if (!sensor.isAvailable) showSensorError()
     }
@@ -47,8 +44,4 @@ class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSen
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
     override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(type, accuracy)
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == DirectionPreferences.directionGimbalLock) sensor.gimbalLock = DirectionPreferences.isGimbalLock()
-    }
 }

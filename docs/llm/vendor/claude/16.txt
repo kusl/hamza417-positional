@@ -2,3 +2,43 @@
 79
 
 Please continue with the next phase 
+
+Claude
+/
+Please continue with the next phase
+
+Ran 42 commands, read memory, and 2 more tools
+Phase 16 is in positional-phase16.tar.gz. It holds 23 files: 21 modified and 2 new (viewmodels/viewmodel/PanelSettings.kt and PanelSettingsTest.kt). Extract it at the repository root. Nothing needs deleting, so there is no git rm this time.
+
+I only syntax-checked the code here. The real compile and the tests run in CI.
+
+What changed:
+
+Settings as flows:
+A new SharedPreferences.watch(keys) { read } re-reads a setting when one of its keys changes, and only passes on values that actually differ.
+A new preference(...) helper turns that into a StateFlow on a view model.
+The compass, clock, direction, GPS, trail, measure and level view models now expose their settings this way.
+Panels: they apply settings with a new PanelController.bind, which applies the current value at once and then follows changes while the panel is started. PanelController and WrappedViewModel no longer register preference listeners.
+Other listeners converted: the clock’s time zone and custom location, the location provider, the GPS target, and the selected trail and measure now follow preferences through flows.
+Trail switching: switching trails now redraws the map from the trail’s points, so TrailMap.clear() was removed.
+Settings panel: it no longer recreates the activity on an accent change. The accent screen already does that, so it was happening twice.
+Tests: a new PanelSettingsTest covers map rotation priority, the compass bloom when off or unknown, and the needle and pin fallbacks.
+README: phase 16 is marked done, and phase 17 is listed as next: the map views’ own preference listeners become flows.
+Worth checking on the Nord:
+
+Switch trails from the trails list. The map should show the new trail on return, with no leftover lines from the old one.
+Change the compass bloom and physics settings, the clock needles and motion type, the GPS pin and rotation, and the tools side on each map panel. Each should apply immediately.
+Pick an accent colour. The app should recreate once.
+Please re-run export.sh and upload the new dump before phase 17.
+
+Positional phase16.tar
+GZ
+
+You’ve used 79% of your weekly limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+

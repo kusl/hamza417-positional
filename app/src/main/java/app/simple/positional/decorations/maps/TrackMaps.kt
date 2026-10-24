@@ -34,7 +34,6 @@ interface TrailMap : PanelMap {
     fun removeLast()
     fun toggleWrap()
     fun moveTo(latitude: Double, longitude: Double, zoom: Float)
-    fun clear()
 
     companion object {
         fun create(context: Context): TrailMap = if (MapSource.isOsm()) OsmTrailMap(context) else GoogleTrailMap(context)
@@ -190,11 +189,6 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     override fun moveTo(latitude: Double, longitude: Double, zoom: Float) {
         TrailPreferences.setWrapStatus(false)
         animateTo(camera(LatLng(latitude, longitude), zoom, TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
-    }
-
-    override fun clear() {
-        points = emptyList()
-        drawPoints()
     }
 
     private fun wrap(animate: Boolean) {

@@ -6,6 +6,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 object SharedPreferences {
     const val preferences = "Preferences"
@@ -32,4 +34,6 @@ object SharedPreferences {
         send(Unit)
         awaitClose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
     }.conflate()
+
+    fun <T> watch(vararg keys: String, read: () -> T): Flow<T> = changes(*keys).map { read() }.distinctUntilChanged()
 }

@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
@@ -28,6 +27,7 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
+import app.simple.positional.viewmodels.viewmodel.MapTools
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.filterNotNull
@@ -35,17 +35,13 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
-    private val measureViewModel: MeasureViewModel
+    private val measureViewModel = ViewModelProvider(activity)[MeasureViewModel::class.java]
     private val maps: MeasureMap
     private var location: Location? = null
     private var shown: Long? = null
 
     init {
-        measureViewModel = ViewModelProvider(activity)[MeasureViewModel::class.java]
-        readPreferences()
-    }
-
-    init {
+        bind(measureViewModel.tools, ::applySettings)
         maps = MeasureMap.create(activity).apply { setCallbacks(this@Measure) }
     }
 
@@ -114,10 +110,10 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         state.current = ""
     }
 
-    private fun readPreferences() {
-        state.toolsLeft = MeasurePreferences.isToolsGravityToLeft()
-        state.compass = MeasurePreferences.isCompassRotation()
-        state.wrapped = MeasurePreferences.arePolylinesWrapped()
+    private fun applySettings(tools: MapTools) {
+        state.toolsLeft = tools.toolsLeft
+        state.compass = tools.compass
+        state.wrapped = tools.wrapped
     }
 
     private fun bottomBar(visible: Boolean) {
@@ -167,13 +163,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
 
     override fun toggleToolsSide() = MeasurePreferences.invertToolsGravity()
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MeasurePreferences.TOOLS_GRAVITY, MeasurePreferences.COMPASS_ROTATION, MeasurePreferences.POLYLINES_WRAPPED -> readPreferences()
-        }
-    }
-
-    companion object {
-        private const val CLOSE_ZOOM = 18F
+    private companion object {
+        const val CLOSE_ZOOM = 18F
     }
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.ui.compose.InfoRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,6 +22,27 @@ class CompassViewModel(application: Application, location: LocationViewModel) : 
         .map(::fieldRows)
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    val settings: StateFlow<CompassSettings> = preference(
+        CompassPreferences.direction_code,
+        CompassPreferences.flowerBloom,
+        CompassPreferences.flowerBloomTheme,
+        CompassPreferences.dampingCoefficient,
+        CompassPreferences.magneticCoefficient,
+        CompassPreferences.rotationalInertia,
+        CompassPreferences.usePhysicalProperties,
+        CompassPreferences.useGimbalLock,
+    ) {
+        CompassSettings(
+            gimbalLock = CompassPreferences.isUsingGimbalLock(),
+            physics = CompassPreferences.isUsingPhysicalProperties(),
+            directionCode = CompassPreferences.getDirectionCode(),
+            bloom = CompassSettings.bloom(CompassPreferences.isFlowerBloomOn(), CompassPreferences.getFlowerBloomTheme()),
+            inertia = CompassPreferences.getRotationalInertia(),
+            damping = CompassPreferences.getDampingCoefficient(),
+            magnetic = CompassPreferences.getMagneticCoefficient(),
+        )
+    }
 
     private fun fieldRows(location: Location): List<InfoRow> {
         val field = GeomagneticField(location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), location.time)

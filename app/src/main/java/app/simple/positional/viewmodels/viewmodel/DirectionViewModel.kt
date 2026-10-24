@@ -27,6 +27,8 @@ class DirectionViewModel(application: Application, location: LocationViewModel) 
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), DirectionInfo())
 
+    val gimbalLock: StateFlow<Boolean> = preference(DirectionPreferences.directionGimbalLock) { DirectionPreferences.isGimbalLock() }
+
     private fun info(fix: Location?): DirectionInfo {
         val context = getContext()
         val maps = DirectionPreferences.isUsingMapsTarget() && GPSPreferences.isTargetMarkerSet()

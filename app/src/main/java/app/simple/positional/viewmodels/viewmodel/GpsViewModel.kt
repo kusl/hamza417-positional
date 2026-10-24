@@ -6,6 +6,7 @@ import android.location.Location
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
+import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.math.Latency
 import app.simple.positional.math.MathExtensions.round
@@ -13,6 +14,7 @@ import app.simple.positional.math.MovementThreshold
 import app.simple.positional.math.UnitConverter.toFeet
 import app.simple.positional.math.UnitConverter.toKiloMetersPerHour
 import app.simple.positional.math.UnitConverter.toMilesPerHour
+import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences.changes
 import app.simple.positional.ui.compose.GpsInfo
@@ -82,6 +84,25 @@ class GpsViewModel(application: Application, source: LocationViewModel) : Wrappe
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), GpsInfo(custom = MainPreferences.isCustomCoordinate()))
+
+    val settings: StateFlow<GpsSettings> = preference(
+        GPSPreferences.pinSkin,
+        GPSPreferences.toolsGravity,
+        GPSPreferences.isTargetMarkerMode,
+        GPSPreferences.mapTargetMarker,
+        GPSPreferences.compassRotation,
+        GPSPreferences.useBearingRotation,
+        GPSPreferences.useVolumeKeys,
+    ) {
+        GpsSettings(
+            pin = LocationPins.getLocationPin(),
+            targetMode = GPSPreferences.isTargetMarkerMode(),
+            targetSet = GPSPreferences.isTargetMarkerSet(),
+            toolsLeft = GPSPreferences.isToolsGravityLeft(),
+            volumeKeys = GPSPreferences.isUsingVolumeKeys(),
+            rotation = GpsSettings.rotation(GPSPreferences.isCompassRotation(), GPSPreferences.isBearingRotation()),
+        )
+    }
 
     private suspend fun lookup(point: LatLng): String {
         val context = getContext()
