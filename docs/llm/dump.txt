@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T13:11:48-04:00
+Generated: 2026-10-24T13:21:24-04:00
 Branch:    master
-Commit:    391c6e7e 2026-10-24 09:57:54 -0400 run scripts
+Commit:    7fd295ae 2026-10-24 13:21:20 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (887 files)
+## TREE (889 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -214,6 +214,7 @@ app/
               util/
                 AccentThemes.kt
                 AppIcons.kt
+                ArtRaster.kt
                 BitmapHelper.kt
                 ColorUtils.kt
                 ContextUtils.kt
@@ -962,6 +963,7 @@ app/
                   RoutesTest.kt
               util/
                 AppIconsTest.kt
+                ArtFrameTest.kt
                 DirectionTest.kt
                 DistanceTextTest.kt
                 LocationShareTest.kt
@@ -1271,7 +1273,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), location pin colours, map preference bindings, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, launcher art path data, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, delayed map tasks, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), location pin colours, map preference bindings, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, launcher art path data, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, delayed map tasks, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial, launcher art frame sizing and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
@@ -1316,7 +1318,7 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Ba
 | 19 | Sensor display rotation through `ContextCompat.getDisplayOrDefault` instead of the deprecated `WindowManager.defaultDisplay`; status bar height from window insets instead of the internal `status_bar_height` resource; reverse geocoding and map search share `Geocoding`; network check without the deprecated `NetworkInfo`; web view force dark fallback (a no-op on target SDK 33+) removed; custom location and direction target written in one edit with `apply` instead of several `commit`s; unused math helpers removed | Done |
 | 20 | Unused resources removed (accent ripple attribute, `colorAccent`, animation duration, bold font, stale lint keep file, generated `versionName` string) and lint `UnusedResources` made fatal, so CI and `assembleRelease` fail on any unused resource; unused instrumentation runner and support vector flag removed | Done |
 | 21 | Launcher art vectors rewritten: coordinates rounded to 0.1 viewport units on absolute positions (no drift along relative paths), default attributes, transparent strokes, viewport-sized and redundant rectangle clips and empty groups dropped; path data about 36% smaller (16.2 MB to 10.4 MB of XML) and about 2,300 fewer clip paths to apply per draw, with renders matching the originals within anti-aliasing; `LauncherArtTest` checks path grammar, precision and that every art has colours | Done |
-| 22 | Launcher art (splash, arts pager, sun time art widget) rasterised once at display size off the main thread instead of parsed and drawn as a vector during composition | Next |
+| 22 | Launcher art (splash, arts pager, sun time art widget) rasterised once at display size on `Dispatchers.Default` by `ArtRaster` and faded in, instead of parsed and drawn as a vector during composition or sent to the launcher as a vector; the splash renders only the visible crop and the widget renders at its own width | Done |
 
 ## Building
 
@@ -7273,6 +7275,7 @@ private fun AccentRow(option: AccentOption, selected: Boolean, onClick: () -> Un
 package app.simple.positional.ui.compose
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -7290,27 +7293,35 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
 import app.simple.positional.constants.LauncherBackground
+import app.simple.positional.util.ArtRaster
 import app.simple.positional.util.BitmapHelper.addLinearGradient
 import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 
@@ -7368,12 +7379,24 @@ private fun ArtCard(art: Art, index: Int, count: Int, cornerRadius: Dp, pin: Int
             )
             Image(icon, contentDescription = null, modifier = Modifier.padding(20.dp).size(dimensionResource(R.dimen.launcher_app_icon_dimen)))
         }
-        Image(
-            painterResource(art.background),
-            contentDescription = null,
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
-            contentScale = ContentScale.FillWidth,
-        )
+        LauncherArt(art.background, Modifier.align(Alignment.BottomCenter).fillMaxWidth())
+    }
+}
+
+@Composable
+fun LauncherArt(@DrawableRes art: Int, modifier: Modifier, crop: Boolean = false) {
+    val context = LocalContext.current
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val width = size.width
+    val height = if (crop) size.height else 0
+    val bitmap by produceState<ImageBitmap?>(null, art, width, height) {
+        if (width > 0 && (!crop || height > 0)) value = ArtRaster.render(context, art, width, height).asImageBitmap()
+    }
+    val fade by animateFloatAsState(if (bitmap == null) 0f else 1f, label = "art")
+    Box(modifier.onSizeChanged { size = it }) {
+        bitmap?.let {
+            Image(it, contentDescription = null, modifier = Modifier.fillMaxWidth().graphicsLayer { alpha = fade }, contentScale = ContentScale.FillWidth)
+        }
     }
 }
 
@@ -11239,7 +11262,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -11297,7 +11319,7 @@ fun SplashScreen(onFinished: () -> Unit) {
                 }
             },
     ) {
-        Image(painterResource(background), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        LauncherArt(background, Modifier.fillMaxSize(), crop = true)
         Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Image(
                 painterResource(LocationPins.getLocationPin()),
@@ -13523,6 +13545,46 @@ object AppIcons {
                 if (i == index) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP,
             )
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/ArtRaster.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlin.math.max
+import kotlin.math.roundToInt
+
+data class ArtFrame(val width: Int, val height: Int, val left: Int, val top: Int, val right: Int, val bottom: Int) {
+    companion object {
+        fun of(intrinsicWidth: Int, intrinsicHeight: Int, width: Int, height: Int = 0): ArtFrame {
+            val scale = if (height > 0) max(width / intrinsicWidth.toFloat(), height / intrinsicHeight.toFloat()) else width / intrinsicWidth.toFloat()
+            val drawWidth = (intrinsicWidth * scale).roundToInt()
+            val drawHeight = (intrinsicHeight * scale).roundToInt()
+            val frameHeight = if (height > 0) height else drawHeight
+            val left = (width - drawWidth) / 2
+            val top = (frameHeight - drawHeight) / 2
+            return ArtFrame(width, frameHeight, left, top, left + drawWidth, top + drawHeight)
+        }
+    }
+}
+
+object ArtRaster {
+    suspend fun render(context: Context, @DrawableRes art: Int, width: Int, height: Int = 0): Bitmap = withContext(Dispatchers.Default) {
+        val drawable = checkNotNull(ContextCompat.getDrawable(context, art)).mutate()
+        val frame = ArtFrame.of(drawable.intrinsicWidth, drawable.intrinsicHeight, width, height)
+        Bitmap.createBitmap(frame.width, frame.height, Bitmap.Config.ARGB_8888).also {
+            drawable.setBounds(frame.left, frame.top, frame.right, frame.bottom)
+            drawable.draw(Canvas(it))
         }
     }
 }
@@ -16181,6 +16243,7 @@ class SunTimeGlance : GlanceAppWidget() {
 ################################################################################
 package app.simple.positional.widgets
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
@@ -16188,6 +16251,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -16202,8 +16266,10 @@ import androidx.glance.layout.padding
 import app.simple.positional.R
 import app.simple.positional.constants.LauncherBackground
 import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.util.ArtRaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 class SunTimeWidgetArt : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = SunTimeArtGlance()
@@ -16217,7 +16283,7 @@ class SunTimeArtGlance : GlanceAppWidget() {
         val pin = WidgetSky.pin()
         val title = context.getString(R.string.app_name)
         val updated = WidgetSky.updated(context, pattern)
-        val art = LauncherBackground.vectorBackground.random()
+        val art = ArtRaster.render(context, LauncherBackground.vectorBackground.random(), artWidth(context, id))
         provideContent {
             Box(
                 GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).cornerRadius(20.dp),
@@ -16230,6 +16296,17 @@ class SunTimeArtGlance : GlanceAppWidget() {
                 }
             }
         }
+    }
+
+    private fun artWidth(context: Context, id: GlanceId): Int {
+        val metrics = context.resources.displayMetrics
+        val widgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+        val dp = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+        return ((if (dp > 0) dp else FALLBACK_WIDTH) * metrics.density).roundToInt().coerceAtMost(metrics.widthPixels)
+    }
+
+    private companion object {
+        const val FALLBACK_WIDTH = 320
     }
 }
 
@@ -19136,6 +19213,42 @@ class AppIconsTest {
     fun manifestDeclaresEveryAlias() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         AppIcons.icons.forEach { (alias, _) -> assertTrue(alias, manifest.contains(".activities.alias.$alias\"")) }
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/util/ArtFrameTest.kt
+################################################################################
+package app.simple.positional.util
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class ArtFrameTest {
+    @Test
+    fun fillWidthKeepsAspect() {
+        val frame = ArtFrame.of(66, 44, 1080)
+        assertEquals(ArtFrame(1080, 720, 0, 0, 1080, 720), frame)
+    }
+
+    @Test
+    fun cropCoversPortraitFrameCentered() {
+        val frame = ArtFrame.of(66, 44, 1080, 2400)
+        assertEquals(1080, frame.width)
+        assertEquals(2400, frame.height)
+        assertEquals(0, frame.top)
+        assertEquals(2400, frame.bottom)
+        assertEquals(-1260, frame.left)
+        assertEquals(2340, frame.right)
+    }
+
+    @Test
+    fun cropCoversLandscapeFrame() {
+        val frame = ArtFrame.of(66, 44, 2400, 1080)
+        assertEquals(0, frame.left)
+        assertEquals(2400, frame.right)
+        assertEquals(-260, frame.top)
+        assertEquals(1340, frame.bottom)
     }
 }
 
