@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T21:48:37-04:00
+Generated: 2026-10-23T21:58:36-04:00
 Branch:    master
-Commit:    f11691e7 2026-10-23 21:32:02 -0400 run scripts
+Commit:    ed0b22a7 2026-10-23 21:58:31 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (874 files)
+## TREE (875 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -118,6 +118,10 @@ app/
                   SensorPanel.kt
                 viewmodel/
                   WrappedViewModel.kt
+              location/
+                AndroidLocationSource.kt
+                FusedLocationSource.kt
+                LocationSource.kt
               math/
                 Angle.kt
                 ClockMotion.kt
@@ -154,10 +158,6 @@ app/
               sensors/
                 OrientationSensors.kt
                 SensorAccuracy.kt
-              services/
-                FusedLocationService.kt
-                LocationBus.kt
-                LocationService.kt
               singleton/
                 SharedPreferences.kt
               ui/
@@ -915,6 +915,8 @@ app/
                   GoogleMapStyleTest.kt
                   OsmStyleTest.kt
                   TrackPinTest.kt
+              location/
+                AndroidLocationSourceTest.kt
               math/
                 AngleTest.kt
                 ClockMotionTest.kt
@@ -1254,9 +1256,9 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
-Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings.
+Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
 ## Compose migration
 
@@ -1289,7 +1291,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 10c | Address search map on OpenStreetMap through a `PickerMap` interface; map views share an `OsmMapView` base and a `MapHost` lifecycle contract; Google Play services prompt only when Google Maps or the fused provider is in use | Done |
 | 11 | All code in Kotlin: Room entities keep their column names and nullability so existing databases open unchanged (CI fails if an exported schema hash changes); map callbacks trimmed to the events panels use; Google marker, circle and line animations as extensions on shared interpolation (accuracy circles no longer wrap radii above 360 m like angles); stale schema exports removed | Done |
 | 12 | View models on `StateFlow`; `lifecycle-livedata` removed; Google GPS, trail, measure and picker maps on a shared `GoogleMapView` base mirroring OpenStreetMap; target start point stored when a target is set instead of on every fix; map bearing not saved on every compass frame; Google trail auto center stops while paused | Done |
-| 13 | Location providers as lifecycle-bound flows replacing the bound services and `LocationBus`; last position saved only after meaningful movement | Next |
+| 13 | Location providers as lifecycle-bound flows (`AndroidLocationSource`, `FusedLocationSource`) replacing the started services and `LocationBus`; fused updates every second instead of every 100 ms; the Android provider registers once instead of re-registering every second and switches provider on `PROVIDERS_CHANGED`; approximate location permission is honoured; last position saved in one write after moving 50 m instead of three writes per fix | Done |
+| 14 | Panel state in view models collected with `collectAsStateWithLifecycle`; dialogs as state instead of stored composables; map search result returned through the back stack | Next |
 
 ## Building
 
@@ -1338,7 +1341,7 @@ app/src/main/java/app/simple/positional/
   extensions/   panel controller base, sensor panel, map callbacks
   decorations/  Google Maps and OpenStreetMap views, marker helpers
   database/     Room entities, DAOs and databases
-  services/     location services
+  location/     location sources as lifecycle-bound flows
   widgets/      app widget providers
   math/         vectors, angles, rotation physics, distances, unit conversion
   util/         formatting and Android helpers
@@ -1881,29 +1884,6 @@ dependencies {
             android:exported="false"
             tools:targetApi="o" />
 
-        <service
-            android:name=".services.LocationService"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="location"
-            android:icon="@drawable/ic_pin_01"
-            android:label="@string/location_provider"
-            android:logo="@drawable/ic_pin_01"
-            android:stopWithTask="true"
-            tools:ignore="ForegroundServicePermission" />
-
-        <service
-            android:name=".services.FusedLocationService"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="location"
-            android:icon="@drawable/ic_pin_01"
-            android:label="@string/fused_location_provider"
-            android:stopWithTask="true"
-            tools:ignore="ForegroundServicePermission" />
-
         <receiver
             android:name=".widgets.ClockWidget4x4"
             android:enabled="@bool/clock_widgets"
@@ -2055,12 +2035,11 @@ class LauncherActivity : BaseActivity() {
 package app.simple.positional.activities.main
 
 import android.Manifest
-import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -2100,9 +2079,6 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.services.FusedLocationService
-import app.simple.positional.services.LocationService
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.compose.PanelSwitcher
 import app.simple.positional.ui.compose.setPositionalContent
@@ -2116,18 +2092,20 @@ import app.simple.positional.ui.panels.Time
 import app.simple.positional.ui.panels.Trail
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt.displayLocationSettingsRequest
+import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import com.google.android.gms.maps.MapsInitializer
 
-class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferences.OnSharedPreferenceChangeListener {
+class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
     private var panel by mutableStateOf(PanelCatalog.LOCATION)
     private var barVisible by mutableStateOf(true)
     private var navController: NavHostController? = null
     private var searchResult: ((SearchResult) -> Unit)? = null
+    private val location: LocationViewModel by viewModels()
 
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.any { it }) {
             showPrompt()
-            startLocation()
+            location.restart()
         } else {
             Toast.makeText(this, R.string.no_location_permission_alert, Toast.LENGTH_LONG).show()
         }
@@ -2140,18 +2118,6 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferen
         setPositionalContent { topInset -> AppNavHost(topInset) }
         checkLocationPermission()
         MainPreferences.setLaunchCount(MainPreferences.getLaunchCount() + 1)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-        startLocation()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-        stopLocation()
     }
 
     private fun select(tag: String) {
@@ -2225,29 +2191,7 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferen
         if (!getLocationStatus(this)) displayLocationSettingsRequest(this)
     }
 
-    private fun locationService(provider: String = MainPreferences.getLocationProvider()) =
-        if (provider == FUSED) FusedLocationService::class.java else LocationService::class.java
-
-    private fun startLocation() {
-        runCatching { startService(Intent(applicationContext, locationService())) }
-    }
-
-    private fun stopLocation() {
-        runCatching { stopService(Intent(applicationContext, locationService())) }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key != MainPreferences.locationProvider) return
-        val current = MainPreferences.getLocationProvider()
-        runCatching {
-            stopService(Intent(applicationContext, locationService(if (current == FUSED) ANDROID else FUSED)))
-            startService(Intent(applicationContext, locationService(current)))
-        }.onFailure { Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show() }
-    }
-
     private companion object {
-        const val FUSED = "fused"
-        const val ANDROID = "android"
         val locationPermissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 }
@@ -5202,6 +5146,165 @@ open class WrappedViewModel(application: Application) : AndroidViewModel(applica
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/location/AndroidLocationSource.kt
+################################################################################
+package app.simple.positional.location
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.LocationManager
+import android.os.Looper
+import androidx.core.content.getSystemService
+import androidx.core.location.LocationListenerCompat
+import androidx.core.location.LocationManagerCompat
+import androidx.core.location.LocationRequestCompat
+import app.simple.positional.util.PermissionUtils
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+
+class AndroidLocationSource(private val context: Context) : LocationSource {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun events(): Flow<LocationEvent> {
+        val manager = context.getSystemService<LocationManager>() ?: return emptyFlow()
+        if (!PermissionUtils.checkPermission(context)) return emptyFlow()
+        val fine = PermissionUtils.hasFineLocation(context)
+        return context.providerChanges()
+            .onStart { emit(Unit) }
+            .map { bestProvider(fine, manager::isProviderEnabled) }
+            .distinctUntilChanged()
+            .flatMapLatest { provider -> updates(manager, provider).onStart { emit(LocationEvent.Provider(provider)) } }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun updates(manager: LocationManager, provider: String?): Flow<LocationEvent> = if (provider == null) emptyFlow() else callbackFlow {
+        manager.getLastKnownLocation(provider)?.let { trySend(it.asLastKnown()) }
+        val listener = LocationListenerCompat { trySend(LocationEvent.Fix(it)) }
+        LocationManagerCompat.requestLocationUpdates(manager, provider, request, listener, Looper.getMainLooper())
+        awaitClose { LocationManagerCompat.removeUpdates(manager, listener) }
+    }
+
+    companion object {
+        private val request = LocationRequestCompat.Builder(LocationSource.INTERVAL)
+            .setQuality(LocationRequestCompat.QUALITY_HIGH_ACCURACY)
+            .setMinUpdateIntervalMillis(LocationSource.INTERVAL)
+            .build()
+
+        fun bestProvider(fine: Boolean, enabled: (String) -> Boolean): String? = when {
+            fine && enabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
+            enabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
+            fine -> LocationManager.PASSIVE_PROVIDER
+            else -> null
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/location/FusedLocationSource.kt
+################################################################################
+package app.simple.positional.location
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Looper
+import app.simple.positional.ui.compose.SettingsLabels
+import app.simple.positional.util.PermissionUtils
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
+
+class FusedLocationSource(private val context: Context) : LocationSource {
+    override fun events(): Flow<LocationEvent> =
+        if (!PermissionUtils.checkPermission(context)) emptyFlow() else merge(
+            context.providerChanges().map { LocationEvent.Provider(SettingsLabels.PROVIDER_FUSED) },
+            fixes(),
+        )
+
+    @SuppressLint("MissingPermission")
+    private fun fixes(): Flow<LocationEvent> = callbackFlow {
+        val client = LocationServices.getFusedLocationProviderClient(context)
+        var fresh = false
+        val callback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                val location = result.lastLocation ?: return
+                fresh = true
+                trySend(LocationEvent.Fix(location))
+            }
+        }
+        client.lastLocation.addOnSuccessListener { last -> if (!fresh && last != null) trySend(last.asLastKnown()) }
+        client.requestLocationUpdates(request, callback, Looper.getMainLooper())
+        awaitClose { client.removeLocationUpdates(callback) }
+    }
+
+    private companion object {
+        val request: LocationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LocationSource.INTERVAL)
+            .setMinUpdateIntervalMillis(LocationSource.INTERVAL)
+            .build()
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/location/LocationSource.kt
+################################################################################
+package app.simple.positional.location
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.location.Location
+import android.location.LocationManager
+import androidx.core.content.ContextCompat
+import app.simple.positional.ui.compose.SettingsLabels
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+
+sealed interface LocationEvent {
+    data class Fix(val location: Location) : LocationEvent
+    data class Provider(val name: String?) : LocationEvent
+}
+
+fun interface LocationSource {
+    fun events(): Flow<LocationEvent>
+
+    companion object {
+        const val INTERVAL = 1_000L
+        const val LAST_KNOWN = "Last Location"
+
+        fun of(context: Context, provider: String): LocationSource =
+            if (provider == SettingsLabels.PROVIDER_FUSED) FusedLocationSource(context) else AndroidLocationSource(context)
+    }
+}
+
+internal fun Location.asLastKnown(): LocationEvent = LocationEvent.Fix(apply { provider = LocationSource.LAST_KNOWN })
+
+internal fun Context.providerChanges(): Flow<Unit> = callbackFlow {
+    val receiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            trySend(Unit)
+        }
+    }
+    val context = this@providerChanges
+    ContextCompat.registerReceiver(context, receiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION), ContextCompat.RECEIVER_NOT_EXPORTED)
+    awaitClose { context.unregisterReceiver(receiver) }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/math/Angle.kt
 ################################################################################
 package app.simple.positional.math
@@ -6385,6 +6488,9 @@ object MainPreferences {
     private const val skipSplashScreen = "skip_splash_screen"
     private const val currentArt = "current_art_position"
     private const val isMaterialYouAccent = "is_material_you_accent"
+    private const val lastLatitude = "last_latitude"
+    private const val lastLongitude = "last_longitude"
+    private const val lastAltitude = "last_altitude"
 
     const val isCustomCoordinate = "is_custom_coordinate_set"
     const val locationProvider = "location_provider"
@@ -6394,9 +6500,6 @@ object MainPreferences {
     const val latitude = "custom_latitude"
     const val longitude = "custom_longitude"
     const val accentColor = "app_accent_color"
-    const val lastLatitude = "last_latitude"
-    const val lastLongitude = "last_longitude"
-    const val lastAltitude = "last_altitude"
     const val coordinatesFormat = "coordinate_format"
 
     fun setLaunchCount(value: Int) {
@@ -6473,12 +6576,12 @@ object MainPreferences {
         )
     }
 
-    fun setLastLatitude(value: Float) {
-        getSharedPreferences().edit().putFloat(lastLatitude, value).apply()
-    }
-
-    fun setLastLongitude(value: Float) {
-        getSharedPreferences().edit().putFloat(lastLongitude, value).apply()
+    fun setLastLocation(latitude: Float, longitude: Float, altitude: Float) {
+        getSharedPreferences().edit()
+                .putFloat(lastLatitude, latitude)
+                .putFloat(lastLongitude, longitude)
+                .putFloat(lastAltitude, altitude)
+                .apply()
     }
 
     fun getLastCoordinates(): FloatArray {
@@ -6486,10 +6589,6 @@ object MainPreferences {
                 getSharedPreferences().getFloat(lastLatitude, 48.8584f),
                 getSharedPreferences().getFloat(lastLongitude, 2.2945f)
         )
-    }
-
-    fun setLastAltitude(value: Float) {
-        getSharedPreferences().edit().putFloat(lastAltitude, value).apply()
     }
 
     fun getLastAltitude(): Float {
@@ -6998,271 +7097,6 @@ object SensorAccuracy {
         SensorManager.SENSOR_STATUS_ACCURACY_LOW -> R.string.sensor_accuracy_low
         SensorManager.SENSOR_STATUS_UNRELIABLE -> R.string.sensor_accuracy_unreliable
         else -> R.string.not_available
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/FusedLocationService.kt
-################################################################################
-package app.simple.positional.services
-
-import android.annotation.SuppressLint
-import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.location.Location
-import android.location.LocationManager
-import android.os.Build
-import android.os.HandlerThread
-import android.os.IBinder
-import android.util.Log
-import app.simple.positional.util.PermissionUtils
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-
-class FusedLocationService : Service() {
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
-    private lateinit var handlerThread: HandlerThread
-
-    private val intentFilter = IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION)
-    private var broadcastReceiver: BroadcastReceiver? = null
-
-    private var delay: Long = 100
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
-
-    @SuppressLint("UnspecifiedRegisterReceiverFlag")
-    override fun onCreate() {
-        super.onCreate()
-
-        handlerThread = HandlerThread("location_thread")
-        intentFilter.addAction(Intent.ACTION_PROVIDER_CHANGED)
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(applicationContext)
-
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, delay)
-                .setWaitForAccurateLocation(true)
-                .setIntervalMillis(delay)
-                .setMinUpdateIntervalMillis(delay)
-                .build()
-
-        requestLastLocation()
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                super.onLocationResult(result)
-                result.lastLocation?.let(::broadcastLocation)
-            }
-        }
-
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                LocationBus.publishProvider(intent?.action)
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(broadcastReceiver, intentFilter, RECEIVER_NOT_EXPORTED)
-            } else {
-                registerReceiver(broadcastReceiver, intentFilter)
-            }
-        } else {
-            registerReceiver(broadcastReceiver, intentFilter)
-        }
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        requestLastLocation()
-        if (!handlerThread.isAlive) {
-            handlerThread.start()
-        }
-        return START_REDELIVER_INTENT
-    }
-
-    private fun requestLastLocation() {
-        if (PermissionUtils.checkPermission(applicationContext)) {
-            fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                if (it.isSuccessful && it.result != null) {
-                    it.result.provider = "Last Location"
-                    broadcastLocation(it.result)
-                }
-
-                requestCurrentLocation()
-            }
-        }
-    }
-
-    private fun requestCurrentLocation() {
-        if (PermissionUtils.checkPermission(applicationContext)) {
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, handlerThread.looper)
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-        try {
-            Log.d("FusedLocationService", "BroadcastReceiver attempting to unregister")
-            unregisterReceiver(broadcastReceiver)
-            Log.d("FusedLocationService", "BroadcastReceiver unregistered")
-        } catch (e: IllegalArgumentException) {
-            Log.e("FusedLocationService", "BroadcastReceiver not registered")
-        }
-        handlerThread.quitSafely()
-    }
-
-    private fun broadcastLocation(location: Location) {
-        LocationBus.publishLocation(location)
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/LocationBus.kt
-################################################################################
-package app.simple.positional.services
-
-import android.location.Location
-import java.util.concurrent.CopyOnWriteArraySet
-
-object LocationBus {
-    interface Listener {
-        fun onLocation(location: Location)
-        fun onProvider(provider: String?)
-    }
-
-    private val listeners = CopyOnWriteArraySet<Listener>()
-
-    fun register(listener: Listener) {
-        listeners += listener
-    }
-
-    fun unregister(listener: Listener) {
-        listeners -= listener
-    }
-
-    fun publishLocation(location: Location) = listeners.forEach { it.onLocation(location) }
-
-    fun publishProvider(provider: String?) = listeners.forEach { it.onProvider(provider) }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/services/LocationService.kt
-################################################################################
-package app.simple.positional.services
-
-import android.app.Service
-import android.content.Intent
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.os.Bundle
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
-import app.simple.positional.util.PermissionUtils
-
-class LocationService : Service(), LocationListener {
-    private var locationManager: LocationManager? = null
-    private var handler = Handler(Looper.getMainLooper())
-    private var delay: Long = 1000
-
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        locationManager = baseContext.getSystemService(LOCATION_SERVICE) as LocationManager
-    }
-
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        requestLastKnownLocation()
-        return START_REDELIVER_INTENT
-    }
-
-    override fun onDestroy() {
-        locationManager?.removeUpdates(this)
-        handler.removeCallbacks(locationUpdater)
-        super.onDestroy()
-    }
-
-    override fun onLocationChanged(location: Location) {
-        LocationBus.publishLocation(location)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-        LocationBus.publishProvider(provider)
-    }
-
-    override fun onProviderEnabled(provider: String) {
-        requestLastKnownLocation()
-        LocationBus.publishProvider(provider)
-    }
-
-    override fun onProviderDisabled(provider: String) {
-        handler.removeCallbacks(locationUpdater)
-        LocationBus.publishProvider(provider)
-    }
-
-    private val locationUpdater: Runnable = object : Runnable {
-        override fun run() {
-            requestLocation()
-            handler.postDelayed(this, delay)
-        }
-    }
-
-    private fun requestLastKnownLocation() {
-        if (PermissionUtils.checkPermission(applicationContext)) {
-            var location: Location? = null
-
-            when {
-                locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER) -> {
-                    location = locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                }
-                locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> {
-                    location = locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                }
-                locationManager!!.isProviderEnabled(LocationManager.PASSIVE_PROVIDER) -> {
-                    location = locationManager?.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-                }
-            }
-
-            if (location == null) {
-                handler.post(locationUpdater)
-            } else {
-                location?.provider = "Last Location"
-                onLocationChanged(location!!)
-                handler.post(locationUpdater)
-            }
-        }
-    }
-
-    private fun requestLocation() {
-        if (PermissionUtils.checkPermission(applicationContext)) {
-            when {
-                locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER) -> {
-                    locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, delay, 0f, this)
-                }
-                locationManager!!.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> {
-                    locationManager?.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, delay, 0f, this)
-                }
-                else -> {
-                    locationManager?.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, delay, 0f, this)
-                }
-            }
-        }
     }
 }
 
@@ -12851,12 +12685,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         addressThreshold.reset()
     }
 
-
     private fun onLocation(location: Location) {
         this.location = location
-        MainPreferences.setLastLatitude(location.latitude.toFloat())
-        MainPreferences.setLastLongitude(location.longitude.toFloat())
-        MainPreferences.setLastAltitude(location.altitude.toFloat())
 
         val metric = MainPreferences.isMetric()
         val length = getString(if (metric) R.string.meter else R.string.feet)
@@ -13747,8 +13577,6 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
         observe(locationViewModel.location.filterNotNull()) {
             location = it
-            MainPreferences.setLastLatitude(it.latitude.toFloat())
-            MainPreferences.setLastLongitude(it.longitude.toFloat())
             state.fixed = true
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
@@ -13757,7 +13585,6 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         observe(trailData.trail) { state.trail = it }
         observe(trailData.points, ::showPoints)
     }
-
 
     private fun showPoints(points: List<TrailPoint>) {
         maps.showPoints(points)
@@ -14976,15 +14803,16 @@ package app.simple.positional.util
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 object PermissionUtils {
-    fun checkPermission(applicationContext: Context): Boolean {
-        return (ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED)
-    }
+    fun checkPermission(context: Context): Boolean =
+        granted(context, Manifest.permission.ACCESS_COARSE_LOCATION) || hasFineLocation(context)
+
+    fun hasFineLocation(context: Context): Boolean = granted(context, Manifest.permission.ACCESS_FINE_LOCATION)
+
+    private fun granted(context: Context, permission: String) =
+        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 }
 
 ################################################################################
@@ -15372,12 +15200,14 @@ import android.text.TextUtils
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.location.LocationEvent
+import app.simple.positional.location.LocationSource
 import app.simple.positional.math.Latency
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.math.MovementThreshold
 import app.simple.positional.math.SeriesStats
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.services.LocationBus
 import app.simple.positional.util.Direction
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.HtmlHelper
@@ -15391,8 +15221,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
@@ -15400,24 +15236,26 @@ import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-    private val listener = object : LocationBus.Listener {
-        override fun onLocation(location: Location) = onNewLocation(location)
-
-        override fun onProvider(provider: String?) {
-            mutableProvider.value = provider?.uppercase(Locale.getDefault())
-        }
-    }
-
-    private val mutableLocation = MutableStateFlow<Location?>(null)
-    private val mutableProvider = MutableStateFlow<String?>(null)
+    private val providerSetting = MutableStateFlow(MainPreferences.getLocationProvider())
+    private val restarts = MutableStateFlow(0)
+    private val saved = MovementThreshold(SAVE_DISTANCE)
     private val mutableLatency = MutableStateFlow<Latency?>(null)
     private val mutableAccuracy = MutableStateFlow(emptyList<Float>())
     private val mutableAltitude = MutableStateFlow(emptyList<Float>())
     private val targetPoint = MutableStateFlow(currentTarget())
     private var lastFix = SystemClock.elapsedRealtime()
 
-    val location: StateFlow<Location?> = mutableLocation.asStateFlow()
-    val provider: StateFlow<String?> = mutableProvider.asStateFlow()
+    private val events = combine(providerSetting, restarts) { provider, _ -> provider }
+        .flatMapLatest { provider -> LocationSource.of(application, provider).events().onStart { lastFix = SystemClock.elapsedRealtime() } }
+        .onEach(::record)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT))
+
+    val location: StateFlow<Location?> = events.filterIsInstance<LocationEvent.Fix>()
+        .map { it.location }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    val provider: StateFlow<String?> = events.filterIsInstance<LocationEvent.Provider>()
+        .map { it.name?.uppercase(Locale.getDefault()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
     val latency: StateFlow<Latency?> = mutableLatency.asStateFlow()
     val accuracySeries: StateFlow<List<Float>> = mutableAccuracy.asStateFlow()
     val altitudeSeries: StateFlow<List<Float>> = mutableAltitude.asStateFlow()
@@ -15427,21 +15265,23 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
         if (point != null) emit(ReverseGeocoder.addressLine(getApplication<Application>(), point.latitude, point.longitude))
     }
 
-    val target: StateFlow<Spanned?> = combine(mutableLocation.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
+    val target: StateFlow<Spanned?> = combine(location.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
-    init {
-        LocationBus.register(listener)
-    }
+    fun restart() = restarts.update { it + 1 }
 
-    private fun onNewLocation(fix: Location) {
+    private fun record(event: LocationEvent) {
+        if (event !is LocationEvent.Fix) return
+        val fix = event.location
         val now = SystemClock.elapsedRealtime()
         mutableLatency.value = Latency(now - lastFix)
         lastFix = now
         mutableAccuracy.update { SeriesStats.append(it, fix.accuracy) }
         mutableAltitude.update { SeriesStats.append(it, fix.altitude.toFloat()) }
-        mutableLocation.value = fix
+        if (saved.accept(fix.latitude, fix.longitude)) {
+            MainPreferences.setLastLocation(fix.latitude.toFloat(), fix.longitude.toFloat(), fix.altitude.toFloat())
+        }
     }
 
     private fun currentTarget(): LatLng? =
@@ -15487,19 +15327,16 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
+            MainPreferences.locationProvider -> providerSetting.value = MainPreferences.getLocationProvider()
             GPSPreferences.mapTargetMarker,
             GPSPreferences.mapTargetMarkerLatitude,
             GPSPreferences.mapTargetMarkerLongitude -> targetPoint.value = currentTarget()
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        LocationBus.unregister(listener)
-    }
-
     private companion object {
         const val STOP_TIMEOUT = 5_000L
+        const val SAVE_DISTANCE = 50.0
         const val MINUTE = 60L
         const val HOUR = 3_600L
         const val DAY = 86_400L
@@ -17692,6 +17529,45 @@ class TrackPinTest {
     fun withoutCompassPinShowsMovement() {
         assertEquals(R.drawable.ic_pin_bearing, TrackPin.drawable(true, false, -1, true))
         assertEquals(R.drawable.ic_pin_no_speed, TrackPin.drawable(true, false, -1, false))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/location/AndroidLocationSourceTest.kt
+################################################################################
+package app.simple.positional.location
+
+import android.location.LocationManager
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class AndroidLocationSourceTest {
+    private val all = setOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER, LocationManager.PASSIVE_PROVIDER)
+
+    @Test
+    fun prefersGpsWithFinePermission() {
+        assertEquals(LocationManager.GPS_PROVIDER, AndroidLocationSource.bestProvider(true) { it in all })
+    }
+
+    @Test
+    fun fallsBackToNetworkWhenGpsIsOff() {
+        assertEquals(LocationManager.NETWORK_PROVIDER, AndroidLocationSource.bestProvider(true) { it != LocationManager.GPS_PROVIDER })
+    }
+
+    @Test
+    fun usesPassiveWhenLocationIsOff() {
+        assertEquals(LocationManager.PASSIVE_PROVIDER, AndroidLocationSource.bestProvider(true) { it == LocationManager.PASSIVE_PROVIDER })
+    }
+
+    @Test
+    fun approximatePermissionSkipsGps() {
+        assertEquals(LocationManager.NETWORK_PROVIDER, AndroidLocationSource.bestProvider(false) { it in all })
+    }
+
+    @Test
+    fun approximatePermissionWithoutNetworkHasNoProvider() {
+        assertNull(AndroidLocationSource.bestProvider(false) { it == LocationManager.GPS_PROVIDER })
     }
 }
 
