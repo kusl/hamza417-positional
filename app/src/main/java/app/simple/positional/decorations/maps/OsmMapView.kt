@@ -6,14 +6,14 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.location.Location
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
+import app.simple.positional.decorations.utils.DelayedTask
+import app.simple.positional.decorations.utils.child
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.util.ColorUtils.resolveAttrColor
@@ -30,7 +30,8 @@ import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.sources.GeoJsonSource
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlin.math.roundToInt
 import org.maplibre.android.geometry.LatLng as LibreLatLng
 
@@ -43,16 +44,16 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected var heading = 0f
     protected var headingAccuracy = -1
     protected var animating = false
-    protected val mainHandler = Handler(Looper.getMainLooper())
+    protected var resumedScope: CoroutineScope? = null
+        private set
     private var style: Style? = null
     private var pinKey: Any? = null
     private var owner: LifecycleOwner? = null
     private var sensorOn = false
     private val headingSensor = HeadingSensor(context, this)
-    private val registerTask = Runnable { registerHeading() }
+    private val registerTask = DelayedTask(SENSOR_DELAY, ::registerHeading)
     private val accent = context.resolveAttrColor(R.attr.colorAppAccent)
     private val preferences by lazy { MapPreferences().also(::bindPreferences) }
-    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
     protected open val compassKey: String? = null
@@ -66,7 +67,6 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected open fun onCameraMoved() {}
     protected open fun onHeadingChanged() {}
     protected open fun onResumed() {}
-    protected open fun onPaused() {}
     protected open fun onCompassRotation(enabled: Boolean) {}
 
     protected open fun bindPreferences(preferences: MapPreferences) {
@@ -84,23 +84,21 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
         override fun onResume(owner: LifecycleOwner) {
             this@OsmMapView.owner = owner
             this@OsmMapView.onResume()
-            preferenceJob = preferences.launchIn(owner.lifecycleScope)
+            resumedScope = owner.lifecycleScope.child().also { preferences.launchIn(it) }
             registerHeadingLater()
             onResumed()
         }
 
         override fun onPause(owner: LifecycleOwner) {
-            onPaused()
             unregisterHeading()
-            preferenceJob?.cancel()
-            preferenceJob = null
+            resumedScope?.cancel()
+            resumedScope = null
             this@OsmMapView.onPause()
         }
 
         override fun onStop(owner: LifecycleOwner) = this@OsmMapView.onStop()
 
         override fun onDestroy(owner: LifecycleOwner) {
-            mainHandler.removeCallbacksAndMessages(null)
             this@OsmMapView.owner = null
             this@OsmMapView.onDestroy()
         }
@@ -152,12 +150,11 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     }
 
     protected fun registerHeadingLater() {
-        mainHandler.removeCallbacks(registerTask)
-        mainHandler.postDelayed(registerTask, SENSOR_DELAY)
+        registerTask.schedule(resumedScope)
     }
 
     protected fun unregisterHeading() {
-        mainHandler.removeCallbacks(registerTask)
+        registerTask.cancel()
         if (sensorOn) owner?.let(headingSensor::onPause)
         sensorOn = false
     }

@@ -6,6 +6,7 @@ import android.location.Location
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.constants.TrailIcons
+import app.simple.positional.decorations.utils.DelayedTask
 import app.simple.positional.model.TrailPoint
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
@@ -19,7 +20,7 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     private var points: List<TrailPoint> = emptyList()
     private val icons = mutableSetOf<Int>()
     private var restore: CameraPosition? = null
-    private val autoCenter = Runnable { recenter() }
+    private val autoCenter = DelayedTask(AUTO_CENTER_DELAY, ::recenter)
 
     override fun startCamera(): CameraPosition {
         val last = MainPreferences.getLastCoordinates()
@@ -33,9 +34,7 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
         scheduleAutoCenter()
     }
 
-    override fun onCameraMoved() {
-        mainHandler.removeCallbacks(autoCenter)
-    }
+    override fun onCameraMoved() = autoCenter.cancel()
 
     override fun onStyleReady() {
         icons.clear()
@@ -47,10 +46,6 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override fun onHeadingChanged() = drawPuck()
 
     override fun onResumed() = scheduleAutoCenter()
-
-    override fun onPaused() {
-        mainHandler.removeCallbacks(autoCenter)
-    }
 
     override fun updateLocation(location: Location) {
         val first = this.location == null
@@ -99,8 +94,7 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     }
 
     private fun scheduleAutoCenter() {
-        mainHandler.removeCallbacks(autoCenter)
-        if (TrailPreferences.getMapAutoCenter()) mainHandler.postDelayed(autoCenter, AUTO_CENTER_DELAY)
+        if (TrailPreferences.getMapAutoCenter()) autoCenter.schedule(resumedScope) else autoCenter.cancel()
     }
 
     private fun recenter() {

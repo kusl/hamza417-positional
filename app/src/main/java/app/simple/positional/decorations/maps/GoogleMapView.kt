@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.location.Location
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -16,8 +14,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
+import app.simple.positional.decorations.utils.DelayedTask
 import app.simple.positional.decorations.utils.animateColors
 import app.simple.positional.decorations.utils.animateTo
+import app.simple.positional.decorations.utils.child
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.util.BitmapHelper.toBitmap
@@ -39,7 +39,8 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PatternItem
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlin.math.roundToInt
 
 data class MapLook(val label: Boolean, val satellite: Boolean, val highContrast: Boolean, val buildings: Boolean, val traffic: Boolean)
@@ -68,12 +69,13 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     protected var heading = 0f
     protected var headingAccuracy = -1
     protected var animating = false
-    protected val mainHandler = Handler(Looper.getMainLooper())
+    protected var resumedScope: CoroutineScope? = null
+        private set
     protected val accent = context.resolveAttrColor(R.attr.colorAppAccent)
     private var owner: LifecycleOwner? = null
     private var sensorOn = false
     private val headingSensor = HeadingSensor(context, this)
-    private val registerTask = Runnable { registerHeading() }
+    private val registerTask = DelayedTask(SENSOR_DELAY, ::registerHeading)
     private var pin: Marker? = null
     private var pinKey: Any? = null
     private var circle: Circle? = null
@@ -83,7 +85,6 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     private val startCap by lazy { cap(R.drawable.ic_trail_start) }
     private val endCap by lazy { cap(R.drawable.seekbar_thumb) }
     private val preferences by lazy { MapPreferences().also(::bindPreferences) }
-    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
     protected open val lookKeys: Set<String> = emptySet()
@@ -100,7 +101,6 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     protected open fun onHeadingChanged() {}
     protected open fun onHeadingAccuracyChanged() {}
     protected open fun onResumed() {}
-    protected open fun onPaused() {}
     protected open fun onCompassRotation(enabled: Boolean) {}
 
     protected open fun bindPreferences(preferences: MapPreferences) {
@@ -119,23 +119,21 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         override fun onResume(owner: LifecycleOwner) {
             this@GoogleMapView.owner = owner
             this@GoogleMapView.onResume()
-            preferenceJob = preferences.launchIn(owner.lifecycleScope)
+            resumedScope = owner.lifecycleScope.child().also { preferences.launchIn(it) }
             registerHeadingLater()
             onResumed()
         }
 
         override fun onPause(owner: LifecycleOwner) {
-            onPaused()
             unregisterHeading()
-            preferenceJob?.cancel()
-            preferenceJob = null
+            resumedScope?.cancel()
+            resumedScope = null
             this@GoogleMapView.onPause()
         }
 
         override fun onStop(owner: LifecycleOwner) = this@GoogleMapView.onStop()
 
         override fun onDestroy(owner: LifecycleOwner) {
-            mainHandler.removeCallbacksAndMessages(null)
             listOf(pinAnimator, circleAnimator, colorAnimator).forEach { it?.cancel() }
             this@GoogleMapView.owner = null
             this@GoogleMapView.onDestroy()
@@ -190,12 +188,11 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     }
 
     protected fun registerHeadingLater() {
-        mainHandler.removeCallbacks(registerTask)
-        mainHandler.postDelayed(registerTask, SENSOR_DELAY)
+        registerTask.schedule(resumedScope)
     }
 
     protected fun unregisterHeading() {
-        mainHandler.removeCallbacks(registerTask)
+        registerTask.cancel()
         if (sensorOn) owner?.let(headingSensor::onPause)
         sensorOn = false
     }

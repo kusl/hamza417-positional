@@ -2,3 +2,43 @@
 81
 
 Please continue with the next phase 
+
+Claude
+/
+Please continue with the next phase
+
+Ran 21 commands, read memory, shared files
+Phase 18 is done. positional-phase18.tar.gz contains only the 8 changed or new files. Extract it at the repo root.
+
+What changed
+
+New DelayedTask (decorations/utils/DelayedTask.kt): a cancellable delayed action that runs in a given coroutine scope. The same file adds a CoroutineScope.child() helper that creates a child scope backed by a SupervisorJob.
+GoogleMapView and OsmMapView:
+The Handler is gone. On resume, each map creates a resumedScope as a child of the panel’s lifecycle scope. The preference flows and the 500 ms heading sensor registration both run in it.
+On pause the scope is cancelled, which stops all of them together. The separate preferenceJob and the removeCallbacksAndMessages call on destroy are no longer needed.
+The onPaused hook was only used for the trail auto center, so I removed it.
+OsmTrailMap and GoogleTrailMap: auto center is now a DelayedTask in resumedScope. If the camera goes idle while the map is paused, nothing gets scheduled.
+build.gradle: adds kotlinx-coroutines-test:1.11.0 as a test dependency, so the timer tests use virtual time instead of real waits.
+DelayedTaskTest covers:
+the task runs once, exactly after the delay;
+scheduling again restarts the delay;
+cancel stops a pending run;
+nothing runs when there is no scope;
+cancelling the child scope stops the task but leaves the parent running;
+cancelling the parent also cancels the child.
+README.md: phase 18 is marked Done, and the architecture notes and test list are updated. I added phase 19 as Next: read the display rotation through ContextCompat.getDisplayOrDefault instead of the deprecated defaultDisplay.
+There are no files to delete. I couldn’t build here because there’s no Android SDK, so CI will be the first compile and test run.
+
+Positional phase18.tar
+GZ
+
+You’ve used 82% of your weekly limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+71
+82
