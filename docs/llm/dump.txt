@@ -1,7 +1,7 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T20:51:30-04:00
+Generated: 2026-10-23T20:55:17-04:00
 Branch:    master
-Commit:    1d96874c 2026-10-23 20:51:25 -0400 add prompt
+Commit:    3023b96f 2026-10-23 20:55:13 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
@@ -15168,7 +15168,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
             val existing by trails.trails.collectAsState()
             NameNoteDialog(
                 title,
-                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().map { it.trailName }) },
+                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().mapNotNull { it.trailName }) },
                 onDismiss = dialogs::dismiss,
                 initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
                 onDraft = { name, note ->
@@ -17383,14 +17383,15 @@ class TrailsViewModel(application: Application) : AndroidViewModel(application) 
 
     fun addTrail(trailEntry: TrailEntry) = persist {
         dao.insertTrail(trailEntry)
-        TrailPreferences.setCurrentTrailName(trailEntry.trailName)
+        TrailPreferences.setCurrentTrailName(trailEntry.trailName.orEmpty())
     }
 
     fun deleteTrail(trailEntry: TrailEntry) = persist {
         dao.deleteTrail(trailEntry)
-        if (TrailPreferences.getCurrentTrail() == trailEntry.trailName) TrailPreferences.setCurrentTrailName("")
-        TrailPointDatabase.close(trailEntry.trailName)
-        getApplication<Application>().deleteDatabase("${trailEntry.trailName}.db")
+        val name = trailEntry.trailName ?: return@persist
+        if (TrailPreferences.getCurrentTrail() == name) TrailPreferences.setCurrentTrailName("")
+        TrailPointDatabase.close(name)
+        getApplication<Application>().deleteDatabase("$name.db")
     }
 
     private fun persist(block: suspend () -> Unit) {
