@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T01:50:56-04:00
+Generated: 2026-10-24T02:21:19-04:00
 Branch:    master
-Commit:    613df4fc 2026-10-24 01:50:53 -0400 add claude response
+Commit:    d46f71f4 2026-10-24 02:21:16 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (875 files)
+## TREE (880 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -241,8 +241,12 @@ app/
                 UTMConverter.kt
               viewmodels/
                 viewmodel/
+                  ClockViewModel.kt
+                  CompassViewModel.kt
                   CustomLocationViewModel.kt
+                  DirectionViewModel.kt
                   DirectionsViewModel.kt
+                  GpsViewModel.kt
                   LocationViewModel.kt
                   MapSearchViewModel.kt
                   MeasureViewModel.kt
@@ -959,6 +963,9 @@ app/
                 NightModeTest.kt
                 TrailNamesTest.kt
                 TwilightTest.kt
+              viewmodels/
+                viewmodel/
+                  SkyPositionTest.kt
               widgets/
                 DayNightTest.kt
 build.gradle
@@ -1256,13 +1263,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`), panels collect them through `PanelController.observe` only while started, and the GPS target summary and its address lookup run only while the GPS panel is shown. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`). Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1293,7 +1300,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 12 | View models on `StateFlow`; `lifecycle-livedata` removed; Google GPS, trail, measure and picker maps on a shared `GoogleMapView` base mirroring OpenStreetMap; target start point stored when a target is set instead of on every fix; map bearing not saved on every compass frame; Google trail auto center stops while paused | Done |
 | 13 | Location providers as lifecycle-bound flows (`AndroidLocationSource`, `FusedLocationSource`) replacing the started services and `LocationBus`; fused updates every second instead of every 100 ms; the Android provider registers once instead of re-registering every second and switches provider on `PROVIDERS_CHANGED`; approximate location permission is honoured; last position saved in one write after moving 50 m instead of three writes per fix | Done |
 | 14a | Panel dialogs as state (`PanelDialog` values rendered by each panel) instead of stored composables; map search result returned through the previous back stack entry's `SavedStateHandle`, so it survives configuration changes; sub screens collect with `collectAsStateWithLifecycle`; clock second hand drawn at full size again; empty trail art scaled to width | Done |
-| 14b | Panel state in view models collected with `collectAsStateWithLifecycle` | Next |
+| 14b | Panel info in view models (`ClockViewModel`, `CompassViewModel`, `DirectionViewModel`, `GpsViewModel`, trail and measure summaries) built on `Dispatchers.Default` and collected with `collectAsStateWithLifecycle`, so it survives rotation and panel switches; GPS address lookup moved into the view model; sun and moon report recomputed once a minute or after moving 1 km instead of on every fix; the clock no longer turns on location with a custom location; view models react to unit, coordinate format and clock format changes through `SharedPreferences.changes`; localized context cached per language | Done |
+| 15 | Settings and level panel state in view models; panel controllers limited to sensors, maps and actions | Next |
 
 ## Building
 
@@ -4954,6 +4962,7 @@ interface MapsCallbacks {
 ################################################################################
 package app.simple.positional.extensions.panel
 
+import android.app.Application
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
@@ -4969,8 +4978,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.viewModelFactory
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.navigation.AppNavigator
 import app.simple.positional.ui.navigation.Routes
@@ -4982,8 +4994,10 @@ import app.simple.positional.ui.compose.MessageDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlin.reflect.KClass
 
 abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
     private val registry = LifecycleRegistry(this)
@@ -5003,6 +5017,7 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected val owner: LifecycleOwner get() = this
     protected val dialogs = DialogHost()
     protected val menuSheet = MenuSheetState()
+    protected val locationModel: LocationViewModel by lazy { ViewModelProvider(activity)[LocationViewModel::class.java] }
     protected val isLandscapeOrientation: Boolean = activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     init {
@@ -5042,6 +5057,9 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected open fun DialogContent(dialog: PanelDialog) {
         if (dialog is ErrorDialog) MessageDialog(dialog.message, dialogs::dismiss)
     }
+
+    protected fun <T : ViewModel> panelModel(type: KClass<T>, create: (Application, LocationViewModel) -> T): T =
+        ViewModelProvider(activity, viewModelFactory { addInitializer(type) { create(activity.application, locationModel) } })[type.java]
 
     protected fun <T> observe(flow: Flow<T>, action: (T) -> Unit) {
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { action(it) } } }
@@ -5141,12 +5159,19 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.ContextUtils
 
 open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
+    @Volatile
+    private var localized: Pair<String, Context>? = null
+
     init {
         getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
 
-    protected fun getContext(): Context =
-        ContextUtils.wrap(getApplication<Application>().applicationContext, ContextUtils.language(), applyNightMode = false)
+    protected fun getContext(): Context {
+        val language = ContextUtils.language()
+        localized?.let { (code, context) -> if (code == language) return context }
+        return ContextUtils.wrap(getApplication<Application>().applicationContext, language, applyNightMode = false)
+            .also { localized = language to it }
+    }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
 
@@ -6033,8 +6058,8 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import java.util.Calendar
 
 object ClockPreferences {
-    private const val isUsingSecondsPrecision = "is_using_seconds_precision"
-    private const val isUsingAmPm = "is_clock_time_type_am_pm"
+    const val isUsingSecondsPrecision = "is_using_seconds_precision"
+    const val isUsingAmPm = "is_clock_time_type_am_pm"
     const val clockNeedleMovementType = "clock_needle_movement_type_updated"
     const val clockNeedle = "clock_needle_res_value"
     const val timezone = "custom_timezone"
@@ -7118,6 +7143,10 @@ package app.simple.positional.singleton
 
 import android.content.Context
 import android.content.SharedPreferences
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 
 object SharedPreferences {
     const val preferences = "Preferences"
@@ -7136,6 +7165,14 @@ object SharedPreferences {
     fun getSharedPreferences(context: Context): SharedPreferences {
         return sharedPreferences ?: context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
     }
+
+    fun changes(vararg keys: String): Flow<Unit> = callbackFlow {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key in keys) trySend(Unit) }
+        val preferences = getSharedPreferences()
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        send(Unit)
+        awaitClose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.conflate()
 }
 
 ################################################################################
@@ -7560,15 +7597,12 @@ class ClockState {
     val minute = RotationState(0.5f, 8f, 5000f)
     val second = RotationState()
     val sweep = RotationState()
-    var zone by mutableStateOf<ZoneId>(ZoneId.systemDefault())
     var motion by mutableStateOf(ClockMotion.TICK)
     var face24 by mutableStateOf(false)
     var needles by mutableStateOf(clockNeedleSkins[0].toList())
     var daytime by mutableStateOf(true)
     var customLocation by mutableStateOf(false)
     var pin by mutableIntStateOf(R.drawable.ic_pin_01)
-    var time by mutableStateOf(ClockTime())
-    var sky by mutableStateOf<SkyReport?>(null)
 
     fun show(now: ZonedDateTime) {
         hour.update(if (face24) getHoursInDegreesFor24(now) else getHoursInDegrees(now), true)
@@ -7581,12 +7615,12 @@ class ClockState {
 }
 
 @Composable
-fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu: () -> Unit, onLocation: () -> Unit) {
+fun ClockScreen(state: ClockState, zone: ZoneId, time: ClockTime, sky: SkyReport?, topInset: Dp, onTimezone: () -> Unit, onMenu: () -> Unit, onLocation: () -> Unit) {
     val motion = state.motion
-    LaunchedEffect(state, motion, state.zone, state.face24) {
+    LaunchedEffect(state, motion, zone, state.face24) {
         listOf(state.second, state.sweep).forEach { it.configure(motion.inertia, motion.damping, motion.magnetic) }
         while (true) {
-            state.show(ZonedDateTime.now(state.zone))
+            state.show(ZonedDateTime.now(zone))
             if (motion.intervalMillis > 0) delay(motion.intervalMillis - System.currentTimeMillis() % motion.intervalMillis)
             withFrameMillis { }
         }
@@ -7629,9 +7663,9 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 10.dp),
                     )
                 }
-                InfoSection(stringResource(R.string.local_time), state.time.local, painterResource(R.drawable.ic_access_time))
-                InfoSection(stringResource(R.string.utc_time), state.time.utc)
-                state.sky?.let { SkySections(it) }
+                InfoSection(stringResource(R.string.local_time), time.local, painterResource(R.drawable.ic_access_time))
+                InfoSection(stringResource(R.string.utc_time), time.utc)
+                sky?.let { SkySections(it) }
             }
         }
     }
@@ -7726,7 +7760,6 @@ class CompassState {
     var magnetometerAccuracy by mutableIntStateOf(-1)
     var accelerometer by mutableStateOf(emptyList<InfoRow>())
     var magnetometer by mutableStateOf(emptyList<InfoRow>())
-    var field by mutableStateOf(emptyList<InfoRow>())
     var physics = true
     private var dragging = false
     private var target = 0f
@@ -7781,7 +7814,7 @@ class CompassState {
 }
 
 @Composable
-fun CompassScreen(state: CompassState, topInset: Dp, onCalibrate: () -> Unit, onMenu: () -> Unit) {
+fun CompassScreen(state: CompassState, field: List<InfoRow>, topInset: Dp, onCalibrate: () -> Unit, onMenu: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val degrees by remember(state) { derivedStateOf { abs(state.dial.angle.normalizeEulerAngle(true).toInt()) } }
@@ -7852,7 +7885,7 @@ fun CompassScreen(state: CompassState, topInset: Dp, onCalibrate: () -> Unit, on
                 )
                 InfoSection(stringResource(R.string.accelerometer), state.accelerometer)
                 InfoSection(stringResource(R.string.magnetometer), state.magnetometer)
-                InfoSection(stringResource(R.string.compass_field), state.field)
+                InfoSection(stringResource(R.string.compass_field), field)
             }
         }
     }
@@ -8133,12 +8166,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -8150,14 +8182,19 @@ import app.simple.positional.R
 import app.simple.positional.math.Angle.normalizeEulerAngle
 import kotlin.math.abs
 
+@Immutable
+data class DirectionInfo(
+    val target: String = "",
+    val coordinates: List<InfoRow> = emptyList(),
+    val displacement: String = "",
+    val bearing: Float = 0f,
+)
+
 @Stable
 class DirectionState {
     val dial = RotationState(0.5f, 8f, 5000f)
     val arrow = RotationState(1f, 8f, 5000f)
     var bearing = 0f
-    var target by mutableStateOf("")
-    var displacement by mutableStateOf("")
-    var coordinates by mutableStateOf(emptyList<InfoRow>())
 
     fun onHeading(azimuth: Float) {
         dial.update(-azimuth, true)
@@ -8166,7 +8203,7 @@ class DirectionState {
 }
 
 @Composable
-fun DirectionPanel(state: DirectionState, topInset: Dp, onCalibrate: () -> Unit, onTarget: () -> Unit, onMenu: () -> Unit) {
+fun DirectionPanel(state: DirectionState, info: DirectionInfo, topInset: Dp, onCalibrate: () -> Unit, onTarget: () -> Unit, onMenu: () -> Unit) {
     val azimuth by remember(state) { derivedStateOf { abs(state.dial.angle.normalizeEulerAngle(true).toInt()) } }
     val bearing by remember(state) { derivedStateOf { abs(state.arrow.angle.normalizeEulerAngle(false).toInt()) } }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -8199,12 +8236,12 @@ fun DirectionPanel(state: DirectionState, topInset: Dp, onCalibrate: () -> Unit,
                 InfoSection(
                     stringResource(R.string.gps_location),
                     listOf(
-                        InfoRow("${stringResource(R.string.target)}:", state.target),
+                        InfoRow("${stringResource(R.string.target)}:", info.target),
                         InfoRow(stringResource(R.string.gps_bearing), "$bearing°"),
-                        InfoRow(stringResource(R.string.gps_displacement), state.displacement),
+                        InfoRow(stringResource(R.string.gps_displacement), info.displacement),
                     ),
                 )
-                InfoSection(stringResource(R.string.gps_coordinates), state.coordinates)
+                InfoSection(stringResource(R.string.gps_coordinates), info.coordinates)
                 InfoSection(stringResource(R.string.compass), listOf(InfoRow(stringResource(R.string.moon_azimuth), "$azimuth°")))
             }
         }
@@ -8384,10 +8421,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -8413,18 +8450,23 @@ import kotlinx.coroutines.delay
 
 enum class MapRotation { Compass, Bearing, North }
 
+@Immutable
+data class GpsInfo(
+    val provider: List<InfoRow> = emptyList(),
+    val location: List<InfoRow> = emptyList(),
+    val movement: List<InfoRow> = emptyList(),
+    val coordinates: List<InfoRow> = emptyList(),
+    val address: String = "",
+    val target: AnnotatedString = AnnotatedString(""),
+    val speed: Float = 0f,
+    val fixed: Boolean = false,
+    val enabled: Boolean = true,
+    val custom: Boolean = false,
+)
+
 @Stable
-class GpsState(val custom: Boolean) {
-    var provider by mutableStateOf(emptyList<InfoRow>())
-    var location by mutableStateOf(emptyList<InfoRow>())
-    var movement by mutableStateOf(emptyList<InfoRow>())
-    var coordinates by mutableStateOf(emptyList<InfoRow>())
-    var address by mutableStateOf("")
-    var target by mutableStateOf(AnnotatedString(""))
-    var speed by mutableFloatStateOf(0f)
+class GpsState {
     var message by mutableStateOf<Int?>(null)
-    var fixed by mutableStateOf(false)
-    var enabled by mutableStateOf(true)
     var pin by mutableIntStateOf(R.drawable.ic_place_custom)
     var targetMode by mutableStateOf(false)
     var targetSet by mutableStateOf(false)
@@ -8461,7 +8503,7 @@ interface GpsActions {
 }
 
 @Composable
-fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, actions: GpsActions) {
+fun GpsScreen(state: GpsState, info: GpsInfo, map: View, topInset: Dp, landscape: Boolean, actions: GpsActions) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(state.volumeKeys) { if (state.volumeKeys) runCatching { focus.requestFocus() } }
     val keys = Modifier
@@ -8486,11 +8528,11 @@ fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, acti
         modifier = keys,
         toolbar = {
             MapToolbar(stringResource(R.string.gps_location)) {
-                MapToolButton(if (state.custom) R.drawable.ic_place_custom else state.pin, tint = false, onLongClick = actions::pinCustomization, onClick = actions::customLocation)
+                MapToolButton(if (info.custom) R.drawable.ic_place_custom else state.pin, tint = false, onLongClick = actions::pinCustomization, onClick = actions::customLocation)
                 IconAction(R.drawable.ic_menu, stringResource(R.string.gps_location), actions::menu)
             }
         },
-        tools = { horizontal -> GpsTools(state, actions, horizontal) },
+        tools = { horizontal -> GpsTools(state, info, actions, horizontal) },
         overlay = {
             if (state.targetMode) MapCrosshair()
             state.pressed?.let { point ->
@@ -8502,16 +8544,16 @@ fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, acti
                 }
             }
         },
-        side = { GpsInfo(state, actions) },
+        side = { GpsDetails(state, info, actions) },
         bottom = { SheetHandle { actions.sheet(true) } },
     )
-    if (state.sheet && !landscape) InfoSheet(state, actions)
+    if (state.sheet && !landscape) InfoSheet(state, info, actions)
 }
 
 @Composable
-private fun GpsTools(state: GpsState, actions: GpsActions, horizontal: Boolean) {
+private fun GpsTools(state: GpsState, info: GpsInfo, actions: GpsActions, horizontal: Boolean) {
     if (!horizontal) AlignToolButton(state.toolsLeft, actions::toggleToolsSide)
-    LocationToolButton(state.fixed, state.enabled, actions::locate)
+    LocationToolButton(info.fixed, info.enabled, actions::locate)
     if (state.targetSet) {
         ConfirmToolButton(R.drawable.ic_clear, actions::removeTarget)
     } else {
@@ -8519,27 +8561,27 @@ private fun GpsTools(state: GpsState, actions: GpsActions, horizontal: Boolean) 
     }
     if (state.targetMode) MapToolButton(R.drawable.ic_check, onClick = actions::confirmTarget)
     MapToolButton(R.drawable.ic_compass_on, alpha = toggleAlpha(state.rotation == MapRotation.Compass)) { actions.rotate(MapRotation.Compass) }
-    if (!state.custom) MapToolButton(R.drawable.ic_bearing_rotation, alpha = toggleAlpha(state.rotation == MapRotation.Bearing)) { actions.rotate(MapRotation.Bearing) }
+    if (!info.custom) MapToolButton(R.drawable.ic_bearing_rotation, alpha = toggleAlpha(state.rotation == MapRotation.Bearing)) { actions.rotate(MapRotation.Bearing) }
     MapToolButton(R.drawable.ic_north_only, alpha = toggleAlpha(state.rotation == MapRotation.North)) { actions.rotate(MapRotation.North) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun InfoSheet(state: GpsState, actions: GpsActions) {
+private fun InfoSheet(state: GpsState, info: GpsInfo, actions: GpsActions) {
     ModalBottomSheet(
         onDismissRequest = { actions.sheet(false) },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()) {
-            GpsInfo(state, actions)
+            GpsDetails(state, info, actions)
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GpsInfo(state: GpsState, actions: GpsActions) {
+private fun GpsDetails(state: GpsState, info: GpsInfo, actions: GpsActions) {
     var shareMenu by remember { mutableStateOf(false) }
     LaunchedEffect(state.message) {
         if (state.message != null) {
@@ -8552,14 +8594,14 @@ private fun GpsInfo(state: GpsState, actions: GpsActions) {
             AnimatedContent(state.message ?: R.string.gps_info, modifier = Modifier.weight(1f), label = "message") {
                 Text(stringResource(it), style = MaterialTheme.typography.titleLarge)
             }
-            if (!state.custom) IconAction(R.drawable.ic_save, stringResource(R.string.location_saved), actions::save)
+            if (!info.custom) IconAction(R.drawable.ic_save, stringResource(R.string.location_saved), actions::save)
             IconAction(R.drawable.ic_content_copy, stringResource(R.string.info_copied), actions::copy)
         }
-        InfoSection(stringResource(R.string.gps_provider), state.provider)
-        InfoSection(stringResource(R.string.gps_location), state.location, modifier = Modifier.combinedClickable(onClick = actions::locationDetails))
-        InfoSection(stringResource(R.string.gps_movement), state.movement)
-        Speedometer(state.speed)
-        if (state.custom) {
+        InfoSection(stringResource(R.string.gps_provider), info.provider)
+        InfoSection(stringResource(R.string.gps_location), info.location, modifier = Modifier.combinedClickable(onClick = actions::locationDetails))
+        InfoSection(stringResource(R.string.gps_movement), info.movement)
+        Speedometer(info.speed)
+        if (info.custom) {
             HorizontalDivider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.outline)
             Text(
                 stringResource(R.string.specified_location_notice),
@@ -8568,12 +8610,12 @@ private fun GpsInfo(state: GpsState, actions: GpsActions) {
                 modifier = Modifier.padding(10.dp),
             )
         }
-        TargetSection(state.target, Modifier.combinedClickable(onClick = actions::showTarget))
+        TargetSection(info.target, Modifier.combinedClickable(onClick = actions::showTarget))
         Box {
             InfoSection(
                 stringResource(R.string.gps_coordinates),
-                state.coordinates + InfoRow(stringResource(R.string.gps_address) + ":", state.address),
-                graphic = painterResource(if (state.custom) R.drawable.ic_place_custom else state.pin),
+                info.coordinates + InfoRow(stringResource(R.string.gps_address) + ":", info.address),
+                graphic = painterResource(if (info.custom) R.drawable.ic_place_custom else state.pin),
                 modifier = Modifier.combinedClickable(onLongClick = { shareMenu = true }, onClick = actions::coordinateDetails),
             )
             DropdownMenu(expanded = shareMenu, onDismissRequest = { shareMenu = false }) {
@@ -9296,7 +9338,6 @@ import app.simple.positional.R
 class MeasureState {
     var selected by mutableStateOf(false)
     var name by mutableStateOf("")
-    var summary by mutableStateOf(emptyList<InfoRow>())
     var current by mutableStateOf("")
     var hasPoints by mutableStateOf(false)
     var fixed by mutableStateOf(false)
@@ -9320,7 +9361,7 @@ interface MeasureActions {
 }
 
 @Composable
-fun MeasureScreen(state: MeasureState, map: View, topInset: Dp, actions: MeasureActions) {
+fun MeasureScreen(state: MeasureState, summary: List<InfoRow>, map: View, topInset: Dp, actions: MeasureActions) {
     MapPanelScaffold(
         map = map,
         topInset = topInset,
@@ -9347,12 +9388,12 @@ fun MeasureScreen(state: MeasureState, map: View, topInset: Dp, actions: Measure
             }
         },
         overlay = { if (state.selected) MapCrosshair() },
-        bottom = { if (state.selected) MeasureCard(state) },
+        bottom = { if (state.selected) MeasureCard(state, summary) },
     )
 }
 
 @Composable
-private fun MeasureCard(state: MeasureState) {
+private fun MeasureCard(state: MeasureState, summary: List<InfoRow>) {
     Surface(
         Modifier
             .navigationBarsPadding()
@@ -9364,7 +9405,7 @@ private fun MeasureCard(state: MeasureState) {
         shadowElevation = 5.dp,
     ) {
         Column(Modifier.padding(horizontal = 6.dp)) {
-            InfoSection(state.name, state.summary)
+            InfoSection(state.name, summary)
             if (state.current.isNotEmpty()) {
                 Text(
                     state.current,
@@ -11651,11 +11692,11 @@ data class TrailPointItem(
     val date: String,
 )
 
+@Immutable
+data class TrailInfo(val trail: String = "", val summary: List<InfoRow> = emptyList(), val points: List<TrailPointItem> = emptyList())
+
 @Stable
 class TrailState {
-    var trail by mutableStateOf("")
-    var summary by mutableStateOf(emptyList<InfoRow>())
-    var points by mutableStateOf(emptyList<TrailPointItem>())
     var fixed by mutableStateOf(false)
     var enabled by mutableStateOf(true)
     var toolsLeft by mutableStateOf(false)
@@ -11686,7 +11727,7 @@ interface TrailActions {
 }
 
 @Composable
-fun TrailScreen(state: TrailState, map: View, topInset: Dp, landscape: Boolean, actions: TrailActions) {
+fun TrailScreen(state: TrailState, info: TrailInfo, map: View, topInset: Dp, landscape: Boolean, actions: TrailActions) {
     MapPanelScaffold(
         map = map,
         topInset = topInset,
@@ -11703,42 +11744,42 @@ fun TrailScreen(state: TrailState, map: View, topInset: Dp, landscape: Boolean, 
         tools = { horizontal ->
             if (!horizontal) AlignToolButton(state.toolsLeft, actions::toggleToolsSide)
             LocationToolButton(state.fixed, state.enabled, actions::locate)
-            if (state.points.isNotEmpty()) {
+            if (info.points.isNotEmpty()) {
                 MapToolButton(if (state.wrapped) R.drawable.ic_close_fullscreen else R.drawable.ic_full_screen, onClick = actions::wrap)
             }
             MapToolButton(if (state.compass) R.drawable.ic_compass_on else R.drawable.ic_compass_off, onClick = actions::toggleCompass)
             MapToolButton(R.drawable.ic_add_location, onClick = actions::addPoint)
-            if (state.points.isNotEmpty()) ConfirmToolButton(R.drawable.ic_backspace, actions::removeLast)
+            if (info.points.isNotEmpty()) ConfirmToolButton(R.drawable.ic_backspace, actions::removeLast)
         },
-        side = { TrailPoints(state, actions) },
+        side = { TrailPoints(info, actions) },
         bottom = { SheetHandle { actions.sheet(true) } },
     )
-    if (state.sheet && !landscape) TrailSheet(state, actions)
+    if (state.sheet && !landscape) TrailSheet(info, actions)
     if (state.pickingMarker) MarkerPicker(actions) { state.pickingMarker = false }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TrailSheet(state: TrailState, actions: TrailActions) {
+private fun TrailSheet(info: TrailInfo, actions: TrailActions) {
     ModalBottomSheet(
         onDismissRequest = { actions.sheet(false) },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()) {
-            TrailPoints(state, actions)
+            TrailPoints(info, actions)
         }
     }
 }
 
 @Composable
-private fun TrailPoints(state: TrailState, actions: TrailActions) {
+private fun TrailPoints(info: TrailInfo, actions: TrailActions) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InfoSection(state.trail.ifEmpty { stringResource(R.string.not_available) }, state.summary, modifier = Modifier.weight(1f))
+            InfoSection(info.trail.ifEmpty { stringResource(R.string.not_available) }, info.summary, modifier = Modifier.weight(1f))
             IconAction(R.drawable.ic_add_location, stringResource(R.string.trail), actions::addPoint)
         }
-        if (state.points.isEmpty()) {
+        if (info.points.isEmpty()) {
             Image(
                 painterResource(R.drawable.art_trail),
                 contentDescription = null,
@@ -11746,7 +11787,7 @@ private fun TrailPoints(state: TrailState, actions: TrailActions) {
                 contentScale = ContentScale.FillWidth,
             )
         }
-        state.points.forEach { TrailPointRow(it, actions) }
+        info.points.forEach { TrailPointRow(it, actions) }
     }
 }
 
@@ -12369,34 +12410,30 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.simple.positional.viewmodels.viewmodel.CompassViewModel
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
-import android.hardware.GeomagneticField
 import android.hardware.Sensor
-import android.location.Location
 import android.os.SystemClock
-import androidx.lifecycle.ViewModelProvider
-import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.PhysicalPropertiesDialog
 import app.simple.positional.extensions.panel.SensorPanel
-import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
-import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import kotlinx.coroutines.flow.filterNotNull
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
     private val sensor: HeadingSensor
+    private val viewModel = panelModel(CompassViewModel::class, ::CompassViewModel)
     private var lastReadings = 0L
 
     init {
@@ -12407,7 +12444,8 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     @Composable
     override fun Content(topInset: Dp) {
-        CompassScreen(state, topInset, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
+        val field by viewModel.field.collectAsStateWithLifecycle()
+        CompassScreen(state, field, topInset, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
     }
 
     private fun showMenu() = menuSheet.show {
@@ -12427,7 +12465,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     init {
         if (!sensor.isAvailable) showSensorError()
-        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull(), ::showField)
     }
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
@@ -12446,15 +12483,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
         lastReadings = now
         state.accelerometer = axisRows(accelerometer)
         state.magnetometer = axisRows(magnetometer)
-    }
-
-    private fun showField(location: Location) {
-        val field = GeomagneticField(location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), location.time)
-        state.field = listOf(
-            InfoRow(getString(R.string.compass_inclination), "${round(field.inclination.toDouble(), 2)}°"),
-            InfoRow(getString(R.string.compass_declination), "${round(field.declination.toDouble(), 2)}°"),
-            InfoRow(getString(R.string.compass_field_strength), "${round(field.fieldStrength.toDouble(), 2)} nT"),
-        )
     }
 
     private fun applyPreferences() {
@@ -12489,46 +12517,41 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 ################################################################################
 package app.simple.positional.ui.panels
 
+import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
-import android.location.Location
-import androidx.lifecycle.ViewModelProvider
-import app.simple.positional.R
-import app.simple.positional.ui.navigation.Routes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.preferences.DirectionPreferences
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.ui.compose.DirectionPanel
 import app.simple.positional.ui.compose.DirectionState
-import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.util.DMSConverter
-import app.simple.positional.util.DistanceText
-import app.simple.positional.util.LocationExtension
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import kotlinx.coroutines.flow.filterNotNull
-import com.google.android.gms.maps.model.LatLng
+import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.viewmodels.viewmodel.DirectionViewModel
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = DirectionState()
     private val sensor: HeadingSensor
-    private var target = LatLng(0.0, 0.0)
-    private var location: Location? = null
+    private val viewModel = panelModel(DirectionViewModel::class, ::DirectionViewModel)
 
     init {
         sensor = HeadingSensor(activity, this)
         sensor.gimbalLock = DirectionPreferences.isGimbalLock()
         lifecycle.addObserver(sensor)
+        if (!sensor.isAvailable) showSensorError()
     }
 
     @Composable
     override fun Content(topInset: Dp) {
+        val info by viewModel.info.collectAsStateWithLifecycle()
+        SideEffect { state.bearing = info.bearing }
         DirectionPanel(
             state,
+            info,
             topInset,
             onCalibrate = { showCalibration() },
             onTarget = ::openTargets,
@@ -12538,49 +12561,13 @@ class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSen
 
     private fun openTargets() = navigate(Routes.DIRECTIONS)
 
-    init {
-        if (!sensor.isAvailable) showSensorError()
-        loadTarget()
-        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
-            location = it
-            updateTarget()
-        }
-    }
-
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
     override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(type, accuracy)
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            DirectionPreferences.directionLatitude,
-            DirectionPreferences.directionLongitude,
-            DirectionPreferences.directionLabel,
-            DirectionPreferences.useMapsTarget -> loadTarget()
-            DirectionPreferences.directionGimbalLock -> sensor.gimbalLock = DirectionPreferences.isGimbalLock()
-        }
+        if (key == DirectionPreferences.directionGimbalLock) sensor.gimbalLock = DirectionPreferences.isGimbalLock()
     }
-
-    private fun usesMapsTarget() = DirectionPreferences.isUsingMapsTarget() && GPSPreferences.isTargetMarkerSet()
-
-    private fun loadTarget() {
-        val coordinates = if (usesMapsTarget()) GPSPreferences.getTargetMarkerCoordinates() else DirectionPreferences.getTargetCoordinates()
-        target = LatLng(coordinates[0].toDouble(), coordinates[1].toDouble())
-        state.target = if (usesMapsTarget()) getString(R.string.using_maps_target) else DirectionPreferences.getTargetLabel() ?: getString(R.string.not_available)
-        val formatted = DMSConverter.getFormattedCoordinates(target, activity)
-        state.coordinates = listOf(
-            InfoRow(getString(R.string.gps_latitude), formatted[0]),
-            InfoRow(getString(R.string.gps_longitude), formatted[1]),
-        )
-        updateTarget()
-    }
-
-    private fun updateTarget() {
-        val current = location ?: return
-        state.bearing = LocationExtension.calculateBearingAngle(current.latitude, current.longitude, target.latitude, target.longitude).toFloat()
-        state.displacement = DistanceText.format(activity, LocationExtension.measureDisplacement(arrayOf(LatLng(current.latitude, current.longitude), target)).toDouble(), MainPreferences.isMetric())
-    }
-
 }
 
 ################################################################################
@@ -12597,11 +12584,9 @@ import android.content.SharedPreferences
 import android.location.Location
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
@@ -12610,11 +12595,6 @@ import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.GpsMap
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapsCallbacks
-import app.simple.positional.math.MathExtensions.round
-import app.simple.positional.math.MovementThreshold
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKiloMetersPerHour
-import app.simple.positional.math.UnitConverter.toMilesPerHour
 import app.simple.positional.model.Locations
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
@@ -12636,52 +12616,28 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.ui.compose.toAnnotatedString
-import app.simple.positional.util.DMSConverter
-import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
-import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.MapSource
-import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import app.simple.positional.util.ReverseGeocoder
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import app.simple.positional.viewmodels.viewmodel.GpsViewModel
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, MapsCallbacks {
-    private val state: GpsState
+    private val state = GpsState()
     private val targetForm = CustomLocationForm()
-    private var accuracySeries by mutableStateOf(emptyList<Float>())
-    private var altitudeSeries by mutableStateOf(emptyList<Float>())
     private val maps: GpsMap
-    private val viewModel: LocationViewModel
-    private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
-    private var addressJob: Job? = null
+    private val viewModel = panelModel(GpsViewModel::class, ::GpsViewModel)
     private var location: Location? = null
     private var pressed: LatLng? = null
-    private var accuracyRow = InfoRow("")
-    private var altitudeRow = InfoRow("")
-    private var latencyRow = InfoRow("")
 
     init {
-        viewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
-        state = GpsState(MainPreferences.isCustomCoordinate())
         state.fullScreen = !isLandscapeOrientation && consumeFullScreenShortcut()
         readPreferences()
-        accuracyRow = InfoRow(getString(R.string.gps_accuracy), PENDING)
-        altitudeRow = InfoRow(getString(R.string.gps_altitude), PENDING)
-        latencyRow = InfoRow(getString(R.string.gps_latency), PENDING)
-        publishLocationRows()
-        state.provider = providerRows(PENDING)
-        state.movement = listOf(R.string.gps_bearing, R.string.gps_direction, R.string.gps_speed).map { InfoRow(getString(it), PENDING) }
-        state.coordinates = listOf(R.string.gps_latitude, R.string.gps_longitude).map { InfoRow(getString(it), PENDING) }
-        state.address = PENDING
     }
 
     init {
@@ -12698,7 +12654,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     @Composable
     override fun Content(topInset: Dp) {
-        GpsScreen(state, maps.view, topInset, isLandscapeOrientation, this)
+        val info by viewModel.info.collectAsStateWithLifecycle()
+        GpsScreen(state, info, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
@@ -12710,85 +12667,10 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
             showError(getString(R.string.play_services_error))
         }
 
-        if (state.custom) {
-            val coordinates = MainPreferences.getCoordinates()
-            showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
+        observe(locationModel.location.filterNotNull()) {
+            location = it
+            if (!MainPreferences.isCustomCoordinate()) maps.updateLocation(it)
         }
-
-        observe(viewModel.location.filterNotNull(), ::onLocation)
-        observe(viewModel.provider.filterNotNull()) {
-            state.enabled = getLocationStatus(activity)
-            state.provider = providerRows(it)
-        }
-        observe(viewModel.latency.filterNotNull()) {
-            val unit = getString(if (it.inSeconds) R.string.seconds else R.string.milliseconds)
-            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.value} $unit", it.isLate)
-            publishLocationRows()
-        }
-        observe(viewModel.target.filterNotNull()) { state.target = it.toAnnotatedString() }
-        observe(viewModel.accuracySeries) { accuracySeries = it }
-        observe(viewModel.altitudeSeries) { altitudeSeries = it }
-    }
-
-    override fun onCleared() {
-        addressJob?.cancel()
-        addressThreshold.reset()
-    }
-
-    private fun onLocation(location: Location) {
-        this.location = location
-
-        val metric = MainPreferences.isMetric()
-        val length = getString(if (metric) R.string.meter else R.string.feet)
-        val accuracy = if (metric) location.accuracy.toDouble() else location.accuracy.toDouble().toFeet()
-        val altitude = if (metric) location.altitude else location.altitude.toFeet()
-        val kmh = location.speed.toDouble().toKiloMetersPerHour()
-        val speed = if (metric) kmh else kmh.toMilesPerHour()
-        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(activity, location.bearing.toDouble()) else getString(R.string.not_available)
-
-        state.fixed = true
-        state.enabled = getLocationStatus(activity)
-        state.provider = providerRows(location.provider?.uppercase(LocaleHelper.getAppLocale()) ?: getString(R.string.not_available))
-        accuracyRow = InfoRow(getString(R.string.gps_accuracy), "${round(accuracy, 2)} $length")
-        altitudeRow = InfoRow(getString(R.string.gps_altitude), "${round(altitude, 2)} $length")
-        publishLocationRows()
-        state.movement = listOf(
-            InfoRow(getString(R.string.gps_bearing), "${location.bearing}°"),
-            InfoRow(getString(R.string.gps_direction), direction),
-            InfoRow(getString(R.string.gps_speed), "${round(speed, 2)} ${getString(if (metric) R.string.kilometer_hour else R.string.miles_hour)}"),
-        )
-        state.speed = if (metric) location.speed.toKiloMetersPerHour() else location.speed.toMilesPerHour()
-
-        if (!state.custom) {
-            maps.updateLocation(location)
-            showCoordinates(location.latitude, location.longitude)
-        }
-    }
-
-    private fun showCoordinates(latitude: Double, longitude: Double) {
-        state.coordinates = listOf(
-            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, activity)),
-            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, activity)),
-        )
-        if (!addressThreshold.accept(latitude, longitude)) return
-        addressJob?.cancel()
-        addressJob = owner.lifecycleScope.launch {
-            state.address = if (isNetworkAvailable(activity)) {
-                ReverseGeocoder.addressLine(activity, latitude, longitude) ?: getString(R.string.no_address_found)
-            } else {
-                addressThreshold.reset()
-                getString(R.string.internet_connection_alert)
-            }
-        }
-    }
-
-    private fun providerRows(source: String) = listOf(
-        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(activity)) R.string.gps_enabled else R.string.gps_disabled)),
-        InfoRow(getString(R.string.gps_source), source),
-    )
-
-    private fun publishLocationRows() {
-        state.location = listOf(accuracyRow, altitudeRow, latencyRow)
     }
 
     private fun readPreferences() {
@@ -12839,9 +12721,10 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     }
 
     private fun coordinates(): Pair<Double, Double> {
+        val custom = MainPreferences.isCustomCoordinate()
         val current = location
-        if (!state.custom && current != null) return current.latitude to current.longitude
-        val stored = if (state.custom) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
+        if (!custom && current != null) return current.latitude to current.longitude
+        val stored = if (custom) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
         return stored[0].toDouble() to stored[1].toDouble()
     }
 
@@ -12898,7 +12781,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         val entry = Locations().apply {
             latitude = current.latitude
             longitude = current.longitude
-            address = state.address
+            address = viewModel.info.value.address
             date = System.currentTimeMillis()
         }
         val dao = LocationDatabase.getInstance(activity).locationDao()
@@ -12910,12 +12793,13 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun copy() {
         val clipboard = activity.getSystemService<ClipboardManager>() ?: return
+        val info = viewModel.info.value
         val text = buildString {
-            section(getString(R.string.gps_provider), state.provider)
-            section(getString(R.string.gps_location), state.location)
-            section(getString(R.string.gps_movement), state.movement)
-            if (state.custom) append(getString(R.string.specified_location_notice)).append("\n\n")
-            section(getString(R.string.gps_coordinates), state.coordinates + InfoRow(getString(R.string.gps_address) + ":", state.address))
+            section(getString(R.string.gps_provider), info.provider)
+            section(getString(R.string.gps_location), info.location)
+            section(getString(R.string.gps_movement), info.movement)
+            if (info.custom) append(getString(R.string.specified_location_notice)).append("\n\n")
+            section(getString(R.string.gps_coordinates), info.coordinates + InfoRow(getString(R.string.gps_address) + ":", info.address))
         }.trim()
         clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.gps_info), text))
         state.message = R.string.info_copied
@@ -12929,7 +12813,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun share() {
         val (latitude, longitude) = coordinates()
-        LocationShare.share(activity, latitude, longitude, state.address)
+        LocationShare.share(activity, latitude, longitude, viewModel.info.value.address)
     }
 
     override fun locationDetails() = dialogs.show(GpsDialog.Details)
@@ -12942,10 +12826,15 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     @Composable
     override fun DialogContent(dialog: PanelDialog) {
         when (dialog) {
-            is GpsDialog.Summary -> LocationSummaryDialog(dialog.latitude, dialog.longitude, state.custom, dialogs::dismiss)
+            is GpsDialog.Summary -> LocationSummaryDialog(dialog.latitude, dialog.longitude, MainPreferences.isCustomCoordinate(), dialogs::dismiss)
             is GpsDialog.Formats -> CoordinateDetailsDialog(dialog.latitude, dialog.longitude, dialogs::dismiss)
             GpsDialog.Pin -> PinCustomizationDialog(dialogs::dismiss)
-            GpsDialog.Details -> LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
+            GpsDialog.Details -> {
+                val info by viewModel.info.collectAsStateWithLifecycle()
+                val accuracy by locationModel.accuracySeries.collectAsStateWithLifecycle()
+                val altitude by locationModel.altitudeSeries.collectAsStateWithLifecycle()
+                LocationDetailsDialog(info.location, accuracy, altitude, MainPreferences.isMetric(), dialogs::dismiss)
+            }
             GpsDialog.Target -> TargetCoordinatesDialog(targetForm, onSearch = ::search, onDismiss = dialogs::dismiss) { latitude, longitude ->
                 GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
                 GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
@@ -12989,10 +12878,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     }
 
     companion object {
-        private const val PENDING = "-"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
         private const val CLOSE_ZOOM = 18F
-        private const val ADDRESS_DISTANCE = 25.0
         private val gpsKeys = setOf(
             GPSPreferences.pinSkin,
             GPSPreferences.toolsGravity,
@@ -13057,6 +12944,8 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
@@ -13072,7 +12961,6 @@ import app.simple.positional.math.GeoDistance
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.MeasurePreferences
-import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MeasureActions
 import app.simple.positional.ui.compose.MeasureScreen
 import app.simple.positional.ui.compose.MeasureState
@@ -13082,7 +12970,6 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.filterNotNull
@@ -13090,14 +12977,12 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
-    private val locationViewModel: LocationViewModel
     private val measureViewModel: MeasureViewModel
     private val maps: MeasureMap
     private var location: Location? = null
     private var shown: Long? = null
 
     init {
-        locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
         measureViewModel = ViewModelProvider(activity)[MeasureViewModel::class.java]
         readPreferences()
     }
@@ -13108,14 +12993,15 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
 
     @Composable
     override fun Content(topInset: Dp) {
-        MeasureScreen(state, maps.view, topInset, this)
+        val summary by measureViewModel.summary.collectAsStateWithLifecycle()
+        MeasureScreen(state, summary, maps.view, topInset, this)
     }
 
     init {
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
-        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
-        observe(locationViewModel.location.filterNotNull()) {
+        observe(locationModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(locationModel.location.filterNotNull()) {
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
@@ -13136,7 +13022,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         shown = measure.dateCreated
         state.selected = true
         state.name = measure.name.orEmpty()
-        showSummary(measure)
+        state.hasPoints = measure.points.isNotEmpty()
     }
 
     override fun onMapClicked() {
@@ -13158,15 +13044,6 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         state.current = if (latLng == null || last == null) "" else {
             distance(GeoDistance.meters(last.latitude, last.longitude, latLng.latitude, latLng.longitude))
         }
-    }
-
-    private fun showSummary(measure: MeasureModel) {
-        val points = measure.points
-        state.hasPoints = points.isNotEmpty()
-        state.summary = listOf(
-            InfoRow(getString(R.string.total), points.size.toString()),
-            InfoRow(getString(R.string.gps_displacement), distance(GeoDistance.path(points.map { it.latitude to it.longitude }))),
-        )
     }
 
     private fun distance(meters: Double) = DistanceText.format(activity, meters, MainPreferences.isMetric())
@@ -13403,18 +13280,14 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
 ################################################################################
 package app.simple.positional.ui.panels
 
+import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
-import android.os.SystemClock
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
-import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.panel.PanelController
@@ -13422,39 +13295,35 @@ import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.ui.compose.ClockScreen
-import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
+import app.simple.positional.ui.compose.ClockScreen
+import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.ZoneId
+import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.viewmodels.viewmodel.ClockViewModel
 
 class Time(activity: ComponentActivity) : PanelController(activity) {
     private val state = ClockState()
-    private val report: ClockReport
-    private var latitude = 0.0
-    private var longitude = 0.0
-    private var altitude = 0.0
-    private var lastSky = 0L
+    private val viewModel = panelModel(ClockViewModel::class, ::ClockViewModel)
 
     init {
-        report = ClockReport(activity)
         applyPreferences()
     }
 
     @Composable
     override fun Content(topInset: Dp) {
+        val zone by viewModel.zone.collectAsStateWithLifecycle()
+        val time by viewModel.time.collectAsStateWithLifecycle()
+        val sky by viewModel.sky.collectAsStateWithLifecycle()
         ClockScreen(
             state,
+            zone,
+            time,
+            sky,
             topInset,
             onTimezone = { navigate(Routes.TIMEZONE) },
             onMenu = ::showMenu,
@@ -13469,7 +13338,10 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
     @Composable
     override fun DialogContent(dialog: PanelDialog) {
         when (dialog) {
-            ClockDialog.Location -> LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss)
+            ClockDialog.Location -> {
+                val position by viewModel.position.collectAsStateWithLifecycle()
+                LocationSummaryDialog(position.latitude, position.longitude, state.customLocation, dialogs::dismiss)
+            }
             ClockDialog.Needles -> ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) }
             ClockDialog.Motion -> ChoiceDialog(
                 stringResource(R.string.motion_type),
@@ -13486,67 +13358,19 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
 
     private enum class ClockDialog : PanelDialog { Location, Needles, Motion }
 
-    init {
-        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
-            if (state.customLocation) return@observe
-            latitude = it.latitude
-            longitude = it.longitude
-            altitude = it.altitude
-            if (SystemClock.elapsedRealtime() - lastSky > SKY_MIN_INTERVAL) refreshSkyAsync()
-        }
-        owner.lifecycleScope.launch {
-            owner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                launch {
-                    while (true) {
-                        val zone = state.zone
-                        state.time = withContext(Dispatchers.Default) { report.time(zone) }
-                        delay(1000L - System.currentTimeMillis() % 1000L)
-                    }
-                }
-                while (true) {
-                    refreshSky()
-                    delay(SKY_INTERVAL)
-                }
-            }
-        }
-    }
-
-    private suspend fun refreshSky() {
-        lastSky = SystemClock.elapsedRealtime()
-        val zone = state.zone
-        state.sky = withContext(Dispatchers.Default) { report.sky(latitude, longitude, altitude, zone) }
-    }
-
-    private fun refreshSkyAsync() {
-        owner.lifecycleScope.launch { refreshSky() }
-    }
-
     private fun applyPreferences() {
-        state.zone = runCatching { ZoneId.of(ClockPreferences.getTimeZone()) }.getOrDefault(ZoneId.systemDefault())
         state.motion = ClockMotion.of(ClockPreferences.getMovementType())
         state.face24 = ClockPreferences.isClockFace24Hour()
         state.needles = clockNeedleSkins.getOrElse(ClockPreferences.getClockNeedleTheme()) { clockNeedleSkins[0] }.toList()
         state.pin = LocationPins.locationsPins.getOrElse(GPSPreferences.getPinSkin()) { R.drawable.ic_pin_01 }
         state.customLocation = MainPreferences.isCustomCoordinate()
-        if (state.customLocation) {
-            latitude = MainPreferences.getCoordinates()[0].toDouble()
-            longitude = MainPreferences.getCoordinates()[1].toDouble()
-            altitude = 0.0
-        } else {
-            latitude = MainPreferences.getLastCoordinates()[0].toDouble()
-            longitude = MainPreferences.getLastCoordinates()[1].toDouble()
-            altitude = MainPreferences.getLastAltitude().toDouble()
-        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key !in clockKeys) return
-        applyPreferences()
-        refreshSkyAsync()
+        if (key in clockKeys) applyPreferences()
     }
 
     companion object {
-        private const val SKY_INTERVAL = 60_000L
         private val motionTypes = listOf(
             "smooth" to R.string.motion_type_smooth,
             "tick" to R.string.motion_type_tick,
@@ -13554,16 +13378,11 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
             "tick_smooth" to R.string.tick_smooth,
             "mechanical" to R.string.mechanical,
         )
-        private const val SKY_MIN_INTERVAL = 10_000L
         private val clockKeys = setOf(
             ClockPreferences.clockNeedleMovementType,
             ClockPreferences.clockNeedle,
-            ClockPreferences.timezone,
             ClockPreferences.is24HourFace,
             MainPreferences.isCustomCoordinate,
-            MainPreferences.latitude,
-            MainPreferences.longitude,
-            MainPreferences.unit,
             GPSPreferences.pinSkin,
         )
     }
@@ -13589,22 +13408,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.maps.TrailMap
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapsCallbacks
-import app.simple.positional.math.GeoDistance
-import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.model.TrailEntry
 import app.simple.positional.model.TrailPoint
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.TrailActions
 import app.simple.positional.ui.compose.TrailPointItem
 import app.simple.positional.ui.compose.TrailScreen
@@ -13614,14 +13427,10 @@ import app.simple.positional.ui.compose.NameNoteDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.util.DMSConverter
-import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
-import app.simple.positional.util.TimeFormatter.formatDate
 import app.simple.positional.util.TrailNames
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -13631,13 +13440,11 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private val state = TrailState()
     private val trailData: TrailDataViewModel by activity.viewModels()
     private val trails: TrailsViewModel by activity.viewModels()
-    private val locationViewModel: LocationViewModel
     private val maps: TrailMap
     private var location: Location? = null
     private var pending: Triple<Double, Double, Float>? = null
 
     init {
-        locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
         readPreferences()
     }
 
@@ -13647,50 +13454,22 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     @Composable
     override fun Content(topInset: Dp) {
-        TrailScreen(state, maps.view, topInset, isLandscapeOrientation, this)
+        val info by trailData.info.collectAsStateWithLifecycle()
+        TrailScreen(state, info, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
-        observe(locationViewModel.location.filterNotNull()) {
+        observe(locationModel.location.filterNotNull()) {
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
         }
-        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
-        observe(trailData.trail) { state.trail = it }
-        observe(trailData.points, ::showPoints)
-    }
-
-    private fun showPoints(points: List<TrailPoint>) {
-        maps.showPoints(points)
-        val metric = MainPreferences.isMetric()
-        val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
-        state.summary = listOf(
-            InfoRow(getString(R.string.total), points.size.toString()),
-            InfoRow(getString(R.string.gps_displacement), DistanceText.format(activity, distance, metric)),
-        )
-        state.points = points.asReversed().map { item(it, metric) }
-    }
-
-    private fun item(point: TrailPoint, metric: Boolean): TrailPointItem {
-        val (accuracy, unit) = DistanceText.parts(point.accuracy.toDouble(), metric)
-        return TrailPointItem(
-            point = point,
-            icon = TrailIcons.icons.getOrElse(point.iconPosition) { TrailIcons.icons[0] },
-            name = point.name.orEmpty().ifEmpty { "--" },
-            note = point.note.orEmpty().ifEmpty { getString(R.string.not_available) },
-            coordinates = getString(
-                R.string.coordinates_format,
-                DMSConverter.getFormattedLatitude(point.latitude, activity),
-                DMSConverter.getFormattedLongitude(point.longitude, activity),
-            ),
-            accuracy = getString(R.string.trail_data_accuracy, round(accuracy, 1).toString(), getString(unit)),
-            date = point.timeAdded.formatDate(),
-        )
+        observe(locationModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(trailData.points, maps::showPoints)
     }
 
     private fun readPreferences() {
@@ -15174,6 +14953,151 @@ object UTMConverter {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/ClockViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import android.app.Application
+import android.content.SharedPreferences
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.GeoDistance
+import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.singleton.SharedPreferences.changes
+import app.simple.positional.ui.compose.ClockTime
+import app.simple.positional.ui.compose.SkyReport
+import app.simple.positional.ui.panels.ClockReport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import java.time.ZoneId
+
+data class SkyPosition(val latitude: Double, val longitude: Double, val altitude: Double) {
+    fun isNear(other: SkyPosition, meters: Double) = GeoDistance.meters(latitude, longitude, other.latitude, other.longitude) < meters
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class ClockViewModel(application: Application, location: LocationViewModel) : WrappedViewModel(application) {
+    private val custom = MutableStateFlow(customPosition())
+    private val mutableZone = MutableStateFlow(storedZone())
+
+    val zone: StateFlow<ZoneId> = mutableZone.asStateFlow()
+
+    val position: StateFlow<SkyPosition> = custom
+        .flatMapLatest { fixed ->
+            if (fixed != null) flowOf(fixed) else location.location.filterNotNull().map { SkyPosition(it.latitude, it.longitude, it.altitude) }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), custom.value ?: storedPosition())
+
+    val time: StateFlow<ClockTime> = combine(mutableZone, changes(ClockPreferences.isUsingAmPm)) { zone, _ -> zone }
+        .flatMapLatest { zone -> ticker(SECOND) { report().time(zone) } }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), ClockTime())
+
+    val sky: StateFlow<SkyReport?> = combine(
+        position.distinctUntilChanged { old, new -> old.isNear(new, SKY_DISTANCE) },
+        mutableZone,
+        changes(MainPreferences.unit, ClockPreferences.isUsingAmPm, ClockPreferences.isUsingSecondsPrecision),
+    ) { position, zone, _ -> position to zone }
+        .flatMapLatest { (position, zone) -> ticker(MINUTE) { report().sky(position.latitude, position.longitude, position.altitude, zone) } }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
+
+    private fun report() = ClockReport(getContext())
+
+    private fun <T> ticker(period: Long, value: () -> T): Flow<T> = flow {
+        while (true) {
+            emit(value())
+            delay(period - System.currentTimeMillis() % period)
+        }
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            ClockPreferences.timezone -> mutableZone.value = storedZone()
+            MainPreferences.isCustomCoordinate, MainPreferences.latitude, MainPreferences.longitude -> custom.value = customPosition()
+        }
+    }
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+        const val SECOND = 1_000L
+        const val MINUTE = 60_000L
+        const val SKY_DISTANCE = 1_000.0
+
+        fun storedZone(): ZoneId = runCatching { ZoneId.of(ClockPreferences.getTimeZone()) }.getOrDefault(ZoneId.systemDefault())
+
+        fun customPosition(): SkyPosition? {
+            if (!MainPreferences.isCustomCoordinate()) return null
+            val coordinates = MainPreferences.getCoordinates()
+            return SkyPosition(coordinates[0].toDouble(), coordinates[1].toDouble(), 0.0)
+        }
+
+        fun storedPosition(): SkyPosition {
+            val coordinates = MainPreferences.getLastCoordinates()
+            return SkyPosition(coordinates[0].toDouble(), coordinates[1].toDouble(), MainPreferences.getLastAltitude().toDouble())
+        }
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/CompassViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import android.app.Application
+import android.hardware.GeomagneticField
+import android.location.Location
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
+import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.ui.compose.InfoRow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+
+class CompassViewModel(application: Application, location: LocationViewModel) : WrappedViewModel(application) {
+    val field: StateFlow<List<InfoRow>> = location.location.filterNotNull()
+        .map(::fieldRows)
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    private fun fieldRows(location: Location): List<InfoRow> {
+        val field = GeomagneticField(location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), location.time)
+        val context = getContext()
+        return listOf(
+            InfoRow(context.getString(R.string.compass_inclination), "${round(field.inclination.toDouble(), 2)}°"),
+            InfoRow(context.getString(R.string.compass_declination), "${round(field.declination.toDouble(), 2)}°"),
+            InfoRow(context.getString(R.string.compass_field_strength), "${round(field.fieldStrength.toDouble(), 2)} nT"),
+        )
+    }
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/CustomLocationViewModel.kt
 ################################################################################
 package app.simple.positional.viewmodels.viewmodel
@@ -15211,6 +15135,75 @@ class CustomLocationViewModel(application: Application) : AndroidViewModel(appli
 
     private companion object {
         const val STOP_TIMEOUT = 5_000L
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/DirectionViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import android.app.Application
+import android.location.Location
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
+import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.preferences.DirectionPreferences
+import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.singleton.SharedPreferences.changes
+import app.simple.positional.ui.compose.DirectionInfo
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.DistanceText
+import app.simple.positional.util.LocationExtension
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+
+class DirectionViewModel(application: Application, location: LocationViewModel) : WrappedViewModel(application) {
+    val info: StateFlow<DirectionInfo> = combine(changes(*KEYS), location.location) { _, fix -> info(fix) }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), DirectionInfo())
+
+    private fun info(fix: Location?): DirectionInfo {
+        val context = getContext()
+        val maps = DirectionPreferences.isUsingMapsTarget() && GPSPreferences.isTargetMarkerSet()
+        val stored = if (maps) GPSPreferences.getTargetMarkerCoordinates() else DirectionPreferences.getTargetCoordinates()
+        val target = LatLng(stored[0].toDouble(), stored[1].toDouble())
+        val formatted = DMSConverter.getFormattedCoordinates(target, context)
+        val info = DirectionInfo(
+            target = if (maps) context.getString(R.string.using_maps_target) else DirectionPreferences.getTargetLabel() ?: context.getString(R.string.not_available),
+            coordinates = listOf(
+                InfoRow(context.getString(R.string.gps_latitude), formatted[0]),
+                InfoRow(context.getString(R.string.gps_longitude), formatted[1]),
+            ),
+        )
+        fix ?: return info
+        val meters = LocationExtension.measureDisplacement(arrayOf(LatLng(fix.latitude, fix.longitude), target)).toDouble()
+        return info.copy(
+            displacement = DistanceText.format(context, meters, MainPreferences.isMetric()),
+            bearing = LocationExtension.calculateBearingAngle(fix.latitude, fix.longitude, target.latitude, target.longitude).toFloat(),
+        )
+    }
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+        val KEYS = arrayOf(
+            DirectionPreferences.directionLatitude,
+            DirectionPreferences.directionLongitude,
+            DirectionPreferences.directionLabel,
+            DirectionPreferences.useMapsTarget,
+            GPSPreferences.mapTargetMarker,
+            GPSPreferences.mapTargetMarkerLatitude,
+            GPSPreferences.mapTargetMarkerLongitude,
+            MainPreferences.unit,
+            MainPreferences.coordinatesFormat,
+        )
     }
 }
 
@@ -15271,6 +15264,178 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
 
     private companion object {
         const val STOP_TIMEOUT = 5_000L
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/GpsViewModel.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import android.app.Application
+import android.content.Context
+import android.location.Location
+import androidx.compose.ui.text.AnnotatedString
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
+import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.Latency
+import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.math.MovementThreshold
+import app.simple.positional.math.UnitConverter.toFeet
+import app.simple.positional.math.UnitConverter.toKiloMetersPerHour
+import app.simple.positional.math.UnitConverter.toMilesPerHour
+import app.simple.positional.preferences.MainPreferences
+import app.simple.positional.singleton.SharedPreferences.changes
+import app.simple.positional.ui.compose.GpsInfo
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.ui.compose.toAnnotatedString
+import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
+import app.simple.positional.util.LocaleHelper
+import app.simple.positional.util.LocationExtension.getLocationStatus
+import app.simple.positional.util.NetworkCheck.isNetworkAvailable
+import app.simple.positional.util.ReverseGeocoder
+import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class GpsViewModel(application: Application, source: LocationViewModel) : WrappedViewModel(application) {
+    private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
+
+    private val point: Flow<Pair<Boolean, LatLng?>> = combine(
+        changes(MainPreferences.isCustomCoordinate, MainPreferences.latitude, MainPreferences.longitude),
+        source.location,
+    ) { _, fix -> customPoint()?.let { true to it } ?: (false to fix?.let { LatLng(it.latitude, it.longitude) }) }
+        .distinctUntilChanged()
+
+    private val address: Flow<String> = point
+        .onStart { addressThreshold.reset() }
+        .map { it.second }
+        .filterNotNull()
+        .filter { addressThreshold.accept(it.latitude, it.longitude) }
+        .mapLatest(::lookup)
+        .onStart { emit(PENDING) }
+
+    private val fix: Flow<FixRows> = combine(source.location, source.provider, source.latency, changes(MainPreferences.unit)) { fix, provider, latency, _ ->
+        fixRows(getContext(), fix, provider, latency)
+    }
+
+    private val coordinates: Flow<Pair<Boolean, List<InfoRow>>> = combine(point, changes(MainPreferences.coordinatesFormat)) { (custom, latLng), _ ->
+        custom to coordinateRows(getContext(), latLng)
+    }
+
+    val info: StateFlow<GpsInfo> = combine(fix, coordinates, address, source.target) { rows, (custom, coords), addressLine, target ->
+        GpsInfo(
+            provider = rows.provider,
+            location = rows.location,
+            movement = rows.movement,
+            coordinates = coords,
+            address = addressLine,
+            target = target?.toAnnotatedString() ?: AnnotatedString(""),
+            speed = rows.speed,
+            fixed = rows.fixed,
+            enabled = rows.enabled,
+            custom = custom,
+        )
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), GpsInfo(custom = MainPreferences.isCustomCoordinate()))
+
+    private suspend fun lookup(point: LatLng): String {
+        val context = getContext()
+        if (!isNetworkAvailable(context)) {
+            addressThreshold.reset()
+            return context.getString(R.string.internet_connection_alert)
+        }
+        return ReverseGeocoder.addressLine(context, point.latitude, point.longitude) ?: context.getString(R.string.no_address_found)
+    }
+
+    private fun customPoint(): LatLng? {
+        if (!MainPreferences.isCustomCoordinate()) return null
+        val coordinates = MainPreferences.getCoordinates()
+        return LatLng(coordinates[0].toDouble(), coordinates[1].toDouble())
+    }
+
+    private class FixRows(
+        val provider: List<InfoRow>,
+        val location: List<InfoRow>,
+        val movement: List<InfoRow>,
+        val speed: Float,
+        val fixed: Boolean,
+        val enabled: Boolean,
+    )
+
+    private fun fixRows(context: Context, fix: Location?, provider: String?, latency: Latency?): FixRows {
+        val enabled = getLocationStatus(context)
+        val metric = MainPreferences.isMetric()
+        val length = context.getString(if (metric) R.string.meter else R.string.feet)
+        val source = fix?.provider?.uppercase(LocaleHelper.getAppLocale()) ?: provider ?: PENDING
+        val latencyRow = if (latency == null) {
+            InfoRow(context.getString(R.string.gps_latency), PENDING)
+        } else {
+            val unit = context.getString(if (latency.inSeconds) R.string.seconds else R.string.milliseconds)
+            InfoRow(context.getString(R.string.gps_latency), "${latency.value} $unit", latency.isLate)
+        }
+        val providerRows = listOf(
+            InfoRow(context.getString(R.string.gps_status), context.getString(if (enabled) R.string.gps_enabled else R.string.gps_disabled)),
+            InfoRow(context.getString(R.string.gps_source), source),
+        )
+        if (fix == null) {
+            return FixRows(
+                providerRows,
+                listOf(InfoRow(context.getString(R.string.gps_accuracy), PENDING), InfoRow(context.getString(R.string.gps_altitude), PENDING), latencyRow),
+                listOf(R.string.gps_bearing, R.string.gps_direction, R.string.gps_speed).map { InfoRow(context.getString(it), PENDING) },
+                0f,
+                false,
+                enabled,
+            )
+        }
+        val accuracy = if (metric) fix.accuracy.toDouble() else fix.accuracy.toDouble().toFeet()
+        val altitude = if (metric) fix.altitude else fix.altitude.toFeet()
+        val kmh = fix.speed.toDouble().toKiloMetersPerHour()
+        val speed = if (metric) kmh else kmh.toMilesPerHour()
+        val direction = if (fix.speed > 0f) getDirectionNameFromAzimuth(context, fix.bearing.toDouble()) else context.getString(R.string.not_available)
+        return FixRows(
+            providerRows,
+            listOf(
+                InfoRow(context.getString(R.string.gps_accuracy), "${round(accuracy, 2)} $length"),
+                InfoRow(context.getString(R.string.gps_altitude), "${round(altitude, 2)} $length"),
+                latencyRow,
+            ),
+            listOf(
+                InfoRow(context.getString(R.string.gps_bearing), "${fix.bearing}°"),
+                InfoRow(context.getString(R.string.gps_direction), direction),
+                InfoRow(context.getString(R.string.gps_speed), "${round(speed, 2)} ${context.getString(if (metric) R.string.kilometer_hour else R.string.miles_hour)}"),
+            ),
+            if (metric) fix.speed.toKiloMetersPerHour() else fix.speed.toMilesPerHour(),
+            true,
+            enabled,
+        )
+    }
+
+    private fun coordinateRows(context: Context, point: LatLng?): List<InfoRow> = listOf(
+        InfoRow(context.getString(R.string.gps_latitude), point?.let { DMSConverter.getFormattedLatitude(it.latitude, context) } ?: PENDING),
+        InfoRow(context.getString(R.string.gps_longitude), point?.let { DMSConverter.getFormattedLongitude(it.longitude, context) } ?: PENDING),
+    )
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+        const val ADDRESS_DISTANCE = 25.0
+        const val PENDING = "-"
     }
 }
 
@@ -15537,17 +15702,26 @@ package app.simple.positional.viewmodels.viewmodel
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
 import app.simple.positional.database.instances.MeasureDatabase
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.GeoDistance
 import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
+import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.MeasurePreferences
+import app.simple.positional.singleton.SharedPreferences.changes
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.util.DistanceText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -15566,6 +15740,19 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     val measure: StateFlow<Measure?> = selected
         .flatMapLatest { dao.observeById(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
+
+    val summary: StateFlow<List<InfoRow>> = combine(measure, changes(MainPreferences.unit)) { measure, _ -> summary(measure?.points.orEmpty()) }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    private fun summary(points: List<MeasurePoint>): List<InfoRow> {
+        val context = getContext()
+        val meters = GeoDistance.path(points.map { it.latitude to it.longitude })
+        return listOf(
+            InfoRow(context.getString(R.string.total), points.size.toString()),
+            InfoRow(context.getString(R.string.gps_displacement), DistanceText.format(context, meters, MainPreferences.isMetric())),
+        )
+    }
 
     fun addMeasure(name: String, note: String) {
         val created = Measure(System.currentTimeMillis(), name, note)
@@ -15614,32 +15801,51 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
 import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
+import app.simple.positional.constants.TrailIcons
 import app.simple.positional.database.instances.TrailPointDatabase
+import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.GeoDistance
+import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.model.TrailPoint
+import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
+import app.simple.positional.singleton.SharedPreferences.changes
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.ui.compose.TrailInfo
+import app.simple.positional.ui.compose.TrailPointItem
+import app.simple.positional.util.DMSConverter
+import app.simple.positional.util.DistanceText
+import app.simple.positional.util.TimeFormatter.formatDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TrailDataViewModel(application: Application) : AndroidViewModel(application) {
+class TrailDataViewModel(application: Application) : WrappedViewModel(application) {
     private val name = MutableStateFlow(TrailPreferences.getCurrentTrail())
-    val trail: StateFlow<String> = name.asStateFlow()
 
     val points: StateFlow<List<TrailPoint>> = name
         .flatMapLatest { if (it.isEmpty()) flowOf(emptyList()) else dao(it).observeAll() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    val info: StateFlow<TrailInfo> = combine(name, points, changes(MainPreferences.unit, MainPreferences.coordinatesFormat)) { trail, points, _ ->
+        info(getContext(), trail, points)
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), TrailInfo())
 
     fun select(trail: String) {
         name.value = trail
@@ -15650,6 +15856,36 @@ class TrailDataViewModel(application: Application) : AndroidViewModel(applicatio
     fun delete(point: TrailPoint?) {
         point ?: return
         persist { dao(it).deleteTrailData(point) }
+    }
+
+    private fun info(context: Context, trail: String, points: List<TrailPoint>): TrailInfo {
+        val metric = MainPreferences.isMetric()
+        val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
+        return TrailInfo(
+            trail = trail,
+            summary = listOf(
+                InfoRow(context.getString(R.string.total), points.size.toString()),
+                InfoRow(context.getString(R.string.gps_displacement), DistanceText.format(context, distance, metric)),
+            ),
+            points = points.asReversed().map { item(context, it, metric) },
+        )
+    }
+
+    private fun item(context: Context, point: TrailPoint, metric: Boolean): TrailPointItem {
+        val (accuracy, unit) = DistanceText.parts(point.accuracy.toDouble(), metric)
+        return TrailPointItem(
+            point = point,
+            icon = TrailIcons.icons.getOrElse(point.iconPosition) { TrailIcons.icons[0] },
+            name = point.name.orEmpty().ifEmpty { "--" },
+            note = point.note.orEmpty().ifEmpty { context.getString(R.string.not_available) },
+            coordinates = context.getString(
+                R.string.coordinates_format,
+                DMSConverter.getFormattedLatitude(point.latitude, context),
+                DMSConverter.getFormattedLongitude(point.longitude, context),
+            ),
+            accuracy = context.getString(R.string.trail_data_accuracy, round(accuracy, 1).toString(), context.getString(unit)),
+            date = point.timeAdded.formatDate(),
+        )
     }
 
     private fun dao(trail: String) = TrailPointDatabase.getInstance(getApplication(), trail).trailDataDao()
@@ -18966,6 +19202,31 @@ class TwilightTest {
     @Test
     fun phasesHaveDistinctColors() {
         assertEquals(TwilightPhase.entries.size, TwilightPhase.entries.map { it.color }.toSet().size)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/viewmodels/viewmodel/SkyPositionTest.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class SkyPositionTest {
+    private val origin = SkyPosition(37.0, -76.0, 10.0)
+
+    @Test
+    fun smallMovesAreNear() {
+        assertTrue(origin.isNear(SkyPosition(37.005, -76.0, 500.0), 1_000.0))
+        assertTrue(origin.isNear(origin, 1_000.0))
+    }
+
+    @Test
+    fun largeMovesAreNotNear() {
+        assertFalse(origin.isNear(SkyPosition(37.01, -76.0, 10.0), 1_000.0))
+        assertFalse(origin.isNear(SkyPosition(-37.0, 104.0, 10.0), 1_000.0))
     }
 }
 
