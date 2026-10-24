@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T03:11:39-04:00
+Generated: 2026-10-24T03:20:20-04:00
 Branch:    master
-Commit:    dce000d2 2026-10-24 03:06:44 -0400 add prompt
+Commit:    bd2729cf 2026-10-24 03:20:15 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (885 files)
+## TREE (888 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -97,6 +97,7 @@ app/
                 maps/
                   GoogleMapView.kt
                   GpsMap.kt
+                  MapPreferences.kt
                   OsmGpsMap.kt
                   OsmMapView.kt
                   OsmMeasureMap.kt
@@ -914,12 +915,14 @@ app/
             positional/
               constants/
                 HtmlPageTest.kt
+                LocationPinsTest.kt
               database/
                 converters/
                   MeasurePointConverterTest.kt
               decorations/
                 maps/
                   GoogleMapStyleTest.kt
+                  MapPreferencesTest.kt
                   OsmStyleTest.kt
                   TrackPinTest.kt
               location/
@@ -1268,13 +1271,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), location pin colours, map preference bindings, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started, so no panel or view model registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started; map views follow their own settings through `MapPreferences` flows collected while resumed, applying only values that changed (including changes made while paused), so no panel, view model or map view registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1308,7 +1311,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 14b | Panel info in view models (`ClockViewModel`, `CompassViewModel`, `DirectionViewModel`, `GpsViewModel`, trail and measure summaries) built on `Dispatchers.Default` and collected with `collectAsStateWithLifecycle`, so it survives rotation and panel switches; GPS address lookup moved into the view model; sun and moon report recomputed once a minute or after moving 1 km instead of on every fix; the clock no longer turns on location with a custom location; view models react to unit, coordinate format and clock format changes through `SharedPreferences.changes`; localized context cached per language | Done |
 | 15 | Settings and level panel state in view models (`SettingsViewModel`, `LevelViewModel`) built from `SharedPreferences.changes` and collected with `collectAsStateWithLifecycle`; preference writes moved out of the panel controllers, which keep only permission requests, activity recreation, window flags and navigation; the settings screen no longer rebuilds its state (and queries every launcher alias) on unrelated preference changes | Done |
 | 16 | Compass, clock, direction, GPS, trail and measure panel settings as view model `StateFlow`s built with `preference` (`SharedPreferences.watch`, only distinct values); panels apply them with `PanelController.bind` while started; panels and view models no longer register preference listeners; clock time zone, custom location, location provider, GPS target, selected trail and measure follow preferences through flows; trail map clear removed (switching trails redraws from the points flow); duplicate accent recreate in the settings panel removed | Done |
-| 17 | Map view preference listeners (Google and OpenStreetMap bases) as flows | Next |
+| 17 | Map view preference listeners (Google and OpenStreetMap bases) replaced by `MapPreferences` flows bound to the map lifecycle: look, compass rotation, pin, bearing, target, auto center, geodesic and wrap settings react only to their own keys (the OpenStreetMap GPS map no longer redraws the target line on every preference write); unused north only preference removed; location pin colours as constants so panel settings load in JVM tests | Done |
+| 18 | Map view timers (heading sensor delay, trail auto center) as lifecycle-bound coroutines instead of `Handler` runnables | Next |
 
 ## Building
 
@@ -2533,61 +2537,52 @@ object LauncherBackground {
 ################################################################################
 package app.simple.positional.constants
 
-import android.graphics.Color
 import app.simple.positional.R
 import app.simple.positional.preferences.GPSPreferences
 
 object LocationPins {
+    private const val FILL_ALPHA = 0x4D000000
+    private const val OPAQUE = 0xFF000000.toInt()
+
     val locationsPins = intArrayOf(
-            R.drawable.ic_pin_01,
-            R.drawable.ic_pin_02,
-            R.drawable.ic_pin_03,
-            R.drawable.ic_pin_04,
-            R.drawable.ic_pin_05,
-            R.drawable.ic_pin_06,
-            R.drawable.ic_pin_07,
-            R.drawable.ic_pin_08,
-            R.drawable.ic_pin_09,
-            R.drawable.ic_pin_10
+        R.drawable.ic_pin_01,
+        R.drawable.ic_pin_02,
+        R.drawable.ic_pin_03,
+        R.drawable.ic_pin_04,
+        R.drawable.ic_pin_05,
+        R.drawable.ic_pin_06,
+        R.drawable.ic_pin_07,
+        R.drawable.ic_pin_08,
+        R.drawable.ic_pin_09,
+        R.drawable.ic_pin_10,
     )
 
-    private val circleFillColor = intArrayOf(
-            Color.parseColor("#4D1B9CFF"),
-            Color.parseColor("#4D5f0b95"),
-            Color.parseColor("#4DFF8859"),
-            Color.parseColor("#4D4c9acc"),
-            Color.parseColor("#4Ded765e"),
-            Color.parseColor("#4DEB2A2E"),
-            Color.parseColor("#4D943b5e"),
-            Color.parseColor("#4D8B3B94"),
-            Color.parseColor("#4Df38630"),
-            Color.parseColor("#4DFF695B"),
+    private val circleColors = intArrayOf(
+        0x1B9CFF,
+        0x5F0B95,
+        0xFF8859,
+        0x4C9ACC,
+        0xED765E,
+        0xEB2A2E,
+        0x943B5E,
+        0x8B3B94,
+        0xF38630,
+        0xFF695B,
     )
 
-    private val circleStrokeColor = intArrayOf(
-            Color.parseColor("#1B9CFF"),
-            Color.parseColor("#5f0b95"),
-            Color.parseColor("#FF8859"),
-            Color.parseColor("#4c9acc"),
-            Color.parseColor("#ed765e"),
-            Color.parseColor("#EB2A2E"),
-            Color.parseColor("#943b5e"),
-            Color.parseColor("#8B3B94"),
-            Color.parseColor("#f38630"),
-            Color.parseColor("#FF695B"),
-    )
+    fun pin(skin: Int): Int = locationsPins.getOrElse(skin) { locationsPins[0] }
 
-    fun getLocationPin(): Int {
-        return locationsPins[GPSPreferences.getPinSkin()]
-    }
+    fun fillColor(skin: Int): Int = rgb(skin) or FILL_ALPHA
 
-    fun getCircleFillColor(): Int {
-        return circleFillColor[GPSPreferences.getPinSkin()]
-    }
+    fun strokeColor(skin: Int): Int = rgb(skin) or OPAQUE
 
-    fun getCircleStrokeColor(): Int {
-        return circleStrokeColor[GPSPreferences.getPinSkin()]
-    }
+    private fun rgb(skin: Int): Int = circleColors.getOrElse(skin) { circleColors[0] }
+
+    fun getLocationPin(): Int = pin(GPSPreferences.getPinSkin())
+
+    fun getCircleFillColor(): Int = fillColor(GPSPreferences.getPinSkin())
+
+    fun getCircleStrokeColor(): Int = strokeColor(GPSPreferences.getPinSkin())
 }
 
 ################################################################################
@@ -2967,7 +2962,6 @@ package app.simple.positional.decorations.maps
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.location.Location
@@ -2979,12 +2973,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RawRes
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.decorations.utils.animateColors
 import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.BitmapHelper.toBitmap
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -3004,6 +2998,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PatternItem
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.Job
 import kotlin.math.roundToInt
 
 data class MapLook(val label: Boolean, val satellite: Boolean, val highContrast: Boolean, val buildings: Boolean, val traffic: Boolean)
@@ -3024,8 +3019,7 @@ object GoogleMapStyle {
 }
 
 @SuppressLint("ViewConstructor")
-abstract class GoogleMapView(context: Context) : MapView(context), MapHost, HeadingSensor.Listener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class GoogleMapView(context: Context) : MapView(context), MapHost, HeadingSensor.Listener {
     override val view: View get() = this
     protected var map: GoogleMap? = null
     protected var mapCallbacks: MapsCallbacks? = null
@@ -3047,9 +3041,12 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     private var colorAnimator: ValueAnimator? = null
     private val startCap by lazy { cap(R.drawable.ic_trail_start) }
     private val endCap by lazy { cap(R.drawable.seekbar_thumb) }
+    private val preferences by lazy { MapPreferences().also(::bindPreferences) }
+    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
-    protected abstract val lookKeys: Set<String>
+    protected open val lookKeys: Set<String> = emptySet()
+    protected open val compassKey: String? = null
     protected abstract fun look(): MapLook
     protected abstract fun startCamera(): CameraPosition
     protected abstract fun onCameraIdle(position: CameraPosition)
@@ -3063,7 +3060,17 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     protected open fun onHeadingAccuracyChanged() {}
     protected open fun onResumed() {}
     protected open fun onPaused() {}
-    protected open fun onPreference(key: String?) {}
+    protected open fun onCompassRotation(enabled: Boolean) {}
+
+    protected open fun bindPreferences(preferences: MapPreferences) {
+        if (lookKeys.isNotEmpty()) preferences.watch(*lookKeys.toTypedArray(), read = ::look, apply = ::applyLook)
+        compassKey?.let { key ->
+            preferences.watch(key, read = { compassRotation }) { enabled ->
+                if (enabled) registerHeadingLater() else unregisterHeading()
+                onCompassRotation(enabled)
+            }
+        }
+    }
 
     override val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) = this@GoogleMapView.onStart()
@@ -3071,7 +3078,7 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         override fun onResume(owner: LifecycleOwner) {
             this@GoogleMapView.owner = owner
             this@GoogleMapView.onResume()
-            getSharedPreferences().registerOnSharedPreferenceChangeListener(this@GoogleMapView)
+            preferenceJob = preferences.launchIn(owner.lifecycleScope)
             registerHeadingLater()
             onResumed()
         }
@@ -3079,7 +3086,8 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         override fun onPause(owner: LifecycleOwner) {
             onPaused()
             unregisterHeading()
-            getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this@GoogleMapView)
+            preferenceJob?.cancel()
+            preferenceJob = null
             this@GoogleMapView.onPause()
         }
 
@@ -3104,7 +3112,7 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         map.uiSettings.isCompassEnabled = false
         map.uiSettings.isMapToolbarEnabled = false
         map.uiSettings.isMyLocationButtonEnabled = false
-        applyLook()
+        applyLook(look())
         map.moveCamera(CameraUpdateFactory.newCameraPosition(startCamera()))
         map.setOnMapClickListener { onClick(it) }
         map.setOnMapLongClickListener { mapCallbacks?.onMapLongClicked(it) }
@@ -3120,13 +3128,8 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         animate().alpha(1f).setDuration(FADE).start()
     }
 
-    final override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in lookKeys) applyLook() else onPreference(key)
-    }
-
-    private fun applyLook() {
+    private fun applyLook(look: MapLook) {
         val map = map ?: return
-        val look = look()
         val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         map.mapType = GoogleMapStyle.type(look.satellite, look.label)
         runCatching { map.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, GoogleMapStyle.raw(look.label, look.highContrast, night))) }
@@ -3304,7 +3307,6 @@ package app.simple.positional.decorations.maps
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.Point
 import android.location.Location
 import android.view.MotionEvent
@@ -3351,7 +3353,7 @@ interface GpsMap : PanelMap {
 }
 
 object GpsPin {
-    private val customGradient = intArrayOf(Color.parseColor("#FF1B50"), Color.parseColor("#e11677"))
+    private val customGradient = intArrayOf(0xFFFF1B50.toInt(), 0xFFE11677.toInt())
 
     fun bitmap(context: Context, custom: Boolean, moving: Boolean): Bitmap {
         val icon = if (moving && !custom) R.drawable.ic_bearing_marker else LocationPins.getLocationPin()
@@ -3360,11 +3362,36 @@ object GpsPin {
     }
 }
 
+object GpsMapPreferences {
+    private val targetKeys = arrayOf(
+        GPSPreferences.mapTargetMarker,
+        GPSPreferences.mapTargetMarkerLatitude,
+        GPSPreferences.mapTargetMarkerLongitude,
+        GPSPreferences.mapTargetMarkerStartLatitude,
+        GPSPreferences.mapTargetMarkerStartLongitude,
+    )
+
+    fun bind(preferences: MapPreferences, onPin: () -> Unit, onBearing: () -> Unit, onTarget: () -> Unit) {
+        preferences.watch(GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity, read = ::pinStyle) { onPin() }
+        preferences.watch(GPSPreferences.useBearingRotation, read = GPSPreferences::isBearingRotation) { onBearing() }
+        preferences.watch(*targetKeys, read = ::targetState) { onTarget() }
+    }
+
+    private fun pinStyle() = Triple(GPSPreferences.getPinSkin(), GPSPreferences.getPinSize(), GPSPreferences.getPinOpacity())
+
+    private fun targetState() = Triple(
+        GPSPreferences.isTargetMarkerSet(),
+        GPSPreferences.getTargetMarkerCoordinates().toList(),
+        GPSPreferences.getTargetMarkerStartCoordinates().toList(),
+    )
+}
+
 @SuppressLint("ViewConstructor")
 class GoogleGpsMap(context: Context) : GooglePanelMap(context), GpsMap {
     override var isMapMovementEnabled = true
     override var onTouch: ((MotionEvent) -> Unit)? = null
     override val compassRotation get() = GPSPreferences.isCompassRotation()
+    override val compassKey get() = GPSPreferences.compassRotation
     override val lookKeys: Set<String> = setOf(
         GPSPreferences.GPSLabelMode,
         GPSPreferences.GPSSatellite,
@@ -3492,17 +3519,47 @@ class GoogleGpsMap(context: Context) : GooglePanelMap(context), GpsMap {
         targetLine?.let { it.points = points } ?: run { targetLine = line(points) }
     }
 
-    override fun onPreference(key: String?) {
-        when (key) {
-            GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity -> {
-                invalidatePin()
-                drawPin()
-            }
-            GPSPreferences.compassRotation -> if (GPSPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-            GPSPreferences.useBearingRotation, GPSPreferences.isNorthOnly -> rotate(bearing(), animate = true)
-            GPSPreferences.mapTargetMarker, GPSPreferences.mapTargetMarkerLatitude, GPSPreferences.mapTargetMarkerLongitude -> drawTarget()
+    override fun onCompassRotation(enabled: Boolean) = rotate(bearing(), animate = true)
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        GpsMapPreferences.bind(preferences, onPin = ::redrawPin, onBearing = { rotate(bearing(), animate = true) }, onTarget = ::drawTarget)
+    }
+
+    private fun redrawPin() {
+        invalidatePin()
+        drawPin()
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/MapPreferences.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import app.simple.positional.singleton.SharedPreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
+
+class MapPreferences {
+    private val flows = mutableListOf<Flow<Any?>>()
+
+    fun <T> add(initial: T, values: Flow<T>, apply: (T) -> Unit) {
+        var applied = initial
+        flows += values.filter { it != applied }.onEach {
+            applied = it
+            apply(it)
         }
     }
+
+    fun <T> watch(vararg keys: String, read: () -> T, apply: (T) -> Unit) = add(read(), SharedPreferences.watch(*keys, read = read), apply)
+
+    fun launchIn(scope: CoroutineScope): Job = flows.merge().launchIn(scope)
 }
 
 ################################################################################
@@ -3512,7 +3569,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Point
 import android.location.Location
 import android.view.MotionEvent
@@ -3529,6 +3585,7 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
     override var isMapMovementEnabled = true
     override var onTouch: ((MotionEvent) -> Unit)? = null
     override val compassRotation get() = GPSPreferences.isCompassRotation()
+    override val compassKey get() = GPSPreferences.compassRotation
     private val custom = MainPreferences.isCustomCoordinate()
     private val customPoint = MainPreferences.getCoordinates().let { it[0].toDouble() to it[1].toDouble() }
 
@@ -3638,16 +3695,16 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
         source(OsmStyle.LINE, OsmStyle.line(if (custom) listOf(current, target) else listOf(start, current, target)))
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity -> {
-                invalidatePin()
-                drawPin()
-            }
-            GPSPreferences.compassRotation -> if (GPSPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-            GPSPreferences.useBearingRotation, GPSPreferences.isNorthOnly -> rotate(bearing(), animate = true)
-            else -> drawTarget()
-        }
+    override fun onCompassRotation(enabled: Boolean) = rotate(bearing(), animate = true)
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        GpsMapPreferences.bind(preferences, onPin = ::redrawPin, onBearing = { rotate(bearing(), animate = true) }, onTarget = ::drawTarget)
+    }
+
+    private fun redrawPin() {
+        invalidatePin()
+        drawPin()
     }
 }
 
@@ -3658,7 +3715,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
@@ -3669,10 +3725,10 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import com.google.android.gms.maps.model.LatLng
 import org.maplibre.android.MapLibre
@@ -3687,12 +3743,12 @@ import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.sources.GeoJsonSource
+import kotlinx.coroutines.Job
 import kotlin.math.roundToInt
 import org.maplibre.android.geometry.LatLng as LibreLatLng
 
 @SuppressLint("ViewConstructor")
-abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), MapHost, HeadingSensor.Listener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), MapHost, HeadingSensor.Listener {
     override val view: View get() = this
     protected var map: MapLibreMap? = null
     protected var mapCallbacks: MapsCallbacks? = null
@@ -3708,8 +3764,11 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     private val headingSensor = HeadingSensor(context, this)
     private val registerTask = Runnable { registerHeading() }
     private val accent = context.resolveAttrColor(R.attr.colorAppAccent)
+    private val preferences by lazy { MapPreferences().also(::bindPreferences) }
+    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
+    protected open val compassKey: String? = null
     protected abstract fun startCamera(): CameraPosition
     protected abstract fun onCameraIdle(position: CameraPosition)
     protected open fun onStyleReady() {}
@@ -3721,6 +3780,16 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected open fun onHeadingChanged() {}
     protected open fun onResumed() {}
     protected open fun onPaused() {}
+    protected open fun onCompassRotation(enabled: Boolean) {}
+
+    protected open fun bindPreferences(preferences: MapPreferences) {
+        compassKey?.let { key ->
+            preferences.watch(key, read = { compassRotation }) { enabled ->
+                if (enabled) registerHeadingLater() else unregisterHeading()
+                onCompassRotation(enabled)
+            }
+        }
+    }
 
     override val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) = this@OsmMapView.onStart()
@@ -3728,7 +3797,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
         override fun onResume(owner: LifecycleOwner) {
             this@OsmMapView.owner = owner
             this@OsmMapView.onResume()
-            getSharedPreferences().registerOnSharedPreferenceChangeListener(this@OsmMapView)
+            preferenceJob = preferences.launchIn(owner.lifecycleScope)
             registerHeadingLater()
             onResumed()
         }
@@ -3736,7 +3805,8 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
         override fun onPause(owner: LifecycleOwner) {
             onPaused()
             unregisterHeading()
-            getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this@OsmMapView)
+            preferenceJob?.cancel()
+            preferenceJob = null
             this@OsmMapView.onPause()
         }
 
@@ -3935,7 +4005,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
@@ -3948,6 +4017,7 @@ import org.maplibre.android.camera.CameraPosition
 @SuppressLint("ViewConstructor")
 class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
     override val compassRotation get() = MeasurePreferences.isCompassRotation()
+    override val compassKey get() = MeasurePreferences.COMPASS_ROTATION
     private val measurePoints = mutableListOf<MeasurePoint>()
     override val points: List<MeasurePoint> get() = measurePoints
     private var restore: CameraPosition? = null
@@ -4063,13 +4133,12 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         )
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MeasurePreferences.COMPASS_ROTATION -> {
-                if (MeasurePreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            MeasurePreferences.POLYLINES_WRAPPED -> if (MeasurePreferences.arePolylinesWrapped()) {
+    override fun onCompassRotation(enabled: Boolean) = drawPuck()
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(MeasurePreferences.POLYLINES_WRAPPED, read = MeasurePreferences::arePolylinesWrapped) { wrapped ->
+            if (wrapped) {
                 wrap(animate = true)
             } else {
                 restore?.let(::animateTo)
@@ -4155,7 +4224,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
@@ -4169,6 +4237,7 @@ import org.maplibre.android.camera.CameraPosition
 @SuppressLint("ViewConstructor")
 class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override val compassRotation get() = TrailPreferences.isCompassRotation()
+    override val compassKey get() = TrailPreferences.compass
     private var points: List<TrailPoint> = emptyList()
     private val icons = mutableSetOf<Int>()
     private var restore: CameraPosition? = null
@@ -4293,14 +4362,11 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
 
     private fun iconName(position: Int) = "trail-$position"
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            TrailPreferences.compass -> {
-                if (TrailPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            TrailPreferences.mapAutoCenter -> scheduleAutoCenter()
-        }
+    override fun onCompassRotation(enabled: Boolean) = drawPuck()
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(TrailPreferences.mapAutoCenter, read = TrailPreferences::getMapAutoCenter) { scheduleAutoCenter() }
     }
 
     private companion object {
@@ -4316,7 +4382,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.MapSource
 import com.google.android.gms.maps.model.LatLng
@@ -4337,7 +4402,6 @@ interface PickerMap : MapHost {
 @SuppressLint("ViewConstructor")
 class GooglePickerMap(context: Context) : GoogleMapView(context), PickerMap {
     override val compassRotation = false
-    override val lookKeys: Set<String> = emptySet()
     override var onIdle: ((Double, Double) -> Unit)? = null
     private var pending: LatLng? = null
 
@@ -4387,8 +4451,6 @@ class OsmPickerMap(context: Context) : OsmMapView(context), PickerMap {
         val position = camera(latitude, longitude, PickerMap.ZOOM, 0f, 0f)
         if (animate) animateTo(position) else moveCamera(position)
     }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = Unit
 }
 
 ################################################################################
@@ -4492,11 +4554,14 @@ abstract class GoogleTrackMap(context: Context) : GooglePanelMap(context) {
     }
 
     override fun onHeadingAccuracyChanged() = drawPuck()
+
+    override fun onCompassRotation(enabled: Boolean) = drawPuck()
 }
 
 @SuppressLint("ViewConstructor")
 class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     override val compassRotation get() = TrailPreferences.isCompassRotation()
+    override val compassKey get() = TrailPreferences.compass
     override val lookKeys: Set<String> = setOf(
         TrailPreferences.trailLabelMode,
         TrailPreferences.trailSatellite,
@@ -4620,15 +4685,10 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
         BitmapDescriptorFactory.fromBitmap(TrailIcons.icons.getOrElse(position) { TrailIcons.icons[0] }.toBitmap(context, ICON_SIZE))
     }
 
-    override fun onPreference(key: String?) {
-        when (key) {
-            TrailPreferences.compass -> {
-                if (TrailPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            TrailPreferences.mapAutoCenter -> scheduleAutoCenter()
-            TrailPreferences.geodesic -> path?.isGeodesic = TrailPreferences.isTrailGeodesic()
-        }
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(TrailPreferences.mapAutoCenter, read = TrailPreferences::getMapAutoCenter) { scheduleAutoCenter() }
+        preferences.watch(TrailPreferences.geodesic, read = TrailPreferences::isTrailGeodesic) { path?.isGeodesic = it }
     }
 
     private companion object {
@@ -4640,6 +4700,7 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
 @SuppressLint("ViewConstructor")
 class GoogleMeasureMap(context: Context) : GoogleTrackMap(context), MeasureMap {
     override val compassRotation get() = MeasurePreferences.isCompassRotation()
+    override val compassKey get() = MeasurePreferences.COMPASS_ROTATION
     override val lookKeys: Set<String> = setOf(
         MeasurePreferences.LABEL_MODE,
         MeasurePreferences.SATELLITE_MAP,
@@ -4752,13 +4813,10 @@ class GoogleMeasureMap(context: Context) : GoogleTrackMap(context), MeasureMap {
         target()?.let { mapCallbacks?.onCameraDistance(it) }
     }
 
-    override fun onPreference(key: String?) {
-        when (key) {
-            MeasurePreferences.COMPASS_ROTATION -> {
-                if (MeasurePreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            MeasurePreferences.POLYLINES_WRAPPED -> if (MeasurePreferences.arePolylinesWrapped()) {
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(MeasurePreferences.POLYLINES_WRAPPED, read = MeasurePreferences::arePolylinesWrapped) { wrapped ->
+            if (wrapped) {
                 wrap(animate = true)
             } else {
                 restore?.let(::animateTo)
@@ -6269,8 +6327,8 @@ object GPSPreferences {
     private const val mapBearing = "map_bearing_value"
     const val mapTargetMarkerLatitude = "target_marker_latitude"
     const val mapTargetMarkerLongitude = "target_marker_longitude"
-    private const val mapTargetMarkerStartLatitude = "target_start_latitude"
-    private const val mapTargetMarkerStartLongitude = "target_start_longitude"
+    const val mapTargetMarkerStartLatitude = "target_start_latitude"
+    const val mapTargetMarkerStartLongitude = "target_start_longitude"
 
     const val pinSize = "map_pin_size"
     const val pinOpacity = "pin_opacity"
@@ -6283,7 +6341,6 @@ object GPSPreferences {
     const val pinSkin = "current_pin_skin"
     const val compassRotation = "is_location_map_compass_rotation"
     const val toolsGravity = "is_tools_gravity_left"
-    const val isNorthOnly = "is_map_north_only"
     const val mapTargetMarker = "target_marker_state"
     const val isTargetMarkerMode = "target_marker_mode"
     const val trafficMode = "traffic_on_maps"
@@ -6374,14 +6431,6 @@ object GPSPreferences {
 
     fun isBearingRotation(): Boolean {
         return getSharedPreferences().getBoolean(useBearingRotation, false)
-    }
-
-    fun setNorthOnly(boolean: Boolean) {
-        getSharedPreferences().edit().putBoolean(isNorthOnly, boolean).apply()
-    }
-
-    fun isNorthOnly(): Boolean {
-        return getSharedPreferences().getBoolean(isNorthOnly, true)
     }
 
     fun setPinSize(value: Int) {
@@ -12716,7 +12765,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     override fun rotate(rotation: MapRotation) {
         GPSPreferences.setCompassRotation(rotation == MapRotation.Compass)
         GPSPreferences.setBearingRotation(rotation == MapRotation.Bearing)
-        GPSPreferences.setNorthOnly(rotation == MapRotation.North)
     }
 
     override fun sheet(open: Boolean) {
@@ -15710,7 +15758,6 @@ package app.simple.positional.viewmodels.viewmodel
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.simple.positional.R
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.CompassBloom.compassBloomRes
 import app.simple.positional.constants.LocationPins
@@ -15758,7 +15805,7 @@ data class ClockSettings(val motion: ClockMotion, val face24: Boolean, val needl
     companion object {
         fun needles(theme: Int): List<Int> = clockNeedleSkins.getOrElse(theme) { clockNeedleSkins[0] }.toList()
 
-        fun pin(skin: Int): Int = LocationPins.locationsPins.getOrElse(skin) { R.drawable.ic_pin_01 }
+        fun pin(skin: Int): Int = LocationPins.pin(skin)
     }
 }
 
@@ -17763,6 +17810,41 @@ class HtmlPageTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/constants/LocationPinsTest.kt
+################################################################################
+package app.simple.positional.constants
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class LocationPinsTest {
+    @Test
+    fun unknownSkinFallsBackToFirst() {
+        assertEquals(LocationPins.locationsPins[0], LocationPins.pin(-1))
+        assertEquals(LocationPins.locationsPins[0], LocationPins.pin(LocationPins.locationsPins.size))
+        assertEquals(LocationPins.locationsPins[3], LocationPins.pin(3))
+    }
+
+    @Test
+    fun fillIsTranslucentStroke() {
+        LocationPins.locationsPins.indices.forEach { skin ->
+            val fill = LocationPins.fillColor(skin)
+            val stroke = LocationPins.strokeColor(skin)
+            assertEquals(0x4D, fill ushr 24)
+            assertEquals(0xFF, stroke ushr 24)
+            assertEquals(stroke and 0xFFFFFF, fill and 0xFFFFFF)
+        }
+    }
+
+    @Test
+    fun firstSkinKeepsOriginalColors() {
+        assertEquals(0xFF1B9CFF.toInt(), LocationPins.strokeColor(0))
+        assertEquals(0x4D1B9CFF, LocationPins.fillColor(0))
+        assertEquals(LocationPins.strokeColor(0), LocationPins.strokeColor(99))
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/database/converters/MeasurePointConverterTest.kt
 ################################################################################
 package app.simple.positional.database.converters
@@ -17842,6 +17924,56 @@ class GoogleMapStyleTest {
         assertEquals(R.raw.maps_dark_no_label, GoogleMapStyle.raw(label = false, highContrast = false, night = true))
         assertEquals(R.raw.maps_light_labelled, GoogleMapStyle.raw(label = true, highContrast = false, night = false))
         assertEquals(R.raw.maps_light_no_label, GoogleMapStyle.raw(label = false, highContrast = false, night = false))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/decorations/maps/MapPreferencesTest.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class MapPreferencesTest {
+    @Test
+    fun appliesOnlyChangedValues() = runBlocking {
+        val applied = mutableListOf<Int>()
+        val preferences = MapPreferences()
+        preferences.add(1, flowOf(1, 2, 2, 3)) { applied += it }
+        preferences.launchIn(this).join()
+        assertEquals(listOf(2, 3), applied)
+    }
+
+    @Test
+    fun resumeAppliesChangeMadeWhilePausedOnce() = runBlocking {
+        var stored = 1
+        val applied = mutableListOf<Int>()
+        val preferences = MapPreferences()
+        preferences.add(stored, flow { emit(stored) }) { applied += it }
+        preferences.launchIn(this).join()
+        stored = 5
+        preferences.launchIn(this).join()
+        preferences.launchIn(this).join()
+        assertEquals(listOf(5), applied)
+    }
+
+    @Test
+    fun bindingsRunIndependently() = runBlocking {
+        val applied = mutableListOf<String>()
+        val preferences = MapPreferences()
+        preferences.add(false, flowOf(true)) { applied += "compass" }
+        preferences.add("a", flowOf("a")) { applied += "look" }
+        preferences.launchIn(this).join()
+        assertEquals(listOf("compass"), applied)
+    }
+
+    @Test
+    fun emptyBindingsFinish() = runBlocking {
+        MapPreferences().launchIn(this).join()
     }
 }
 
