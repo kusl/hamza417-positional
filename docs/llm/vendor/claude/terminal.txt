@@ -34,4 +34,22 @@ kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash ex
 real	0m1.030s
 user	0m0.385s
 sys	0m0.584s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/model/Measure.java app/src/main/java/app/simple/positional/model/MeasurePoint.java app/src/main/java/app/simple/positional/model/TrailEntry.java app/src/main/java/app/simple/positional/model/TrailPoint.java app/src/main/java/app/simple/positional/extensions/maps/MapsCallbacks.java app/src/main/java/app/simple/positional/decorations/interpolators/LatLngInterpolator.java app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java app/databases/schemas/app.simple.positional.database.instances.TrailDataDatabase/2.json app/databases/schemas/app.simple.positional.database.instances.TrailDataDatabase/3.json
+rm 'app/databases/schemas/app.simple.positional.database.instances.TrailDataDatabase/2.json'
+rm 'app/databases/schemas/app.simple.positional.database.instances.TrailDataDatabase/3.json'
+rm 'app/src/main/java/app/simple/positional/decorations/interpolators/LatLngInterpolator.java'
+rm 'app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java'
+rm 'app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java'
+rm 'app/src/main/java/app/simple/positional/extensions/maps/MapsCallbacks.java'
+rm 'app/src/main/java/app/simple/positional/model/Measure.java'
+rm 'app/src/main/java/app/simple/positional/model/MeasurePoint.java'
+rm 'app/src/main/java/app/simple/positional/model/TrailEntry.java'
+rm 'app/src/main/java/app/simple/positional/model/TrailPoint.java'
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-20-40-00
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.930s
+user	0m0.380s
+sys	0m0.501s
 kushal@fedora:~/src/kotlin/positional$ 

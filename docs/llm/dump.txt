@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T20:11:02-04:00
+Generated: 2026-10-23T20:40:02-04:00
 Branch:    master
-Commit:    23198873 2026-10-23 19:57:59 -0400 run scripts
+Commit:    37f2b9d9 2026-10-23 20:38:16 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (881 files)
+## TREE (879 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -29,9 +29,6 @@ app/
         1.json
       app.simple.positional.database.instances.MeasureDatabase/
         1.json
-      app.simple.positional.database.instances.TrailDataDatabase/
-        2.json
-        3.json
       app.simple.positional.database.instances.TrailPointDatabase/
         3.json
   proguard-rules.pro
@@ -97,8 +94,6 @@ app/
                   TrailDatabase.kt
                   TrailPointDatabase.kt
               decorations/
-                interpolators/
-                  LatLngInterpolator.java
                 maps/
                   GpsMap.kt
                   Maps.kt
@@ -114,8 +109,7 @@ app/
                 trails/
                   TrailMaps.kt
                 utils/
-                  CircleUtils.java
-                  MarkerUtils.java
+                  MapAnimations.kt
                 views/
                   CustomWebView.kt
               extensions/
@@ -124,7 +118,7 @@ app/
                 maps/
                   CustomMaps.kt
                   MapLifecycle.kt
-                  MapsCallbacks.java
+                  MapsCallbacks.kt
                 panel/
                   PanelController.kt
                   SensorPanel.kt
@@ -136,6 +130,7 @@ app/
                 CompassAzimuth.kt
                 GeoDistance.kt
                 LowPassFilter.kt
+                MapInterpolation.kt
                 MathExtensions.kt
                 RotationPhysics.kt
                 SeriesStats.kt
@@ -147,10 +142,10 @@ app/
                 DirectionModel.kt
                 Locales.kt
                 Locations.kt
-                Measure.java
-                MeasurePoint.java
-                TrailEntry.java
-                TrailPoint.java
+                Measure.kt
+                MeasurePoint.kt
+                TrailEntry.kt
+                TrailPoint.kt
               preferences/
                 ClockPreferences.kt
                 CompassPreferences.kt
@@ -932,6 +927,7 @@ app/
                 CompassAzimuthTest.kt
                 GeoDistanceTest.kt
                 LowPassFilterTest.kt
+                MapInterpolationTest.kt
                 MathExtensionsTest.kt
                 RotationPhysicsTest.kt
                 SeriesStatsTest.kt
@@ -1121,6 +1117,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - run: chmod +x gradlew
       - run: ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+      - name: Room schemas unchanged
+        run: |
+          if git diff -U0 app/databases/schemas | grep -E '^[-+][[:space:]]*"identityHash"'; then exit 1; fi
       - if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -1262,7 +1261,7 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, OpenStreetMap style and geometry, tracking pins, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings.
 
@@ -1295,7 +1294,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 10a | Map source setting (automatic, Google Maps, OpenStreetMap); GPS panel on MapLibre with OpenStreetMap tiles, tile cache, pin, accuracy circle, target line, follow, compass and bearing rotation behind a `GpsMap` interface; pin bitmaps shared by both maps; APK limited to arm64-v8a, armeabi-v7a and x86_64 | Done |
 | 10b | Trail and measure panels on OpenStreetMap through `TrailMap` and `MeasureMap` interfaces on a shared `OsmMapView` base (camera, heading sensor, pin, accuracy circle, lines, trail markers, measure guide line, wrap to fit); trail auto center stops while paused instead of re-posting forever; tracking pins shared with the Google maps; unused measure label overlay removed | Done |
 | 10c | Address search map on OpenStreetMap through a `PickerMap` interface; map views share an `OsmMapView` base and a `MapHost` lifecycle contract; Google Play services prompt only when Google Maps or the fused provider is in use | Done |
-| 11 | Remaining Java (Room models, map callbacks, Google marker animation helpers) to Kotlin with the same Room schema | Next |
+| 11 | All code in Kotlin: Room entities keep their column names and nullability so existing databases open unchanged (CI fails if an exported schema hash changes); map callbacks trimmed to the events panels use; Google marker, circle and line animations as extensions on shared interpolation (accuracy circles no longer wrap radii above 360 m like angles); stale schema exports removed | Done |
+| 12 | View models on `StateFlow` instead of `LiveData`; Google map views share marker, circle and camera code | Next |
 
 ## Building
 
@@ -1320,7 +1320,7 @@ Optional `local.properties` keys (environment variables of the same name take pr
 
 `.github/workflows/build.yml` runs on every push and pull request:
 
-1. Unit tests, release lint checks (the same fatal checks that gate `assembleRelease`) and a debug build.
+1. Unit tests, release lint checks (the same fatal checks that gate `assembleRelease`) and a debug build; the build fails if an exported Room schema identity hash changed.
 2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
 
 Required secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.
@@ -2700,12 +2700,12 @@ import app.simple.positional.model.MeasurePoint
 
 class MeasurePointConverter {
     @TypeConverter
-    fun fromMeasurePoints(measurePoints: ArrayList<MeasurePoint?>): String =
-        measurePoints.filterNotNull().joinToString("") { it.convertForDatabase() + ";" }
+    fun fromMeasurePoints(points: ArrayList<MeasurePoint>?): String? =
+        points?.joinToString("") { it.toDatabase() + ";" }
 
     @TypeConverter
-    fun toMeasurePoints(data: String?): ArrayList<MeasurePoint?> =
-        data.orEmpty().split(';').filter { it.isNotEmpty() }.mapTo(ArrayList<MeasurePoint?>()) { MeasurePoint.convertFromDatabase(it) }
+    fun toMeasurePoints(data: String?): ArrayList<MeasurePoint>? =
+        data?.split(';')?.filter { it.isNotEmpty() }?.mapTo(ArrayList()) { MeasurePoint.fromDatabase(it) }
 }
 
 ################################################################################
@@ -3007,33 +3007,6 @@ abstract class TrailPointDatabase : RoomDatabase() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/interpolators/LatLngInterpolator.java
-################################################################################
-package app.simple.positional.decorations.interpolators;
-
-import com.google.android.gms.maps.model.LatLng;
-
-public interface LatLngInterpolator {
-    LatLng interpolate(float fraction, LatLng a, LatLng b);
-
-    class LinearFixed implements LatLngInterpolator {
-        @Override
-        public LatLng interpolate(float fraction, LatLng a, LatLng b) {
-            double lat = (b.latitude - a.latitude) * fraction + a.latitude;
-            double lngDelta = b.longitude - a.longitude;
-
-            if (Math.abs(lngDelta) > 180) {
-                lngDelta -= Math.signum(lngDelta) * 360;
-            }
-
-            double lng = lngDelta * fraction + a.longitude;
-
-            return new LatLng(lat, lng);
-        }
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/maps/GpsMap.kt
 ################################################################################
 package app.simple.positional.decorations.maps
@@ -3146,8 +3119,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.constants.LocationPins
-import app.simple.positional.decorations.utils.CircleUtils
-import app.simple.positional.decorations.utils.MarkerUtils
+import app.simple.positional.decorations.utils.animateColors
+import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.CustomMaps
 import app.simple.positional.math.CompassAzimuth
 import app.simple.positional.math.LowPassFilter
@@ -3204,8 +3177,7 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
     private var markerBitmap: Bitmap? = null
     private var markerAnimator: ValueAnimator? = null
     private var circleAnimator: ValueAnimator? = null
-    private var fillAnimator: ValueAnimator? = null
-    private var strokeAnimator: ValueAnimator? = null
+    private var colorAnimator: ValueAnimator? = null
 
     private val sensorRegistrationRunnable = Runnable { register() }
 
@@ -3327,8 +3299,7 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
         viewHandler.removeCallbacksAndMessages(null)
         circleAnimator?.cancel()
         markerAnimator?.cancel()
-        fillAnimator?.cancel()
-        strokeAnimator?.cancel()
+        colorAnimator?.cancel()
     }
 
     private fun reestablishSensorRegistration() {
@@ -3495,7 +3466,7 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
                             }
 
                             markerAnimator?.cancel()
-                            markerAnimator = MarkerUtils.animateMarker(location, marker)
+                            markerAnimator = marker!!.animateTo(location!!, if (location!!.speed > 0F) location!!.bearing else 0F)
                         }
                     }
                 }
@@ -3503,20 +3474,12 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
                 if (!isCustomCoordinate) {
                     runCatching {
                         circleAnimator?.cancel()
-                        fillAnimator?.cancel()
-                        strokeAnimator?.cancel()
-                        circleAnimator = CircleUtils.animateCircle(location, circle)
-                        fillAnimator = CircleUtils.animateFillColor(
-                            if (location!!.speed > 0F) ContextCompat.getColor(
-                                context,
-                                R.color.bearing_circle_color
-                            ) else LocationPins.getCircleFillColor(), circle
-                        )
-                        strokeAnimator = CircleUtils.animateStrokeColor(
-                            if (location!!.speed > 0F) ContextCompat.getColor(
-                                context,
-                                R.color.bearing_circle_stroke
-                            ) else LocationPins.getCircleStrokeColor(), circle
+                        colorAnimator?.cancel()
+                        val moving = location!!.speed > 0F
+                        circleAnimator = circle!!.animateTo(location!!)
+                        colorAnimator = circle!!.animateColors(
+                            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_color) else LocationPins.getCircleFillColor(),
+                            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_stroke) else LocationPins.getCircleStrokeColor(),
                         )
                     }.onFailure {
                         circle = googleMap?.addCircle(
@@ -3601,13 +3564,6 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
 
             targetPolyline = googleMap?.addPolyline(polylineOptions!!)
 
-            if (location.isNotNull() || isCustomCoordinate) {
-                mapsCallbacks?.onTargetUpdated(
-                    polylineOptions?.points?.get(1),
-                    polylineOptions?.points?.get(0),
-                    location?.speed ?: 0F)
-            }
-
             polylineOptions?.startCap(
                 CustomCap(BitmapDescriptorFactory.fromBitmap(
                     R.drawable.ic_trail_start.toBitmap(
@@ -3619,8 +3575,6 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
                     R.drawable.seekbar_thumb.toBitmap(
                         context,
                         30))))
-        } else {
-            mapsCallbacks?.onTargetUpdated(null, null, 0F)
         }
     }
 
@@ -4378,9 +4332,8 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
 
     override fun showMeasure(measure: Measure) {
         measurePoints.clear()
-        measurePoints.addAll(measure.measurePoints)
+        measurePoints.addAll(measure.points)
         drawLines()
-        mapCallbacks?.onLineCountChanged(measurePoints.size)
         if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
@@ -4397,7 +4350,6 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         val last = measurePoints.removeLastOrNull() ?: return
         drawLines()
         mapCallbacks?.onLineDeleted(last)
-        mapCallbacks?.onLineCountChanged(measurePoints.size)
         reportDistance()
     }
 
@@ -4606,7 +4558,6 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override fun showPoints(points: List<TrailPoint>) {
         this.points = points
         drawPoints()
-        mapCallbacks?.onLineCountChanged(points.size)
         if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
@@ -4937,8 +4888,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.decorations.maps.TrackPin
-import app.simple.positional.decorations.utils.CircleUtils
-import app.simple.positional.decorations.utils.MarkerUtils
+import app.simple.positional.decorations.utils.animateSegment
+import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.CustomMaps
 import app.simple.positional.math.CompassAzimuth
 import app.simple.positional.math.LowPassFilter
@@ -5113,11 +5064,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
                         }
 
                         markerAnimator?.cancel()
-                        markerAnimator = MarkerUtils.animateMarker(
-                            location,
-                            marker,
-                            location?.bearing ?: 0F,
-                            isCompassRotation)
+                        markerAnimator = marker!!.animateTo(location!!, if (isCompassRotation) null else location!!.bearing)
                     }.onFailure {
                         marker = googleMap?.addMarker(MarkerOptions()
                                 .position(latLng)
@@ -5130,7 +5077,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
 
                     runCatching {
                         circleAnimator?.cancel()
-                        circleAnimator = CircleUtils.animateCircle(location, circle)
+                        circleAnimator = circle!!.animateTo(location!!)
                     }.onFailure {
                         circle = googleMap?.addCircle(CircleOptions()
                                 .center(latLng)
@@ -5243,8 +5190,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         invalidate()
         lastPolyline = polylines.lastOrNull()
 
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
-
         if (MeasurePreferences.arePolylinesWrapped()) {
             wrap(false)
         }
@@ -5261,7 +5206,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         currentPolylines.removeLastOrNull()
         polylineOptions?.points?.removeLastOrNull()
         mapsCallbacks?.onLineDeleted(measurePoints.lastOrNull())
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
         measurePoints.removeLastOrNull()
         cameraTargetPolyline?.remove()
         cameraTargetPolyline = null
@@ -5373,7 +5317,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     fun createMeasurePolylines(measure: Measure?) {
         try {
             measurePoints.clear()
-            measurePoints.addAll(measure!!.measurePoints)
+            measurePoints.addAll(measure!!.points)
             removeAllPolylines()
             updatePolylines(measurePoints)
         } catch (e: NullPointerException) {
@@ -5406,7 +5350,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         mapsCallbacks?.onLineAdded(measurePoint)
         mapsCallbacks?.onCameraDistance(latLng)
 
-        polylineAnimator = MarkerUtils.animatePolyline(lastPoint, latLng, polylines.lastOrNull()!!)
+        polylineAnimator = polylines.lastOrNull()!!.animateSegment(lastPoint, latLng)
     }
 
     fun getMeasurePoints(): ArrayList<MeasurePoint> {
@@ -5449,8 +5393,7 @@ import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.decorations.maps.TrackPin
 import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.utils.CircleUtils
-import app.simple.positional.decorations.utils.MarkerUtils
+import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.CustomMaps
 import app.simple.positional.math.CompassAzimuth
 import app.simple.positional.math.LowPassFilter
@@ -5611,11 +5554,7 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
                         }
 
                         markerAnimator?.cancel()
-                        markerAnimator = MarkerUtils.animateMarker(
-                            location,
-                            marker,
-                            location?.bearing ?: 0F,
-                            isCompassRotation)
+                        markerAnimator = marker!!.animateTo(location!!, if (isCompassRotation) null else location!!.bearing)
                     }.onFailure {
                         marker = googleMap?.addMarker(MarkerOptions()
                             .position(latLng)
@@ -5628,7 +5567,7 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
 
                     runCatching {
                         circleAnimator?.cancel()
-                        circleAnimator = CircleUtils.animateCircle(location, circle)
+                        circleAnimator = circle!!.animateTo(location!!)
                     }.onFailure {
                         circle = googleMap?.addCircle(CircleOptions()
                             .center(latLng)
@@ -5674,8 +5613,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
         polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
 
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
-
         if (TrailPreferences.arePolylinesWrapped()) {
             wrap(false)
         }
@@ -5718,7 +5655,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
 
         trailData.addAll(arrayList)
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
 
         if (TrailPreferences.arePolylinesWrapped()) {
             wrap(false)
@@ -5742,8 +5678,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         polylineOptions?.add(latLng)
         polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
 
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
-
         invalidate()
 
         if (TrailPreferences.arePolylinesWrapped()) {
@@ -5759,7 +5693,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         currentPolyline.removeLastOrNull()
         polylineOptions?.points?.removeLastOrNull()
         mapsCallbacks?.onLineDeleted(trailData.lastOrNull())
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
         trailData.removeLastOrNull()
 
         kotlin.runCatching {
@@ -5943,205 +5876,68 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/utils/CircleUtils.java
+# FILE: app/src/main/java/app/simple/positional/decorations/utils/MapAnimations.kt
 ################################################################################
-package app.simple.positional.decorations.utils;
+package app.simple.positional.decorations.utils
 
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
-import android.location.Location;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.PathInterpolator;
+import android.animation.ValueAnimator
+import android.location.Location
+import android.view.animation.PathInterpolator
+import androidx.core.graphics.ColorUtils
+import app.simple.positional.math.MapInterpolation
+import com.google.android.gms.maps.model.Circle
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.Polyline
 
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.LatLng;
-import app.simple.positional.decorations.interpolators.LatLngInterpolator;
+private const val DURATION = 1000L
 
-public class CircleUtils {
-    static final int duration = 1000;
+private fun animate(update: (Float) -> Unit): ValueAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+    duration = DURATION
+    interpolator = PathInterpolator(0f, 0f, 0.2f, 1f)
+    addUpdateListener { animator -> runCatching { update(animator.animatedFraction) } }
+    start()
+}
 
-    public static ValueAnimator animateCircle(Location location, Circle circle) {
-        if (circle != null) {
-            LatLng startPosition = circle.getCenter();
-            LatLng endPosition = new LatLng(location.getLatitude(), location.getLongitude());
+private fun LatLng.toward(end: LatLng, fraction: Float): LatLng {
+    val (latitude, longitude) = MapInterpolation.position(fraction, latitude, longitude, end.latitude, end.longitude)
+    return LatLng(latitude, longitude)
+}
 
-            float startRadius = (float) circle.getRadius();
+private fun Location.latLng() = LatLng(latitude, longitude)
 
-            LatLngInterpolator latLngInterpolator = new LatLngInterpolator.LinearFixed();
-            ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-            valueAnimator.setDuration(duration);
-            valueAnimator.setInterpolator(new PathInterpolator(0f, 0f, 0.2f, 1f));
-            valueAnimator.addUpdateListener(animation -> {
-                try {
-                    float v = animation.getAnimatedFraction();
-                    LatLng newPosition = latLngInterpolator.interpolate(v, startPosition, endPosition);
-                    circle.setCenter(newPosition);
-                    circle.setRadius(computeRadius(v, startRadius, location.getAccuracy()));
-                } catch (Exception ignored) {
-                }
-            });
-
-            valueAnimator.start();
-
-            return valueAnimator;
-        } else {
-            throw new IllegalStateException("Circle object must not be null");
-        }
-    }
-
-    public static ValueAnimator animateStrokeColor(int endColor, Circle circle) {
-        ValueAnimator valueAnimator = ValueAnimator.ofArgb(circle.getStrokeColor(), endColor);
-        valueAnimator.setEvaluator(new ArgbEvaluator());
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.setDuration(duration);
-        valueAnimator.addUpdateListener(animation -> circle.setStrokeColor((int) animation.getAnimatedValue()));
-        valueAnimator.start();
-        return valueAnimator;
-    }
-
-    public static ValueAnimator animateFillColor(int endColor, Circle circle) {
-        ValueAnimator valueAnimator = ValueAnimator.ofArgb(circle.getFillColor(), endColor);
-        valueAnimator.setEvaluator(new ArgbEvaluator());
-        valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-        valueAnimator.setDuration(duration);
-        valueAnimator.addUpdateListener(animation -> circle.setFillColor((int) animation.getAnimatedValue()));
-        valueAnimator.start();
-        return valueAnimator;
-    }
-
-    private static float computeRadius(float fraction, float start, float end) {
-        float normalizeEnd = end - start;
-        float normalizedEndAbs = (normalizeEnd + 360) % 360;
-
-        float direction = (normalizedEndAbs > 180) ? -1 : 1;
-        float rotation;
-        if (direction > 0) {
-            rotation = normalizedEndAbs;
-        } else {
-            rotation = normalizedEndAbs - 360;
-        }
-
-        float result = fraction * rotation + start;
-        return (result + 360) % 360;
+fun Marker.animateTo(location: Location, rotation: Float?): ValueAnimator {
+    val start = position
+    val end = location.latLng()
+    val startRotation = this.rotation
+    return animate { fraction ->
+        position = start.toward(end, fraction)
+        if (rotation != null) this.rotation = MapInterpolation.angle(fraction, startRotation, rotation)
     }
 }
 
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/utils/MarkerUtils.java
-################################################################################
-package app.simple.positional.decorations.utils;
-
-import android.animation.ValueAnimator;
-import android.location.Location;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.PathInterpolator;
-
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.Polyline;
-import java.util.Arrays;
-
-import app.simple.positional.decorations.interpolators.LatLngInterpolator;
-
-public class MarkerUtils {
-    public static ValueAnimator animateMarker(Location location, Marker marker) {
-        if (marker != null) {
-            LatLng startPosition = marker.getPosition();
-            LatLng endPosition = new LatLng(location.getLatitude(), location.getLongitude());
-
-            float startRotation = marker.getRotation();
-            float rotation;
-
-            if (location.getSpeed() > 0) {
-                rotation = location.getBearing();
-            } else {
-                rotation = 0F;
-            }
-
-            LatLngInterpolator latLngInterpolator = new LatLngInterpolator.LinearFixed();
-            ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-            valueAnimator.setDuration(1000);
-            valueAnimator.setInterpolator(new DecelerateInterpolator(1.5F));
-            valueAnimator.addUpdateListener(animation -> {
-                try {
-                    float v = animation.getAnimatedFraction();
-                    LatLng newPosition = latLngInterpolator.interpolate(v, startPosition, endPosition);
-                    marker.setPosition(newPosition);
-                    marker.setRotation(computeRotation(v, startRotation, rotation));
-                } catch (Exception ignored) {
-                }
-            });
-
-            valueAnimator.start();
-
-            return valueAnimator;
-        }
-        return null;
+fun Circle.animateTo(location: Location): ValueAnimator {
+    val start = center
+    val end = location.latLng()
+    val startRadius = radius
+    val endRadius = location.accuracy.toDouble()
+    return animate { fraction ->
+        center = start.toward(end, fraction)
+        radius = MapInterpolation.linear(fraction, startRadius, endRadius)
     }
+}
 
-    public static ValueAnimator animateMarker(Location location, Marker marker, float rotation, boolean isCompassRotation) {
-        if (marker != null) {
-            LatLng startPosition = marker.getPosition();
-            LatLng endPosition = new LatLng(location.getLatitude(), location.getLongitude());
-
-            float startRotation = marker.getRotation();
-
-            LatLngInterpolator latLngInterpolator = new LatLngInterpolator.LinearFixed();
-            ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-            valueAnimator.setDuration(1000);
-            valueAnimator.setInterpolator(new PathInterpolator(0f, 0f, 0.2f, 1f));
-            valueAnimator.addUpdateListener(animation -> {
-                try {
-                    float v = animation.getAnimatedFraction();
-                    LatLng newPosition = latLngInterpolator.interpolate(v, startPosition, endPosition);
-                    marker.setPosition(newPosition);
-                    if (!isCompassRotation) {
-                        marker.setRotation(computeRotation(v, startRotation, rotation));
-                    }
-                } catch (Exception ignored) {
-                }
-            });
-
-            valueAnimator.start();
-
-            return valueAnimator;
-        }
-        return null;
+fun Circle.animateColors(fill: Int, stroke: Int): ValueAnimator {
+    val startFill = fillColor
+    val startStroke = strokeColor
+    return animate { fraction ->
+        fillColor = ColorUtils.blendARGB(startFill, fill, fraction)
+        strokeColor = ColorUtils.blendARGB(startStroke, stroke, fraction)
     }
+}
 
-    private static float computeRotation(float fraction, float start, float end) {
-        float normalizeEnd = end - start;
-        float normalizedEndAbs = (normalizeEnd + 360) % 360;
-
-        float direction = (normalizedEndAbs > 180) ? -1 : 1;
-        float rotation;
-        if (direction > 0) {
-            rotation = normalizedEndAbs;
-        } else {
-            rotation = normalizedEndAbs - 360;
-        }
-
-        float result = fraction * rotation + start;
-        return (result + 360) % 360;
-    }
-
-    public static ValueAnimator animatePolyline(LatLng start, LatLng end, Polyline polyline) {
-        LatLngInterpolator latLngInterpolator = new LatLngInterpolator.LinearFixed();
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
-        valueAnimator.setDuration(1000L);
-        valueAnimator.setInterpolator(new DecelerateInterpolator(3F));
-        valueAnimator.addUpdateListener(animation -> {
-            try {
-                float v = animation.getAnimatedFraction();
-                LatLng newPosition = latLngInterpolator.interpolate(v, start, end);
-                polyline.setPoints(Arrays.asList(start, newPosition));
-            } catch (Exception ignored) {
-            }
-        });
-
-        valueAnimator.start();
-        return valueAnimator;
-    }
+fun Polyline.animateSegment(start: LatLng, end: LatLng): ValueAnimator = animate { fraction ->
+    points = listOf(start, start.toward(end, fraction))
 }
 
 ################################################################################
@@ -6517,56 +6313,28 @@ class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/extensions/maps/MapsCallbacks.java
+# FILE: app/src/main/java/app/simple/positional/extensions/maps/MapsCallbacks.kt
 ################################################################################
-package app.simple.positional.extensions.maps;
+package app.simple.positional.extensions.maps
 
-import androidx.annotation.Nullable;
-import com.google.android.gms.maps.model.LatLng;
+import app.simple.positional.model.MeasurePoint
+import app.simple.positional.model.TrailPoint
+import com.google.android.gms.maps.model.LatLng
 
-import org.jetbrains.annotations.NotNull;
-import app.simple.positional.model.MeasurePoint;
-import app.simple.positional.model.TrailPoint;
+interface MapsCallbacks {
+    fun onMapInitialized() {}
 
-public interface MapsCallbacks {
-    default void onMapInitialized() {
-    }
+    fun onMapClicked() {}
 
-    default void onMapClicked() {
-    }
+    fun onMapLongClicked(latLng: LatLng) {}
 
-    default void onMapLongClicked(@NotNull LatLng latLng) {
-    }
+    fun onLineDeleted(trailPoint: TrailPoint?) {}
 
-    default void onTouchCoordinates(float x, float y) {
-    }
+    fun onLineDeleted(measurePoint: MeasurePoint?) {}
 
-    default void onLineDeleted(@Nullable TrailPoint trailPoint) {
-    }
+    fun onLineAdded(measurePoint: MeasurePoint) {}
 
-    default void onLineDeleted(@Nullable MeasurePoint measurePoint) {
-    }
-
-    default void onLineAdded(@NotNull TrailPoint trailPoint) {
-    }
-
-    default void onLineAdded(@NotNull MeasurePoint measurePoint) {
-    }
-
-    default void onLineCountChanged(int lineCount) {
-    }
-
-    default void onTargetUpdated(LatLng target, LatLng current, float speed) {
-    }
-
-    default void onTargetAdd() {
-    }
-
-    default void onNavigate() {
-    }
-
-    default void onCameraDistance(LatLng latLng) {
-    }
+    fun onCameraDistance(latLng: LatLng?) {}
 }
 
 ################################################################################
@@ -6767,8 +6535,6 @@ open class WrappedViewModel(application: Application) : AndroidViewModel(applica
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/math/Angle.kt
 ################################################################################
-@file:Suppress("unused")
-
 package app.simple.positional.math
 
 import kotlin.math.acos
@@ -6792,14 +6558,6 @@ object Angle {
         var normalized = this % 360
         if (normalized < 0) normalized += 360
         return if (inverseResult) normalized - 360F else normalized
-    }
-
-    private fun getQuadrant(x: Double, y: Double): Int {
-        return if (x >= 0) {
-            if (y >= 0) 1 else 4
-        } else {
-            if (y >= 0) 2 else 3
-        }
     }
 }
 
@@ -6933,6 +6691,30 @@ object LowPassFilter {
         readings[1] = readingsAlpha * newReadings[1] + (1 - readingsAlpha) * readings[1]
         readings[2] = readingsAlpha * newReadings[2] + (1 - readingsAlpha) * readings[2]
     }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/math/MapInterpolation.kt
+################################################################################
+package app.simple.positional.math
+
+import kotlin.math.abs
+import kotlin.math.sign
+
+object MapInterpolation {
+    fun position(fraction: Float, startLatitude: Double, startLongitude: Double, endLatitude: Double, endLongitude: Double): Pair<Double, Double> {
+        var delta = endLongitude - startLongitude
+        if (abs(delta) > 180) delta -= sign(delta) * 360
+        return (endLatitude - startLatitude) * fraction + startLatitude to delta * fraction + startLongitude
+    }
+
+    fun angle(fraction: Float, start: Float, end: Float): Float {
+        var delta = ((end - start) % 360 + 360) % 360
+        if (delta > 180) delta -= 360
+        return ((start + delta * fraction) % 360 + 360) % 360
+    }
+
+    fun linear(fraction: Float, start: Double, end: Double) = start + (end - start) * fraction
 }
 
 ################################################################################
@@ -7364,322 +7146,79 @@ class Locations {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/Measure.java
+# FILE: app/src/main/java/app/simple/positional/model/Measure.kt
 ################################################################################
-package app.simple.positional.model;
+package app.simple.positional.model
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
-import androidx.room.TypeConverters;
-import java.util.ArrayList;
-
-import app.simple.positional.database.converters.MeasurePointConverter;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "measures")
-public class Measure {
-    @PrimaryKey
-    @ColumnInfo(name = "date_added")
-    long dateCreated;
+class Measure(
+    @PrimaryKey @ColumnInfo(name = "date_added") var dateCreated: Long,
+    @ColumnInfo(name = "measure_name") var name: String?,
+    @ColumnInfo(name = "measure_note") var note: String?,
+    @ColumnInfo(name = "measure_points") var measurePoints: ArrayList<MeasurePoint>? = null,
+) {
+    val points: ArrayList<MeasurePoint>
+        get() = measurePoints ?: ArrayList<MeasurePoint>().also { measurePoints = it }
+}
 
-    @ColumnInfo(name = "measure_name")
-    String name;
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/model/MeasurePoint.kt
+################################################################################
+package app.simple.positional.model
 
-    @ColumnInfo(name = "measure_note")
-    String note;
+data class MeasurePoint(val latitude: Double, val longitude: Double, val order: Int) {
+    fun toDatabase() = "$latitude,$longitude,$order"
 
-    @TypeConverters(MeasurePointConverter.class)
-    @ColumnInfo(name = "measure_points")
-    @Nullable
-    ArrayList<MeasurePoint> measurePoints;
-
-    @Ignore
-    public Measure(long dateCreated, String name, String note) {
-        this.dateCreated = dateCreated;
-        this.name = name;
-        this.note = note;
-    }
-
-    public Measure() {
-    }
-
-    @Ignore
-    public Measure(String name, String note) {
-        this.dateCreated = System.currentTimeMillis();
-        this.name = name;
-        this.note = note;
-    }
-
-    public long getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(long dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public ArrayList<MeasurePoint> getMeasurePoints() {
-        if (measurePoints == null) {
-            measurePoints = new ArrayList<>();
+    companion object {
+        fun fromDatabase(data: String): MeasurePoint {
+            val (latitude, longitude, order) = data.split(',')
+            return MeasurePoint(latitude.toDouble(), longitude.toDouble(), order.toInt())
         }
-        return measurePoints;
-    }
-
-    public void setMeasurePoints(ArrayList<MeasurePoint> measurePoints) {
-        this.measurePoints = measurePoints;
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "Measure{" +
-                "dateCreated=" + dateCreated +
-                ", name='" + name + '\'' +
-                ", note='" + note + '\'' +
-                ", measurePoints=" + measurePoints +
-                '}';
     }
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/MeasurePoint.java
+# FILE: app/src/main/java/app/simple/positional/model/TrailEntry.kt
 ################################################################################
-package app.simple.positional.model;
+package app.simple.positional.model
 
-import androidx.annotation.NonNull;
-
-public final class MeasurePoint {
-    private final double latitude;
-    private final double longitude;
-    private final int order;
-
-    public MeasurePoint(double latitude, double longitude, int order) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.order = order;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public int getOrder() {
-        return order;
-    }
-
-    public String convertForDatabase() {
-        return latitude + "," + longitude + "," + order;
-    }
-
-    public static MeasurePoint convertFromDatabase(String data) {
-        String[] parts = data.split(",");
-        return new MeasurePoint(
-                Double.parseDouble(parts[0]),
-                Double.parseDouble(parts[1]),
-                Integer.parseInt(parts[2]));
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MeasurePoint)) return false;
-        MeasurePoint that = (MeasurePoint) o;
-        return Double.compare(latitude, that.latitude) == 0
-                && Double.compare(longitude, that.longitude) == 0
-                && order == that.order;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = Double.hashCode(latitude);
-        result = 31 * result + Double.hashCode(longitude);
-        result = 31 * result + order;
-        return result;
-    }
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "MeasurePoint{" + "latitude=" + latitude + ", longitude=" + longitude + ", order=" + order + '}';
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/TrailEntry.java
-################################################################################
-package app.simple.positional.model;
-
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "trails")
-public class TrailEntry {
+class TrailEntry(
+    @ColumnInfo(name = "date_added") var dateCreated: Long,
+    @ColumnInfo(name = "trail_name") var trailName: String?,
+    @ColumnInfo(name = "trail_note") var trailNote: String?,
+) {
     @PrimaryKey(autoGenerate = true)
-    public int keyTag = 0;
-
-    @ColumnInfo(name = "date_added")
-    long dateCreated;
-
-    @ColumnInfo(name = "trail_name")
-    String trailName;
-
-    @ColumnInfo(name = "trail_note")
-    String trailNote;
-
-    public TrailEntry(long dateCreated, String trailName, String trailNote) {
-        this.dateCreated = dateCreated;
-        this.trailName = trailName;
-        this.trailNote = trailNote;
-    }
-
-    public String getTrailName() {
-        return trailName;
-    }
-
-    public void setTrailName(String trailName) {
-        this.trailName = trailName;
-    }
-
-    public long getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(long dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public String getTrailNote() {
-        return trailNote;
-    }
-
-    public void setTrailNote(String trailNote) {
-        this.trailNote = trailNote;
-    }
+    var keyTag: Int = 0
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/model/TrailPoint.java
+# FILE: app/src/main/java/app/simple/positional/model/TrailPoint.kt
 ################################################################################
-package app.simple.positional.model;
+package app.simple.positional.model
 
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity(tableName = "trail_data")
-public class TrailPoint {
-    @ColumnInfo(name = "lat")
-    double latitude;
-
-    @ColumnInfo(name = "lng")
-    double longitude;
-
-    @PrimaryKey
-    @ColumnInfo(name = "time_added")
-    long timeAdded;
-
-    @ColumnInfo(name = "icon_position")
-    int iconPosition;
-
-    @ColumnInfo(name = "note")
-    String note;
-
-    @ColumnInfo(name = "name")
-    String name;
-
-    @ColumnInfo(name = "accuracy")
-    float accuracy;
-
-    public TrailPoint(double latitude, double longitude, long timeAdded, int iconPosition, String note, String name, float accuracy) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.timeAdded = timeAdded;
-        this.iconPosition = iconPosition;
-        this.note = note;
-        this.name = name;
-        this.accuracy = accuracy;
-    }
-
-    public float getAccuracy() {
-        return accuracy;
-    }
-
-    public void setAccuracy(float accuracy) {
-        this.accuracy = accuracy;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public long getTimeAdded() {
-        return timeAdded;
-    }
-
-    public void setTimeAdded(long timeAdded) {
-        this.timeAdded = timeAdded;
-    }
-
-    public int getIconPosition() {
-        return iconPosition;
-    }
-
-    public void setIconPosition(int iconPosition) {
-        this.iconPosition = iconPosition;
-    }
-
-    public String getNote() {
-        return note == null ? "" : note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public String getName() {
-        return name == null ? "" : name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-}
+class TrailPoint(
+    @ColumnInfo(name = "lat") var latitude: Double,
+    @ColumnInfo(name = "lng") var longitude: Double,
+    @PrimaryKey @ColumnInfo(name = "time_added") var timeAdded: Long,
+    @ColumnInfo(name = "icon_position") var iconPosition: Int,
+    @ColumnInfo(name = "note") var note: String?,
+    @ColumnInfo(name = "name") var name: String?,
+    @ColumnInfo(name = "accuracy") var accuracy: Float,
+)
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/preferences/ClockPreferences.kt
@@ -13956,7 +13495,7 @@ fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
     val actions = remember(viewModel) {
         object : RecordActions<TrailEntry> {
             override fun open(record: TrailEntry) {
-                TrailPreferences.setCurrentTrailName(record.trailName)
+                TrailPreferences.setCurrentTrailName(record.trailName.orEmpty())
                 navigator.back()
             }
 
@@ -13964,7 +13503,7 @@ fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
 
             override fun delete(record: TrailEntry) = viewModel.deleteTrail(record)
 
-            override fun isValidName(name: String) = TrailNames.isValid(name, viewModel.trails.value.orEmpty().map { it.trailName })
+            override fun isValidName(name: String) = TrailNames.isValid(name, viewModel.trails.value.orEmpty().mapNotNull { it.trailName })
         }
     }
     RecordsScreen(stringResource(R.string.saved_trails), records, topInset, actions)
@@ -15060,7 +14599,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     private fun showSummary(measure: MeasureModel) {
-        val points = measure.measurePoints
+        val points = measure.points
         state.hasPoints = points.isNotEmpty()
         state.summary = listOf(
             InfoRow(getString(R.string.total), points.size.toString()),
@@ -15576,8 +15115,8 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         return TrailPointItem(
             point = point,
             icon = TrailIcons.icons.getOrElse(point.iconPosition) { TrailIcons.icons[0] },
-            name = point.name.ifEmpty { "--" },
-            note = point.note.ifEmpty { getString(R.string.not_available) },
+            name = point.name.orEmpty().ifEmpty { "--" },
+            note = point.note.orEmpty().ifEmpty { getString(R.string.not_available) },
             coordinates = getString(
                 R.string.coordinates_format,
                 DMSConverter.getFormattedLatitude(point.latitude, activity),
@@ -17706,7 +17245,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
 
     fun addMeasure(name: String, note: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val created = Measure(name, note)
+            val created = Measure(System.currentTimeMillis(), name, note)
             withContext(NonCancellable) {
                 dao.insertMeasure(created)
                 MeasurePreferences.setLastSelectedMeasure(created.dateCreated)
@@ -17718,7 +17257,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             measure.value?.let {
-                it.measurePoints.add(measurePoint)
+                it.points.add(measurePoint)
                 dao.updateMeasure(it)
                 onAdded(it)
             }
@@ -17729,7 +17268,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         viewModelScope.launch(Dispatchers.IO) {
             val current = measure.value
             if (measurePoint != null && current != null) {
-                current.measurePoints.remove(measurePoint)
+                current.points.remove(measurePoint)
                 dao.updateMeasure(current)
                 onRemoved(current)
             }
@@ -19597,8 +19136,11 @@ class HtmlPageTest {
 ################################################################################
 package app.simple.positional.database.converters
 
+import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -19607,18 +19149,18 @@ class MeasurePointConverterTest {
 
     @Test
     fun roundTrip() {
-        val points = arrayListOf<MeasurePoint?>(MeasurePoint(1.5, -2.25, 1), MeasurePoint(-45.0, 170.125, 2))
+        val points = arrayListOf(MeasurePoint(1.5, -2.25, 1), MeasurePoint(-45.0, 170.125, 2))
         val data = converter.fromMeasurePoints(points)
         assertEquals("1.5,-2.25,1;-45.0,170.125,2;", data)
         assertEquals(points, converter.toMeasurePoints(data))
     }
 
     @Test
-    fun emptyNullAndNullElements() {
+    fun emptyAndNull() {
         assertEquals("", converter.fromMeasurePoints(arrayListOf()))
-        assertEquals("1.0,2.0,1;", converter.fromMeasurePoints(arrayListOf(null, MeasurePoint(1.0, 2.0, 1))))
-        assertTrue(converter.toMeasurePoints(null).isEmpty())
-        assertTrue(converter.toMeasurePoints("").isEmpty())
+        assertNull(converter.fromMeasurePoints(null))
+        assertNull(converter.toMeasurePoints(null))
+        assertTrue(converter.toMeasurePoints("")!!.isEmpty())
     }
 
     @Test
@@ -19626,6 +19168,15 @@ class MeasurePointConverterTest {
         val list = arrayListOf(MeasurePoint(3.0, 4.0, 1))
         list.remove(MeasurePoint(3.0, 4.0, 1))
         assertTrue(list.isEmpty())
+    }
+
+    @Test
+    fun measureCreatesPointsOnce() {
+        val measure = Measure(1L, "a", null)
+        val points = measure.points
+        points.add(MeasurePoint(1.0, 2.0, 1))
+        assertSame(points, measure.measurePoints)
+        assertEquals(1, measure.points.size)
     }
 }
 
@@ -19900,6 +19451,43 @@ class LowPassFilterTest {
         val readings = floatArrayOf(1f, 2f, 3f)
         LowPassFilter.smoothAndSetReadings(readings, floatArrayOf(7f, 8f, 9f), 1f)
         assertArrayEquals(floatArrayOf(7f, 8f, 9f), readings, 0f)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/math/MapInterpolationTest.kt
+################################################################################
+package app.simple.positional.math
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class MapInterpolationTest {
+    @Test
+    fun positionMovesLinearly() {
+        val (latitude, longitude) = MapInterpolation.position(0.5f, 0.0, 0.0, 10.0, 20.0)
+        assertEquals(5.0, latitude, 1e-9)
+        assertEquals(10.0, longitude, 1e-9)
+    }
+
+    @Test
+    fun positionCrossesAntimeridianTheShortWay() {
+        assertEquals(180.0, MapInterpolation.position(0.5f, 0.0, 179.0, 0.0, -179.0).second, 1e-9)
+        assertEquals(-180.0, MapInterpolation.position(0.5f, 0.0, -179.0, 0.0, 179.0).second, 1e-9)
+    }
+
+    @Test
+    fun angleTurnsTheShortWay() {
+        assertEquals(0f, MapInterpolation.angle(0.5f, 350f, 10f), 1e-4f)
+        assertEquals(0f, MapInterpolation.angle(0.5f, 10f, 350f), 1e-4f)
+        assertEquals(10f, MapInterpolation.angle(1f, 350f, 10f), 1e-4f)
+        assertEquals(350f, MapInterpolation.angle(0f, 350f, 10f), 1e-4f)
+        assertEquals(90f, MapInterpolation.angle(0.5f, 0f, 180f), 1e-4f)
+    }
+
+    @Test
+    fun radiusIsNotWrappedLikeAnAngle() {
+        assertEquals(205.0, MapInterpolation.linear(0.5f, 10.0, 400.0), 1e-9)
     }
 }
 
