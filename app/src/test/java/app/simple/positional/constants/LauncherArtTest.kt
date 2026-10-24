@@ -25,7 +25,7 @@ class LauncherArtTest {
                 assertEquals(file.name, data, segments.joinToString("") { it.value })
                 assertTrue(file.name, data.first() in "Mm")
                 segments.forEach { segment ->
-                    val command = segment.groupValues[1].lowercaseChar()
+                    val command = segment.groupValues[1].first().lowercaseChar()
                     val rest = segment.groupValues[2]
                     val numbers = NUMBER.findAll(rest).map { it.value }.toList()
                     assertTrue(file.name, rest.replace(NUMBER, "").all { it == ' ' || it == ',' })
