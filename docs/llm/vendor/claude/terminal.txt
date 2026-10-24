@@ -8,4 +8,38 @@ rm 'app/src/main/java/app/simple/positional/util/ArrayHelper.kt'
 rm 'app/src/main/java/app/simple/positional/util/ConditionUtils.kt'
 rm 'app/src/test/java/app/simple/positional/util/ArrayHelperTest.kt'
 rm 'app/src/test/java/app/simple/positional/util/ConditionUtilsTest.kt'
+kushal@fedora:~/src/kotlin/positional$ smem -tk | sort -k5 -h | tail -20
+ 4287 kushal   /usr/libexec/localsearch-3     10.1M    38.4M    39.4M    49.6M 
+117915 kushal   /home/kushal/.local/share/S   121.5M    40.1M    41.7M    43.7M 
+ 4285 kushal   /usr/bin/gnome-software --g    43.7M   218.8M   223.5M   251.1M 
+31318 kushal   /usr/bin/nautilus --gapplic    47.8M    68.3M    72.7M   101.2M 
+ 9461 kushal   /opt/VSCode-linux-x64/code     57.0M    49.4M    61.0M   111.0M 
+16412 kushal   /app/extra/chrome --type=zy    50.9M   478.1M   501.1M   581.4M 
+77895 kushal   /opt/VSCode-linux-x64/code     28.3M    53.3M    60.5M    94.7M 
+ 6809 kushal   /usr/bin/python3 /usr/share    60.8M     1.1M     1.7M    19.4M 
+16152 kushal   /app/extra/chrome --disable    63.4M   116.1M   139.7M   210.4M 
+16242 kushal   /app/extra/chrome --type=gp    67.1M    47.4M    54.7M    85.5M 
+309902 kushal   /app/grayjay/cef/justcefnat        0    70.6M   100.8M   166.5M 
+310212 kushal   /app/grayjay/cef/justcefnat        0   145.1M   188.8M   292.9M 
+309835 kushal   /app/grayjay/cef/justcefnat        0   146.7M   192.0M   308.7M 
+310490 kushal   /app/grayjay/cef/justcefnat        0   165.2M   203.8M   301.5M 
+118232 kushal   ./steamwebhelper -nocrashdi   175.6M    34.0M    41.6M    61.7M 
+ 3898 kushal   /usr/bin/gnome-shell --mode   245.0M   196.5M   201.4M   233.4M 
+118345 kushal   /home/kushal/.local/share/S   340.7M   257.3M   264.3M   278.9M 
+10061 kushal   /opt/VSCode-linux-x64/code     92.7M   331.9M   344.8M   380.8M 
+309803 kushal   Grayjay                            0   876.8M   888.4M   906.1M 
+  178 1                                        2.2G     4.0G     4.6G     7.1G 
+kushal@fedora:~/src/kotlin/positional$ free -h; swapon --show;
+               total        used        free      shared  buff/cache   available
+Mem:            14Gi       7.6Gi       541Mi       106Mi       7.3Gi       7.3Gi
+Swap:          8.0Gi       2.2Gi       5.8Gi
+NAME       TYPE      SIZE USED PRIO
+/dev/zram0 partition   8G 2.2G  100
+kushal@fedora:~/src/kotlin/positional$ date +%Y-%m-%d-%H-%M-%S
+2026-10-23-21-28-37
+kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
+
+real	0m0.882s
+user	0m0.392s
+sys	0m0.514s
 kushal@fedora:~/src/kotlin/positional$ 

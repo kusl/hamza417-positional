@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-23T21:02:56-04:00
+Generated: 2026-10-23T21:28:40-04:00
 Branch:    master
-Commit:    14bcc542 2026-10-23 20:55:29 -0400 run scripts
+Commit:    3f3cc6f7 2026-10-23 21:28:22 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (879 files)
+## TREE (874 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -95,8 +95,8 @@ app/
                   TrailPointDatabase.kt
               decorations/
                 maps/
+                  GoogleMapView.kt
                   GpsMap.kt
-                  Maps.kt
                   OsmGpsMap.kt
                   OsmMapView.kt
                   OsmMeasureMap.kt
@@ -104,10 +104,6 @@ app/
                   OsmTrailMap.kt
                   PickerMap.kt
                   TrackMaps.kt
-                measure/
-                  MeasureMaps.kt
-                trails/
-                  TrailMaps.kt
                 utils/
                   MapAnimations.kt
                 views/
@@ -116,8 +112,6 @@ app/
                 activity/
                   BaseActivity.kt
                 maps/
-                  CustomMaps.kt
-                  MapLifecycle.kt
                   MapsCallbacks.kt
                 panel/
                   PanelController.kt
@@ -129,6 +123,7 @@ app/
                 ClockMotion.kt
                 CompassAzimuth.kt
                 GeoDistance.kt
+                Latency.kt
                 LowPassFilter.kt
                 MapInterpolation.kt
                 MathExtensions.kt
@@ -217,10 +212,8 @@ app/
               util/
                 AccentThemes.kt
                 AppIcons.kt
-                ArrayHelper.kt
                 BitmapHelper.kt
                 ColorUtils.kt
-                ConditionUtils.kt
                 ContextUtils.kt
                 CoordinateFormats.kt
                 DMSConverter.kt
@@ -919,6 +912,7 @@ app/
                   MeasurePointConverterTest.kt
               decorations/
                 maps/
+                  GoogleMapStyleTest.kt
                   OsmStyleTest.kt
                   TrackPinTest.kt
               math/
@@ -926,6 +920,7 @@ app/
                 ClockMotionTest.kt
                 CompassAzimuthTest.kt
                 GeoDistanceTest.kt
+                LatencyTest.kt
                 LowPassFilterTest.kt
                 MapInterpolationTest.kt
                 MathExtensionsTest.kt
@@ -955,8 +950,6 @@ app/
                   RoutesTest.kt
               util/
                 AppIconsTest.kt
-                ArrayHelperTest.kt
-                ConditionUtilsTest.kt
                 DirectionTest.kt
                 DistanceTextTest.kt
                 LocationShareTest.kt
@@ -1261,13 +1254,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
-Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings.
+Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. Saved lists observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and follow the view lifecycle through `MapLifecycle`; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. View models expose `StateFlow` (no `LiveData`), panels collect them through `PanelController.observe` only while started, and the GPS target summary and its address lookup run only while the GPS panel is shown. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1295,7 +1288,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 10b | Trail and measure panels on OpenStreetMap through `TrailMap` and `MeasureMap` interfaces on a shared `OsmMapView` base (camera, heading sensor, pin, accuracy circle, lines, trail markers, measure guide line, wrap to fit); trail auto center stops while paused instead of re-posting forever; tracking pins shared with the Google maps; unused measure label overlay removed | Done |
 | 10c | Address search map on OpenStreetMap through a `PickerMap` interface; map views share an `OsmMapView` base and a `MapHost` lifecycle contract; Google Play services prompt only when Google Maps or the fused provider is in use | Done |
 | 11 | All code in Kotlin: Room entities keep their column names and nullability so existing databases open unchanged (CI fails if an exported schema hash changes); map callbacks trimmed to the events panels use; Google marker, circle and line animations as extensions on shared interpolation (accuracy circles no longer wrap radii above 360 m like angles); stale schema exports removed | Done |
-| 12 | View models on `StateFlow` instead of `LiveData`; Google map views share marker, circle and camera code | Next |
+| 12 | View models on `StateFlow`; `lifecycle-livedata` removed; Google GPS, trail, measure and picker maps on a shared `GoogleMapView` base mirroring OpenStreetMap; target start point stored when a target is set instead of on every fix; map bearing not saved on every compass frame; Google trail auto center stops while paused | Done |
+| 13 | Location providers as lifecycle-bound flows replacing the bound services and `LocationBus`; last position saved only after meaningful movement | Next |
 
 ## Building
 
@@ -1341,7 +1335,7 @@ app/src/main/java/app/simple/positional/
   ui/compose/   Compose theme, shared components, dialogs and screens
   sensors/      lifecycle-aware gravity and heading sensors
   ui/panels/    panel controllers
-  extensions/   panel controller base, sensor panel, map lifecycle
+  extensions/   panel controller base, sensor panel, map callbacks
   decorations/  Google Maps and OpenStreetMap views, marker helpers
   database/     Room entities, DAOs and databases
   services/     location services
@@ -1469,7 +1463,6 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.9.1'
     implementation 'androidx.webkit:webkit:1.16.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.10.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
     implementation 'androidx.navigation:navigation-compose:2.9.0'
@@ -2781,7 +2774,10 @@ interface MeasureDao {
     fun observeAll(): Flow<List<Measure>>
 
     @Query("SELECT * FROM measures WHERE date_added = :date")
-    fun getMeasureById(date: Long): Measure?
+    fun observeById(date: Long): Flow<Measure?>
+
+    @Query("SELECT * FROM measures WHERE date_added = :date")
+    suspend fun getMeasureById(date: Long): Measure?
 
     @Delete
     suspend fun deleteMeasure(measure: Measure)
@@ -3007,10 +3003,348 @@ abstract class TrailPointDatabase : RoomDatabase() {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/maps/GoogleMapView.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import android.animation.ValueAnimator
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.location.Location
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import app.simple.positional.R
+import app.simple.positional.decorations.utils.animateColors
+import app.simple.positional.decorations.utils.animateTo
+import app.simple.positional.extensions.maps.MapsCallbacks
+import app.simple.positional.sensors.HeadingSensor
+import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
+import app.simple.positional.util.BitmapHelper.toBitmap
+import app.simple.positional.util.ColorUtils.resolveAttrColor
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Circle
+import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.CustomCap
+import com.google.android.gms.maps.model.JointType
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PatternItem
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
+import kotlin.math.roundToInt
+
+data class MapLook(val label: Boolean, val satellite: Boolean, val highContrast: Boolean, val buildings: Boolean, val traffic: Boolean)
+
+object GoogleMapStyle {
+    fun type(satellite: Boolean, label: Boolean): Int = when {
+        !satellite -> GoogleMap.MAP_TYPE_NORMAL
+        label -> GoogleMap.MAP_TYPE_HYBRID
+        else -> GoogleMap.MAP_TYPE_SATELLITE
+    }
+
+    @RawRes
+    fun raw(label: Boolean, highContrast: Boolean, night: Boolean): Int = when {
+        highContrast -> if (label) R.raw.map_high_contrast_labelled else R.raw.map_high_contrast_non_labelled
+        night -> if (label) R.raw.maps_dark_labelled else R.raw.maps_dark_no_label
+        else -> if (label) R.raw.maps_light_labelled else R.raw.maps_light_no_label
+    }
+}
+
+@SuppressLint("ViewConstructor")
+abstract class GoogleMapView(context: Context) : MapView(context), MapHost, HeadingSensor.Listener,
+    SharedPreferences.OnSharedPreferenceChangeListener {
+    override val view: View get() = this
+    protected var map: GoogleMap? = null
+    protected var mapCallbacks: MapsCallbacks? = null
+    protected var location: Location? = null
+    protected var heading = 0f
+    protected var headingAccuracy = -1
+    protected var animating = false
+    protected val mainHandler = Handler(Looper.getMainLooper())
+    protected val accent = context.resolveAttrColor(R.attr.colorAppAccent)
+    private var owner: LifecycleOwner? = null
+    private var sensorOn = false
+    private val headingSensor = HeadingSensor(context, this)
+    private val registerTask = Runnable { registerHeading() }
+    private var pin: Marker? = null
+    private var pinKey: Any? = null
+    private var circle: Circle? = null
+    private var pinAnimator: ValueAnimator? = null
+    private var circleAnimator: ValueAnimator? = null
+    private var colorAnimator: ValueAnimator? = null
+    private val startCap by lazy { cap(R.drawable.ic_trail_start) }
+    private val endCap by lazy { cap(R.drawable.seekbar_thumb) }
+
+    protected abstract val compassRotation: Boolean
+    protected abstract val lookKeys: Set<String>
+    protected abstract fun look(): MapLook
+    protected abstract fun startCamera(): CameraPosition
+    protected abstract fun onCameraIdle(position: CameraPosition)
+    protected open fun onReady() {}
+    protected open fun onClick(latLng: LatLng) {
+        mapCallbacks?.onMapClicked()
+    }
+    protected open fun onGesture() {}
+    protected open fun onCameraMoved() {}
+    protected open fun onHeadingChanged() {}
+    protected open fun onHeadingAccuracyChanged() {}
+    protected open fun onResumed() {}
+    protected open fun onPaused() {}
+    protected open fun onPreference(key: String?) {}
+
+    override val lifecycleObserver = object : DefaultLifecycleObserver {
+        override fun onStart(owner: LifecycleOwner) = this@GoogleMapView.onStart()
+
+        override fun onResume(owner: LifecycleOwner) {
+            this@GoogleMapView.owner = owner
+            this@GoogleMapView.onResume()
+            getSharedPreferences().registerOnSharedPreferenceChangeListener(this@GoogleMapView)
+            registerHeadingLater()
+            onResumed()
+        }
+
+        override fun onPause(owner: LifecycleOwner) {
+            onPaused()
+            unregisterHeading()
+            getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this@GoogleMapView)
+            this@GoogleMapView.onPause()
+        }
+
+        override fun onStop(owner: LifecycleOwner) = this@GoogleMapView.onStop()
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            mainHandler.removeCallbacksAndMessages(null)
+            listOf(pinAnimator, circleAnimator, colorAnimator).forEach { it?.cancel() }
+            this@GoogleMapView.owner = null
+            this@GoogleMapView.onDestroy()
+        }
+    }
+
+    init {
+        alpha = 0f
+        onCreate(null)
+        getMapAsync { ready(it) }
+    }
+
+    private fun ready(map: GoogleMap) {
+        this.map = map
+        map.uiSettings.isCompassEnabled = false
+        map.uiSettings.isMapToolbarEnabled = false
+        map.uiSettings.isMyLocationButtonEnabled = false
+        applyLook()
+        map.moveCamera(CameraUpdateFactory.newCameraPosition(startCamera()))
+        map.setOnMapClickListener { onClick(it) }
+        map.setOnMapLongClickListener { mapCallbacks?.onMapLongClicked(it) }
+        map.setOnCameraMoveStartedListener { reason ->
+            if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+                animating = false
+                onGesture()
+            }
+        }
+        map.setOnCameraMoveListener { onCameraMoved() }
+        map.setOnCameraIdleListener { onCameraIdle(map.cameraPosition) }
+        onReady()
+        animate().alpha(1f).setDuration(FADE).start()
+    }
+
+    final override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        if (key in lookKeys) applyLook() else onPreference(key)
+    }
+
+    private fun applyLook() {
+        val map = map ?: return
+        val look = look()
+        val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        map.mapType = GoogleMapStyle.type(look.satellite, look.label)
+        runCatching { map.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, GoogleMapStyle.raw(look.label, look.highContrast, night))) }
+        map.isBuildingsEnabled = look.buildings
+        map.isTrafficEnabled = look.traffic
+    }
+
+    override fun onHeading(azimuth: Float) {
+        heading = azimuth
+        onHeadingChanged()
+    }
+
+    override fun onAccuracy(type: Int, accuracy: Int) {
+        if (headingAccuracy == accuracy) return
+        headingAccuracy = accuracy
+        onHeadingAccuracyChanged()
+    }
+
+    protected fun registerHeadingLater() {
+        mainHandler.removeCallbacks(registerTask)
+        mainHandler.postDelayed(registerTask, SENSOR_DELAY)
+    }
+
+    protected fun unregisterHeading() {
+        mainHandler.removeCallbacks(registerTask)
+        if (sensorOn) owner?.let(headingSensor::onPause)
+        sensorOn = false
+    }
+
+    private fun registerHeading() {
+        val current = owner ?: return
+        if (sensorOn || !compassRotation || !headingSensor.isAvailable) return
+        headingSensor.onResume(current)
+        sensorOn = true
+    }
+
+    protected fun drawPin(key: Any, position: LatLng, centered: Boolean, rotation: Float?, bitmap: () -> Bitmap) {
+        val map = map ?: return
+        val anchor = if (centered) 0.5f else 1f
+        val marker = pin
+        if (marker == null) {
+            pin = map.addMarker(
+                MarkerOptions()
+                    .position(position)
+                    .anchor(0.5f, anchor)
+                    .flat(centered)
+                    .rotation(rotation ?: heading)
+                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap()))
+            )
+            pinKey = key
+            return
+        }
+        if (pinKey != key) {
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap()))
+            pinKey = key
+        }
+        marker.setAnchor(0.5f, anchor)
+        marker.isFlat = centered
+        pinAnimator?.cancel()
+        pinAnimator = marker.animateTo(position, rotation)
+    }
+
+    protected fun rotatePin(rotation: Float) {
+        pin?.rotation = rotation
+    }
+
+    protected fun invalidatePin() {
+        pinKey = null
+    }
+
+    protected fun drawAccuracy(position: LatLng, radius: Double, @ColorInt fill: Int, @ColorInt stroke: Int) {
+        val map = map ?: return
+        val current = circle
+        if (current == null) {
+            circle = map.addCircle(
+                CircleOptions().center(position).radius(radius).fillColor(fill).strokeColor(stroke).strokeWidth(CIRCLE_STROKE).clickable(false)
+            )
+            return
+        }
+        circleAnimator?.cancel()
+        circleAnimator = current.animateTo(position, radius)
+        if (current.fillColor != fill || current.strokeColor != stroke) {
+            colorAnimator?.cancel()
+            colorAnimator = current.animateColors(fill, stroke)
+        }
+    }
+
+    protected fun line(
+        points: List<LatLng>,
+        @ColorInt color: Int = accent,
+        width: Float = LINE_WIDTH,
+        geodesic: Boolean = false,
+        pattern: List<PatternItem>? = null,
+    ): Polyline? {
+        val map = map ?: return null
+        val options = PolylineOptions()
+            .addAll(points)
+            .width(width)
+            .color(color)
+            .jointType(JointType.ROUND)
+            .geodesic(geodesic)
+            .startCap(startCap)
+            .endCap(endCap)
+        if (pattern != null) options.pattern(pattern)
+        return map.addPolyline(options)
+    }
+
+    private fun cap(@DrawableRes drawable: Int) = CustomCap(BitmapDescriptorFactory.fromBitmap(drawable.toBitmap(context, CAP_SIZE)))
+
+    protected fun target(): LatLng? = map?.cameraPosition?.target
+
+    protected fun isVisible(position: LatLng): Boolean = map?.projection?.visibleRegion?.latLngBounds?.contains(position) ?: true
+
+    protected fun camera(target: LatLng, zoom: Float, tilt: Float, bearing: Float) = CameraPosition(target, zoom, tilt, bearing)
+
+    protected fun moveCamera(position: CameraPosition) {
+        map?.moveCamera(CameraUpdateFactory.newCameraPosition(position))
+    }
+
+    protected fun animateTo(position: CameraPosition) {
+        val map = map ?: return
+        animating = true
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(position), CAMERA_SPEED, object : GoogleMap.CancelableCallback {
+            override fun onCancel() {
+                animating = false
+            }
+
+            override fun onFinish() {
+                animating = false
+            }
+        })
+    }
+
+    protected fun fit(points: List<LatLng>, animate: Boolean): Boolean {
+        val map = map ?: return false
+        if (points.size < 2) return false
+        val bounds = LatLngBounds.builder().apply { points.forEach { include(it) } }.build()
+        val update = CameraUpdateFactory.newLatLngBounds(bounds, (FIT_PADDING * resources.displayMetrics.density).roundToInt())
+        return runCatching { if (animate) map.animateCamera(update) else map.moveCamera(update) }.isSuccess
+    }
+
+    protected fun zoom(zoomIn: Boolean) {
+        map?.animateCamera(if (zoomIn) CameraUpdateFactory.zoomIn() else CameraUpdateFactory.zoomOut())
+    }
+
+    protected fun rotate(bearing: Float, animate: Boolean) {
+        val map = map ?: return
+        val update = CameraUpdateFactory.newCameraPosition(CameraPosition.Builder(map.cameraPosition).bearing(bearing).build())
+        if (animate) map.animateCamera(update) else map.moveCamera(update)
+    }
+
+    protected companion object {
+        const val CAMERA_SPEED = 1000
+        const val SENSOR_DELAY = 500L
+        const val FIT_PADDING = 64
+        const val FADE = 300L
+        const val LINE_WIDTH = 10f
+        const val CIRCLE_STROKE = 3f
+        const val CAP_SIZE = 30
+    }
+}
+
+@SuppressLint("ViewConstructor")
+abstract class GooglePanelMap(context: Context) : GoogleMapView(context), PanelMap {
+    override fun setCallbacks(callbacks: MapsCallbacks) {
+        mapCallbacks = callbacks
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/maps/GpsMap.kt
 ################################################################################
 package app.simple.positional.decorations.maps
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -3018,16 +3352,19 @@ import android.graphics.Point
 import android.location.Location
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import app.simple.positional.R
 import app.simple.positional.constants.LocationPins
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.preferences.GPSPreferences
+import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.BitmapHelper.addLinearGradient
 import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.MapSource
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polyline
 
 interface MapHost {
     val view: View
@@ -3052,7 +3389,7 @@ interface GpsMap : PanelMap {
     fun unregister()
 
     companion object {
-        fun create(context: Context): GpsMap = if (MapSource.isOsm()) OsmGpsMap(context) else GoogleGpsMap(Maps(context))
+        fun create(context: Context): GpsMap = if (MapSource.isOsm()) OsmGpsMap(context) else GoogleGpsMap(context)
     }
 }
 
@@ -3066,780 +3403,147 @@ object GpsPin {
     }
 }
 
-class GoogleGpsMap(private val maps: Maps) : GpsMap {
-    init {
-        maps.alpha = 0f
-        maps.onCreate(null)
+@SuppressLint("ViewConstructor")
+class GoogleGpsMap(context: Context) : GooglePanelMap(context), GpsMap {
+    override var isMapMovementEnabled = true
+    override var onTouch: ((MotionEvent) -> Unit)? = null
+    override val compassRotation get() = GPSPreferences.isCompassRotation()
+    override val lookKeys: Set<String> = setOf(
+        GPSPreferences.GPSLabelMode,
+        GPSPreferences.GPSSatellite,
+        GPSPreferences.highContrastMap,
+        GPSPreferences.showBuilding,
+        GPSPreferences.trafficMode,
+    )
+    private val custom = MainPreferences.isCustomCoordinate()
+    private val customPoint = MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+    private var targetLine: Polyline? = null
+
+    override fun look() = MapLook(
+        GPSPreferences.isLabelOn(),
+        GPSPreferences.isSatelliteOn(),
+        GPSPreferences.getHighContrastMap(),
+        GPSPreferences.getShowBuildingsOnMap(),
+        GPSPreferences.isTrafficShown(),
+    )
+
+    override fun startCamera(): CameraPosition {
+        val start = current() ?: MainPreferences.getLastCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        return camera(start, GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), GPSPreferences.getMapBearing())
     }
 
-    override val view: View get() = maps
-    override val lifecycleObserver = MapLifecycle(maps)
-    override var isMapMovementEnabled by maps::isMapMovementEnabled
-    override var onTouch: ((MotionEvent) -> Unit)? = null
-        set(value) {
-            field = value
-            maps.onTouch = value?.let { touch -> { event: MotionEvent, _: Boolean -> touch(event) } }
-        }
+    override fun onCameraIdle(position: CameraPosition) {
+        GPSPreferences.setMapZoom(position.zoom)
+        GPSPreferences.setMapTilt(position.tilt)
+        if (!compassRotation) GPSPreferences.setMapBearing(position.bearing)
+    }
 
-    override fun setCallbacks(callbacks: MapsCallbacks) = maps.setOnMapsCallbackListener(callbacks)
+    override fun onGesture() {
+        isMapMovementEnabled = false
+    }
+
+    override fun onReady() {
+        drawPin()
+        drawTarget()
+    }
+
+    override fun onHeadingChanged() {
+        if (!animating) rotate(heading, animate = false)
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        onTouch?.invoke(ev)
+        return super.dispatchTouchEvent(ev)
+    }
 
     override fun updateLocation(location: Location) {
-        maps.setFirstLocation(location)
-        maps.location = location
-        maps.addMarker(LatLng(location.latitude, location.longitude))
-    }
-
-    override fun screenPoint(latLng: LatLng): Point? = maps.screenPoint(latLng)
-    override fun resetCamera(zoom: Float) = maps.resetCamera(zoom)
-    override fun setTargetMarker(latLng: LatLng?) = maps.setTargetMarker(latLng)
-    override fun moveCameraToTarget() = maps.moveCameraToTarget()
-    override fun zoomIn() = maps.zoomIn()
-    override fun zoomOut() = maps.zoomOut()
-    override fun registerWithRunnable() = maps.registerWithRunnable()
-    override fun unregister() = maps.unregister()
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/maps/Maps.kt
-################################################################################
-package app.simple.positional.decorations.maps
-
-import android.animation.ValueAnimator
-import android.content.Context
-import android.content.SharedPreferences
-import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.location.Location
-import android.util.AttributeSet
-import android.util.Log
-import androidx.core.content.ContextCompat
-import app.simple.positional.R
-import app.simple.positional.constants.LocationPins
-import app.simple.positional.decorations.utils.animateColors
-import app.simple.positional.decorations.utils.animateTo
-import app.simple.positional.extensions.maps.CustomMaps
-import app.simple.positional.math.CompassAzimuth
-import app.simple.positional.math.LowPassFilter
-import app.simple.positional.math.Vector3
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
-import app.simple.positional.util.LocationExtension
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.CustomCap
-import com.google.android.gms.maps.model.JointType
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(context, attributeSet),
-    SensorEventListener {
-    private val accelerometerReadings = FloatArray(3)
-    private val magnetometerReadings = FloatArray(3)
-    private var readingsAlpha = 0.03f
-    private var rotationAngle = 0f
-
-    private var haveAccelerometerSensor = false
-    private var haveMagnetometerSensor = false
-    private var isRegistered = false
-
-    private var accelerometer = Vector3.zero
-    private var magnetometer = Vector3.zero
-    private var sensorManager: SensorManager
-    private lateinit var sensorAccelerometer: Sensor
-    private lateinit var sensorMagneticField: Sensor
-
-    private var marker: Marker? = null
-    private var circle: Circle? = null
-    private var polylineOptions: PolylineOptions? = null
-    private var targetPolyline: Polyline? = null
-
-    private var markerBitmap: Bitmap? = null
-    private var markerAnimator: ValueAnimator? = null
-    private var circleAnimator: ValueAnimator? = null
-    private var colorAnimator: ValueAnimator? = null
-
-    private val sensorRegistrationRunnable = Runnable { register() }
-
-    private var isCustomCoordinate = false
-    private var isBearingRotation = false
-    private var isFirstLocation = true
-    private var isCompassRotation = false
-    private var isNorthOnly = true
-
-    private var customLatitude = 0.0
-    private var customLongitude = 0.0
-
-    init {
-        isCustomCoordinate = MainPreferences.isCustomCoordinate()
-        isBearingRotation = GPSPreferences.isBearingRotation()
-        isCompassRotation = GPSPreferences.isCompassRotation()
-        isNorthOnly = GPSPreferences.isNorthOnly()
-
-        polylineOptions = PolylineOptions()
-                .width(10f)
-                .jointType(JointType.ROUND)
-                .color(context.resolveAttrColor(R.attr.colorAppAccent))
-                .geodesic(false)
-
-        if (isCustomCoordinate) {
-            customLatitude = MainPreferences.getCoordinates()[0].toDouble()
-            customLongitude = MainPreferences.getCoordinates()[1].toDouble()
-        }
-
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-        kotlin.runCatching {
-            sensorMagneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)!!
-            sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
-            haveMagnetometerSensor = true
-            haveAccelerometerSensor = true
-        }.getOrElse {
-            haveAccelerometerSensor = false
-            haveMagnetometerSensor = false
+        val first = this.location == null
+        this.location = location
+        drawPin()
+        drawTarget()
+        val point = current() ?: return
+        if (first) {
+            moveCamera(camera(point, GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), bearing()))
+        } else if (isMapMovementEnabled && !animating && !GPSPreferences.isTargetMarkerMode() && (!compassRotation || !isVisible(point))) {
+            follow(GPSPreferences.getMapZoom())
         }
     }
 
-    override fun onMapReady(p0: GoogleMap) {
-        super.onMapReady(p0)
+    override fun screenPoint(latLng: LatLng): Point? = map?.projection?.toScreenLocation(latLng)
 
-        latLng = if (isCustomCoordinate)
-            LatLng(customLatitude, customLongitude)
-        else
-            LatLng(lastLatitude, lastLongitude)
+    override fun resetCamera(zoom: Float) = follow(zoom)
 
-        if (isCustomCoordinate) {
-            addMarker(latLng!!)
-        } else {
-            if (location.isNotNull()) {
-                setFirstLocation(location!!)
-            }
+    override fun setTargetMarker(latLng: LatLng?) {
+        val target = latLng ?: target() ?: return
+        GPSPreferences.setTargetMarkerLatitude(target.latitude.toFloat())
+        GPSPreferences.setTargetMarkerLongitude(target.longitude.toFloat())
+        GPSPreferences.setTargetMarker(true)
+    }
+
+    override fun moveCameraToTarget() {
+        val target = GPSPreferences.getTargetMarkerCoordinates()
+        animateTo(camera(LatLng(target[0].toDouble(), target[1].toDouble()), GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), bearing()))
+    }
+
+    override fun zoomIn() = zoom(zoomIn = true)
+
+    override fun zoomOut() = zoom(zoomIn = false)
+
+    override fun registerWithRunnable() = registerHeadingLater()
+
+    override fun unregister() = unregisterHeading()
+
+    private fun current(): LatLng? = if (custom) customPoint else location?.let { LatLng(it.latitude, it.longitude) }
+
+    private fun bearing(): Float = when {
+        GPSPreferences.isCompassRotation() -> heading
+        GPSPreferences.isBearingRotation() -> location?.bearing ?: 0f
+        else -> 0f
+    }
+
+    private fun follow(zoom: Float) {
+        val point = current() ?: target() ?: return
+        animateTo(camera(point, zoom, GPSPreferences.getMapTilt(), bearing()))
+    }
+
+    private fun drawPin() {
+        val point = current() ?: return
+        val fix = location
+        val moving = !custom && (fix?.speed ?: 0f) > 0f
+        drawPin(moving, point, centered = moving, rotation = if (moving) fix?.bearing ?: 0f else 0f) {
+            GpsPin.bitmap(context, custom, moving)
         }
-
-        setMapStyle(GPSPreferences.isLabelOn())
-        setSatellite()
-        setTraffic(GPSPreferences.isTrafficShown())
-        setBuildings(GPSPreferences.getShowBuildingsOnMap())
-
-        this.googleMap?.moveCamera(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition(
-                    latLng!!,
-                    GPSPreferences.getMapZoom(),
-                    GPSPreferences.getMapTilt(),
-                    GPSPreferences.getMapBearing()
-                )
-            )
+        if (custom || fix == null) return
+        drawAccuracy(
+            point,
+            if (moving) fix.speed.toDouble() else fix.accuracy.toDouble(),
+            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_color) else LocationPins.getCircleFillColor(),
+            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_stroke) else LocationPins.getCircleStrokeColor(),
         )
+    }
 
-        this.googleMap?.setOnCameraMoveStartedListener { reason ->
-            when (reason) {
-                GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE -> {
-                    isMapMovementEnabled = false
-                    clearAnimation()
-                    Log.i("Maps", "Camera Move Started by Gesture")
-                }
-            }
+    private fun drawTarget() {
+        val current = current()
+        if (!GPSPreferences.isTargetMarkerSet() || current == null) {
+            targetLine?.remove()
+            targetLine = null
+            return
         }
-
-        this.googleMap?.setOnCameraIdleListener {
-            GPSPreferences.setMapZoom(this.googleMap?.cameraPosition!!.zoom)
-            GPSPreferences.setMapTilt(this.googleMap?.cameraPosition!!.tilt)
-            GPSPreferences.setMapBearing(this.googleMap?.cameraPosition!!.bearing)
-
-            viewHandler.postDelayed(sensorRegistrationRunnable, 100L)
-            isAnimating = false
-            clearAnimation()
-        }
-
-        this.googleMap?.setOnCameraMoveCanceledListener {
-            clearAnimation()
-            reestablishSensorRegistration()
-            isAnimating = false
-        }
-
-        viewHandler.postDelayed(sensorRegistrationRunnable, 0L)
-
-        mapsCallbacks?.onMapInitialized()
+        val target = GPSPreferences.getTargetMarkerCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        val start = GPSPreferences.getTargetMarkerStartCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        val points = if (custom) listOf(current, target) else listOf(start, current, target)
+        targetLine?.let { it.points = points } ?: run { targetLine = line(points) }
     }
 
-    override fun onPause() {
-        super.onPause()
-        unregister()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewHandler.postDelayed(sensorRegistrationRunnable, 250L)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewHandler.removeCallbacks(sensorRegistrationRunnable)
-        viewHandler.removeCallbacksAndMessages(null)
-        circleAnimator?.cancel()
-        markerAnimator?.cancel()
-        colorAnimator?.cancel()
-    }
-
-    private fun reestablishSensorRegistration() {
-        viewHandler.postDelayed(sensorRegistrationRunnable, 100L)
-    }
-
-    fun resetCamera(zoom: Float) {
-        when {
-            isCustomCoordinate -> {
-                moveMapCamera(LatLng(customLatitude, customLongitude), zoom)
-            }
-
-            location.isNotNull() -> {
-                moveMapCamera(LatLng(location!!.latitude, location!!.longitude), zoom)
-            }
-
-            else               -> {
-                kotlin.runCatching {
-                    moveMapCamera(googleMap?.cameraPosition?.target!!, zoom)
-                }.getOrElse {
-                    it.printStackTrace()
-                }
-            }
-        }
-    }
-
-    private fun setSatellite() {
-        if (googleMap.isNotNull())
-            googleMap?.mapType = if (GPSPreferences.isSatelliteOn()) {
-                if (GPSPreferences.isLabelOn()) {
-                    GoogleMap.MAP_TYPE_HYBRID
-                } else {
-                    GoogleMap.MAP_TYPE_SATELLITE
-                }
-            } else {
-                GoogleMap.MAP_TYPE_NORMAL
-            }
-    }
-
-    private fun setMapStyle(value: Boolean) {
-        setSatellite()
-
-        if (!googleMap.isNull()) {
-            if (GPSPreferences.getHighContrastMap()) {
-                googleMap?.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                        context,
-                        if (value) {
-                            R.raw.map_high_contrast_labelled
-                        } else {
-                            R.raw.map_high_contrast_non_labelled
-                        }
-                    )
-                )
-            } else {
-                googleMap?.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                        context,
-                        when (this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                            Configuration.UI_MODE_NIGHT_YES -> {
-                                if (value) {
-                                    R.raw.maps_dark_labelled
-                                } else {
-                                    R.raw.maps_dark_no_label
-                                }
-                            }
-
-                            Configuration.UI_MODE_NIGHT_NO  -> {
-                                if (value) {
-                                    R.raw.maps_light_labelled
-                                } else {
-                                    R.raw.maps_light_no_label
-                                }
-                            }
-
-                            else                            -> 0
-                        }
-                    )
-                )
-            }
-        }
-    }
-
-    fun zoomIn() {
-        unregister()
-        isAnimating = true
-        googleMap?.animateCamera(
-            CameraUpdateFactory.zoomIn(),
-            object : GoogleMap.CancelableCallback {
-                override fun onFinish() {
-                    registerWithRunnable()
-                    isAnimating = false
-                }
-
-                override fun onCancel() {
-                    registerWithRunnable()
-                    isAnimating = false
-                }
-            })
-    }
-
-    fun zoomOut() {
-        unregister()
-        isAnimating = true
-        googleMap?.animateCamera(
-            CameraUpdateFactory.zoomOut(),
-            object : GoogleMap.CancelableCallback {
-                override fun onFinish() {
-                    registerWithRunnable()
-                    isAnimating = false
-                }
-
-                override fun onCancel() {
-                    registerWithRunnable()
-                    isAnimating = false
-                }
-            })
-    }
-
-    fun addMarker(latLng: LatLng) {
-        launch {
-            this@Maps.latLng = latLng
-
-            withContext(Dispatchers.Default) {
-                if (isCustomCoordinate) {
-                    markerBitmap = GpsPin.bitmap(context, custom = true, moving = false)
-                } else if (location.isNotNull()) {
-                    if (!LocationExtension.getLocationStatus(context)) return@withContext
-                    markerBitmap = GpsPin.bitmap(context, custom = false, moving = location!!.speed > 0F)
-                }
-            }
-
-            if (googleMap.isNotNull()) {
-                runCatching {
-                    if (marker.isNull()) {
-                        marker = if (isCustomCoordinate) {
-                            googleMap?.addMarker(
-                                MarkerOptions().position(latLng)
-                                        .rotation(0F)
-                                        .flat(false)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!))
-                            )
-                        } else {
-                            googleMap?.addMarker(
-                                MarkerOptions().position(latLng)
-                                        .rotation(if (location!!.speed > 0F) location!!.bearing else 0F)
-                                        .anchor(0.5F, if (location!!.speed > 0F) 0.5F else 1F)
-                                        .flat(location!!.speed > 0F)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!))
-                            )
-                        }
-                    } else {
-                        if (isCustomCoordinate) {
-                            marker!!.apply {
-                                setAnchor(0.5F, 1F)
-                                setIcon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!))
-                                isFlat = false
-                            }
-                        } else {
-                            marker!!.apply {
-                                setAnchor(0.5F, if (location!!.speed > 0F) 0.5F else 1F)
-                                setIcon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!))
-                                isFlat = location!!.speed > 0F
-                            }
-
-                            markerAnimator?.cancel()
-                            markerAnimator = marker!!.animateTo(location!!, if (location!!.speed > 0F) location!!.bearing else 0F)
-                        }
-                    }
-                }
-
-                if (!isCustomCoordinate) {
-                    runCatching {
-                        circleAnimator?.cancel()
-                        colorAnimator?.cancel()
-                        val moving = location!!.speed > 0F
-                        circleAnimator = circle!!.animateTo(location!!)
-                        colorAnimator = circle!!.animateColors(
-                            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_color) else LocationPins.getCircleFillColor(),
-                            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_stroke) else LocationPins.getCircleStrokeColor(),
-                        )
-                    }.onFailure {
-                        circle = googleMap?.addCircle(
-                            CircleOptions()
-                                    .center(latLng)
-                                    .radius(
-                                        if (location!!.speed > 0F) location!!.speed.toDouble() else location?.accuracy?.toDouble()
-                                                                                                    ?: 0.0
-                                    )
-                                    .clickable(false)
-                                    .fillColor(
-                                        if (location!!.speed > 0F) ContextCompat.getColor(
-                                            context,
-                                            R.color.bearing_circle_color
-                                        ) else LocationPins.getCircleFillColor()
-                                    )
-                                    .strokeColor(
-                                        if (location!!.speed > 0F) ContextCompat.getColor(
-                                            context,
-                                            R.color.bearing_circle_stroke
-                                        ) else LocationPins.getCircleStrokeColor()
-                                    )
-                                    .strokeWidth(2F)
-                        )
-                    }
-                }
-
-                drawMarkerToTargetPolyline()
-                invalidate()
-
-                if (isCompassRotation) {
-                    if (isMapMovementEnabled && !isAnimating && !isCameraWithinBounds(latLng)) moveMap()
-                } else {
-                    if (isMapMovementEnabled && !isAnimating) moveMap()
-                }
-            }
-        }
-    }
-
-    fun setTargetMarker(latLng: LatLng?) {
-        if (googleMap.isNotNull()) {
-            if (latLng.isNull()) {
-                with(googleMap?.cameraPosition!!) {
-                    GPSPreferences.setTargetMarkerLatitude(this.target.latitude.toFloat())
-                    GPSPreferences.setTargetMarkerLongitude(this.target.longitude.toFloat())
-                    GPSPreferences.setTargetMarker(true)
-                }
-            } else {
-                GPSPreferences.setTargetMarkerLatitude(latLng!!.latitude.toFloat())
-                GPSPreferences.setTargetMarkerLongitude(latLng.longitude.toFloat())
-                GPSPreferences.setTargetMarker(true)
-            }
-        }
-    }
-
-    fun moveCameraToTarget() {
-        with(GPSPreferences.getTargetMarkerCoordinates()) {
-            moveMapCamera(
-                LatLng(this[0].toDouble(), this[1].toDouble()),
-                GPSPreferences.getMapZoom()
-            )
-        }
-    }
-
-    private fun drawMarkerToTargetPolyline() {
-        targetPolyline?.remove()
-        polylineOptions?.points?.clear()
-
-        if (GPSPreferences.isTargetMarkerSet()) {
-            if (isCustomCoordinate) {
-                polylineOptions?.add(LatLng(customLatitude, customLongitude))
-            } else {
-                if (location.isNotNull()) {
-                    polylineOptions?.add(LatLng(GPSPreferences.getTargetMarkerStartCoordinates()[0].toDouble(),
-                        GPSPreferences.getTargetMarkerStartCoordinates()[1].toDouble()))
-                    polylineOptions?.add(LatLng(location?.latitude!!, location?.longitude!!))
-                }
-            }
-
-            polylineOptions?.add(LatLng(GPSPreferences.getTargetMarkerCoordinates()[0].toDouble(),
-                GPSPreferences.getTargetMarkerCoordinates()[1].toDouble()))
-
-            targetPolyline = googleMap?.addPolyline(polylineOptions!!)
-
-            polylineOptions?.startCap(
-                CustomCap(BitmapDescriptorFactory.fromBitmap(
-                    R.drawable.ic_trail_start.toBitmap(
-                        context,
-                        30))))
-
-            polylineOptions?.endCap(
-                CustomCap(BitmapDescriptorFactory.fromBitmap(
-                    R.drawable.seekbar_thumb.toBitmap(
-                        context,
-                        30))))
-        }
-    }
-
-    private fun moveMap() {
-        if (!GPSPreferences.isTargetMarkerMode()) {
-            if (isCustomCoordinate) {
-                moveMapCamera(LatLng(customLatitude, customLongitude), GPSPreferences.getMapZoom())
-            } else {
-                if (location.isNotNull()) {
-                    with(location!!) {
-                        moveMapCamera(LatLng(latitude, longitude), GPSPreferences.getMapZoom())
-                    }
-                }
-            }
-        }
-    }
-
-    private fun moveMapCamera(latLng: LatLng, zoom: Float) {
-        if (googleMap.isNull()) return
-
-        if (isCompassRotation) {
-            unregister()
-        }
-
-        val bearing = when {
-            isCompassRotation -> {
-                rotationAngle
-            }
-
-            isBearingRotation -> {
-                location?.bearing
-            }
-
-            isNorthOnly -> {
-                0F
-            }
-
-            else        -> {
-                0F
-            }
-        }
-
-        isAnimating = true
-        animateCamera(latLng, zoom, GPSPreferences.getMapTilt(), bearing = bearing ?: 0F)
-    }
-
-    fun setFirstLocation(location: Location?) {
-        if (googleMap.isNotNull() && isFirstLocation) {
-            this.location = location
-
-            with(LatLng(location!!.latitude, location.longitude)) {
-                addMarker(this)
-                googleMap?.moveCamera(
-                    CameraUpdateFactory.newCameraPosition(
-                        CameraPosition(
-                            this,
-                            GPSPreferences.getMapZoom(),
-                            GPSPreferences.getMapTilt(),
-                            GPSPreferences.getMapBearing()
-                        )
-                    )
-                )
-
-                latLng = this
-                isFirstLocation = false
-            }
-        }
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null) return
-
-        when (event.sensor.type) {
-            Sensor.TYPE_ACCELEROMETER  -> {
-                LowPassFilter.smoothAndSetReadings(
-                    accelerometerReadings,
-                    event.values,
-                    readingsAlpha
-                )
-                accelerometer = Vector3(
-                    accelerometerReadings[0],
-                    accelerometerReadings[1],
-                    accelerometerReadings[2]
-                )
-            }
-
-            Sensor.TYPE_MAGNETIC_FIELD -> {
-                LowPassFilter.smoothAndSetReadings(
-                    magnetometerReadings,
-                    event.values,
-                    readingsAlpha
-                )
-                magnetometer = Vector3(
-                    magnetometerReadings[0],
-                    magnetometerReadings[1],
-                    magnetometerReadings[2]
-                )
-            }
-        }
-
-        rotationAngle =
-            CompassAzimuth.calculate(gravity = accelerometer, magneticField = magnetometer, windowManager)
-
-        if (isCompassRotation) {
-            if (googleMap.isNotNull())
-                with(googleMap!!) {
-                    moveCamera(
-                        CameraUpdateFactory.newCameraPosition(
-                            CameraPosition(
-                                cameraPosition.target,
-                                cameraPosition.zoom,
-                                cameraPosition.tilt,
-                                rotationAngle
-                            )
-                        )
-                    )
-                }
-        }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-    }
-
-    fun registerWithRunnable() {
-        viewHandler.removeCallbacks(sensorRegistrationRunnable)
-        viewHandler.postDelayed(sensorRegistrationRunnable, 500L)
-    }
-
-    private fun register() {
-        if (!isRegistered) {
-            if (haveAccelerometerSensor && haveMagnetometerSensor) {
-                unregister()
-                if (isCompassRotation) {
-                    sensorManager.registerListener(
-                        this,
-                        sensorAccelerometer,
-                        SensorManager.SENSOR_DELAY_GAME
-                    )
-                    sensorManager.registerListener(
-                        this,
-                        sensorMagneticField,
-                        SensorManager.SENSOR_DELAY_GAME
-                    )
-
-                    isRegistered = true
-                }
-            }
-        }
-    }
-
-    fun unregister() {
-        viewHandler.removeCallbacks(sensorRegistrationRunnable)
-
-        if (isRegistered) {
-            if (haveAccelerometerSensor && haveMagnetometerSensor) {
-                sensorManager.unregisterListener(this, sensorAccelerometer)
-                sensorManager.unregisterListener(this, sensorMagneticField)
-
-                isRegistered = false
-            }
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+    override fun onPreference(key: String?) {
         when (key) {
-            GPSPreferences.highContrastMap, GPSPreferences.GPSLabelMode -> {
-                setMapStyle(GPSPreferences.isLabelOn())
+            GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity -> {
+                invalidatePin()
+                drawPin()
             }
-
-            GPSPreferences.GPSSatellite       -> {
-                setSatellite()
-            }
-
-            GPSPreferences.showBuilding       -> {
-                setBuildings(GPSPreferences.getShowBuildingsOnMap())
-            }
-
-            GPSPreferences.pinSkin,
-            GPSPreferences.pinSize,
-            GPSPreferences.pinOpacity         -> {
-                Log.d("Maps", "Pin Skin, Size or Opacity Changed")
-                if (isCustomCoordinate.invert()) {
-                    if (location.isNotNull()) {
-                        if (latLng.isNotNull()) {
-                            addMarker(latLng!!)
-                            Log.d("Maps", "Marker Added")
-                        }
-                    }
-                } else {
-                    if (latLng.isNotNull()) {
-                        addMarker(latLng!!)
-                        Log.d("Maps", "Custom marker Added")
-                    }
-                }
-            }
-
-            GPSPreferences.compassRotation    -> {
-                if (GPSPreferences.isCompassRotation()) {
-                    isCompassRotation = true
-                    viewHandler.post(sensorRegistrationRunnable)
-                } else {
-                    isCompassRotation = false
-                    unregister()
-                }
-            }
-
-            GPSPreferences.useBearingRotation -> {
-                isBearingRotation = GPSPreferences.isBearingRotation()
-
-                if (googleMap.isNotNull() && isBearingRotation) {
-                    with(googleMap!!) {
-                        isAnimating = true
-                        animateCamera(CameraUpdateFactory.newCameraPosition(
-                            CameraPosition(
-                                cameraPosition.target,
-                                cameraPosition.zoom,
-                                cameraPosition.tilt,
-                                location?.bearing ?: 0F
-                            )
-                        ), CAMERA_SPEED, object : GoogleMap.CancelableCallback {
-                            override fun onCancel() {
-                                isAnimating = false
-                            }
-
-                            override fun onFinish() {
-                                isAnimating = false
-                            }
-                        })
-                    }
-                }
-            }
-
-            GPSPreferences.isNorthOnly        -> {
-                isNorthOnly = GPSPreferences.isNorthOnly()
-
-                if (googleMap.isNotNull() && isNorthOnly) {
-                    with(googleMap!!) {
-                        isAnimating = true
-                        animateCamera(CameraUpdateFactory.newCameraPosition(
-                            CameraPosition(
-                                cameraPosition.target,
-                                cameraPosition.zoom,
-                                cameraPosition.tilt,
-                                0F
-                            )
-                        ), CAMERA_SPEED, object : GoogleMap.CancelableCallback {
-                            override fun onFinish() {
-                                isAnimating = false
-                            }
-
-                            override fun onCancel() {
-                                isAnimating = false
-                            }
-                        })
-                    }
-                }
-            }
-
-            GPSPreferences.mapTargetMarker    -> {
-                drawMarkerToTargetPolyline()
-            }
-
-            GPSPreferences.trafficMode        -> {
-                setTraffic(GPSPreferences.isTrafficShown())
-            }
+            GPSPreferences.compassRotation -> if (GPSPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
+            GPSPreferences.useBearingRotation, GPSPreferences.isNorthOnly -> rotate(bearing(), animate = true)
+            GPSPreferences.mapTargetMarker, GPSPreferences.mapTargetMarkerLatitude, GPSPreferences.mapTargetMarkerLongitude -> drawTarget()
         }
     }
 }
@@ -3879,7 +3583,7 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
     override fun onCameraIdle(position: CameraPosition) {
         GPSPreferences.setMapZoom(position.zoom.toFloat())
         GPSPreferences.setMapTilt(position.tilt.toFloat())
-        GPSPreferences.setMapBearing(position.bearing.toFloat())
+        if (!compassRotation) GPSPreferences.setMapBearing(position.bearing.toFloat())
     }
 
     override fun onGesture() {
@@ -3907,7 +3611,7 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
         drawTarget()
         if (first) {
             moveCamera(camera(location.latitude, location.longitude, GPSPreferences.getMapZoom(), GPSPreferences.getMapTilt(), bearing()))
-        } else if (isMapMovementEnabled && !animating && !GPSPreferences.isTargetMarkerMode()) {
+        } else if (isMapMovementEnabled && !animating && !GPSPreferences.isTargetMarkerMode() && (!compassRotation || current()?.let { !isVisible(it.first, it.second) } == true)) {
             follow(GPSPreferences.getMapZoom())
         }
     }
@@ -4121,7 +3825,6 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
             layer(OsmStyle.LINE, PropertyFactory.lineColor(accent))
             layer(OsmStyle.GUIDE, PropertyFactory.lineColor(accent))
             onStyleReady()
-            mapCallbacks?.onMapInitialized()
         }
     }
 
@@ -4190,6 +3893,9 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     }
 
     protected fun target(): Pair<Double, Double>? = map?.cameraPosition?.target?.let { it.latitude to it.longitude }
+
+    protected fun isVisible(latitude: Double, longitude: Double): Boolean =
+        map?.projection?.visibleRegion?.latLngBounds?.contains(LibreLatLng(latitude, longitude)) ?: true
 
     protected fun screenPointOf(latitude: Double, longitude: Double): Point? =
         map?.projection?.toScreenLocation(LibreLatLng(latitude, longitude))?.let { Point(it.x.roundToInt(), it.y.roundToInt()) }
@@ -4659,17 +4365,10 @@ package app.simple.positional.decorations.maps
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.res.Configuration
-import android.view.View
-import app.simple.positional.R
-import app.simple.positional.extensions.maps.MapLifecycle
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.MapSource
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.CameraPosition as GoogleCameraPosition
 import org.maplibre.android.camera.CameraPosition
 
 interface PickerMap : MapHost {
@@ -4683,36 +4382,31 @@ interface PickerMap : MapHost {
     }
 }
 
-class GooglePickerMap(context: Context) : PickerMap {
-    private val mapView = MapView(context).apply { onCreate(null) }
-    private var map: GoogleMap? = null
-    private var pending: Pair<Double, Double>? = null
-    override val view: View get() = mapView
-    override val lifecycleObserver = MapLifecycle(mapView)
+@SuppressLint("ViewConstructor")
+class GooglePickerMap(context: Context) : GoogleMapView(context), PickerMap {
+    override val compassRotation = false
+    override val lookKeys: Set<String> = emptySet()
     override var onIdle: ((Double, Double) -> Unit)? = null
+    private var pending: LatLng? = null
 
-    init {
-        mapView.getMapAsync { googleMap ->
-            map = googleMap
-            googleMap.uiSettings.isMapToolbarEnabled = false
-            googleMap.uiSettings.isCompassEnabled = false
-            val night = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-            runCatching {
-                googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, if (night) R.raw.maps_dark_labelled else R.raw.maps_light_labelled))
-            }
-            pending?.let { (latitude, longitude) -> moveTo(latitude, longitude, animate = false) }
-            googleMap.setOnCameraIdleListener { googleMap.cameraPosition.target.let { onIdle?.invoke(it.latitude, it.longitude) } }
-            googleMap.setOnMapClickListener { googleMap.animateCamera(CameraUpdateFactory.newLatLng(it)) }
-        }
+    override fun look() = MapLook(label = true, satellite = false, highContrast = false, buildings = true, traffic = false)
+
+    override fun startCamera(): GoogleCameraPosition =
+        camera(pending ?: MainPreferences.getLastCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }, PickerMap.ZOOM, 0f, 0f)
+
+    override fun onCameraIdle(position: GoogleCameraPosition) {
+        onIdle?.invoke(position.target.latitude, position.target.longitude)
+    }
+
+    override fun onClick(latLng: LatLng) {
+        animateTo(camera(latLng, map?.cameraPosition?.zoom ?: PickerMap.ZOOM, 0f, 0f))
     }
 
     override fun moveTo(latitude: Double, longitude: Double, animate: Boolean) {
-        val map = map ?: run {
-            pending = latitude to longitude
-            return
-        }
-        val update = CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), PickerMap.ZOOM)
-        if (animate) map.animateCamera(update) else map.moveCamera(update)
+        val target = LatLng(latitude, longitude)
+        pending = target
+        val position = camera(target, PickerMap.ZOOM, 0f, 0f)
+        if (animate) animateTo(position) else moveCamera(position)
     }
 }
 
@@ -4750,26 +4444,34 @@ class OsmPickerMap(context: Context) : OsmMapView(context), PickerMap {
 ################################################################################
 package app.simple.positional.decorations.maps
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.hardware.SensorManager
 import android.location.Location
-import android.view.View
 import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
 import app.simple.positional.R
-import app.simple.positional.decorations.measure.MeasureMaps
-import app.simple.positional.decorations.trails.TrailMaps
-import app.simple.positional.extensions.maps.MapLifecycle
-import app.simple.positional.extensions.maps.MapsCallbacks
+import app.simple.positional.constants.TrailIcons
 import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.model.TrailPoint
+import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.MeasurePreferences
 import app.simple.positional.preferences.TrailPreferences
 import app.simple.positional.util.BitmapHelper.toBitmap
 import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 import app.simple.positional.util.MapSource
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
 
 interface TrailMap : PanelMap {
     fun showPoints(points: List<TrailPoint>)
@@ -4779,7 +4481,7 @@ interface TrailMap : PanelMap {
     fun clear()
 
     companion object {
-        fun create(context: Context): TrailMap = if (MapSource.isOsm()) OsmTrailMap(context) else GoogleTrailMap(TrailMaps(context))
+        fun create(context: Context): TrailMap = if (MapSource.isOsm()) OsmTrailMap(context) else GoogleTrailMap(context)
     }
 }
 
@@ -4792,7 +4494,7 @@ interface MeasureMap : PanelMap {
     fun clear()
 
     companion object {
-        fun create(context: Context): MeasureMap = if (MapSource.isOsm()) OsmMeasureMap(context) else GoogleMeasureMap(MeasureMaps(context))
+        fun create(context: Context): MeasureMap = if (MapSource.isOsm()) OsmMeasureMap(context) else GoogleMeasureMap(context)
     }
 }
 
@@ -4817,1061 +4519,311 @@ object TrackPin {
         if (drawable == R.drawable.ic_place_historical) drawable.toBitmap(context, HISTORICAL_SIZE) else drawable.toBitmapKeepingSize(context, SCALE)
 }
 
-class GoogleTrailMap(private val maps: TrailMaps) : TrailMap {
-    init {
-        maps.alpha = 0f
-        maps.onCreate(null)
+@SuppressLint("ViewConstructor")
+abstract class GoogleTrackMap(context: Context) : GooglePanelMap(context) {
+    protected fun drawPuck() {
+        val compass = compassRotation
+        val fix = location
+        val point = fix?.let { LatLng(it.latitude, it.longitude) } ?: MainPreferences.getLastCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        val pin = TrackPin.drawable(fix != null, compass, headingAccuracy, (fix?.speed ?: 0f) > 0f)
+        drawPin(pin, point, centered = true, rotation = if (compass) null else fix?.bearing ?: 0f) { TrackPin.bitmap(context, pin) }
+        if (fix == null) return
+        drawAccuracy(
+            point,
+            fix.accuracy.toDouble(),
+            ContextCompat.getColor(context, R.color.map_circle_color),
+            ContextCompat.getColor(context, R.color.compass_pin_color),
+        )
     }
 
-    override val view: View get() = maps
-    override val lifecycleObserver = MapLifecycle(maps)
-    override fun setCallbacks(callbacks: MapsCallbacks) = maps.setOnMapsCallbackListener(callbacks)
+    override fun onHeadingChanged() {
+        if (compassRotation) rotatePin(heading)
+    }
+
+    override fun onHeadingAccuracyChanged() = drawPuck()
+}
+
+@SuppressLint("ViewConstructor")
+class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
+    override val compassRotation get() = TrailPreferences.isCompassRotation()
+    override val lookKeys: Set<String> = setOf(
+        TrailPreferences.trailLabelMode,
+        TrailPreferences.trailSatellite,
+        TrailPreferences.trailHighContrastMap,
+        TrailPreferences.trailShowBuilding,
+    )
+    private var points: List<TrailPoint> = emptyList()
+    private var path: Polyline? = null
+    private val flags = mutableListOf<Pair<Long, Marker>>()
+    private val icons = mutableMapOf<Int, BitmapDescriptor>()
+    private var restore: CameraPosition? = null
+    private val autoCenter = Runnable { recenter() }
+
+    override fun look() = MapLook(
+        TrailPreferences.isLabelOn(),
+        TrailPreferences.isSatelliteOn(),
+        TrailPreferences.getHighContrastMap(),
+        TrailPreferences.getShowBuildingsOnMap(),
+        traffic = false,
+    )
+
+    override fun startCamera(): CameraPosition {
+        val start = location?.let { LatLng(it.latitude, it.longitude) } ?: MainPreferences.getLastCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+        return camera(start, TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing())
+    }
+
+    override fun onCameraIdle(position: CameraPosition) {
+        TrailPreferences.setMapZoom(position.zoom)
+        TrailPreferences.setMapTilt(position.tilt)
+        TrailPreferences.setMapBearing(position.bearing)
+        scheduleAutoCenter()
+    }
+
+    override fun onCameraMoved() {
+        mainHandler.removeCallbacks(autoCenter)
+    }
+
+    override fun onReady() {
+        drawPoints()
+        drawPuck()
+        if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun onResumed() = scheduleAutoCenter()
+
+    override fun onPaused() {
+        mainHandler.removeCallbacks(autoCenter)
+    }
 
     override fun updateLocation(location: Location) {
-        maps.setFirstLocation(location)
-        maps.location = location
-        maps.addMarker(LatLng(location.latitude, location.longitude))
-    }
-
-    override fun resetCamera(zoom: Float) = maps.resetCamera(zoom)
-    override fun showPoints(points: List<TrailPoint>) = maps.addPolylines(ArrayList(points))
-    override fun removeLast() = maps.removePolyline()
-    override fun toggleWrap() = maps.wrapUnwrap()
-    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) =
-        maps.moveMapCamera(LatLng(latitude, longitude), zoom, TrailPreferences.getMapTilt())
-    override fun clear() = maps.clear()
-}
-
-class GoogleMeasureMap(private val maps: MeasureMaps) : MeasureMap {
-    init {
-        maps.alpha = 0f
-        maps.onCreate(null)
-    }
-
-    override val view: View get() = maps
-    override val lifecycleObserver = MapLifecycle(maps)
-    override val points: List<MeasurePoint> get() = maps.getMeasurePoints()
-    override fun setCallbacks(callbacks: MapsCallbacks) = maps.setOnMapsCallbackListener(callbacks)
-
-    override fun updateLocation(location: Location) {
-        val latLng = LatLng(location.latitude, location.longitude)
-        maps.setFirstLocation(latLng)
-        maps.location = location
-        maps.addMarker(latLng)
-    }
-
-    override fun resetCamera(zoom: Float) = maps.resetCamera(zoom)
-    override fun showMeasure(measure: Measure) = maps.createMeasurePolylines(measure)
-    override fun addPoint() = maps.addPolyline()
-    override fun removeLast() = maps.removeRecentPolyline()
-    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) =
-        maps.moveMapCamera(LatLng(latitude, longitude), zoom, MeasurePreferences.getMapTilt(), MeasurePreferences.getMapBearing())
-    override fun clear() = maps.clear()
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt
-################################################################################
-package app.simple.positional.decorations.measure
-
-import android.animation.ValueAnimator
-import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.util.AttributeSet
-import android.util.Log
-import androidx.core.content.ContextCompat
-import app.simple.positional.R
-import app.simple.positional.decorations.maps.TrackPin
-import app.simple.positional.decorations.utils.animateSegment
-import app.simple.positional.decorations.utils.animateTo
-import app.simple.positional.extensions.maps.CustomMaps
-import app.simple.positional.math.CompassAzimuth
-import app.simple.positional.math.LowPassFilter
-import app.simple.positional.math.Vector3
-import app.simple.positional.model.Measure
-import app.simple.positional.model.MeasurePoint
-import app.simple.positional.preferences.MeasurePreferences
-import app.simple.positional.util.ArrayHelper.secondLastOrNull
-import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.CustomCap
-import com.google.android.gms.maps.model.Dash
-import com.google.android.gms.maps.model.Gap
-import com.google.android.gms.maps.model.JointType
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.PatternItem
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(context, attrs),
-    SensorEventListener {
-    private val accelerometerReadings = FloatArray(3)
-    private val magnetometerReadings = FloatArray(3)
-    private var readingsAlpha = 0.03f
-    private var rotationAngle = 0f
-    private var accuracy = -1
-
-    private var haveAccelerometerSensor = false
-    private var haveMagnetometerSensor = false
-
-    private var accelerometer = Vector3.zero
-    private var magnetometer = Vector3.zero
-    private val sensorManager: SensorManager
-    private lateinit var sensorAccelerometer: Sensor
-    private lateinit var sensorMagneticField: Sensor
-
-    private var markerBitmap: Bitmap? = null
-    private var marker: Marker? = null
-    private var circle: Circle? = null
-    private var markerAnimator: ValueAnimator? = null
-    private var circleAnimator: ValueAnimator? = null
-    private var polylineAnimator: ValueAnimator? = null
-
-    private var isWrapped = false
-    private var isFirstLocation = true
-    private var isCompassRotation = true
-    private var lastZoom = 20F
-    private var lastTilt = 0F
-    private var lastBearing = 0F
-
-    private var polylineOptions: PolylineOptions? = null
-    private val currentPolylines = arrayListOf<LatLng>()
-    private val polylines = arrayListOf<Polyline>()
-    private var lastPolyline: Polyline? = null
-    private var cameraTargetPolyline: Polyline? = null
-    private var measurePoints = arrayListOf<MeasurePoint>()
-
-    private val pattern: List<PatternItem> = listOf(
-        Dash(20f), Gap(10f), Dash(30f), Gap(20f), Dash(40f), Gap(30f))
-
-    init {
-        polylineOptions = PolylineOptions()
-                .width(10f)
-                .jointType(JointType.ROUND)
-                .color(context.resolveAttrColor(R.attr.colorAppAccent))
-
-        latLng = MeasurePreferences.getLastLatLng()
-        isCompassRotation = MeasurePreferences.isCompassRotation()
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-        runCatching {
-            sensorMagneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)!!
-            sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
-            haveMagnetometerSensor = true
-            haveAccelerometerSensor = true
-        }.getOrElse {
-            haveAccelerometerSensor = false
-            haveMagnetometerSensor = false
+        val first = this.location == null
+        this.location = location
+        drawPuck()
+        if (first && !TrailPreferences.arePolylinesWrapped()) {
+            moveCamera(camera(LatLng(location.latitude, location.longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
         }
     }
 
-    override fun onMapReady(p0: GoogleMap) {
-        super.onMapReady(p0)
-
-        addMarker(latLng!!)
-        setMapStyle(MeasurePreferences.isLabelOn(),
-            MeasurePreferences.isSatelliteOn(),
-            MeasurePreferences.getHighContrastMap())
-        setBuildings(MeasurePreferences.getShowBuildingsOnMap())
-        mapsCallbacks?.onCameraDistance(googleMap?.cameraPosition?.target!!)
-
-        if (!MeasurePreferences.arePolylinesWrapped()) {
-            this.googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition(
-                latLng!!,
-                MeasurePreferences.getMapZoom(),
-                MeasurePreferences.getMapTilt(),
-                MeasurePreferences.getMapBearing())))
-        }
-
-        this.googleMap?.setOnCameraIdleListener {
-            MeasurePreferences.setMapZoom(this.googleMap?.cameraPosition!!.zoom)
-            MeasurePreferences.setMapTilt(this.googleMap?.cameraPosition!!.tilt)
-            MeasurePreferences.setMapBearing(this.googleMap?.cameraPosition!!.bearing)
-            MeasurePreferences.setLastLatitude(this.googleMap?.cameraPosition!!.target.latitude)
-            MeasurePreferences.setLastLongitude(this.googleMap?.cameraPosition!!.target.longitude)
-        }
-
-        this.googleMap?.setOnCameraMoveListener {
-            val lastPoint = currentPolylines.lastOrNull()
-            val cameraTarget = googleMap?.cameraPosition?.target
-            mapsCallbacks?.onCameraDistance(cameraTarget!!)
-
-            if (lastPoint != null && cameraTarget != null) {
-                if (cameraTargetPolyline == null) {
-                    initCameraTargetPolyline()
-                } else {
-                    cameraTargetPolyline?.points = listOf(lastPoint, cameraTarget)
-                }
-            }
-        }
-
-        mapsCallbacks?.onMapInitialized()
-        registerSensors()
+    override fun resetCamera(zoom: Float) {
+        location?.let { moveTo(it.latitude, it.longitude, zoom) }
     }
 
-    private fun initCameraTargetPolyline() {
-        val lastPoint = currentPolylines.lastOrNull() ?: return
-        val cameraTarget = googleMap?.cameraPosition?.target ?: return
-
-        Log.d("MeasureMaps", "initCameraTargetPolyline: $lastPoint, $cameraTarget")
-
-        val newPolylineOptions = PolylineOptions()
-                .add(lastPoint)
-                .add(cameraTarget)
-                .width(7f)
-                .color(Color.BLACK)
-                .pattern(pattern)
-                .startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
-                .endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
-
-        cameraTargetPolyline = googleMap?.addPolyline(newPolylineOptions)
-
-        Log.i("MeasureMaps", "initCameraTargetPolyline: $cameraTargetPolyline")
+    override fun showPoints(points: List<TrailPoint>) {
+        this.points = points
+        drawPoints()
+        if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
-    fun addMarker(latLng: LatLng) {
-        launch {
-            withContext(Dispatchers.Main) {
-                if (context.isNotNull() && googleMap.isNotNull()) {
-                    val pin = TrackPin.drawable(location.isNotNull(), MeasurePreferences.isCompassRotation(), accuracy, (location?.speed ?: 0F) > 0F)
-                    markerBitmap = TrackPin.bitmap(context, pin)
-                }
-
-                withContext(Dispatchers.Main) {
-                    runCatching {
-                        marker!!.apply {
-                            setIcon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!))
-                        }
-
-                        markerAnimator?.cancel()
-                        markerAnimator = marker!!.animateTo(location!!, if (isCompassRotation) null else location!!.bearing)
-                    }.onFailure {
-                        marker = googleMap?.addMarker(MarkerOptions()
-                                .position(latLng)
-                                .rotation(if (MeasurePreferences.isCompassRotation()) rotationAngle else location?.bearing
-                                                                                                         ?: 0F)
-                                .anchor(0.5F, 0.5F)
-                                .flat(true)
-                                .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!)))
-                    }
-
-                    runCatching {
-                        circleAnimator?.cancel()
-                        circleAnimator = circle!!.animateTo(location!!)
-                    }.onFailure {
-                        circle = googleMap?.addCircle(CircleOptions()
-                                .center(latLng)
-                                .radius(location?.accuracy?.toDouble() ?: 0.0)
-                                .clickable(false)
-                                .fillColor(ContextCompat.getColor(context, R.color.map_circle_color))
-                                .strokeColor(ContextCompat.getColor(context, R.color.compass_pin_color))
-                                .strokeWidth(3F))
-                    }
-
-                    invalidate()
-                }
-            }
-        }
+    override fun removeLast() {
+        val last = points.lastOrNull() ?: return
+        mapCallbacks?.onLineDeleted(last)
+        val previous = points.getOrNull(points.size - 2)
+        if (TrailPreferences.arePolylinesWrapped() || previous == null) return
+        moveTo(previous.latitude, previous.longitude, TrailPreferences.getMapZoom())
     }
 
-    fun setFirstLocation(latLng: LatLng) {
-        if (googleMap.isNotNull() && isFirstLocation) {
-            addMarker(latLng)
-            googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition(
-                MeasurePreferences.getLastLatLng(),
-                MeasurePreferences.getMapZoom(),
-                MeasurePreferences.getMapTilt(),
-                MeasurePreferences.getMapBearing())))
-
-            this.latLng = latLng
-            isFirstLocation = false
-        }
-    }
-
-    fun resetCamera(zoom: Float) {
-        if (location != null) {
-            moveMapCamera(
-                LatLng(location!!.latitude, location!!.longitude),
-                zoom,
-                MeasurePreferences.getMapTilt(),
-                MeasurePreferences.getMapBearing())
-        }
-    }
-
-    fun moveMapCamera(latLng: LatLng, zoom: Float, tilt: Float, bearing: Float) {
-        if (googleMap.isNull() && latLng.isNull()) return
-
-        animateCamera(latLng, zoom, tilt, bearing)
-
-        isWrapped = false
-        MeasurePreferences.setPolylinesWrapped(false)
-    }
-
-    fun wrapUnwrap() {
-        if (isWrapped) {
-            moveMapCamera(latLng!!, lastZoom, lastTilt, lastBearing)
-        } else {
-            wrap(true)
-        }
-    }
-
-    private fun wrap(animate: Boolean) {
-        runCatching {
-            clearAnimation()
-            latLng = googleMap?.cameraPosition?.target
-            lastZoom = googleMap?.cameraPosition?.zoom!!
-            lastTilt = googleMap?.cameraPosition?.tilt ?: 0F
-            lastBearing = googleMap?.cameraPosition?.bearing ?: 0F
-
-            val builder = LatLngBounds.Builder()
-            for (latLng in currentPolylines) {
-                builder.include(latLng)
-            }
-
-            val bounds = builder.build()
-
-            if (animate) {
-                googleMap!!.animateCamera(CameraUpdateFactory
-                        .newLatLngBounds(bounds, 250))
-            } else {
-                googleMap!!.moveCamera(CameraUpdateFactory
-                        .newLatLngBounds(bounds, 250))
-            }
-
-            isWrapped = true
-        }.onFailure {
-            isWrapped = MeasurePreferences.arePolylinesWrapped()
-        }
-    }
-
-    private fun unwrap() {
-        clearAnimation()
-        moveMapCamera(latLng!!, lastZoom, lastTilt, lastBearing)
-    }
-
-    private fun updatePolylines(points: ArrayList<MeasurePoint>) {
-        googleMap?.clear()
-        marker = null
-        cameraTargetPolyline = null
-        polylines.clear()
-        currentPolylines.clear()
-        polylineOptions?.points?.clear()
-
-        polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
-        polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
-
-        for (point in points) {
-            val latLng = LatLng(point.latitude, point.longitude)
-            currentPolylines.add(latLng)
-            polylineOptions?.add(latLng)
-            polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
-        }
-
-        invalidate()
-        lastPolyline = polylines.lastOrNull()
-
-        if (MeasurePreferences.arePolylinesWrapped()) {
-            wrap(false)
-        }
-
-        initCameraTargetPolyline()
-    }
-
-    fun removeRecentPolyline() {
-        cameraTargetPolyline?.remove()
-        polylines.remove(cameraTargetPolyline)
-        lastPolyline = polylines.secondLastOrNull()
-        polylines.lastOrNull()?.remove()
-        polylines.removeLastOrNull()
-        currentPolylines.removeLastOrNull()
-        polylineOptions?.points?.removeLastOrNull()
-        mapsCallbacks?.onLineDeleted(measurePoints.lastOrNull())
-        measurePoints.removeLastOrNull()
-        cameraTargetPolyline?.remove()
-        cameraTargetPolyline = null
-
-        initCameraTargetPolyline()
-        if (currentPolylines.isNotEmpty()) {
-            polylines.add(cameraTargetPolyline!!)
-        }
-        invalidate()
-        mapsCallbacks?.onCameraDistance(googleMap?.cameraPosition?.target!!)
-    }
-
-    private fun registerSensors() {
-        if (haveAccelerometerSensor && haveMagnetometerSensor) {
-            unregisterSensors()
-            if (MeasurePreferences.isCompassRotation()) {
-                sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_GAME)
-                sensorManager.registerListener(this, sensorMagneticField, SensorManager.SENSOR_DELAY_GAME)
-            }
-        }
-    }
-
-    private fun unregisterSensors() {
-        if (haveAccelerometerSensor && haveMagnetometerSensor) {
-            sensorManager.unregisterListener(this, sensorAccelerometer)
-            sensorManager.unregisterListener(this, sensorMagneticField)
-        }
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null) return
-
-        when (event.sensor.type) {
-            Sensor.TYPE_ACCELEROMETER -> {
-                LowPassFilter.smoothAndSetReadings(accelerometerReadings, event.values, readingsAlpha)
-                accelerometer =
-                    Vector3(accelerometerReadings[0], accelerometerReadings[1], accelerometerReadings[2])
-            }
-
-            Sensor.TYPE_MAGNETIC_FIELD -> {
-                LowPassFilter.smoothAndSetReadings(magnetometerReadings, event.values, readingsAlpha)
-                magnetometer =
-                    Vector3(magnetometerReadings[0], magnetometerReadings[1], magnetometerReadings[2])
-            }
-        }
-
-        rotationAngle =
-            CompassAzimuth.calculate(gravity = accelerometer, magneticField = magnetometer, windowManager)
-
-        if (isCompassRotation) {
-            marker?.rotation = rotationAngle
-        }
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        accuracy = p1
-    }
-
-    override fun onPause() {
-        super.onPause()
-        unregisterSensors()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        registerSensors()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterSensors()
-        circleAnimator?.cancel()
-        markerAnimator?.cancel()
-        polylineAnimator?.cancel()
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        super.onSharedPreferenceChanged(sharedPreferences, key)
-        when (key) {
-            MeasurePreferences.LABEL_MODE,
-            MeasurePreferences.SATELLITE_MAP,
-            MeasurePreferences.HIGH_CONTRAST_MAP -> {
-                setMapStyle(MeasurePreferences.isLabelOn(), MeasurePreferences.isSatelliteOn(), MeasurePreferences.getHighContrastMap())
-            }
-
-            MeasurePreferences.SHOW_BUILDINGS -> {
-                setBuildings(MeasurePreferences.getShowBuildingsOnMap())
-            }
-
-            MeasurePreferences.COMPASS_ROTATION -> {
-                isCompassRotation = MeasurePreferences.isCompassRotation()
-                if (isCompassRotation) {
-                    registerSensors()
-                } else {
-                    unregisterSensors()
-                }
-            }
-
-            MeasurePreferences.POLYLINES_WRAPPED -> {
-                if (MeasurePreferences.arePolylinesWrapped()) {
-                    wrap(true)
-                } else {
-                    unwrap()
-                }
-            }
-        }
-    }
-
-    fun createMeasurePolylines(measure: Measure?) {
-        try {
-            measurePoints.clear()
-            measurePoints.addAll(measure!!.points)
-            removeAllPolylines()
-            updatePolylines(measurePoints)
-        } catch (e: NullPointerException) {
-            Log.e("MeasureMaps", "createMeasurePolylines: $e")
-        }
-    }
-
-    private fun removeAllPolylines() {
-        polylines.forEach { it.remove() }
-        polylines.clear()
-        currentPolylines.clear()
-        polylineOptions?.points?.clear()
-        cameraTargetPolyline?.remove()
-        cameraTargetPolyline = null
-        invalidate()
-    }
-
-    fun addPolyline() {
-        val latLng = googleMap?.cameraPosition?.target!!
-        val lastPoint = currentPolylines.lastOrNull() ?: latLng
-        polylineOptions?.add(lastPoint)
-        currentPolylines.add(latLng)
-        polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
-        val measurePoint = MeasurePoint(latLng.latitude, latLng.longitude, measurePoints.size + 1)
-        measurePoints.add(measurePoint)
-        cameraTargetPolyline?.remove()
-        cameraTargetPolyline = null
-        initCameraTargetPolyline()
-        invalidate()
-        mapsCallbacks?.onLineAdded(measurePoint)
-        mapsCallbacks?.onCameraDistance(latLng)
-
-        polylineAnimator = polylines.lastOrNull()!!.animateSegment(lastPoint, latLng)
-    }
-
-    fun getMeasurePoints(): ArrayList<MeasurePoint> {
-        return measurePoints
-    }
-
-    fun clear() {
-        removeAllPolylines()
-        marker?.remove()
-        marker = null
-        circle?.remove()
-        circle = null
-        markerBitmap = null
-        markerAnimator?.cancel()
-        circleAnimator?.cancel()
-        polylineAnimator?.cancel()
-        cameraTargetPolyline?.remove()
-        cameraTargetPolyline = null
-        googleMap?.clear()
-        invalidate()
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt
-################################################################################
-package app.simple.positional.decorations.trails
-
-import android.animation.ValueAnimator
-import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
-import android.location.Location
-import android.util.AttributeSet
-import androidx.core.content.ContextCompat
-import app.simple.positional.R
-import app.simple.positional.decorations.maps.TrackPin
-import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.utils.animateTo
-import app.simple.positional.extensions.maps.CustomMaps
-import app.simple.positional.math.CompassAzimuth
-import app.simple.positional.math.LowPassFilter
-import app.simple.positional.math.Vector3
-import app.simple.positional.model.TrailPoint
-import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.util.BitmapHelper.toBitmap
-import app.simple.positional.util.ColorUtils.resolveAttrColor
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.Circle
-import com.google.android.gms.maps.model.CircleOptions
-import com.google.android.gms.maps.model.CustomCap
-import com.google.android.gms.maps.model.JointType
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(context, attributeSet),
-    SensorEventListener {
-    private val accelerometerReadings = FloatArray(3)
-    private val magnetometerReadings = FloatArray(3)
-    private var readingsAlpha = 0.03f
-    private var rotationAngle = 0f
-    private var accuracy = -1
-
-    private var haveAccelerometerSensor = false
-    private var haveMagnetometerSensor = false
-
-    private var accelerometer = Vector3.zero
-    private var magnetometer = Vector3.zero
-    private var sensorManager: SensorManager
-    private lateinit var sensorAccelerometer: Sensor
-    private lateinit var sensorMagneticField: Sensor
-
-    private var markerBitmap: Bitmap? = null
-    private var marker: Marker? = null
-    private var circle: Circle? = null
-    private var markerAnimator: ValueAnimator? = null
-    private var circleAnimator: ValueAnimator? = null
-
-    private val currentPolyline = arrayListOf<LatLng>()
-    private val flagMarkers = arrayListOf<Marker>()
-    private val polylines = arrayListOf<Polyline>()
-    private var trailData = arrayListOf<TrailPoint>()
-
-    private var isWrapped = false
-    private var isFirstLocation = true
-    private var isCompassRotation = true
-    private var lastZoom = 20F
-    private var lastTilt = 0F
-    private var polylineOptions: PolylineOptions? = null
-
-    init {
-        polylineOptions = PolylineOptions()
-            .width(10f)
-            .jointType(JointType.ROUND)
-            .color(context.resolveAttrColor(R.attr.colorAppAccent))
-            .geodesic(TrailPreferences.isTrailGeodesic())
-
-        latLng = LatLng(lastLatitude, lastLongitude)
-        isCompassRotation = TrailPreferences.isCompassRotation()
-        sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-
-        kotlin.runCatching {
-            sensorMagneticField = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)!!
-            sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
-            haveMagnetometerSensor = true
-            haveAccelerometerSensor = true
-        }.getOrElse {
-            haveAccelerometerSensor = false
-            haveMagnetometerSensor = false
-        }
-    }
-
-    override fun onMapReady(p0: GoogleMap) {
-        super.onMapReady(p0)
-
-        addMarker(latLng!!)
-        setMapStyle(TrailPreferences.isLabelOn(), TrailPreferences.isSatelliteOn(), TrailPreferences.getHighContrastMap())
-        setBuildings(TrailPreferences.getShowBuildingsOnMap())
-
-        if (location.isNotNull()) {
-            setFirstLocation(location)
-        }
-
+    override fun toggleWrap() {
         if (!TrailPreferences.arePolylinesWrapped()) {
-            this.googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition(
-                latLng!!,
-                TrailPreferences.getMapZoom(),
-                TrailPreferences.getMapTilt(),
-                TrailPreferences.getMapBearing())))
+            wrap(animate = true)
+            return
         }
-
-        this.googleMap?.setOnCameraIdleListener {
-            TrailPreferences.setMapZoom(this.googleMap?.cameraPosition!!.zoom)
-            TrailPreferences.setMapTilt(this.googleMap?.cameraPosition!!.tilt)
-            TrailPreferences.setMapBearing(this.googleMap?.cameraPosition!!.bearing)
-            viewHandler.removeCallbacks(mapMoved)
-            viewHandler.postDelayed(mapMoved, autoCenterDelay)
-        }
-
-        this.googleMap?.setOnCameraMoveListener {
-            viewHandler.removeCallbacks(mapMoved)
-        }
-
-        mapsCallbacks?.onMapInitialized()
-        registerSensors()
+        TrailPreferences.setWrapStatus(false)
+        restore?.let(::animateTo)
     }
 
-    override fun onPause() {
-        super.onPause()
-        unregisterSensors()
+    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) {
+        TrailPreferences.setWrapStatus(false)
+        animateTo(camera(LatLng(latitude, longitude), zoom, TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
     }
 
-    override fun onResume() {
-        super.onResume()
-        registerSensors()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewHandler.removeCallbacksAndMessages(null)
-        viewHandler.removeCallbacks(mapMoved)
-    }
-
-    fun clear() {
-        polylines.clear()
-        flagMarkers.clear()
-        polylineOptions!!.points.clear()
-        googleMap?.clear()
-        invalidate()
-    }
-
-    fun addMarker(latLng: LatLng) {
-        launch {
-            withContext(Dispatchers.Main) {
-                if (context.isNotNull() && googleMap.isNotNull()) {
-                    val pin = TrackPin.drawable(location.isNotNull(), TrailPreferences.isCompassRotation(), accuracy, (location?.speed ?: 0F) > 0F)
-                    markerBitmap = TrackPin.bitmap(context, pin)
-                }
-
-                withContext(Dispatchers.Main) {
-                    runCatching {
-                        marker!!.apply {
-                            setIcon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!))
-                        }
-
-                        markerAnimator?.cancel()
-                        markerAnimator = marker!!.animateTo(location!!, if (isCompassRotation) null else location!!.bearing)
-                    }.onFailure {
-                        marker = googleMap?.addMarker(MarkerOptions()
-                            .position(latLng)
-                            .rotation(if (TrailPreferences.isCompassRotation()) rotationAngle else location?.bearing
-                                ?: 0F)
-                            .anchor(0.5F, 0.5F)
-                            .flat(true)
-                            .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap!!)))
-                    }
-
-                    runCatching {
-                        circleAnimator?.cancel()
-                        circleAnimator = circle!!.animateTo(location!!)
-                    }.onFailure {
-                        circle = googleMap?.addCircle(CircleOptions()
-                            .center(latLng)
-                            .radius(location?.accuracy?.toDouble() ?: 0.0)
-                            .clickable(false)
-                            .fillColor(ContextCompat.getColor(context, R.color.map_circle_color))
-                            .strokeColor(ContextCompat.getColor(context, R.color.compass_pin_color))
-                            .strokeWidth(3F))
-                    }
-
-                    invalidate()
-                }
-            }
-        }
-    }
-
-    private fun updatePolylines(arrayList: ArrayList<TrailPoint>) {
-        googleMap?.clear()
-        polylines.clear()
-        currentPolyline.clear()
-        flagMarkers.clear()
-        polylineOptions?.points?.clear()
-
-        for (trailData in arrayList) {
-            val latLng = LatLng(trailData.latitude, trailData.longitude)
-
-            currentPolyline.add(latLng)
-
-            val marker = googleMap?.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .icon(BitmapDescriptorFactory.fromBitmap(
-                        TrailIcons.icons[trailData.iconPosition]
-                            .toBitmap(context, 50))))
-
-            flagMarkers.add(marker!!)
-            polylineOptions?.add(latLng)
-            polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
-        }
-
-        invalidate()
-
-        polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
-        polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
-
-        if (TrailPreferences.arePolylinesWrapped()) {
-            wrap(false)
-        }
-    }
-
-    fun addPolylines(arrayList: ArrayList<TrailPoint>) {
-        for (i in polylines) {
-            i.remove()
-        }
-
-        for (i in flagMarkers) {
-            i.remove()
-        }
-
-        currentPolyline.clear()
-        flagMarkers.clear()
-        trailData.clear()
-        polylineOptions?.points?.clear()
-
-        for (trailData in arrayList) {
-            val latLng = LatLng(trailData.latitude, trailData.longitude)
-
-            currentPolyline.add(latLng)
-
-            val marker = googleMap?.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .icon(BitmapDescriptorFactory.fromBitmap(
-                        TrailIcons.icons[trailData.iconPosition]
-                            .toBitmap(context, 50))))
-
-            flagMarkers.add(marker!!)
-            polylineOptions?.add(latLng)
-            polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
-        }
-
-        invalidate()
-
-        polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
-        polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
-
-        trailData.addAll(arrayList)
-
-        if (TrailPreferences.arePolylinesWrapped()) {
-            wrap(false)
-        }
-    }
-
-    fun addPolyline(trailPoint: TrailPoint) {
-        val latLng = LatLng(trailPoint.latitude, trailPoint.longitude)
-
-        currentPolyline.add(latLng)
-
-        val marker = googleMap?.addMarker(
-            MarkerOptions()
-                .position(latLng)
-                .icon(BitmapDescriptorFactory.fromBitmap(
-                    TrailIcons.icons[trailPoint.iconPosition]
-                        .toBitmap(context, 50))))
-
-        this.trailData.add(trailPoint)
-        flagMarkers.add(marker!!)
-        polylineOptions?.add(latLng)
-        polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
-
-        invalidate()
-
-        if (TrailPreferences.arePolylinesWrapped()) {
-            wrap(true)
-        } else {
-            moveMapCamera(latLng, TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
-        }
-    }
-
-    fun removePolyline() {
-        polylines.lastOrNull()?.remove()
-        flagMarkers.lastOrNull()?.remove()
-        currentPolyline.removeLastOrNull()
-        polylineOptions?.points?.removeLastOrNull()
-        mapsCallbacks?.onLineDeleted(trailData.lastOrNull())
-        trailData.removeLastOrNull()
-
-        kotlin.runCatching {
-            if (TrailPreferences.arePolylinesWrapped()) {
-                wrap(true)
-            } else {
-                with(trailData.lastOrNull()!!) {
-                    moveMapCamera(LatLng(latitude, longitude), TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
-                }
-            }
-        }.getOrElse {
-            moveMapCamera(latLng!!, TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
-        }
-
-        invalidate()
-    }
-
-    fun wrapUnwrap() {
-        if (isWrapped) {
-            moveMapCamera(latLng!!, lastZoom, lastTilt)
-        } else {
-            wrap(true)
-        }
+    override fun clear() {
+        points = emptyList()
+        drawPoints()
     }
 
     private fun wrap(animate: Boolean) {
-        kotlin.runCatching {
-            lastZoom = TrailPreferences.getMapZoom()
-            lastTilt = TrailPreferences.getMapTilt()
+        if (!TrailPreferences.arePolylinesWrapped()) restore = map?.cameraPosition
+        if (fit(points.map { LatLng(it.latitude, it.longitude) }, animate)) TrailPreferences.setWrapStatus(true)
+    }
 
-            val builder = LatLngBounds.Builder()
-            for (latLng in currentPolyline) {
-                builder.include(latLng)
-            }
+    private fun scheduleAutoCenter() {
+        mainHandler.removeCallbacks(autoCenter)
+        if (TrailPreferences.getMapAutoCenter()) mainHandler.postDelayed(autoCenter, AUTO_CENTER_DELAY)
+    }
 
-            val bounds = builder.build()
+    private fun recenter() {
+        val current = location ?: return
+        if (TrailPreferences.arePolylinesWrapped()) return
+        moveTo(current.latitude, current.longitude, TrailPreferences.getMapZoom())
+    }
 
-            if (animate) {
-                googleMap!!.animateCamera(CameraUpdateFactory
-                    .newLatLngBounds(bounds, 250))
-            } else {
-                googleMap!!.moveCamera(CameraUpdateFactory
-                    .newLatLngBounds(bounds, 250))
-            }
-
-            TrailPreferences.setWrapStatus(true)
-            isWrapped = true
-        }.onFailure {
-            isWrapped = TrailPreferences.arePolylinesWrapped()
+    private fun drawPoints() {
+        val map = map ?: return
+        val positions = points.map { LatLng(it.latitude, it.longitude) }
+        path?.let { it.points = positions } ?: run { path = line(positions, geodesic = TrailPreferences.isTrailGeodesic()) }
+        var kept = 0
+        while (kept < flags.size && kept < points.size && flags[kept].first == points[kept].timeAdded) kept++
+        while (flags.size > kept) flags.removeAt(flags.lastIndex).second.remove()
+        points.drop(kept).forEach { point ->
+            val marker = map.addMarker(MarkerOptions().position(LatLng(point.latitude, point.longitude)).icon(icon(point.iconPosition)))
+            if (marker != null) flags += point.timeAdded to marker
         }
     }
 
-    fun resetCamera(zoom: Float) {
-        if (location != null) {
-            moveMapCamera(LatLng(location!!.latitude, location!!.longitude), zoom, TrailPreferences.getMapTilt())
-        }
+    private fun icon(position: Int): BitmapDescriptor = icons.getOrPut(position) {
+        BitmapDescriptorFactory.fromBitmap(TrailIcons.icons.getOrElse(position) { TrailIcons.icons[0] }.toBitmap(context, ICON_SIZE))
     }
 
-    fun moveMapCamera(latLng: LatLng, zoom: Float, tilt: Float) {
-        if (googleMap.isNull() && latLng.isNull()) return
-
-        animateCamera(latLng, zoom, tilt, TrailPreferences.getMapBearing())
-
-        isWrapped = false
-        TrailPreferences.setWrapStatus(false)
-    }
-
-    fun setFirstLocation(location: Location?) {
-        if (googleMap.isNotNull() && isFirstLocation) {
-            this.location = location
-
-            with(LatLng(location!!.latitude, location.longitude)) {
-                addMarker(this)
-                googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition(
-                    this,
-                    TrailPreferences.getMapZoom(),
-                    TrailPreferences.getMapTilt(),
-                    TrailPreferences.getMapBearing())))
-
-                latLng = this
-                isFirstLocation = false
-            }
-        }
-    }
-
-    private val mapMoved = object : Runnable {
-        override fun run() {
-            if (TrailPreferences.getMapAutoCenter() && !isWrapped) {
-                val latLng = if (location.isNotNull()) {
-                    LatLng(location!!.latitude, location!!.longitude)
-                } else {
-                    LatLng(lastLatitude, lastLongitude)
-                }
-
-                moveMapCamera(latLng, TrailPreferences.getMapZoom(), TrailPreferences.getMapTilt())
-            }
-            viewHandler.postDelayed(this, autoCenterDelay)
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+    override fun onPreference(key: String?) {
         when (key) {
-            TrailPreferences.trailHighContrastMap,
-            TrailPreferences.trailLabelMode,
-            TrailPreferences.trailSatellite -> {
-                setMapStyle(TrailPreferences.isLabelOn(), TrailPreferences.isSatelliteOn(), TrailPreferences.getHighContrastMap())
-            }
-
-            TrailPreferences.trailShowBuilding -> {
-                setBuildings(TrailPreferences.getShowBuildingsOnMap())
-            }
-
-            TrailPreferences.geodesic -> {
-                polylineOptions!!.geodesic(TrailPreferences.isTrailGeodesic())
-                updatePolylines(trailData)
-                invalidate()
-            }
-
-            TrailPreferences.mapAutoCenter -> {
-                viewHandler.removeCallbacks(mapMoved)
-                viewHandler.post(mapMoved)
-            }
-
             TrailPreferences.compass -> {
-                if (TrailPreferences.isCompassRotation()) {
-                    isCompassRotation = true
-                    registerSensors()
-                } else {
-                    isCompassRotation = false
-                    unregisterSensors()
-                }
+                if (TrailPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
+                drawPuck()
+            }
+            TrailPreferences.mapAutoCenter -> scheduleAutoCenter()
+            TrailPreferences.geodesic -> path?.isGeodesic = TrailPreferences.isTrailGeodesic()
+        }
+    }
+
+    private companion object {
+        const val AUTO_CENTER_DELAY = 6000L
+        const val ICON_SIZE = 50
+    }
+}
+
+@SuppressLint("ViewConstructor")
+class GoogleMeasureMap(context: Context) : GoogleTrackMap(context), MeasureMap {
+    override val compassRotation get() = MeasurePreferences.isCompassRotation()
+    override val lookKeys: Set<String> = setOf(
+        MeasurePreferences.LABEL_MODE,
+        MeasurePreferences.SATELLITE_MAP,
+        MeasurePreferences.HIGH_CONTRAST_MAP,
+        MeasurePreferences.SHOW_BUILDINGS,
+    )
+    private val measurePoints = mutableListOf<MeasurePoint>()
+    override val points: List<MeasurePoint> get() = measurePoints
+    private var restore: CameraPosition? = null
+    private var path: Polyline? = null
+    private var guide: Polyline? = null
+
+    override fun look() = MapLook(
+        MeasurePreferences.isLabelOn(),
+        MeasurePreferences.isSatelliteOn(),
+        MeasurePreferences.getHighContrastMap(),
+        MeasurePreferences.getShowBuildingsOnMap(),
+        traffic = false,
+    )
+
+    override fun startCamera(): CameraPosition = camera(
+        LatLng(MeasurePreferences.getLastLatitude(), MeasurePreferences.getLastLongitude()),
+        MeasurePreferences.getMapZoom(),
+        MeasurePreferences.getMapTilt(),
+        MeasurePreferences.getMapBearing(),
+    )
+
+    override fun onCameraIdle(position: CameraPosition) {
+        MeasurePreferences.setMapZoom(position.zoom)
+        MeasurePreferences.setMapTilt(position.tilt)
+        MeasurePreferences.setMapBearing(position.bearing)
+        MeasurePreferences.setLastLatitude(position.target.latitude)
+        MeasurePreferences.setLastLongitude(position.target.longitude)
+    }
+
+    override fun onCameraMoved() {
+        drawGuide()
+        reportDistance()
+    }
+
+    override fun onReady() {
+        drawLines()
+        drawPuck()
+        reportDistance()
+        if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun updateLocation(location: Location) {
+        this.location = location
+        drawPuck()
+    }
+
+    override fun resetCamera(zoom: Float) {
+        location?.let { moveTo(it.latitude, it.longitude, zoom) }
+    }
+
+    override fun showMeasure(measure: Measure) {
+        measurePoints.clear()
+        measurePoints.addAll(measure.points)
+        drawLines()
+        if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
+    }
+
+    override fun addPoint() {
+        val target = target() ?: return
+        val point = MeasurePoint(target.latitude, target.longitude, measurePoints.size + 1)
+        measurePoints.add(point)
+        drawLines()
+        mapCallbacks?.onLineAdded(point)
+        reportDistance()
+    }
+
+    override fun removeLast() {
+        val last = measurePoints.removeLastOrNull() ?: return
+        drawLines()
+        mapCallbacks?.onLineDeleted(last)
+        reportDistance()
+    }
+
+    override fun moveTo(latitude: Double, longitude: Double, zoom: Float) {
+        restore = null
+        MeasurePreferences.setPolylinesWrapped(false)
+        animateTo(camera(LatLng(latitude, longitude), zoom, MeasurePreferences.getMapTilt(), MeasurePreferences.getMapBearing()))
+    }
+
+    override fun clear() {
+        measurePoints.clear()
+        drawLines()
+    }
+
+    private fun wrap(animate: Boolean) {
+        if (restore == null) restore = map?.cameraPosition
+        fit(measurePoints.map { LatLng(it.latitude, it.longitude) }, animate)
+    }
+
+    private fun drawLines() {
+        val positions = measurePoints.map { LatLng(it.latitude, it.longitude) }
+        path?.let { it.points = positions } ?: run { path = line(positions) }
+        drawGuide()
+    }
+
+    private fun drawGuide() {
+        val last = measurePoints.lastOrNull()
+        val target = target()
+        val positions = if (last == null || target == null) emptyList() else listOf(LatLng(last.latitude, last.longitude), target)
+        guide?.let { it.points = positions } ?: run { guide = line(positions, Color.BLACK, GUIDE_WIDTH, pattern = GUIDE_PATTERN) }
+    }
+
+    private fun reportDistance() {
+        target()?.let { mapCallbacks?.onCameraDistance(it) }
+    }
+
+    override fun onPreference(key: String?) {
+        when (key) {
+            MeasurePreferences.COMPASS_ROTATION -> {
+                if (MeasurePreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
+                drawPuck()
+            }
+            MeasurePreferences.POLYLINES_WRAPPED -> if (MeasurePreferences.arePolylinesWrapped()) {
+                wrap(animate = true)
+            } else {
+                restore?.let(::animateTo)
+                restore = null
             }
         }
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null) return
-
-        when (event.sensor.type) {
-            Sensor.TYPE_ACCELEROMETER -> {
-                LowPassFilter.smoothAndSetReadings(accelerometerReadings, event.values, readingsAlpha)
-                accelerometer =
-                    Vector3(accelerometerReadings[0], accelerometerReadings[1], accelerometerReadings[2])
-            }
-
-            Sensor.TYPE_MAGNETIC_FIELD -> {
-                LowPassFilter.smoothAndSetReadings(magnetometerReadings, event.values, readingsAlpha)
-                magnetometer =
-                    Vector3(magnetometerReadings[0], magnetometerReadings[1], magnetometerReadings[2])
-            }
-        }
-
-        rotationAngle =
-            CompassAzimuth.calculate(gravity = accelerometer, magneticField = magnetometer, windowManager)
-
-        if (isCompassRotation) {
-            marker?.rotation = rotationAngle
-        }
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        accuracy = p1
-    }
-
-    private fun registerSensors() {
-        if (haveAccelerometerSensor && haveMagnetometerSensor) {
-            unregisterSensors()
-            if (TrailPreferences.isCompassRotation()) {
-                sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_GAME)
-                sensorManager.registerListener(this, sensorMagneticField, SensorManager.SENSOR_DELAY_GAME)
-            }
-        }
-    }
-
-    private fun unregisterSensors() {
-        if (haveAccelerometerSensor && haveMagnetometerSensor) {
-            sensorManager.unregisterListener(this, sensorAccelerometer)
-            sensorManager.unregisterListener(this, sensorMagneticField)
-        }
+    private companion object {
+        const val GUIDE_WIDTH = 7f
+        val GUIDE_PATTERN = listOf(Dash(20f), Gap(10f), Dash(30f), Gap(20f), Dash(40f), Gap(30f))
     }
 }
 
@@ -5881,14 +4833,12 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
 package app.simple.positional.decorations.utils
 
 import android.animation.ValueAnimator
-import android.location.Location
 import android.view.animation.PathInterpolator
 import androidx.core.graphics.ColorUtils
 import app.simple.positional.math.MapInterpolation
 import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.Polyline
 
 private const val DURATION = 1000L
 
@@ -5904,11 +4854,8 @@ private fun LatLng.toward(end: LatLng, fraction: Float): LatLng {
     return LatLng(latitude, longitude)
 }
 
-private fun Location.latLng() = LatLng(latitude, longitude)
-
-fun Marker.animateTo(location: Location, rotation: Float?): ValueAnimator {
+fun Marker.animateTo(end: LatLng, rotation: Float?): ValueAnimator {
     val start = position
-    val end = location.latLng()
     val startRotation = this.rotation
     return animate { fraction ->
         position = start.toward(end, fraction)
@@ -5916,11 +4863,9 @@ fun Marker.animateTo(location: Location, rotation: Float?): ValueAnimator {
     }
 }
 
-fun Circle.animateTo(location: Location): ValueAnimator {
+fun Circle.animateTo(end: LatLng, endRadius: Double): ValueAnimator {
     val start = center
-    val end = location.latLng()
     val startRadius = radius
-    val endRadius = location.accuracy.toDouble()
     return animate { fraction ->
         center = start.toward(end, fraction)
         radius = MapInterpolation.linear(fraction, startRadius, endRadius)
@@ -5934,10 +4879,6 @@ fun Circle.animateColors(fill: Int, stroke: Int): ValueAnimator {
         fillColor = ColorUtils.blendARGB(startFill, fill, fraction)
         strokeColor = ColorUtils.blendARGB(startStroke, stroke, fraction)
     }
-}
-
-fun Polyline.animateSegment(start: LatLng, end: LatLng): ValueAnimator = animate { fraction ->
-    points = listOf(start, start.toward(end, fraction))
 }
 
 ################################################################################
@@ -6044,275 +4985,6 @@ open class BaseActivity : ComponentActivity() {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/extensions/maps/CustomMaps.kt
-################################################################################
-package app.simple.positional.extensions.maps
-
-import android.animation.ValueAnimator
-import android.content.Context
-import android.content.SharedPreferences
-import android.content.res.Configuration
-import android.graphics.Point
-import android.location.Location
-import android.os.Handler
-import android.os.Looper
-import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
-import android.view.WindowManager
-import android.view.animation.DecelerateInterpolator
-import app.simple.positional.R
-import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
-
-open class CustomMaps(context: Context, attrs: AttributeSet? = null) : MapView(context, attrs),
-    OnMapReadyCallback,
-    SharedPreferences.OnSharedPreferenceChangeListener,
-    CoroutineScope {
-    protected var windowManager: WindowManager
-    val viewHandler = Handler(Looper.getMainLooper())
-    open var onTouch: ((event: MotionEvent, b: Boolean) -> Unit)? = null
-    open var mapsCallbacks: MapsCallbacks? = null
-    open var location: Location? = null
-    open var latLng: LatLng? = null
-
-    private var customCameraAnimator: CustomCameraAnimator? = null
-
-    val autoCenterDelay = 6000L
-
-    var isMapMovementEnabled = true
-    var isAnimating = false
-
-    var googleMap: GoogleMap? = null
-
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = job + Dispatchers.Main
-
-    open var lastLatitude = 0.0
-    open var lastLongitude = 0.0
-
-    init {
-        if (isInEditMode.invert()) {
-            lastLatitude = MainPreferences.getLastCoordinates()[0].toDouble()
-            lastLongitude = MainPreferences.getLastCoordinates()[1].toDouble()
-        }
-
-        windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
-        viewHandler.postDelayed(fun() {
-            this.alpha = 0F
-            getMapAsync(this)
-        }, 500)
-    }
-
-    override fun onMapReady(p0: GoogleMap) {
-        googleMap = p0
-        customCameraAnimator = CustomCameraAnimator(googleMap!!)
-
-        this.animate().alpha(1F).setDuration(500).start()
-
-        googleMap?.uiSettings?.isCompassEnabled = false
-        googleMap?.uiSettings?.isMapToolbarEnabled = false
-        googleMap?.uiSettings?.isMyLocationButtonEnabled = false
-        googleMap?.isTrafficEnabled = true
-
-        googleMap?.setOnMapClickListener {
-            mapsCallbacks?.onMapClicked()
-        }
-
-        googleMap?.setOnMapLongClickListener {
-            mapsCallbacks?.onMapLongClicked(it)
-        }
-
-        googleMap?.setOnCameraMoveCanceledListener {
-            customCameraAnimator?.cancel()
-            Log.i("CustomMaps", "onCameraMoveCanceled")
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-    }
-
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        with(super.dispatchTouchEvent(ev)) {
-            onTouch?.invoke(ev, this)
-            return this
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-        removeCallbacks { }
-    }
-
-    open fun getCamera(): CameraPosition? {
-        return googleMap?.cameraPosition
-    }
-
-    open fun setCamera(cameraPosition: CameraPosition?) {
-        cameraPosition ?: return
-        googleMap?.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-    }
-
-    open fun setBuildings(value: Boolean) {
-        googleMap?.isBuildingsEnabled = value
-    }
-
-    open fun setTraffic(value: Boolean) {
-        googleMap?.isTrafficEnabled = value
-    }
-
-    protected fun setMapStyle(label: Boolean, satellite: Boolean, highContrast: Boolean) {
-        setSatellite(label = label, satellite = satellite)
-
-        if (!googleMap.isNull()) {
-            if (highContrast) {
-                googleMap?.setMapStyle(MapStyleOptions.loadRawResourceStyle(context,
-                    if (label) {
-                        R.raw.map_high_contrast_labelled
-                    } else {
-                        R.raw.map_high_contrast_non_labelled
-                    }
-                ))
-            } else {
-                googleMap?.setMapStyle(MapStyleOptions.loadRawResourceStyle(context,
-                    when (this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                        Configuration.UI_MODE_NIGHT_YES -> {
-                            if (label) {
-                                R.raw.maps_dark_labelled
-                            } else {
-                                R.raw.maps_dark_no_label
-                            }
-                        }
-
-                        Configuration.UI_MODE_NIGHT_NO -> {
-                            if (label) {
-                                R.raw.maps_light_labelled
-                            } else {
-                                R.raw.maps_light_no_label
-                            }
-                        }
-
-                        else                           -> 0
-                    }
-                ))
-            }
-        }
-    }
-
-    private fun setSatellite(satellite: Boolean, label: Boolean) {
-        if (googleMap.isNotNull())
-            googleMap?.mapType = if (satellite) {
-                if (label) {
-                    GoogleMap.MAP_TYPE_HYBRID
-                } else {
-                    GoogleMap.MAP_TYPE_SATELLITE
-                }
-            } else {
-                GoogleMap.MAP_TYPE_NORMAL
-            }
-    }
-
-    internal fun animateCamera(latLng: LatLng, zoom: Float, tilt: Float, bearing: Float = 0F, duration: Int = CAMERA_SPEED) {
-        clearAnimation()
-        customCameraAnimator?.animateCamera(latLng, zoom, tilt, bearing, duration)
-    }
-
-    internal fun isCameraWithinBounds(latLng: LatLng): Boolean {
-        return googleMap?.projection?.visibleRegion?.latLngBounds?.contains(latLng)!!
-    }
-
-    fun screenPoint(latLng: LatLng): Point? = googleMap?.projection?.toScreenLocation(latLng)
-
-    fun setOnMapsCallbackListener(mapsCallbacks: MapsCallbacks) {
-        this.mapsCallbacks = mapsCallbacks
-    }
-
-    override fun clearAnimation() {
-        super.clearAnimation()
-        customCameraAnimator?.cancel()
-    }
-
-    private inner class CustomCameraAnimator(private val googleMap: GoogleMap) {
-        private var animator: ValueAnimator? = null
-
-        fun animateCamera(target: LatLng, zoom: Float, tilt: Float, bearing: Float = 0F, duration: Int = CAMERA_SPEED) {
-            val startPosition = googleMap.cameraPosition.target
-            val startZoom = googleMap.cameraPosition.zoom
-
-            animator = ValueAnimator.ofFloat(0f, 1f)
-            animator?.duration = duration.toLong()
-            animator?.interpolator = DecelerateInterpolator()
-            animator?.addUpdateListener { animation ->
-                val fraction = animation.animatedFraction
-                val lat = startPosition.latitude + (target.latitude - startPosition.latitude) * fraction
-                val lng = startPosition.longitude + (target.longitude - startPosition.longitude) * fraction
-                val currentZoom = startZoom + (zoom - startZoom) * fraction
-                val currentTilt = googleMap.cameraPosition.tilt + (tilt - googleMap.cameraPosition.tilt) * fraction
-                val currentBearing = googleMap.cameraPosition.bearing + (bearing - googleMap.cameraPosition.bearing) * fraction
-
-                val cameraPosition = CameraPosition.Builder()
-                        .target(LatLng(lat, lng))
-                        .zoom(currentZoom)
-                        .tilt(currentTilt)
-                        .bearing(currentBearing)
-                        .build()
-
-                googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
-            }
-            animator?.start()
-        }
-
-        fun cancel() {
-            animator?.cancel()
-        }
-    }
-
-    companion object {
-        const val CAMERA_SPEED = 3000
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/extensions/maps/MapLifecycle.kt
-################################################################################
-package app.simple.positional.extensions.maps
-
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import com.google.android.gms.maps.MapView
-
-class MapLifecycle(private val mapView: MapView) : DefaultLifecycleObserver {
-    override fun onStart(owner: LifecycleOwner) = mapView.onStart()
-    override fun onResume(owner: LifecycleOwner) = mapView.onResume()
-    override fun onPause(owner: LifecycleOwner) = mapView.onPause()
-    override fun onStop(owner: LifecycleOwner) = mapView.onStop()
-    override fun onDestroy(owner: LifecycleOwner) = mapView.onDestroy()
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/extensions/maps/MapsCallbacks.kt
 ################################################################################
 package app.simple.positional.extensions.maps
@@ -6322,8 +4994,6 @@ import app.simple.positional.model.TrailPoint
 import com.google.android.gms.maps.model.LatLng
 
 interface MapsCallbacks {
-    fun onMapInitialized() {}
-
     fun onMapClicked() {}
 
     fun onMapLongClicked(latLng: LatLng) {}
@@ -6357,6 +5027,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.navigation.AppNavigator
 import app.simple.positional.ui.navigation.Routes
@@ -6365,6 +5037,8 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
     private val registry = LifecycleRegistry(this)
@@ -6415,6 +5089,10 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
 
     protected fun search(onResult: (SearchResult) -> Unit) {
         (activity as? AppNavigator)?.search(onResult)
+    }
+
+    protected fun <T> observe(flow: Flow<T>, action: (T) -> Unit) {
+        lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { action(it) } } }
     }
 
     protected fun <I, O> register(contract: ActivityResultContract<I, O>, callback: (O) -> Unit): ActivityResultLauncher<I> =
@@ -6504,31 +5182,22 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.AndroidViewModel
+import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.ContextUtils
 
 open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
     init {
-        app.simple.positional.singleton.SharedPreferences.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
 
-    open fun getContext(): Context {
-        return ContextUtils.wrap(getApplication<Application>().applicationContext, ContextUtils.language(), applyNightMode = false)
-    }
+    protected fun getContext(): Context =
+        ContextUtils.wrap(getApplication<Application>().applicationContext, ContextUtils.language(), applyNightMode = false)
 
-    open fun getString(resourceID: Int): String {
-        return getContext().getString(resourceID)
-    }
-
-    fun getString(resId: Int, vararg formatArgs: Any?): String {
-        return getContext().getString(resId, *formatArgs)
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-    }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
 
     override fun onCleared() {
         super.onCleared()
-        app.simple.positional.singleton.SharedPreferences.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 }
 
@@ -6675,6 +5344,22 @@ class MovementThreshold(private val meters: Double) {
 
     fun reset() {
         last = null
+    }
+}
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/math/Latency.kt
+################################################################################
+package app.simple.positional.math
+
+data class Latency(val millis: Long) {
+    val inSeconds: Boolean get() = millis > MAX_MILLIS
+    val value: Number get() = if (inSeconds) MathExtensions.round(millis / 1000.0, 3) else millis
+    val isLate: Boolean get() = millis > LATE_MILLIS
+
+    private companion object {
+        const val MAX_MILLIS = 999L
+        const val LATE_MILLIS = 5000L
     }
 }
 
@@ -6912,11 +5597,16 @@ package app.simple.positional.math
 
 data class SeriesStats(val min: Double, val max: Double, val average: Double) {
     companion object {
+        const val LIMIT = 45
+
         fun of(values: List<Float>): SeriesStats = if (values.isEmpty()) {
             SeriesStats(0.0, 0.0, 0.0)
         } else {
             SeriesStats(values.min().toDouble(), values.max().toDouble(), values.average())
         }
+
+        fun append(values: List<Float>, value: Float, limit: Int = LIMIT): List<Float> =
+            if (values.lastOrNull() == value) values else (values + value).takeLast(limit)
     }
 }
 
@@ -7615,14 +6305,6 @@ object GPSPreferences {
         )
     }
 
-    fun setTargetMarkerStartLatitude(@NotNull value: Float) {
-        getSharedPreferences().edit().putFloat(mapTargetMarkerStartLatitude, value).apply()
-    }
-
-    fun setTargetMarkerStartLongitude(@NotNull value: Float) {
-        getSharedPreferences().edit().putFloat(mapTargetMarkerStartLongitude, value).apply()
-    }
-
     fun getTargetMarkerStartCoordinates(): FloatArray {
         return floatArrayOf(
                 getSharedPreferences().getFloat(mapTargetMarkerStartLatitude, 48.8584f),
@@ -7630,8 +6312,13 @@ object GPSPreferences {
         )
     }
 
-    fun setTargetMarker(boolean: Boolean) {
-        getSharedPreferences().edit().putBoolean(mapTargetMarker, boolean).apply()
+    fun setTargetMarker(boolean: Boolean, restart: Boolean = false) {
+        val editor = getSharedPreferences().edit().putBoolean(mapTargetMarker, boolean)
+        if (boolean && (restart || !isTargetMarkerSet())) {
+            val start = MainPreferences.getLastCoordinates()
+            editor.putFloat(mapTargetMarkerStartLatitude, start[0]).putFloat(mapTargetMarkerStartLongitude, start[1])
+        }
+        editor.apply()
     }
 
     fun isTargetMarkerSet(): Boolean {
@@ -7896,7 +6583,6 @@ object MainPreferences {
 package app.simple.positional.preferences
 
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
-import com.google.android.gms.maps.model.LatLng
 
 object MeasurePreferences {
     const val COMPASS_ROTATION = "measure_compass_rotation"
@@ -8014,10 +6700,6 @@ object MeasurePreferences {
         return getSharedPreferences().getLong(LAST_SELECTED_MEASURE, -1)
     }
 
-    fun isMeasureSelected(): Boolean {
-        return getLastSelectedMeasure() != -1L
-    }
-
     fun setLastLatitude(latitude: Double) {
         getSharedPreferences().edit().putFloat(LAST_LATITUDE, latitude.toFloat()).apply()
     }
@@ -8032,10 +6714,6 @@ object MeasurePreferences {
 
     fun getLastLongitude(): Double {
         return getSharedPreferences().getFloat(LAST_LONGITUDE, 0F).toDouble()
-    }
-
-    fun getLastLatLng(): LatLng {
-        return LatLng(getLastLatitude(), getLastLongitude())
     }
 }
 
@@ -8340,7 +7018,6 @@ import android.os.Build
 import android.os.HandlerThread
 import android.os.IBinder
 import android.util.Log
-import app.simple.positional.util.ConditionUtils.isNotNull
 import app.simple.positional.util.PermissionUtils
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -8384,9 +7061,7 @@ class FusedLocationService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 super.onLocationResult(result)
-                if (result.lastLocation.isNotNull()) {
-                    broadcastLocation(result.lastLocation!!)
-                }
+                result.lastLocation?.let(::broadcastLocation)
             }
         }
 
@@ -8418,7 +7093,7 @@ class FusedLocationService : Service() {
     private fun requestLastLocation() {
         if (PermissionUtils.checkPermission(applicationContext)) {
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                if (it.isSuccessful && it.result.isNotNull()) {
+                if (it.isSuccessful && it.result != null) {
                     it.result.provider = "Last Location"
                     broadcastLocation(it.result)
                 }
@@ -8495,7 +7170,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import app.simple.positional.util.ConditionUtils.isNull
 import app.simple.positional.util.PermissionUtils
 
 class LocationService : Service(), LocationListener {
@@ -8565,7 +7239,7 @@ class LocationService : Service(), LocationListener {
                 }
             }
 
-            if (location.isNull()) {
+            if (location == null) {
                 handler.post(locationUpdater)
             } else {
                 location?.provider = "Last Location"
@@ -8599,14 +7273,13 @@ package app.simple.positional.singleton
 
 import android.content.Context
 import android.content.SharedPreferences
-import app.simple.positional.util.ConditionUtils.isNull
 
 object SharedPreferences {
     const val preferences = "Preferences"
     private var sharedPreferences: SharedPreferences? = null
 
     fun init(context: Context) {
-        if (sharedPreferences.isNull()) {
+        if (sharedPreferences == null) {
             sharedPreferences = context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
         }
     }
@@ -8616,11 +7289,7 @@ object SharedPreferences {
     }
 
     fun getSharedPreferences(context: Context): SharedPreferences {
-        return if (sharedPreferences.isNull()) {
-            context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
-        } else {
-            sharedPreferences!!
-        }
+        return sharedPreferences ?: context.getSharedPreferences(preferences, Context.MODE_PRIVATE)
     }
 }
 
@@ -13532,12 +12201,9 @@ fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
                 viewModel.open(direction.name, direction.latitude, direction.longitude, direction.dateAdded)
 
             override fun useAsTarget(direction: DirectionModel) {
-                val last = MainPreferences.getLastCoordinates()
-                GPSPreferences.setTargetMarker(true)
                 GPSPreferences.setTargetMarkerLatitude(direction.latitude.toFloat())
                 GPSPreferences.setTargetMarkerLongitude(direction.longitude.toFloat())
-                GPSPreferences.setTargetMarkerStartLatitude(last[0])
-                GPSPreferences.setTargetMarkerStartLongitude(last[1])
+                GPSPreferences.setTargetMarker(true, restart = true)
                 select(direction, useMapsTarget = true)
             }
 
@@ -13673,7 +12339,6 @@ private fun app.simple.positional.ui.compose.CustomLocationForm.fill(result: Sea
     latitude = result.latitude.toString(),
     longitude = result.longitude.toString(),
 )
-
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/ui/panels/ClockReport.kt
@@ -13847,6 +12512,7 @@ import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import kotlinx.coroutines.flow.filterNotNull
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
@@ -13877,7 +12543,7 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     init {
         if (!sensor.isAvailable) showSensorError()
-        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) { showField(it) }
+        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull(), ::showField)
     }
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
@@ -13960,6 +12626,7 @@ import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import kotlinx.coroutines.flow.filterNotNull
 import com.google.android.gms.maps.model.LatLng
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
@@ -13990,7 +12657,7 @@ class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSen
     init {
         if (!sensor.isAvailable) showSensorError()
         loadTarget()
-        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) {
+        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
             location = it
             updateTarget()
         }
@@ -14097,6 +12764,7 @@ import app.simple.positional.util.ReverseGeocoder
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -14163,19 +12831,19 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
             showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
         }
 
-        viewModel.getLocation().observe(owner, ::onLocation)
-        viewModel.getProvider().observe(owner) {
+        observe(viewModel.location.filterNotNull(), ::onLocation)
+        observe(viewModel.provider.filterNotNull()) {
             state.enabled = getLocationStatus(activity)
             state.provider = providerRows(it)
         }
-        viewModel.latency.observe(owner) {
-            val unit = getString(if (it.second) R.string.seconds else R.string.milliseconds)
-            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.first} $unit", it.second && it.first.toDouble() > LATE)
+        observe(viewModel.latency.filterNotNull()) {
+            val unit = getString(if (it.inSeconds) R.string.seconds else R.string.milliseconds)
+            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.value} $unit", it.isLate)
             publishLocationRows()
         }
-        viewModel.targetData.observe(owner) { state.target = it.toAnnotatedString() }
-        viewModel.accuracyGraphData.observe(owner) { accuracySeries = it.toList() }
-        viewModel.altitudeGraphData.observe(owner) { altitudeSeries = it.toList() }
+        observe(viewModel.target.filterNotNull()) { state.target = it.toAnnotatedString() }
+        observe(viewModel.accuracySeries) { accuracySeries = it }
+        observe(viewModel.altitudeSeries) { altitudeSeries = it }
     }
 
     override fun onCleared() {
@@ -14265,9 +12933,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     private fun bottomBar(visible: Boolean) {
         (activity as? BottomBarHost)?.showBottomBar(visible)
-    }
-
-    override fun onMapInitialized() {
     }
 
     override fun onMapClicked() {
@@ -14434,7 +13099,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         private const val PENDING = "-"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
         private const val CLOSE_ZOOM = 18F
-        private const val LATE = 5.0
         private const val ADDRESS_DISTANCE = 25.0
         private val gpsKeys = setOf(
             GPSPreferences.pinSkin,
@@ -14526,6 +13190,7 @@ import app.simple.positional.util.LocationPrompt
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.flow.filterNotNull
 import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
@@ -14534,6 +13199,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     private val measureViewModel: MeasureViewModel
     private val maps: MeasureMap
     private var location: Location? = null
+    private var shown: Long? = null
 
     init {
         locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
@@ -14553,28 +13219,29 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     init {
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
-        locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
-    }
-
-
-    override fun onMapInitialized() {
-        locationViewModel.getLocation().observe(owner) {
+        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(locationViewModel.location.filterNotNull()) {
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
         }
-        measureViewModel.getMeasure().observe(owner) { measure ->
-            if (MeasurePreferences.isMeasureSelected() && measure != null) {
-                maps.showMeasure(measure)
-                state.selected = true
-                state.name = measure.name.orEmpty()
-                showSummary(measure)
-                state.current = ""
-            } else {
-                clearMeasure()
-            }
+        observe(measureViewModel.measure, ::showMeasure)
+    }
+
+    private fun showMeasure(measure: MeasureModel?) {
+        if (measure == null) {
+            clearMeasure()
+            return
         }
+        if (measure.dateCreated != shown || maps.points != measure.points) {
+            maps.showMeasure(measure)
+            state.current = ""
+        }
+        shown = measure.dateCreated
+        state.selected = true
+        state.name = measure.name.orEmpty()
+        showSummary(measure)
     }
 
     override fun onMapClicked() {
@@ -14584,11 +13251,11 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     override fun onLineAdded(measurePoint: MeasurePoint) {
-        measureViewModel.addMeasurePoint(measurePoint) { measure -> activity.runOnUiThread { showSummary(measure) } }
+        measureViewModel.addMeasurePoint(measurePoint)
     }
 
     override fun onLineDeleted(measurePoint: MeasurePoint?) {
-        measureViewModel.removeMeasurePoint(measurePoint) { measure -> activity.runOnUiThread { showSummary(measure) } }
+        measureViewModel.removeMeasurePoint(measurePoint)
     }
 
     override fun onCameraDistance(latLng: LatLng?) {
@@ -14610,6 +13277,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     private fun distance(meters: Double) = DistanceText.format(activity, meters, MainPreferences.isMetric())
 
     private fun clearMeasure() {
+        shown = null
         maps.clear()
         state.selected = false
         state.hasPoints = false
@@ -14665,7 +13333,6 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            MeasurePreferences.LAST_SELECTED_MEASURE -> if (!MeasurePreferences.isMeasureSelected()) clearMeasure()
             MeasurePreferences.TOOLS_GRAVITY, MeasurePreferences.COMPASS_ROTATION, MeasurePreferences.POLYLINES_WRAPPED -> readPreferences()
         }
     }
@@ -14863,6 +13530,7 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.ZoneId
@@ -14912,7 +13580,7 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
     }
 
     init {
-        ViewModelProvider(activity)[LocationViewModel::class.java].getLocation().observe(owner) {
+        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
             if (state.customLocation) return@observe
             latitude = it.latitude
             longitude = it.longitude
@@ -15014,10 +13682,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.activity.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
@@ -15051,7 +13716,7 @@ import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filterNotNull
 
 class Trail(activity: ComponentActivity) : PanelController(activity), TrailActions, MapsCallbacks {
     private val state = TrailState()
@@ -15080,7 +13745,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
-        locationViewModel.getLocation().observe(owner) {
+        observe(locationViewModel.location.filterNotNull()) {
             location = it
             MainPreferences.setLastLatitude(it.latitude.toFloat())
             MainPreferences.setLastLongitude(it.longitude.toFloat())
@@ -15088,14 +13753,9 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
         }
-        locationViewModel.getProvider().observe(owner) { state.enabled = getLocationStatus(activity) }
-
-        owner.lifecycleScope.launch {
-            owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { trailData.trail.collect { state.trail = it } }
-                trailData.points.collect(::showPoints)
-            }
-        }
+        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(trailData.trail) { state.trail = it }
+        observe(trailData.points, ::showPoints)
     }
 
 
@@ -15144,10 +13804,6 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         }
         pending = Triple(latitude, longitude, accuracy)
         state.pickingMarker = true
-    }
-
-    override fun onMapInitialized() {
-        maps.showPoints(trailData.points.value)
     }
 
     override fun onMapClicked() {
@@ -15386,29 +14042,6 @@ object AppIcons {
 }
 
 ################################################################################
-# FILE: app/src/main/java/app/simple/positional/util/ArrayHelper.kt
-################################################################################
-package app.simple.positional.util
-
-object ArrayHelper {
-    fun ArrayList<Float>.isLastValueSame(value: Float): Boolean {
-        return try {
-            if (this.size == 0) {
-                false
-            } else {
-                this.last() == value
-            }
-        } catch (e: ArrayIndexOutOfBoundsException) {
-            false
-        }
-    }
-
-    fun <T> List<T>.secondLastOrNull(): T? {
-        return if (size < 2) null else this[size - 2]
-    }
-}
-
-################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/BitmapHelper.kt
 ################################################################################
 package app.simple.positional.util
@@ -15487,30 +14120,6 @@ object ColorUtils {
     }
 
     fun Int.toHex(): String = String.format("#%06x", this and 0xffffff)
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/util/ConditionUtils.kt
-################################################################################
-package app.simple.positional.util
-
-@Suppress("unused")
-object ConditionUtils {
-    fun Any?.isNull(): Boolean {
-        return this == null
-    }
-
-    fun Any?.isNotNull(): Boolean {
-        return this != null
-    }
-
-    fun Number.isZero(): Boolean {
-        return this == 0
-    }
-
-    fun Boolean.invert(): Boolean {
-        return !this
-    }
 }
 
 ################################################################################
@@ -16754,357 +15363,153 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
-import android.location.Geocoder
 import android.location.Location
+import android.os.SystemClock
 import android.text.Spanned
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.text.TextUtils
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.Latency
 import app.simple.positional.math.MathExtensions.round
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKilometers
-import app.simple.positional.math.UnitConverter.toMiles
+import app.simple.positional.math.SeriesStats
 import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.services.LocationBus
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.util.ArrayHelper.isLastValueSame
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNull
+import app.simple.positional.services.LocationBus
 import app.simple.positional.util.Direction
+import app.simple.positional.util.DistanceText
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
-import app.simple.positional.util.NetworkCheck
+import app.simple.positional.util.ReverseGeocoder
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.IOException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
     private val listener = object : LocationBus.Listener {
         override fun onLocation(location: Location) = onNewLocation(location)
 
         override fun onProvider(provider: String?) {
-            this@LocationViewModel.provider.postValue(provider?.uppercase(Locale.getDefault()))
+            mutableProvider.value = provider?.uppercase(Locale.getDefault())
         }
     }
 
-    private val accuracyData = ArrayList<Float>()
-    private val altitudeData = ArrayList<Float>()
+    private val mutableLocation = MutableStateFlow<Location?>(null)
+    private val mutableProvider = MutableStateFlow<String?>(null)
+    private val mutableLatency = MutableStateFlow<Latency?>(null)
+    private val mutableAccuracy = MutableStateFlow(emptyList<Float>())
+    private val mutableAltitude = MutableStateFlow(emptyList<Float>())
+    private val targetPoint = MutableStateFlow(currentTarget())
+    private var lastFix = SystemClock.elapsedRealtime()
 
-    private val location = MutableLiveData<Location>()
-    private val provider = MutableLiveData<String>()
+    val location: StateFlow<Location?> = mutableLocation.asStateFlow()
+    val provider: StateFlow<String?> = mutableProvider.asStateFlow()
+    val latency: StateFlow<Latency?> = mutableLatency.asStateFlow()
+    val accuracySeries: StateFlow<List<Float>> = mutableAccuracy.asStateFlow()
+    val altitudeSeries: StateFlow<List<Float>> = mutableAltitude.asStateFlow()
 
-    val latency = MutableLiveData<Pair<Number, Boolean>>()
-    val targetData = MutableLiveData<Spanned>()
+    private val targetAddress = targetPoint.transformLatest<LatLng?, String?> { point ->
+        emit(null)
+        if (point != null) emit(ReverseGeocoder.addressLine(getApplication<Application>(), point.latitude, point.longitude))
+    }
 
-    val accuracyGraphData = MutableLiveData<ArrayList<Float>>()
-    val altitudeGraphData = MutableLiveData<ArrayList<Float>>()
-
-    private var lastLatencyInMilliseconds: Number = System.currentTimeMillis().toDouble()
-    private var targetAddress: String? = null
+    val target: StateFlow<Spanned?> = combine(mutableLocation.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
     init {
         LocationBus.register(listener)
     }
 
-    private fun onNewLocation(newLocation: Location) {
-        location.postValue(newLocation)
-        measureLatency()
-        graphData(newLocation)
-        if (GPSPreferences.isTargetMarkerSet().invert()) {
-            GPSPreferences.setTargetMarkerStartLatitude(newLocation.latitude.toFloat())
-            GPSPreferences.setTargetMarkerStartLongitude(newLocation.longitude.toFloat())
-        }
-        val target = GPSPreferences.getTargetMarkerCoordinates()
-        val origin = if (MainPreferences.isCustomCoordinate()) {
-            MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
-        } else {
-            LatLng(newLocation.latitude, newLocation.longitude)
-        }
-        targetData(LatLng(target[0].toDouble(), target[1].toDouble()), origin, newLocation.speed)
+    private fun onNewLocation(fix: Location) {
+        val now = SystemClock.elapsedRealtime()
+        mutableLatency.value = Latency(now - lastFix)
+        lastFix = now
+        mutableAccuracy.update { SeriesStats.append(it, fix.accuracy) }
+        mutableAltitude.update { SeriesStats.append(it, fix.altitude.toFloat()) }
+        mutableLocation.value = fix
     }
 
-    fun getLocation(): LiveData<Location> {
-        return location
-    }
+    private fun currentTarget(): LatLng? =
+        if (GPSPreferences.isTargetMarkerSet()) GPSPreferences.getTargetMarkerCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) } else null
 
-    fun getProvider(): LiveData<String> {
-        return provider
-    }
-
-    private fun measureLatency() {
-        kotlin.runCatching {
-            var currentLatency: Number
-
-            with(System.currentTimeMillis()) {
-                currentLatency = this.toDouble() - lastLatencyInMilliseconds.toDouble()
-                lastLatencyInMilliseconds = this.toDouble()
-            }
-
-            val inSeconds: Boolean
-
-            currentLatency = if (currentLatency.toDouble() > 999) {
-                inSeconds = true
-                round(currentLatency.toDouble() / 1000.0, 3)
+    private fun targetText(fix: Location, target: LatLng?, address: String?): Spanned {
+        val context = getContext()
+        val missing = context.getString(R.string.not_available)
+        val values = if (target == null) List(ROWS.size) { missing } else {
+            val origin = if (MainPreferences.isCustomCoordinate()) {
+                MainPreferences.getCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
             } else {
-                inSeconds = false
-                currentLatency.toInt()
+                LatLng(fix.latitude, fix.longitude)
             }
-
-            latency.postValue(Pair(currentLatency, inSeconds))
+            val start = GPSPreferences.getTargetMarkerStartCoordinates().let { LatLng(it[0].toDouble(), it[1].toDouble()) }
+            val metric = MainPreferences.isMetric()
+            val distance = LocationExtension.measureDisplacement(arrayOf(target, origin)).toDouble()
+            val bearing = (LocationExtension.calculateBearingAngle(origin.latitude, origin.longitude, target.latitude, target.longitude) % 360 + 360) % 360
+            listOf(
+                DistanceText.format(context, distance, metric),
+                DistanceText.format(context, LocationExtension.measureDisplacement(arrayOf(start, origin)).toDouble(), metric),
+                "${round(bearing, 2)}°",
+                Direction.getDirectionNameFromAzimuth(context, bearing),
+                if (fix.speed > 0f) eta(context, (distance / fix.speed).toLong()) else missing,
+            )
         }
+        val rows = ROWS.zip(values) { label, value -> "<b>${context.getString(label)} </b>$value" } +
+            "<b>${context.getString(R.string.gps_address)}: </b>${address?.let(TextUtils::htmlEncode) ?: missing}"
+        return HtmlHelper.fromHtml(rows.joinToString("<br>"))
     }
 
-    fun targetData(target: LatLng, current: LatLng, speed: Float) {
-        viewModelScope.launch(Dispatchers.IO) {
-            with(StringBuilder()) {
-                append(targetDisplacement(target, current))
-                append(targetDisplacementFromOrigin(current))
-                append(targetBearing(target, current))
-                append(targetDirection(target, current))
-                append(targetETA(target, current, speed))
-                append(targetAddress(target))
-
-                targetData.postValue(HtmlHelper.fromHtml(this.toString()))
-            }
-        }
-    }
-
-    private fun targetDisplacement(target: LatLng, current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_displacement_from_dest)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.measureDisplacement(arrayOf(target, current))
-
-                if (MainPreferences.isMetric()) {
-                    if (p0 < 1000) {
-                        it.append(p0.round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.meter))
-                    } else {
-                        it.append(p0.toKilometers().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.kilometer))
-                    }
-                } else {
-                    if (p0 < 1000) {
-                        it.append(p0.toDouble().toFeet().toFloat().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.feet))
-                    } else {
-                        it.append(p0.toMiles().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.miles))
-                    }
-                }
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetDisplacementFromOrigin(current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            val target = LatLng(GPSPreferences.getTargetMarkerStartCoordinates()[0].toDouble(),
-                GPSPreferences.getTargetMarkerStartCoordinates()[1].toDouble())
-
-            it.append("<b>${getString(R.string.gps_displacement_from_origin)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.measureDisplacement(arrayOf(target, current))
-
-                if (MainPreferences.isMetric()) {
-                    if (p0 < 1000) {
-                        it.append(p0.round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.meter))
-                    } else {
-                        it.append(p0.toKilometers().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.kilometer))
-                    }
-                } else {
-                    if (p0 < 1000) {
-                        it.append(p0.toDouble().toFeet().toFloat().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.feet))
-                    } else {
-                        it.append(p0.toMiles().round(2))
-                        it.append(" ")
-                        it.append(getContext().getString(R.string.miles))
-                    }
-                }
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetDirection(target: LatLng, current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_direction)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.calculateBearingAngle(
-                    current.latitude,
-                    current.longitude,
-                    target.latitude,
-                    target.longitude
-                )
-
-                it.append(Direction.getDirectionNameFromAzimuth(getContext(), (p0 % 360 + 360) % 360))
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetBearing(target: LatLng, current: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_bearing)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet()) {
-                val p0 = LocationExtension.calculateBearingAngle(
-                    current.latitude,
-                    current.longitude,
-                    target.latitude,
-                    target.longitude
-                )
-
-                it.append(round((p0 % 360 + 360) % 360, 2))
-                it.append("°")
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetETA(target: LatLng, current: LatLng, speed: Float): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.eta)} </b>")
-
-            if (GPSPreferences.isTargetMarkerSet() && speed != 0.0F) {
-                val p0 = LocationExtension.measureDisplacement(arrayOf(target, current))
-
-                val time = (p0 / speed).toLong()
-                println("time: $time")
-                val txt = when {
-                    TimeUnit.SECONDS.toSeconds(time) < 60 -> {
-                        getString(R.string.eta_seconds, TimeUnit.SECONDS.toSeconds(time).toString())
-                    }
-
-                    TimeUnit.SECONDS.toMinutes(time) < 60 -> {
-                        getString(R.string.eta_minutes, TimeUnit.SECONDS.toMinutes(time).toString())
-                    }
-
-                    TimeUnit.SECONDS.toHours(time) < 24 -> {
-                        getString(R.string.eta_hours,
-                            TimeUnit.SECONDS.toHours(time).toString(),
-                            (TimeUnit.SECONDS.toMinutes(time) % 60).toString())
-                    }
-
-                    else -> {
-                        getString(R.string.eta_days,
-                            TimeUnit.SECONDS.toDays(time).toString(),
-                            (TimeUnit.SECONDS.toHours(time) % 24).toString(),
-                            (TimeUnit.SECONDS.toMinutes(time) % 60).toString())
-                    }
-                }
-
-                it.append(txt)
-            } else {
-                it.append(getString(R.string.not_available))
-            }
-
-            it.append("<br>")
-        }
-    }
-
-    private fun targetAddress(target: LatLng): StringBuilder {
-        return StringBuilder().also {
-            it.append("<b>${getString(R.string.gps_address)}: </b>")
-
-            if (targetAddress.isNull()) {
-                if (GPSPreferences.isTargetMarkerSet()) {
-                    targetAddress = try {
-                        if (!NetworkCheck.isNetworkAvailable(getApplication())) {
-                            null
-                        } else {
-                            val geocoder = Geocoder(getApplication(), Locale.getDefault())
-
-                            @Suppress("DEPRECATION")
-                            with(geocoder.getFromLocation(target.latitude, target.longitude, 1)) {
-                                if (!this.isNullOrEmpty()) {
-                                    this[0].getAddressLine(0)
-                                } else {
-                                    getString(R.string.not_available)
-                                }
-                            }
-                        }
-                    } catch (e: IOException) {
-                        null
-                    } catch (e: NullPointerException) {
-                        null
-                    } catch (e: IllegalArgumentException) {
-                        null
-                    }
-                }
-
-                if (targetAddress.isNull()) {
-                    it.append(getString(R.string.not_available))
-                } else {
-                    it.append(targetAddress)
-                }
-            } else {
-                it.append(targetAddress)
-            }
-        }
-    }
-
-    private fun graphData(location: Location) {
-        accuracyGraphData.postValue(ArrayList(manipulateDataForGraph(accuracyData, location.accuracy)))
-        altitudeGraphData.postValue(ArrayList(manipulateDataForGraph(altitudeData, location.altitude.toFloat())))
-    }
-
-    private fun manipulateDataForGraph(arrayList: ArrayList<Float>, value: Float): ArrayList<Float> {
-        if (arrayList.isLastValueSame(value))
-            return arrayList
-
-        if (arrayList.size >= 45)
-            arrayList.removeAt(0)
-
-        arrayList.add(value)
-        return arrayList
+    private fun eta(context: Context, seconds: Long): String = when {
+        seconds < MINUTE -> context.getString(R.string.eta_seconds, seconds.toString())
+        seconds < HOUR -> context.getString(R.string.eta_minutes, (seconds / MINUTE).toString())
+        seconds < DAY -> context.getString(R.string.eta_hours, (seconds / HOUR).toString(), (seconds / MINUTE % 60).toString())
+        else -> context.getString(
+            R.string.eta_days,
+            (seconds / DAY).toString(),
+            (seconds / HOUR % 24).toString(),
+            (seconds / MINUTE % 60).toString(),
+        )
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        super.onSharedPreferenceChanged(sharedPreferences, key)
         when (key) {
-            GPSPreferences.isTargetMarkerMode,
+            GPSPreferences.mapTargetMarker,
             GPSPreferences.mapTargetMarkerLatitude,
-            GPSPreferences.mapTargetMarkerLongitude -> {
-                targetAddress = null
-            }
+            GPSPreferences.mapTargetMarkerLongitude -> targetPoint.value = currentTarget()
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         LocationBus.unregister(listener)
+    }
+
+    private companion object {
+        const val STOP_TIMEOUT = 5_000L
+        const val MINUTE = 60L
+        const val HOUR = 3_600L
+        const val DAY = 86_400L
+        val ROWS = listOf(
+            R.string.gps_displacement_from_dest,
+            R.string.gps_displacement_from_origin,
+            R.string.gps_bearing,
+            R.string.gps_direction,
+            R.string.eta,
+        )
     }
 }
 
@@ -17205,92 +15610,71 @@ package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
 import android.content.SharedPreferences
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.database.instances.MeasureDatabase
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.preferences.MeasurePreferences
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MeasureViewModel(application: Application) : WrappedViewModel(application) {
     private val dao = MeasureDatabase.getInstance(application).measureDao()
+    private val selected = MutableStateFlow(MeasurePreferences.getLastSelectedMeasure())
+    private val writes = Mutex()
 
     val measures: StateFlow<List<Measure>?> = dao.observeAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
-    private val measure: MutableLiveData<Measure> by lazy {
-        MutableLiveData<Measure>().also {
-            loadMeasure(MeasurePreferences.getLastSelectedMeasure())
-        }
-    }
-
-    fun getMeasure(): LiveData<Measure> {
-        return measure
-    }
-
-    private fun loadMeasure(id: Long) {
-        viewModelScope.launch(Dispatchers.IO) {
-            measure.postValue(dao.getMeasureById(id))
-        }
-    }
+    val measure: StateFlow<Measure?> = selected
+        .flatMapLatest { dao.observeById(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
     fun addMeasure(name: String, note: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val created = Measure(System.currentTimeMillis(), name, note)
-            withContext(NonCancellable) {
-                dao.insertMeasure(created)
-                MeasurePreferences.setLastSelectedMeasure(created.dateCreated)
-            }
-            loadMeasure(created.dateCreated)
+        val created = Measure(System.currentTimeMillis(), name, note)
+        persist {
+            dao.insertMeasure(created)
+            MeasurePreferences.setLastSelectedMeasure(created.dateCreated)
         }
     }
 
-    fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            measure.value?.let {
-                it.points.add(measurePoint)
-                dao.updateMeasure(it)
-                onAdded(it)
-            }
+    fun addMeasurePoint(point: MeasurePoint) = editPoints { it + point }
+
+    fun removeMeasurePoint(point: MeasurePoint?) {
+        point ?: return
+        editPoints { it - point }
+    }
+
+    fun deleteMeasure(measure: Measure) = persist {
+        dao.deleteMeasure(measure)
+        if (MeasurePreferences.getLastSelectedMeasure() == measure.dateCreated) MeasurePreferences.setLastSelectedMeasure(-1)
+    }
+
+    private fun editPoints(change: (List<MeasurePoint>) -> List<MeasurePoint>) {
+        val id = selected.value
+        persist {
+            val current = dao.getMeasureById(id) ?: return@persist
+            dao.updateMeasure(Measure(current.dateCreated, current.name, current.note, ArrayList(change(current.points))))
         }
     }
 
-    fun removeMeasurePoint(measurePoint: MeasurePoint?, onRemoved: (Measure) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val current = measure.value
-            if (measurePoint != null && current != null) {
-                current.points.remove(measurePoint)
-                dao.updateMeasure(current)
-                onRemoved(current)
-            }
-        }
-    }
-
-    fun deleteMeasure(measure: Measure) {
-        viewModelScope.launch(Dispatchers.IO) {
-            withContext(NonCancellable) {
-                dao.deleteMeasure(measure)
-                if (MeasurePreferences.getLastSelectedMeasure() == measure.dateCreated) MeasurePreferences.setLastSelectedMeasure(-1)
-            }
-        }
+    private fun persist(block: suspend () -> Unit) {
+        viewModelScope.launch { withContext(NonCancellable) { writes.withLock { block() } } }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        super.onSharedPreferenceChanged(sharedPreferences, key)
-        when (key) {
-            MeasurePreferences.LAST_SELECTED_MEASURE -> {
-                loadMeasure(MeasurePreferences.getLastSelectedMeasure())
-            }
-        }
+        if (key == MeasurePreferences.LAST_SELECTED_MEASURE) selected.value = MeasurePreferences.getLastSelectedMeasure()
     }
 
     private companion object {
@@ -19182,6 +17566,40 @@ class MeasurePointConverterTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/decorations/maps/GoogleMapStyleTest.kt
+################################################################################
+package app.simple.positional.decorations.maps
+
+import app.simple.positional.R
+import com.google.android.gms.maps.GoogleMap
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class GoogleMapStyleTest {
+    @Test
+    fun mapTypeFollowsSatelliteAndLabels() {
+        assertEquals(GoogleMap.MAP_TYPE_NORMAL, GoogleMapStyle.type(satellite = false, label = true))
+        assertEquals(GoogleMap.MAP_TYPE_NORMAL, GoogleMapStyle.type(satellite = false, label = false))
+        assertEquals(GoogleMap.MAP_TYPE_HYBRID, GoogleMapStyle.type(satellite = true, label = true))
+        assertEquals(GoogleMap.MAP_TYPE_SATELLITE, GoogleMapStyle.type(satellite = true, label = false))
+    }
+
+    @Test
+    fun highContrastWinsOverNightMode() {
+        assertEquals(R.raw.map_high_contrast_labelled, GoogleMapStyle.raw(label = true, highContrast = true, night = true))
+        assertEquals(R.raw.map_high_contrast_non_labelled, GoogleMapStyle.raw(label = false, highContrast = true, night = false))
+    }
+
+    @Test
+    fun styleFollowsNightMode() {
+        assertEquals(R.raw.maps_dark_labelled, GoogleMapStyle.raw(label = true, highContrast = false, night = true))
+        assertEquals(R.raw.maps_dark_no_label, GoogleMapStyle.raw(label = false, highContrast = false, night = true))
+        assertEquals(R.raw.maps_light_labelled, GoogleMapStyle.raw(label = true, highContrast = false, night = false))
+        assertEquals(R.raw.maps_light_no_label, GoogleMapStyle.raw(label = false, highContrast = false, night = false))
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/decorations/maps/OsmStyleTest.kt
 ################################################################################
 package app.simple.positional.decorations.maps
@@ -19432,6 +17850,40 @@ class GeoDistanceTest {
 }
 
 ################################################################################
+# FILE: app/src/test/java/app/simple/positional/math/LatencyTest.kt
+################################################################################
+package app.simple.positional.math
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class LatencyTest {
+    @Test
+    fun shortGapsStayInMilliseconds() {
+        val latency = Latency(850)
+        assertFalse(latency.inSeconds)
+        assertEquals(850L, latency.value)
+        assertFalse(latency.isLate)
+    }
+
+    @Test
+    fun longGapsSwitchToSeconds() {
+        val latency = Latency(1234)
+        assertTrue(latency.inSeconds)
+        assertEquals(1.234, latency.value.toDouble(), 1e-9)
+        assertFalse(latency.isLate)
+    }
+
+    @Test
+    fun gapsOverFiveSecondsAreLate() {
+        assertTrue(Latency(5001).isLate)
+        assertFalse(Latency(5000).isLate)
+    }
+}
+
+################################################################################
 # FILE: app/src/test/java/app/simple/positional/math/LowPassFilterTest.kt
 ################################################################################
 package app.simple.positional.math
@@ -19613,6 +18065,7 @@ class RotationPhysicsTest {
 package app.simple.positional.math
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Test
 
 class SeriesStatsTest {
@@ -19627,6 +18080,22 @@ class SeriesStatsTest {
         assertEquals(2.0, stats.min, 0.0)
         assertEquals(6.0, stats.max, 0.0)
         assertEquals(4.0, stats.average, 1e-9)
+    }
+
+    @Test
+    fun appendSkipsRepeatedValue() {
+        val values = listOf(1f, 2f)
+        assertSame(values, SeriesStats.append(values, 2f))
+        assertEquals(listOf(1f, 2f, 1f), SeriesStats.append(values, 1f))
+    }
+
+    @Test
+    fun appendKeepsNewestWithinLimit() {
+        val values = (1..SeriesStats.LIMIT).map { it.toFloat() }
+        val appended = SeriesStats.append(values, 0f)
+        assertEquals(SeriesStats.LIMIT, appended.size)
+        assertEquals(2f, appended.first())
+        assertEquals(0f, appended.last())
     }
 }
 
@@ -20280,60 +18749,6 @@ class AppIconsTest {
     fun manifestDeclaresEveryAlias() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         AppIcons.icons.forEach { (alias, _) -> assertTrue(alias, manifest.contains(".activities.alias.$alias\"")) }
-    }
-}
-
-################################################################################
-# FILE: app/src/test/java/app/simple/positional/util/ArrayHelperTest.kt
-################################################################################
-package app.simple.positional.util
-
-import app.simple.positional.util.ArrayHelper.isLastValueSame
-import app.simple.positional.util.ArrayHelper.secondLastOrNull
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
-
-class ArrayHelperTest {
-    @Test
-    fun lastValueComparison() {
-        assertFalse(arrayListOf<Float>().isLastValueSame(1f))
-        assertTrue(arrayListOf(1f, 2f).isLastValueSame(2f))
-        assertFalse(arrayListOf(1f, 2f).isLastValueSame(1f))
-    }
-
-    @Test
-    fun secondLast() {
-        assertNull(listOf(1).secondLastOrNull())
-        assertEquals(2, listOf(1, 2, 3).secondLastOrNull())
-    }
-}
-
-################################################################################
-# FILE: app/src/test/java/app/simple/positional/util/ConditionUtilsTest.kt
-################################################################################
-package app.simple.positional.util
-
-import app.simple.positional.util.ConditionUtils.invert
-import app.simple.positional.util.ConditionUtils.isNotNull
-import app.simple.positional.util.ConditionUtils.isNull
-import app.simple.positional.util.ConditionUtils.isZero
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Test
-
-class ConditionUtilsTest {
-    @Test
-    fun conditions() {
-        val nothing: Any? = null
-        assertTrue(nothing.isNull())
-        assertFalse(nothing.isNotNull())
-        assertTrue("x".isNotNull())
-        assertTrue(0.isZero())
-        assertFalse(1.isZero())
-        assertFalse(true.invert())
     }
 }
 
