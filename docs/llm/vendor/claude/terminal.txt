@@ -1,6 +1,11 @@
-kushal@fedora:~/src/kotlin/positional$ cd ~/src/kotlin/positional/; time bash export.sh > docs/llm/vendor/claude/output.txt
-
-real	0m0.902s
-user	0m0.391s
-sys	0m0.526s
+kushal@fedora:~/src/kotlin/positional$ git rm app/src/main/java/app/simple/positional/extensions/maps/CustomMaps.kt app/src/main/java/app/simple/positional/extensions/maps/MapLifecycle.kt app/src/main/java/app/simple/positional/decorations/maps/Maps.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt app/src/main/java/app/simple/positional/util/ConditionUtils.kt app/src/main/java/app/simple/positional/util/ArrayHelper.kt app/src/test/java/app/simple/positional/util/ArrayHelperTest.kt app/src/test/java/app/simple/positional/util/ConditionUtilsTest.kt
+rm 'app/src/main/java/app/simple/positional/decorations/maps/Maps.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt'
+rm 'app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt'
+rm 'app/src/main/java/app/simple/positional/extensions/maps/CustomMaps.kt'
+rm 'app/src/main/java/app/simple/positional/extensions/maps/MapLifecycle.kt'
+rm 'app/src/main/java/app/simple/positional/util/ArrayHelper.kt'
+rm 'app/src/main/java/app/simple/positional/util/ConditionUtils.kt'
+rm 'app/src/test/java/app/simple/positional/util/ArrayHelperTest.kt'
+rm 'app/src/test/java/app/simple/positional/util/ConditionUtilsTest.kt'
 kushal@fedora:~/src/kotlin/positional$ 
