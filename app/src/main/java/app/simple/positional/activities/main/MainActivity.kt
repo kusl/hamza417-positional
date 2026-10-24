@@ -1,12 +1,11 @@
 package app.simple.positional.activities.main
 
 import android.Manifest
-import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,9 +45,6 @@ import app.simple.positional.callbacks.BottomBarHost
 import app.simple.positional.extensions.activity.BaseActivity
 import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.services.FusedLocationService
-import app.simple.positional.services.LocationService
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.compose.PanelSwitcher
 import app.simple.positional.ui.compose.setPositionalContent
@@ -62,18 +58,20 @@ import app.simple.positional.ui.panels.Time
 import app.simple.positional.ui.panels.Trail
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt.displayLocationSettingsRequest
+import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import com.google.android.gms.maps.MapsInitializer
 
-class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferences.OnSharedPreferenceChangeListener {
+class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
     private var panel by mutableStateOf(PanelCatalog.LOCATION)
     private var barVisible by mutableStateOf(true)
     private var navController: NavHostController? = null
     private var searchResult: ((SearchResult) -> Unit)? = null
+    private val location: LocationViewModel by viewModels()
 
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.any { it }) {
             showPrompt()
-            startLocation()
+            location.restart()
         } else {
             Toast.makeText(this, R.string.no_location_permission_alert, Toast.LENGTH_LONG).show()
         }
@@ -86,18 +84,6 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferen
         setPositionalContent { topInset -> AppNavHost(topInset) }
         checkLocationPermission()
         MainPreferences.setLaunchCount(MainPreferences.getLaunchCount() + 1)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-        startLocation()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
-        stopLocation()
     }
 
     private fun select(tag: String) {
@@ -171,29 +157,7 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator, SharedPreferen
         if (!getLocationStatus(this)) displayLocationSettingsRequest(this)
     }
 
-    private fun locationService(provider: String = MainPreferences.getLocationProvider()) =
-        if (provider == FUSED) FusedLocationService::class.java else LocationService::class.java
-
-    private fun startLocation() {
-        runCatching { startService(Intent(applicationContext, locationService())) }
-    }
-
-    private fun stopLocation() {
-        runCatching { stopService(Intent(applicationContext, locationService())) }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key != MainPreferences.locationProvider) return
-        val current = MainPreferences.getLocationProvider()
-        runCatching {
-            stopService(Intent(applicationContext, locationService(if (current == FUSED) ANDROID else FUSED)))
-            startService(Intent(applicationContext, locationService(current)))
-        }.onFailure { Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show() }
-    }
-
     private companion object {
-        const val FUSED = "fused"
-        const val ANDROID = "android"
         val locationPermissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 }

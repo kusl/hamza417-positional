@@ -291,29 +291,6 @@
             android:exported="false"
             tools:targetApi="o" />
 
-        <service
-            android:name=".services.LocationService"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="location"
-            android:icon="@drawable/ic_pin_01"
-            android:label="@string/location_provider"
-            android:logo="@drawable/ic_pin_01"
-            android:stopWithTask="true"
-            tools:ignore="ForegroundServicePermission" />
-
-        <service
-            android:name=".services.FusedLocationService"
-            android:enabled="true"
-            android:exported="false"
-            android:externalService="false"
-            android:foregroundServiceType="location"
-            android:icon="@drawable/ic_pin_01"
-            android:label="@string/fused_location_provider"
-            android:stopWithTask="true"
-            tools:ignore="ForegroundServicePermission" />
-
         <receiver
             android:name=".widgets.ClockWidget4x4"
             android:enabled="@bool/clock_widgets"

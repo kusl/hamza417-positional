@@ -80,8 +80,6 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
         observe(locationViewModel.location.filterNotNull()) {
             location = it
-            MainPreferences.setLastLatitude(it.latitude.toFloat())
-            MainPreferences.setLastLongitude(it.longitude.toFloat())
             state.fixed = true
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
@@ -90,7 +88,6 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         observe(trailData.trail) { state.trail = it }
         observe(trailData.points, ::showPoints)
     }
-
 
     private fun showPoints(points: List<TrailPoint>) {
         maps.showPoints(points)

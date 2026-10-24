@@ -147,12 +147,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         addressThreshold.reset()
     }
 
-
     private fun onLocation(location: Location) {
         this.location = location
-        MainPreferences.setLastLatitude(location.latitude.toFloat())
-        MainPreferences.setLastLongitude(location.longitude.toFloat())
-        MainPreferences.setLastAltitude(location.altitude.toFloat())
 
         val metric = MainPreferences.isMetric()
         val length = getString(if (metric) R.string.meter else R.string.feet)

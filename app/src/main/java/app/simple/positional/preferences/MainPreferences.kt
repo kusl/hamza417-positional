@@ -18,6 +18,9 @@ object MainPreferences {
     private const val skipSplashScreen = "skip_splash_screen"
     private const val currentArt = "current_art_position"
     private const val isMaterialYouAccent = "is_material_you_accent"
+    private const val lastLatitude = "last_latitude"
+    private const val lastLongitude = "last_longitude"
+    private const val lastAltitude = "last_altitude"
 
     const val isCustomCoordinate = "is_custom_coordinate_set"
     const val locationProvider = "location_provider"
@@ -27,9 +30,6 @@ object MainPreferences {
     const val latitude = "custom_latitude"
     const val longitude = "custom_longitude"
     const val accentColor = "app_accent_color"
-    const val lastLatitude = "last_latitude"
-    const val lastLongitude = "last_longitude"
-    const val lastAltitude = "last_altitude"
     const val coordinatesFormat = "coordinate_format"
 
     fun setLaunchCount(value: Int) {
@@ -106,12 +106,12 @@ object MainPreferences {
         )
     }
 
-    fun setLastLatitude(value: Float) {
-        getSharedPreferences().edit().putFloat(lastLatitude, value).apply()
-    }
-
-    fun setLastLongitude(value: Float) {
-        getSharedPreferences().edit().putFloat(lastLongitude, value).apply()
+    fun setLastLocation(latitude: Float, longitude: Float, altitude: Float) {
+        getSharedPreferences().edit()
+                .putFloat(lastLatitude, latitude)
+                .putFloat(lastLongitude, longitude)
+                .putFloat(lastAltitude, altitude)
+                .apply()
     }
 
     fun getLastCoordinates(): FloatArray {
@@ -119,10 +119,6 @@ object MainPreferences {
                 getSharedPreferences().getFloat(lastLatitude, 48.8584f),
                 getSharedPreferences().getFloat(lastLongitude, 2.2945f)
         )
-    }
-
-    fun setLastAltitude(value: Float) {
-        getSharedPreferences().edit().putFloat(lastAltitude, value).apply()
     }
 
     fun getLastAltitude(): Float {

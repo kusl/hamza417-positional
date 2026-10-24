@@ -10,12 +10,14 @@ import android.text.TextUtils
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.location.LocationEvent
+import app.simple.positional.location.LocationSource
 import app.simple.positional.math.Latency
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.math.MovementThreshold
 import app.simple.positional.math.SeriesStats
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.services.LocationBus
 import app.simple.positional.util.Direction
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.HtmlHelper
@@ -29,8 +31,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
@@ -38,24 +46,26 @@ import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-    private val listener = object : LocationBus.Listener {
-        override fun onLocation(location: Location) = onNewLocation(location)
-
-        override fun onProvider(provider: String?) {
-            mutableProvider.value = provider?.uppercase(Locale.getDefault())
-        }
-    }
-
-    private val mutableLocation = MutableStateFlow<Location?>(null)
-    private val mutableProvider = MutableStateFlow<String?>(null)
+    private val providerSetting = MutableStateFlow(MainPreferences.getLocationProvider())
+    private val restarts = MutableStateFlow(0)
+    private val saved = MovementThreshold(SAVE_DISTANCE)
     private val mutableLatency = MutableStateFlow<Latency?>(null)
     private val mutableAccuracy = MutableStateFlow(emptyList<Float>())
     private val mutableAltitude = MutableStateFlow(emptyList<Float>())
     private val targetPoint = MutableStateFlow(currentTarget())
     private var lastFix = SystemClock.elapsedRealtime()
 
-    val location: StateFlow<Location?> = mutableLocation.asStateFlow()
-    val provider: StateFlow<String?> = mutableProvider.asStateFlow()
+    private val events = combine(providerSetting, restarts) { provider, _ -> provider }
+        .flatMapLatest { provider -> LocationSource.of(application, provider).events().onStart { lastFix = SystemClock.elapsedRealtime() } }
+        .onEach(::record)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT))
+
+    val location: StateFlow<Location?> = events.filterIsInstance<LocationEvent.Fix>()
+        .map { it.location }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    val provider: StateFlow<String?> = events.filterIsInstance<LocationEvent.Provider>()
+        .map { it.name?.uppercase(Locale.getDefault()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
     val latency: StateFlow<Latency?> = mutableLatency.asStateFlow()
     val accuracySeries: StateFlow<List<Float>> = mutableAccuracy.asStateFlow()
     val altitudeSeries: StateFlow<List<Float>> = mutableAltitude.asStateFlow()
@@ -65,21 +75,23 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
         if (point != null) emit(ReverseGeocoder.addressLine(getApplication<Application>(), point.latitude, point.longitude))
     }
 
-    val target: StateFlow<Spanned?> = combine(mutableLocation.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
+    val target: StateFlow<Spanned?> = combine(location.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
 
-    init {
-        LocationBus.register(listener)
-    }
+    fun restart() = restarts.update { it + 1 }
 
-    private fun onNewLocation(fix: Location) {
+    private fun record(event: LocationEvent) {
+        if (event !is LocationEvent.Fix) return
+        val fix = event.location
         val now = SystemClock.elapsedRealtime()
         mutableLatency.value = Latency(now - lastFix)
         lastFix = now
         mutableAccuracy.update { SeriesStats.append(it, fix.accuracy) }
         mutableAltitude.update { SeriesStats.append(it, fix.altitude.toFloat()) }
-        mutableLocation.value = fix
+        if (saved.accept(fix.latitude, fix.longitude)) {
+            MainPreferences.setLastLocation(fix.latitude.toFloat(), fix.longitude.toFloat(), fix.altitude.toFloat())
+        }
     }
 
     private fun currentTarget(): LatLng? =
@@ -125,19 +137,16 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
+            MainPreferences.locationProvider -> providerSetting.value = MainPreferences.getLocationProvider()
             GPSPreferences.mapTargetMarker,
             GPSPreferences.mapTargetMarkerLatitude,
             GPSPreferences.mapTargetMarkerLongitude -> targetPoint.value = currentTarget()
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        LocationBus.unregister(listener)
-    }
-
     private companion object {
         const val STOP_TIMEOUT = 5_000L
+        const val SAVE_DISTANCE = 50.0
         const val MINUTE = 60L
         const val HOUR = 3_600L
         const val DAY = 86_400L

@@ -249,3 +249,105 @@ However, the architecture contains several **major architectural violations and 
 3. **Refactor Dialog State:**
    Replace `DialogHost`'s `@Composable () -> Unit` storage with sealed class/enum states (like `activeDialog: DialogType?`), keeping all UI composable invocations declarative in the tree.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Claude
+/
+
+Please continue with the next phase also please review the following notes. they may not be completely true or up to date so use your own best judgment. > how is the quality of the migration to kotlin compose so far? major violations? gemini 3.8 flash https://aistudio.google.com/prompts/new_
+
+pasted
+
+Please continue with the next phase 
+also please review the following notes. 
+they may not be completely true or up to date so use your own best judgment.
+
+Ran 22 commands, read memory, shared files
+Phase 13 is in positional-phase13.tar.gz. It contains only the changed files; extract it at the repo root.
+
+Delete these files:
+
+sh
+git rm app/src/main/java/app/simple/positional/services/FusedLocationService.kt app/src/main/java/app/simple/positional/services/LocationBus.kt app/src/main/java/app/simple/positional/services/LocationService.kt
+I couldn’t build or run anything here because this sandbox has no Android SDK. CI will be the first compile and test run.
+
+Phase 13 changes
+
+New location sources: the Android and fused location providers are now cold flows in a new location/ package. LocationViewModel keeps them running only while a panel that shows location is on screen, and stops them 5 s after the last one closes. The Level and Settings panels, sub screens and background now use no location at all.
+Fused provider: it now asks for one update per second instead of every 100 ms.
+Android provider:
+It used to re-register its listener every second; it now registers once.
+It switches between GPS, network and passive when location settings change.
+It uses the compat listener, so it works on Android 7 through 9.
+Approximate location: the app previously needed both coarse and fine permission, so approximate-only users got no location. Approximate-only now works; the Android provider uses the network in that case.
+Last position: it is saved by the view model in one write, and only after moving 50 m. Before, the GPS and Trail panels each saved it on every fix, with up to three writes each time.
+Permission grant: granting permission restarts the location flow. MainActivity no longer starts or stops services, and the two <service> entries are gone from the manifest.
+Tests: added AndroidLocationSourceTest for the provider choice.
+README: phase 13 is marked done, phase 14 is listed as next, and the project layout and location notes are updated.
+Review notes
+
+PanelController acting like a fragment: this is valid. It is the basis of phase 14: panel state moves into view models and is read with collectAsStateWithLifecycle. Tearing a panel down when you switch tabs is partly intended, since it is what stops its sensors and maps.
+Switching to Google’s maps-compose library: I rejected this. It only covers Google Maps, and every map here also has to work with OpenStreetMap. Removing the old view from its parent before reattaching it is a deliberate workaround to keep the map view alive across navigation.
+DialogHost storing composable functions: this is a valid point and is planned for phase 14.
+LiveData: this is out of date; it was removed in phase 12. Copying view model values into panel state by hand is still the case, and phase 14 addresses that.
+Clock and needle animation loops: this is mostly out of date. The needles stop animating once they settle, and the clock pauses when the app is in the background.
+Map search result lost after the app process is killed: low risk, because rotation doesn’t recreate the activity here. When the process is killed, the dialog waiting for the result is gone anyway. Returning the result through the back stack is listed for phase 14.
+
+Positional phase13.tar
+GZ 
+
+You’ve used 96% of your session limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
