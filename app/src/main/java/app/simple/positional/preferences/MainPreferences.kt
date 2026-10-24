@@ -9,13 +9,13 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 
 object MainPreferences {
     private const val launchCount = "launch_count"
-    private const val dayNightMode = "is_day_night_mode"
+    const val dayNightMode = "is_day_night_mode"
     private const val showAgain = "show_permission_dialog_again"
     private const val address = "specified_address"
-    private const val screenOn = "keep_the_screen_on"
-    private const val appLanguage = "current_language_locale"
-    private const val appCornerRadius = "corner_radius"
-    private const val skipSplashScreen = "skip_splash_screen"
+    const val screenOn = "keep_the_screen_on"
+    const val appLanguage = "current_language_locale"
+    const val appCornerRadius = "corner_radius"
+    const val skipSplashScreen = "skip_splash_screen"
     private const val currentArt = "current_art_position"
     private const val isMaterialYouAccent = "is_material_you_accent"
     private const val lastLatitude = "last_latitude"
