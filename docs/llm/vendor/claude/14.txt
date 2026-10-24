@@ -1,0 +1,8 @@
+96
+74
+
+Please continue with the next phase 
+also I have noticed that the second hand is completely missing from the clock. 
+The sweeping circle is still there and the minute and hour hands are there
+but not the second hand 
+please fix all defects and regressions 
