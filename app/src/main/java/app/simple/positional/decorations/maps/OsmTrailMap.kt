@@ -68,7 +68,6 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override fun showPoints(points: List<TrailPoint>) {
         this.points = points
         drawPoints()
-        mapCallbacks?.onLineCountChanged(points.size)
         if (TrailPreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 

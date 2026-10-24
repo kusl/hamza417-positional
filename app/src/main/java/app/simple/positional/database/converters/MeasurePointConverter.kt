@@ -5,10 +5,10 @@ import app.simple.positional.model.MeasurePoint
 
 class MeasurePointConverter {
     @TypeConverter
-    fun fromMeasurePoints(measurePoints: ArrayList<MeasurePoint?>): String =
-        measurePoints.filterNotNull().joinToString("") { it.convertForDatabase() + ";" }
+    fun fromMeasurePoints(points: ArrayList<MeasurePoint>?): String? =
+        points?.joinToString("") { it.toDatabase() + ";" }
 
     @TypeConverter
-    fun toMeasurePoints(data: String?): ArrayList<MeasurePoint?> =
-        data.orEmpty().split(';').filter { it.isNotEmpty() }.mapTo(ArrayList<MeasurePoint?>()) { MeasurePoint.convertFromDatabase(it) }
+    fun toMeasurePoints(data: String?): ArrayList<MeasurePoint>? =
+        data?.split(';')?.filter { it.isNotEmpty() }?.mapTo(ArrayList()) { MeasurePoint.fromDatabase(it) }
 }

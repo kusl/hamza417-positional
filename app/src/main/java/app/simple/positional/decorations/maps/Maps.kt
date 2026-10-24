@@ -15,8 +15,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.constants.LocationPins
-import app.simple.positional.decorations.utils.CircleUtils
-import app.simple.positional.decorations.utils.MarkerUtils
+import app.simple.positional.decorations.utils.animateColors
+import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.CustomMaps
 import app.simple.positional.math.CompassAzimuth
 import app.simple.positional.math.LowPassFilter
@@ -73,8 +73,7 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
     private var markerBitmap: Bitmap? = null
     private var markerAnimator: ValueAnimator? = null
     private var circleAnimator: ValueAnimator? = null
-    private var fillAnimator: ValueAnimator? = null
-    private var strokeAnimator: ValueAnimator? = null
+    private var colorAnimator: ValueAnimator? = null
 
     private val sensorRegistrationRunnable = Runnable { register() }
 
@@ -196,8 +195,7 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
         viewHandler.removeCallbacksAndMessages(null)
         circleAnimator?.cancel()
         markerAnimator?.cancel()
-        fillAnimator?.cancel()
-        strokeAnimator?.cancel()
+        colorAnimator?.cancel()
     }
 
     private fun reestablishSensorRegistration() {
@@ -364,7 +362,7 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
                             }
 
                             markerAnimator?.cancel()
-                            markerAnimator = MarkerUtils.animateMarker(location, marker)
+                            markerAnimator = marker!!.animateTo(location!!, if (location!!.speed > 0F) location!!.bearing else 0F)
                         }
                     }
                 }
@@ -372,20 +370,12 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
                 if (!isCustomCoordinate) {
                     runCatching {
                         circleAnimator?.cancel()
-                        fillAnimator?.cancel()
-                        strokeAnimator?.cancel()
-                        circleAnimator = CircleUtils.animateCircle(location, circle)
-                        fillAnimator = CircleUtils.animateFillColor(
-                            if (location!!.speed > 0F) ContextCompat.getColor(
-                                context,
-                                R.color.bearing_circle_color
-                            ) else LocationPins.getCircleFillColor(), circle
-                        )
-                        strokeAnimator = CircleUtils.animateStrokeColor(
-                            if (location!!.speed > 0F) ContextCompat.getColor(
-                                context,
-                                R.color.bearing_circle_stroke
-                            ) else LocationPins.getCircleStrokeColor(), circle
+                        colorAnimator?.cancel()
+                        val moving = location!!.speed > 0F
+                        circleAnimator = circle!!.animateTo(location!!)
+                        colorAnimator = circle!!.animateColors(
+                            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_color) else LocationPins.getCircleFillColor(),
+                            if (moving) ContextCompat.getColor(context, R.color.bearing_circle_stroke) else LocationPins.getCircleStrokeColor(),
                         )
                     }.onFailure {
                         circle = googleMap?.addCircle(
@@ -470,13 +460,6 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
 
             targetPolyline = googleMap?.addPolyline(polylineOptions!!)
 
-            if (location.isNotNull() || isCustomCoordinate) {
-                mapsCallbacks?.onTargetUpdated(
-                    polylineOptions?.points?.get(1),
-                    polylineOptions?.points?.get(0),
-                    location?.speed ?: 0F)
-            }
-
             polylineOptions?.startCap(
                 CustomCap(BitmapDescriptorFactory.fromBitmap(
                     R.drawable.ic_trail_start.toBitmap(
@@ -488,8 +471,6 @@ class Maps(context: Context, attributeSet: AttributeSet? = null) : CustomMaps(co
                     R.drawable.seekbar_thumb.toBitmap(
                         context,
                         30))))
-        } else {
-            mapsCallbacks?.onTargetUpdated(null, null, 0F)
         }
     }
 

@@ -130,7 +130,7 @@ fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
     val actions = remember(viewModel) {
         object : RecordActions<TrailEntry> {
             override fun open(record: TrailEntry) {
-                TrailPreferences.setCurrentTrailName(record.trailName)
+                TrailPreferences.setCurrentTrailName(record.trailName.orEmpty())
                 navigator.back()
             }
 
@@ -138,7 +138,7 @@ fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
 
             override fun delete(record: TrailEntry) = viewModel.deleteTrail(record)
 
-            override fun isValidName(name: String) = TrailNames.isValid(name, viewModel.trails.value.orEmpty().map { it.trailName })
+            override fun isValidName(name: String) = TrailNames.isValid(name, viewModel.trails.value.orEmpty().mapNotNull { it.trailName })
         }
     }
     RecordsScreen(stringResource(R.string.saved_trails), records, topInset, actions)

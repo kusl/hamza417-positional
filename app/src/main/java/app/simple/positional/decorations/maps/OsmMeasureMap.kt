@@ -62,9 +62,8 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
 
     override fun showMeasure(measure: Measure) {
         measurePoints.clear()
-        measurePoints.addAll(measure.measurePoints)
+        measurePoints.addAll(measure.points)
         drawLines()
-        mapCallbacks?.onLineCountChanged(measurePoints.size)
         if (MeasurePreferences.arePolylinesWrapped()) wrap(animate = false)
     }
 
@@ -81,7 +80,6 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         val last = measurePoints.removeLastOrNull() ?: return
         drawLines()
         mapCallbacks?.onLineDeleted(last)
-        mapCallbacks?.onLineCountChanged(measurePoints.size)
         reportDistance()
     }
 

@@ -116,8 +116,8 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         return TrailPointItem(
             point = point,
             icon = TrailIcons.icons.getOrElse(point.iconPosition) { TrailIcons.icons[0] },
-            name = point.name.ifEmpty { "--" },
-            note = point.note.ifEmpty { getString(R.string.not_available) },
+            name = point.name.orEmpty().ifEmpty { "--" },
+            note = point.note.orEmpty().ifEmpty { getString(R.string.not_available) },
             coordinates = getString(
                 R.string.coordinates_format,
                 DMSConverter.getFormattedLatitude(point.latitude, activity),

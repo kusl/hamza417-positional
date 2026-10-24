@@ -26,6 +26,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - run: chmod +x gradlew
       - run: ./gradlew --no-daemon testDebugUnitTest lintVitalRelease assembleDebug
+      - name: Room schemas unchanged
+        run: |
+          if git diff -U0 app/databases/schemas | grep -E '^[-+][[:space:]]*"identityHash"'; then exit 1; fi
       - if: always()
         uses: actions/upload-artifact@v7
         with:

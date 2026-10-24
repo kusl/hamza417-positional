@@ -42,7 +42,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
 
     fun addMeasure(name: String, note: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val created = Measure(name, note)
+            val created = Measure(System.currentTimeMillis(), name, note)
             withContext(NonCancellable) {
                 dao.insertMeasure(created)
                 MeasurePreferences.setLastSelectedMeasure(created.dateCreated)
@@ -54,7 +54,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     fun addMeasurePoint(measurePoint: MeasurePoint, onAdded: (Measure) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             measure.value?.let {
-                it.measurePoints.add(measurePoint)
+                it.points.add(measurePoint)
                 dao.updateMeasure(it)
                 onAdded(it)
             }
@@ -65,7 +65,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         viewModelScope.launch(Dispatchers.IO) {
             val current = measure.value
             if (measurePoint != null && current != null) {
-                current.measurePoints.remove(measurePoint)
+                current.points.remove(measurePoint)
                 dao.updateMeasure(current)
                 onRemoved(current)
             }

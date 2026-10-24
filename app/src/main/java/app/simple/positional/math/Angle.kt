@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package app.simple.positional.math
 
 import kotlin.math.acos
@@ -23,13 +21,5 @@ object Angle {
         var normalized = this % 360
         if (normalized < 0) normalized += 360
         return if (inverseResult) normalized - 360F else normalized
-    }
-
-    private fun getQuadrant(x: Double, y: Double): Int {
-        return if (x >= 0) {
-            if (y >= 0) 1 else 4
-        } else {
-            if (y >= 0) 2 else 3
-        }
     }
 }

@@ -101,7 +101,7 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
     }
 
     private fun showSummary(measure: MeasureModel) {
-        val points = measure.measurePoints
+        val points = measure.points
         state.hasPoints = points.isNotEmpty()
         state.summary = listOf(
             InfoRow(getString(R.string.total), points.size.toString()),

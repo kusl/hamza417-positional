@@ -14,8 +14,8 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.decorations.maps.TrackPin
-import app.simple.positional.decorations.utils.CircleUtils
-import app.simple.positional.decorations.utils.MarkerUtils
+import app.simple.positional.decorations.utils.animateSegment
+import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.CustomMaps
 import app.simple.positional.math.CompassAzimuth
 import app.simple.positional.math.LowPassFilter
@@ -190,11 +190,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
                         }
 
                         markerAnimator?.cancel()
-                        markerAnimator = MarkerUtils.animateMarker(
-                            location,
-                            marker,
-                            location?.bearing ?: 0F,
-                            isCompassRotation)
+                        markerAnimator = marker!!.animateTo(location!!, if (isCompassRotation) null else location!!.bearing)
                     }.onFailure {
                         marker = googleMap?.addMarker(MarkerOptions()
                                 .position(latLng)
@@ -207,7 +203,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
 
                     runCatching {
                         circleAnimator?.cancel()
-                        circleAnimator = CircleUtils.animateCircle(location, circle)
+                        circleAnimator = circle!!.animateTo(location!!)
                     }.onFailure {
                         circle = googleMap?.addCircle(CircleOptions()
                                 .center(latLng)
@@ -320,8 +316,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         invalidate()
         lastPolyline = polylines.lastOrNull()
 
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
-
         if (MeasurePreferences.arePolylinesWrapped()) {
             wrap(false)
         }
@@ -338,7 +332,6 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         currentPolylines.removeLastOrNull()
         polylineOptions?.points?.removeLastOrNull()
         mapsCallbacks?.onLineDeleted(measurePoints.lastOrNull())
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
         measurePoints.removeLastOrNull()
         cameraTargetPolyline?.remove()
         cameraTargetPolyline = null
@@ -450,7 +443,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
     fun createMeasurePolylines(measure: Measure?) {
         try {
             measurePoints.clear()
-            measurePoints.addAll(measure!!.measurePoints)
+            measurePoints.addAll(measure!!.points)
             removeAllPolylines()
             updatePolylines(measurePoints)
         } catch (e: NullPointerException) {
@@ -483,7 +476,7 @@ class MeasureMaps(context: Context, attrs: AttributeSet? = null) : CustomMaps(co
         mapsCallbacks?.onLineAdded(measurePoint)
         mapsCallbacks?.onCameraDistance(latLng)
 
-        polylineAnimator = MarkerUtils.animatePolyline(lastPoint, latLng, polylines.lastOrNull()!!)
+        polylineAnimator = polylines.lastOrNull()!!.animateSegment(lastPoint, latLng)
     }
 
     fun getMeasurePoints(): ArrayList<MeasurePoint> {

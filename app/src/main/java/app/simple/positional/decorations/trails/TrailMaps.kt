@@ -14,8 +14,7 @@ import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.decorations.maps.TrackPin
 import app.simple.positional.constants.TrailIcons
-import app.simple.positional.decorations.utils.CircleUtils
-import app.simple.positional.decorations.utils.MarkerUtils
+import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.CustomMaps
 import app.simple.positional.math.CompassAzimuth
 import app.simple.positional.math.LowPassFilter
@@ -176,11 +175,7 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
                         }
 
                         markerAnimator?.cancel()
-                        markerAnimator = MarkerUtils.animateMarker(
-                            location,
-                            marker,
-                            location?.bearing ?: 0F,
-                            isCompassRotation)
+                        markerAnimator = marker!!.animateTo(location!!, if (isCompassRotation) null else location!!.bearing)
                     }.onFailure {
                         marker = googleMap?.addMarker(MarkerOptions()
                             .position(latLng)
@@ -193,7 +188,7 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
 
                     runCatching {
                         circleAnimator?.cancel()
-                        circleAnimator = CircleUtils.animateCircle(location, circle)
+                        circleAnimator = circle!!.animateTo(location!!)
                     }.onFailure {
                         circle = googleMap?.addCircle(CircleOptions()
                             .center(latLng)
@@ -239,8 +234,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         polylineOptions?.startCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.ic_trail_start.toBitmap(context, 30))))
         polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
 
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
-
         if (TrailPreferences.arePolylinesWrapped()) {
             wrap(false)
         }
@@ -283,7 +276,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         polylineOptions?.endCap(CustomCap(BitmapDescriptorFactory.fromBitmap(R.drawable.seekbar_thumb.toBitmap(context, 30))))
 
         trailData.addAll(arrayList)
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
 
         if (TrailPreferences.arePolylinesWrapped()) {
             wrap(false)
@@ -307,8 +299,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         polylineOptions?.add(latLng)
         polylines.add(googleMap?.addPolyline(polylineOptions!!)!!)
 
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
-
         invalidate()
 
         if (TrailPreferences.arePolylinesWrapped()) {
@@ -324,7 +314,6 @@ class TrailMaps(context: Context, attributeSet: AttributeSet? = null) : CustomMa
         currentPolyline.removeLastOrNull()
         polylineOptions?.points?.removeLastOrNull()
         mapsCallbacks?.onLineDeleted(trailData.lastOrNull())
-        mapsCallbacks?.onLineCountChanged(polylineOptions!!.points.size)
         trailData.removeLastOrNull()
 
         kotlin.runCatching {
