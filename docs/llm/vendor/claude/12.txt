@@ -1199,3 +1199,202 @@ Claude finished the response
 
 
 Please continue 
+
+Claude
+/
+I have uploaded the latest dump in the project files. 
+Please continue with the next phase.
+
+Ran 47 commands, created 2 files, read memory
+Restructuring Android view models and extracting a large project dump.
+Checking how re-selecting a measure triggers recomposition.
+Modernizing legacy map views to match a shared structure.
+Building a Google Maps counterpart to an existing map view.
+Removing unused utility functions and checking remaining usages.
+Pruning unused dependencies after removing LiveData.
+Tracing whether a transitive dependency pulls in fragment support.
+Cleaning up unused latitude and longitude setters.
+Reviewing map display setting names and options.
+Reworking the GPS target-marker reset logic.
+Now edit GPSPreferences.
+Shared Google map view base
+GoogleMapView.kt
+Tracing how preference changes propagate across panels.
+Resolving a conflicting CameraPosition import with an alias.
+Reviewing deletion methods across view model and screen layers.
+LocationViewModel on StateFlow
+LocationViewModel.kt.new
+Debugging how combine handles multiple Kotlin flows.
+Untangling how lifecycle scope resolves inside the controller class.
+Checking how migrating to StateFlow affects the null-filtering behavior.
+Checking which library version includes a key dependency.
+Explaining why the completed work cannot be delivered as files.
+I ran out of tool budget before I could package anything, so there is no deliverable in this turn. Phase 12 is mostly written in my sandbox but not yet syntax-checked, tested, documented or tarred. Please don’t apply anything yet; send “continue” and I’ll finish and hand over one tar.gz.
+
+Done in the sandbox (not delivered)
+View models on StateFlow, no LiveData
+
+LocationViewModel exposes StateFlows for location, provider, latency, target text and the accuracy and altitude series.
+The target text is computed only while the GPS panel is collecting it.
+The target address uses the non-blocking ReverseGeocoder instead of a deprecated blocking geocode on every fix.
+MeasureViewModel follows the selected measure through a new Room observeById flow. Point edits are serialized with a Mutex, so the callback and runOnUiThread plumbing is gone.
+PanelController.observe(flow) {} collects only while the panel is started. All six panels use it.
+The lifecycle-livedata-ktx dependency is removed.
+Google map views share one base
+
+A new GoogleMapView mirrors OsmMapView. It shares the lifecycle observer, the existing HeadingSensor, map style and type, the pin and accuracy circle, polylines with caps, and the camera, fit, zoom and rotate helpers.
+GoogleGpsMap, GoogleTrailMap, GoogleMeasureMap and GooglePickerMap extend it.
+Each trail or measure line is now a single polyline that gets updated, instead of one new polyline per point.
+Trail flag markers are added incrementally.
+Battery fixes
+
+Google trail auto-center no longer re-posts itself forever.
+No preference writes on every location fix; the target start point is now recorded when the target is set.
+The camera bearing is not saved on every compass frame.
+In compass mode the map follows the location only when the pin leaves the screen. This also fixes the compass rotation being frozen on OSM.
+The traffic layer is off on the trail and measure maps.
+Small removals
+
+ConditionUtils, ArrayHelper, MeasurePreferences.getLastLatLng and isMeasureSelected are gone.
+onMapInitialized is removed from MapsCallbacks.
+Still to do next turn
+Run a kotlinc syntax pass over the changed files. I can’t do a full compile here because Google Maven is blocked.
+Add unit tests for Latency, SeriesStats.append and GoogleMapStyle.
+Update the README: mark phase 12 done, add the test list, and propose phase 13.
+Package one tar.gz containing only the changed files.
+When I deliver, the deletion command will be:
+
+sh
+git rm app/src/main/java/app/simple/positional/extensions/maps/CustomMaps.kt app/src/main/java/app/simple/positional/extensions/maps/MapLifecycle.kt app/src/main/java/app/simple/positional/decorations/maps/Maps.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt app/src/main/java/app/simple/positional/util/ConditionUtils.kt app/src/main/java/app/simple/positional/util/ArrayHelper.kt app/src/test/java/app/simple/positional/util/ArrayHelperTest.kt app/src/test/java/app/simple/positional/util/ConditionUtilsTest.kt
+Don’t run it until you have the matching tar.gz, or the build will break.
+
+Please continue
+
+Ran 9 commands, shared files
+Phase 12 is in positional-phase12.tar.gz, which contains only the changed and new files. Extract it at the repository root.
+
+I ran a Kotlin syntax pass and the new math code, but not a full Android build or the test suite, because Google’s Maven repository is blocked here. The first CI run is the real compile check.
+
+Delete
+sh
+git rm app/src/main/java/app/simple/positional/extensions/maps/CustomMaps.kt app/src/main/java/app/simple/positional/extensions/maps/MapLifecycle.kt app/src/main/java/app/simple/positional/decorations/maps/Maps.kt app/src/main/java/app/simple/positional/decorations/measure/MeasureMaps.kt app/src/main/java/app/simple/positional/decorations/trails/TrailMaps.kt app/src/main/java/app/simple/positional/util/ConditionUtils.kt app/src/main/java/app/simple/positional/util/ArrayHelper.kt app/src/test/java/app/simple/positional/util/ArrayHelperTest.kt app/src/test/java/app/simple/positional/util/ConditionUtilsTest.kt
+What changed
+View models: they now use StateFlow instead of LiveData, and the lifecycle-livedata-ktx dependency is removed.
+Panels collect only while they are visible.
+The GPS target summary and its address lookup run only while the GPS panel is open.
+The selected measure updates straight from the database, so the add and remove callbacks are gone.
+Google maps: the GPS, trail, measure and address-search maps now share one GoogleMapView base built the same way as the OpenStreetMap one.
+Each trail or measure line is a single line updated in place.
+About 1,500 lines of old map code are removed.
+Battery:
+No more preference writes on every location fix; the target’s start point is saved when you set a target.
+The map bearing is no longer saved on every compass frame.
+The Google trail auto-center now stops while the panel is paused.
+The traffic layer only shows on the GPS map.
+Compass rotation: with compass rotation on, the map only re-centres when your pin leaves the screen. Before, constant re-centring kept the compass from turning the map, on OpenStreetMap too.
+Tests: new ones for fix latency, the accuracy and altitude history, and Google map type and style choice.
+README: phase 12 is marked done, and phase 13 (location providers as lifecycle-bound flows replacing the bound services) is set as next.
+Behaviour changes to watch for
+Distances in the GPS target summary: they now use the shared distance formatting, so in imperial they switch to miles at 1 mile instead of at 1,000 m.
+Target address: it is looked up once per target. If you set a target while offline, the address stays “Not available” until you move the target.
+
+Positional phase12.tar
+GZ 
+
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+86
+83
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
