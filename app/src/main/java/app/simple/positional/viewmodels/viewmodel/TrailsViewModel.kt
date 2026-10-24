@@ -23,14 +23,15 @@ class TrailsViewModel(application: Application) : AndroidViewModel(application) 
 
     fun addTrail(trailEntry: TrailEntry) = persist {
         dao.insertTrail(trailEntry)
-        TrailPreferences.setCurrentTrailName(trailEntry.trailName)
+        TrailPreferences.setCurrentTrailName(trailEntry.trailName.orEmpty())
     }
 
     fun deleteTrail(trailEntry: TrailEntry) = persist {
         dao.deleteTrail(trailEntry)
-        if (TrailPreferences.getCurrentTrail() == trailEntry.trailName) TrailPreferences.setCurrentTrailName("")
-        TrailPointDatabase.close(trailEntry.trailName)
-        getApplication<Application>().deleteDatabase("${trailEntry.trailName}.db")
+        val name = trailEntry.trailName ?: return@persist
+        if (TrailPreferences.getCurrentTrail() == name) TrailPreferences.setCurrentTrailName("")
+        TrailPointDatabase.close(name)
+        getApplication<Application>().deleteDatabase("$name.db")
     }
 
     private fun persist(block: suspend () -> Unit) {

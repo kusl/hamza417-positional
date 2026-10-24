@@ -169,7 +169,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
             val existing by trails.trails.collectAsState()
             NameNoteDialog(
                 title,
-                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().map { it.trailName }) },
+                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().mapNotNull { it.trailName }) },
                 onDismiss = dialogs::dismiss,
                 initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
                 onDraft = { name, note ->
