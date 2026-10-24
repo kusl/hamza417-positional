@@ -1,7 +1,7 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T01:37:00-04:00
+Generated: 2026-10-24T01:50:56-04:00
 Branch:    master
-Commit:    a968dc73 2026-10-23 22:01:22 -0400 run scripts
+Commit:    613df4fc 2026-10-24 01:50:53 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
@@ -1256,13 +1256,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. View models expose `StateFlow` (no `LiveData`), panels collect them through `PanelController.observe` only while started, and the GPS target summary and its address lookup run only while the GPS panel is shown. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`), panels collect them through `PanelController.observe` only while started, and the GPS target summary and its address lookup run only while the GPS panel is shown. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1292,7 +1292,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 11 | All code in Kotlin: Room entities keep their column names and nullability so existing databases open unchanged (CI fails if an exported schema hash changes); map callbacks trimmed to the events panels use; Google marker, circle and line animations as extensions on shared interpolation (accuracy circles no longer wrap radii above 360 m like angles); stale schema exports removed | Done |
 | 12 | View models on `StateFlow`; `lifecycle-livedata` removed; Google GPS, trail, measure and picker maps on a shared `GoogleMapView` base mirroring OpenStreetMap; target start point stored when a target is set instead of on every fix; map bearing not saved on every compass frame; Google trail auto center stops while paused | Done |
 | 13 | Location providers as lifecycle-bound flows (`AndroidLocationSource`, `FusedLocationSource`) replacing the started services and `LocationBus`; fused updates every second instead of every 100 ms; the Android provider registers once instead of re-registering every second and switches provider on `PROVIDERS_CHANGED`; approximate location permission is honoured; last position saved in one write after moving 50 m instead of three writes per fix | Done |
-| 14 | Panel state in view models collected with `collectAsStateWithLifecycle`; dialogs as state instead of stored composables; map search result returned through the back stack | Next |
+| 14a | Panel dialogs as state (`PanelDialog` values rendered by each panel) instead of stored composables; map search result returned through the previous back stack entry's `SavedStateHandle`, so it survives configuration changes; sub screens collect with `collectAsStateWithLifecycle`; clock second hand drawn at full size again; empty trail art scaled to width | Done |
+| 14b | Panel state in view models collected with `collectAsStateWithLifecycle` | Next |
 
 ## Building
 
@@ -2072,6 +2073,7 @@ import app.simple.positional.ui.navigation.MapSearchRoute
 import app.simple.positional.ui.navigation.MeasuresRoute
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.ui.navigation.SearchResult
+import app.simple.positional.ui.navigation.SearchResultEffect
 import app.simple.positional.ui.navigation.TimeZoneRoute
 import app.simple.positional.ui.navigation.TrailsRoute
 import app.simple.positional.ui.navigation.WebRoute
@@ -2099,7 +2101,6 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
     private var panel by mutableStateOf(PanelCatalog.LOCATION)
     private var barVisible by mutableStateOf(true)
     private var navController: NavHostController? = null
-    private var searchResult: ((SearchResult) -> Unit)? = null
     private val location: LocationViewModel by viewModels()
 
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -2133,7 +2134,8 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
         val controller = remember(panel) { createPanel(panel, this) }
         DisposableEffect(controller) { onDispose { controller.destroy() } }
         NavHost(nav, startDestination = Routes.PANELS, modifier = Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
-            composable(Routes.PANELS) {
+            composable(Routes.PANELS) { entry ->
+                SearchResultEffect(entry, controller::onSearchResult)
                 Box(Modifier.fillMaxSize()) {
                     controller.Host(topInset)
                     PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
@@ -2144,8 +2146,8 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
             composable(Routes.TIMEZONE) { TimeZoneRoute(this@MainActivity, topInset) }
             composable(Routes.MEASURES) { MeasuresRoute(this@MainActivity, topInset) }
             composable(Routes.TRAILS) { TrailsRoute(this@MainActivity, topInset) }
-            composable(Routes.DIRECTIONS) { DirectionsRoute(this@MainActivity, topInset) }
-            composable(Routes.CUSTOM_LOCATIONS) { CustomLocationsRoute(this@MainActivity, topInset) }
+            composable(Routes.DIRECTIONS) { DirectionsRoute(this@MainActivity, it, topInset) }
+            composable(Routes.CUSTOM_LOCATIONS) { CustomLocationsRoute(this@MainActivity, it, topInset) }
             composable(Routes.MAP_SEARCH) { MapSearchRoute(this@MainActivity) }
             composable(Routes.WEB, arguments = listOf(navArgument(Routes.PAGE_ARGUMENT) { type = NavType.StringType })) { entry ->
                 WebRoute(entry.arguments?.getString(Routes.PAGE_ARGUMENT), this@MainActivity)
@@ -2161,14 +2163,10 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
         navController?.popBackStack()
     }
 
-    override fun search(onResult: (SearchResult) -> Unit) {
-        searchResult = onResult
-        navigate(Routes.MAP_SEARCH)
-    }
-
     override fun deliver(result: SearchResult) {
-        searchResult?.invoke(result)
-        searchResult = null
+        val nav = navController ?: return
+        nav.previousBackStackEntry?.savedStateHandle?.set(Routes.SEARCH_RESULT, result.encode())
+        nav.popBackStack()
     }
 
     override fun showBottomBar(visible: Boolean) {
@@ -4979,6 +4977,9 @@ import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.ErrorDialog
+import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
 import kotlinx.coroutines.flow.Flow
@@ -5031,8 +5032,15 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
 
     protected fun openPage(page: HtmlPage) = navigate(Routes.web(page))
 
-    protected fun search(onResult: (SearchResult) -> Unit) {
-        (activity as? AppNavigator)?.search(onResult)
+    protected fun search() = navigate(Routes.MAP_SEARCH)
+
+    open fun onSearchResult(result: SearchResult) {}
+
+    protected fun showError(message: String) = dialogs.show(ErrorDialog(message))
+
+    @Composable
+    protected open fun DialogContent(dialog: PanelDialog) {
+        if (dialog is ErrorDialog) MessageDialog(dialog.message, dialogs::dismiss)
     }
 
     protected fun <T> observe(flow: Flow<T>, action: (T) -> Unit) {
@@ -5071,7 +5079,7 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
         }
         Content(topInset)
         MenuSheet(menuSheet)
-        dialogs.content?.invoke()
+        dialogs.current?.let { DialogContent(it) }
     }
 }
 
@@ -5083,26 +5091,24 @@ package app.simple.positional.extensions.panel
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import app.simple.positional.R
 import app.simple.positional.ui.compose.CalibrationDialog
-import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PanelDialog
 
 abstract class SensorPanel(activity: ComponentActivity) : PanelController(activity) {
     private var calibrationShown = false
     private var accelerometerAccuracy by mutableIntStateOf(-1)
     private var magnetometerAccuracy by mutableIntStateOf(-1)
 
-    protected fun showSensorError() {
-        val message = getString(R.string.sensor_error)
-        dialogs.show { MessageDialog(message, dialogs::dismiss) }
-    }
+    private data object Calibration : PanelDialog
 
-    protected fun showCalibration() {
-        dialogs.show { CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) }
-    }
+    protected fun showSensorError() = showError(getString(R.string.sensor_error))
+
+    protected fun showCalibration() = dialogs.show(Calibration)
 
     protected fun checkCalibration(type: Int, accuracy: Int) {
         when (type) {
@@ -5113,6 +5119,11 @@ abstract class SensorPanel(activity: ComponentActivity) : PanelController(activi
             calibrationShown = true
             showCalibration()
         }
+    }
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        if (dialog == Calibration) CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) else super.DialogContent(dialog)
     }
 }
 
@@ -7607,7 +7618,7 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
                     )
                     RotatingImage(state.needles[0], state.hour, Modifier.size(needleSize))
                     RotatingImage(state.needles[1], state.minute, Modifier.size(needleSize))
-                    RotatingImage(state.needles[2], state.second, Modifier.height(needleSize))
+                    RotatingImage(state.needles[2], state.second, Modifier.size(needleSize))
                 }
                 if (state.customLocation) {
                     Text(
@@ -8077,17 +8088,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import app.simple.positional.R
 
+interface PanelDialog
+
+data class ErrorDialog(val message: String) : PanelDialog
+
 @Stable
 class DialogHost {
-    var content by mutableStateOf<(@Composable () -> Unit)?>(null)
+    var current by mutableStateOf<PanelDialog?>(null)
         private set
 
-    fun show(content: @Composable () -> Unit) {
-        this.content = content
+    fun show(dialog: PanelDialog) {
+        current = dialog
     }
 
     fun dismiss() {
-        content = null
+        current = null
     }
 }
 
@@ -11613,6 +11628,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -11727,6 +11743,7 @@ private fun TrailPoints(state: TrailState, actions: TrailActions) {
                 painterResource(R.drawable.art_trail),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().padding(32.dp),
+                contentScale = ContentScale.FillWidth,
             )
         }
         state.points.forEach { TrailPointRow(it, actions) }
@@ -11850,16 +11867,27 @@ object Routes {
     const val MAP_SEARCH = "map_search"
     const val PAGE_ARGUMENT = "page"
     const val WEB = "web/{$PAGE_ARGUMENT}"
+    const val SEARCH_RESULT = "search_result"
 
     fun web(page: HtmlPage) = "web/${page.name}"
 }
 
-data class SearchResult(val address: String, val latitude: Double, val longitude: Double)
+data class SearchResult(val address: String, val latitude: Double, val longitude: Double) {
+    fun encode(): Array<String> = arrayOf(address, latitude.toString(), longitude.toString())
+
+    companion object {
+        fun decode(values: Array<String>?): SearchResult? {
+            if (values == null || values.size != 3) return null
+            val latitude = values[1].toDoubleOrNull() ?: return null
+            val longitude = values[2].toDoubleOrNull() ?: return null
+            return SearchResult(values[0], latitude, longitude)
+        }
+    }
+}
 
 interface AppNavigator {
     fun navigate(route: String)
     fun back()
-    fun search(onResult: (SearchResult) -> Unit)
     fun deliver(result: SearchResult)
 }
 
@@ -11878,16 +11906,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import app.simple.positional.R
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.constants.LocationPins
@@ -11908,6 +11938,7 @@ import app.simple.positional.ui.compose.AccentPalette
 import app.simple.positional.ui.compose.ArtsScreen
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationActions
+import app.simple.positional.ui.compose.CustomLocationForm
 import app.simple.positional.ui.compose.CustomLocationScreen
 import app.simple.positional.ui.compose.DirectionsActions
 import app.simple.positional.ui.compose.DirectionsScreen
@@ -11962,7 +11993,7 @@ fun TimeZoneRoute(navigator: AppNavigator, topInset: Dp) {
 @Composable
 fun MeasuresRoute(navigator: AppNavigator, topInset: Dp) {
     val viewModel: MeasureViewModel = viewModel()
-    val measures by viewModel.measures.collectAsState()
+    val measures by viewModel.measures.collectAsStateWithLifecycle()
     val records = remember(measures) {
         val selected = MeasurePreferences.getLastSelectedMeasure()
         measures?.map { Record(it.dateCreated, it, it.name.orEmpty(), it.note.orEmpty(), it.dateCreated, it.dateCreated == selected) }
@@ -11990,7 +12021,7 @@ fun MeasuresRoute(navigator: AppNavigator, topInset: Dp) {
 @Composable
 fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
     val viewModel: TrailsViewModel = viewModel()
-    val trails by viewModel.trails.collectAsState()
+    val trails by viewModel.trails.collectAsStateWithLifecycle()
     val records = remember(trails) {
         val current = TrailPreferences.getCurrentTrail()
         trails?.map { Record(it.keyTag, it, it.trailName.orEmpty(), it.trailNote.orEmpty(), it.dateCreated, it.trailName == current) }
@@ -12013,10 +12044,10 @@ fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
 }
 
 @Composable
-fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
+fun DirectionsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topInset: Dp) {
     val context = LocalContext.current
     val viewModel: DirectionsViewModel = viewModel()
-    val directions by viewModel.directions.collectAsState()
+    val directions by viewModel.directions.collectAsStateWithLifecycle()
     val actions = remember(viewModel) {
         object : DirectionsActions {
             override fun create() {
@@ -12045,7 +12076,7 @@ fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
 
             override fun delete(direction: DirectionModel) = viewModel.delete(direction)
 
-            override fun search() = navigator.search { viewModel.form.fill(it) }
+            override fun search() = navigator.navigate(Routes.MAP_SEARCH)
 
             override fun save(latitude: Double, longitude: Double) = viewModel.save(latitude, longitude)
 
@@ -12060,11 +12091,12 @@ fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
             }
         }
     }
+    SearchResultEffect(entry) { viewModel.form.fill(it) }
     DirectionsScreen(directions, viewModel.editing != null, viewModel.form, topInset, actions)
 }
 
 @Composable
-fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
+fun CustomLocationsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topInset: Dp) {
     val context = LocalContext.current
     val viewModel: CustomLocationViewModel = viewModel()
     LaunchedEffect(viewModel) {
@@ -12073,10 +12105,10 @@ fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
             viewModel.form.fill(MainPreferences.getAddress(), coordinates[0].toString(), coordinates[1].toString())
         }
     }
-    val locations by viewModel.locations.collectAsState()
+    val locations by viewModel.locations.collectAsStateWithLifecycle()
     val actions = remember(viewModel) {
         object : CustomLocationActions {
-            override fun search() = navigator.search { viewModel.form.fill(it) }
+            override fun search() = navigator.navigate(Routes.MAP_SEARCH)
 
             override fun save(latitude: Double, longitude: Double) = viewModel.save(newLocation(latitude, longitude))
 
@@ -12114,6 +12146,7 @@ fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
             }
         }
     }
+    SearchResultEffect(entry) { viewModel.form.fill(it) }
     CustomLocationScreen(viewModel.form, locations, topInset, actions)
 }
 
@@ -12121,7 +12154,7 @@ fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
 fun MapSearchRoute(navigator: AppNavigator) {
     val context = LocalContext.current
     val viewModel: MapSearchViewModel = viewModel()
-    val suggestions by viewModel.suggestions.collectAsState()
+    val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
     val map = rememberPickerMap()
     LaunchedEffect(map) {
         CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) -> map.moveTo(lat, lon, animate = false) }
@@ -12146,11 +12179,23 @@ fun MapSearchRoute(navigator: AppNavigator) {
                     return
                 }
                 navigator.deliver(SearchResult(form.address.trim(), coordinates.first, coordinates.second))
-                navigator.back()
             }
         }
     }
     MapSearchScreen(viewModel.form, suggestions, map.view, actions)
+}
+
+@Composable
+fun SearchResultEffect(entry: NavBackStackEntry, onResult: (SearchResult) -> Unit) {
+    val latest by rememberUpdatedState(onResult)
+    LaunchedEffect(entry) {
+        val handle = entry.savedStateHandle
+        handle.getStateFlow<Array<String>?>(Routes.SEARCH_RESULT, null).collect { values ->
+            if (values == null) return@collect
+            handle.set<Array<String>?>(Routes.SEARCH_RESULT, null)
+            SearchResult.decode(values)?.let(latest)
+        }
+    }
 }
 
 @Composable
@@ -12168,7 +12213,7 @@ fun WebRoute(pageName: String?, navigator: AppNavigator) {
     }
 }
 
-private fun app.simple.positional.ui.compose.CustomLocationForm.fill(result: SearchResult) = fill(
+fun CustomLocationForm.fill(result: SearchResult) = fill(
     address = result.address.ifEmpty { address },
     latitude = result.latitude.toString(),
     longitude = result.longitude.toString(),
@@ -12344,6 +12389,7 @@ import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.flow.filterNotNull
@@ -12365,15 +12411,19 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
     }
 
     private fun showMenu() = menuSheet.show {
-        PanelMenus.compass(
-            onBloomSkins = {
-                dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
-            },
-            onPhysicalProperties = {
-                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { openPage(HtmlPage.PHYSICAL_PROPERTIES) } }
-            },
-        )
+        PanelMenus.compass(onBloomSkins = { dialogs.show(CompassDialog.Bloom) }, onPhysicalProperties = { dialogs.show(CompassDialog.Physics) })
     }
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            CompassDialog.Bloom -> BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) }
+            CompassDialog.Physics -> PhysicalPropertiesDialog(dialogs::dismiss) { openPage(HtmlPage.PHYSICAL_PROPERTIES) }
+            else -> super.DialogContent(dialog)
+        }
+    }
+
+    private enum class CompassDialog : PanelDialog { Bloom, Physics }
 
     init {
         if (!sensor.isAvailable) showSensorError()
@@ -12573,7 +12623,6 @@ import app.simple.positional.ui.compose.GpsScreen
 import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
-import app.simple.positional.ui.compose.MessageDialog
 import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
@@ -12582,7 +12631,9 @@ import app.simple.positional.ui.compose.CoordinateDetailsDialog
 import app.simple.positional.ui.compose.LocationDetailsDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.util.LocationShare
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
@@ -12656,8 +12707,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
         val needsPlayServices = !MapSource.isOsm() || MainPreferences.getLocationProvider() == SettingsLabels.PROVIDER_FUSED
         if (needsPlayServices && !LocationPrompt.checkGooglePlayServices(activity)) {
-            val message = getString(R.string.play_services_error)
-            dialogs.show { MessageDialog(message, dialogs::dismiss) }
+            showError(getString(R.string.play_services_error))
         }
 
         if (state.custom) {
@@ -12785,7 +12835,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun customLocation() {
         val (latitude, longitude) = coordinates()
-        dialogs.show { LocationSummaryDialog(latitude, longitude, state.custom, dialogs::dismiss) }
+        dialogs.show(GpsDialog.Summary(latitude, longitude))
     }
 
     private fun coordinates(): Pair<Double, Double> {
@@ -12795,7 +12845,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         return stored[0].toDouble() to stored[1].toDouble()
     }
 
-    override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
+    override fun pinCustomization() = dialogs.show(GpsDialog.Pin)
 
     override fun locate(close: Boolean) {
         if (getLocationStatus(activity)) {
@@ -12816,22 +12866,12 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     override fun targetCoordinates() {
         val target = GPSPreferences.getTargetMarkerCoordinates()
         targetForm.fill("", CoordinateInput.format(target[0].toDouble()), CoordinateInput.format(target[1].toDouble()))
-        dialogs.show {
-            TargetCoordinatesDialog(
-                targetForm,
-                onSearch = {
-                    search { result ->
-                        targetForm.fill(result.address, CoordinateInput.format(result.latitude), CoordinateInput.format(result.longitude))
-                    }
-                },
-                onDismiss = dialogs::dismiss,
-            ) { latitude, longitude ->
-                GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
-                GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
-                GPSPreferences.setTargetMarker(true)
-                dialogs.dismiss()
-            }
-        }
+        dialogs.show(GpsDialog.Target)
+    }
+
+    override fun onSearchResult(result: SearchResult) {
+        targetForm.fill(result.address, CoordinateInput.format(result.latitude), CoordinateInput.format(result.longitude))
+        dialogs.show(GpsDialog.Target)
     }
 
     override fun removeTarget() = GPSPreferences.setTargetMarker(false)
@@ -12892,13 +12932,36 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         LocationShare.share(activity, latitude, longitude, state.address)
     }
 
-    override fun locationDetails() = dialogs.show {
-        LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
-    }
+    override fun locationDetails() = dialogs.show(GpsDialog.Details)
 
     override fun coordinateDetails() {
         val (latitude, longitude) = coordinates()
-        dialogs.show { CoordinateDetailsDialog(latitude, longitude, dialogs::dismiss) }
+        dialogs.show(GpsDialog.Formats(latitude, longitude))
+    }
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            is GpsDialog.Summary -> LocationSummaryDialog(dialog.latitude, dialog.longitude, state.custom, dialogs::dismiss)
+            is GpsDialog.Formats -> CoordinateDetailsDialog(dialog.latitude, dialog.longitude, dialogs::dismiss)
+            GpsDialog.Pin -> PinCustomizationDialog(dialogs::dismiss)
+            GpsDialog.Details -> LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
+            GpsDialog.Target -> TargetCoordinatesDialog(targetForm, onSearch = ::search, onDismiss = dialogs::dismiss) { latitude, longitude ->
+                GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
+                GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
+                GPSPreferences.setTargetMarker(true)
+                dialogs.dismiss()
+            }
+            else -> super.DialogContent(dialog)
+        }
+    }
+
+    private sealed interface GpsDialog : PanelDialog {
+        data class Summary(val latitude: Double, val longitude: Double) : GpsDialog
+        data class Formats(val latitude: Double, val longitude: Double) : GpsDialog
+        data object Pin : GpsDialog
+        data object Details : GpsDialog
+        data object Target : GpsDialog
     }
 
     override fun showTarget() {
@@ -12994,6 +13057,7 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
 import android.location.Location
@@ -13013,6 +13077,7 @@ import app.simple.positional.ui.compose.MeasureActions
 import app.simple.positional.ui.compose.MeasureScreen
 import app.simple.positional.ui.compose.MeasureState
 import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
@@ -13124,15 +13189,21 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         (activity as? BottomBarHost)?.showBottomBar(visible)
     }
 
-    override fun addMeasure() {
-        val title = getString(R.string.create_new)
-        dialogs.show {
-            NameNoteDialog(title, isValid = { it.isNotEmpty() }, onDismiss = dialogs::dismiss) { name, note ->
+    override fun addMeasure() = dialogs.show(NewMeasure)
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        if (dialog == NewMeasure) {
+            NameNoteDialog(stringResource(R.string.create_new), isValid = { it.isNotEmpty() }, onDismiss = dialogs::dismiss) { name, note ->
                 measureViewModel.addMeasure(name, note)
                 dialogs.dismiss()
             }
+        } else {
+            super.DialogContent(dialog)
         }
     }
+
+    private data object NewMeasure : PanelDialog
 
     override fun measures() = navigate(Routes.MEASURES)
 
@@ -13334,6 +13405,7 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
 import android.os.SystemClock
@@ -13356,6 +13428,7 @@ import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
@@ -13385,29 +13458,33 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
             topInset,
             onTimezone = { navigate(Routes.TIMEZONE) },
             onMenu = ::showMenu,
-            onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
+            onLocation = { dialogs.show(ClockDialog.Location) },
         )
     }
 
     private fun showMenu() = menuSheet.show {
-        PanelMenus.clock(
-            onNeedles = {
-                dialogs.show { ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) } }
-            },
-            onMotionType = ::showMotionTypes,
-        )
+        PanelMenus.clock(onNeedles = { dialogs.show(ClockDialog.Needles) }, onMotionType = { dialogs.show(ClockDialog.Motion) })
     }
 
-    private fun showMotionTypes() {
-        val title = getString(R.string.motion_type)
-        val choices = motionTypes.map { (value, label) -> Choice(value, getString(label)) }
-        dialogs.show {
-            ChoiceDialog(title, choices, ClockPreferences.getMovementType(), onDismiss = dialogs::dismiss) {
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            ClockDialog.Location -> LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss)
+            ClockDialog.Needles -> ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) }
+            ClockDialog.Motion -> ChoiceDialog(
+                stringResource(R.string.motion_type),
+                motionTypes.map { (value, label) -> Choice(value, stringResource(label)) },
+                ClockPreferences.getMovementType(),
+                onDismiss = dialogs::dismiss,
+            ) {
                 ClockPreferences.setMovementType(it)
                 dialogs.dismiss()
             }
+            else -> super.DialogContent(dialog)
         }
     }
+
+    private enum class ClockDialog : PanelDialog { Location, Needles, Motion }
 
     init {
         observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
@@ -13499,13 +13576,13 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.SharedPreferences
 import android.location.Location
 import android.widget.Toast
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -13513,6 +13590,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
@@ -13533,6 +13611,7 @@ import app.simple.positional.ui.compose.TrailScreen
 import app.simple.positional.ui.compose.TrailState
 import app.simple.positional.ui.compose.MarkerIconRow
 import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.util.DMSConverter
@@ -13645,27 +13724,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     override fun trails() = navigate(Routes.TRAILS)
 
-    override fun addTrail() {
-        val title = getString(R.string.enter_trail_name)
-        dialogs.show {
-            val existing by trails.trails.collectAsState()
-            NameNoteDialog(
-                title,
-                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().mapNotNull { it.trailName }) },
-                onDismiss = dialogs::dismiss,
-                initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
-                onDraft = { name, note ->
-                    TrailPreferences.setLastTrailName(name)
-                    TrailPreferences.setLastTrailNote(note)
-                },
-            ) { name, note ->
-                trails.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
-                TrailPreferences.setLastTrailName("")
-                TrailPreferences.setLastTrailNote("")
-                dialogs.dismiss()
-            }
-        }
-    }
+    override fun addTrail() = dialogs.show(NewTrail)
 
     override fun menu() = menuSheet.show { PanelMenus.trail { openPage(HtmlPage.TRAIL_HELP) } }
 
@@ -13709,33 +13768,63 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         if (quick) {
             save(TrailPoint(latitude, longitude, System.currentTimeMillis(), icon, null, null, accuracy))
         } else {
-            showMarkerDialog(icon, latitude, longitude, accuracy)
+            dialogs.show(NewMarker(icon, latitude, longitude, accuracy, System.currentTimeMillis()))
         }
     }
 
-    private fun showMarkerDialog(icon: Int, latitude: Double, longitude: Double, accuracy: Float) {
-        val title = getString(R.string.enter_marker_name)
-        val time = System.currentTimeMillis()
-        dialogs.show {
-            var selected by rememberSaveable { mutableIntStateOf(icon) }
-            NameNoteDialog(
-                title,
-                isValid = { true },
-                onDismiss = dialogs::dismiss,
-                initial = TrailPreferences.getLastMarkerName() to TrailPreferences.getLastMarkerNote(),
-                onDraft = { name, note ->
-                    TrailPreferences.setLastMarkerName(name)
-                    TrailPreferences.setLastMarkerNote(note)
-                },
-                extra = { MarkerIconRow(selected) { selected = it } },
-            ) { name, note ->
-                save(TrailPoint(latitude, longitude, time, selected, note.ifEmpty { null }, name.ifEmpty { null }, accuracy))
-                TrailPreferences.setLastMarkerName("")
-                TrailPreferences.setLastMarkerNote("")
-                dialogs.dismiss()
-            }
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            NewTrail -> NewTrailDialog()
+            is NewMarker -> NewMarkerDialog(dialog)
+            else -> super.DialogContent(dialog)
         }
     }
+
+    @Composable
+    private fun NewTrailDialog() {
+        val existing by trails.trails.collectAsStateWithLifecycle()
+        NameNoteDialog(
+            stringResource(R.string.enter_trail_name),
+            isValid = { name -> TrailNames.isValid(name, existing.orEmpty().mapNotNull { it.trailName }) },
+            onDismiss = dialogs::dismiss,
+            initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
+            onDraft = { name, note ->
+                TrailPreferences.setLastTrailName(name)
+                TrailPreferences.setLastTrailNote(note)
+            },
+        ) { name, note ->
+            trails.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
+            TrailPreferences.setLastTrailName("")
+            TrailPreferences.setLastTrailNote("")
+            dialogs.dismiss()
+        }
+    }
+
+    @Composable
+    private fun NewMarkerDialog(marker: NewMarker) {
+        var selected by rememberSaveable(marker) { mutableIntStateOf(marker.icon) }
+        NameNoteDialog(
+            stringResource(R.string.enter_marker_name),
+            isValid = { true },
+            onDismiss = dialogs::dismiss,
+            initial = TrailPreferences.getLastMarkerName() to TrailPreferences.getLastMarkerNote(),
+            onDraft = { name, note ->
+                TrailPreferences.setLastMarkerName(name)
+                TrailPreferences.setLastMarkerNote(note)
+            },
+            extra = { MarkerIconRow(selected) { selected = it } },
+        ) { name, note ->
+            save(TrailPoint(marker.latitude, marker.longitude, marker.time, selected, note.ifEmpty { null }, name.ifEmpty { null }, marker.accuracy))
+            TrailPreferences.setLastMarkerName("")
+            TrailPreferences.setLastMarkerNote("")
+            dialogs.dismiss()
+        }
+    }
+
+    private data object NewTrail : PanelDialog
+
+    private data class NewMarker(val icon: Int, val latitude: Double, val longitude: Double, val accuracy: Float, val time: Long) : PanelDialog
 
     private fun save(point: TrailPoint) {
         trailData.save(point)
@@ -18275,7 +18364,7 @@ class CoordinateInputTest {
 ################################################################################
 package app.simple.positional.ui.compose
 
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -18283,11 +18372,19 @@ class DialogHostTest {
     @Test
     fun showAndDismiss() {
         val host = DialogHost()
-        assertNull(host.content)
-        host.show {}
-        assertNotNull(host.content)
+        assertNull(host.current)
+        host.show(ErrorDialog("a"))
+        assertEquals(ErrorDialog("a"), host.current)
         host.dismiss()
-        assertNull(host.content)
+        assertNull(host.current)
+    }
+
+    @Test
+    fun showReplacesCurrent() {
+        val host = DialogHost()
+        host.show(ErrorDialog("a"))
+        host.show(ErrorDialog("b"))
+        assertEquals(ErrorDialog("b"), host.current)
     }
 }
 
@@ -18571,6 +18668,7 @@ package app.simple.positional.ui.navigation
 
 import app.simple.positional.constants.HtmlPage
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -18592,6 +18690,20 @@ class RoutesTest {
         )
         assertEquals(routes.size, routes.toSet().size)
         assertTrue(routes.none { it.contains(' ') })
+    }
+
+    @Test
+    fun searchResultRoundTrips() {
+        val result = SearchResult("Main St, 1", 37.0871, -76.4730)
+        assertEquals(result, SearchResult.decode(result.encode()))
+        assertEquals(SearchResult("", -90.0, 180.0), SearchResult.decode(SearchResult("", -90.0, 180.0).encode()))
+    }
+
+    @Test
+    fun malformedSearchResultIsIgnored() {
+        assertNull(SearchResult.decode(null))
+        assertNull(SearchResult.decode(arrayOf("a", "1.0")))
+        assertNull(SearchResult.decode(arrayOf("a", "x", "1.0")))
     }
 }
 
