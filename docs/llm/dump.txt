@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T04:29:33-04:00
+Generated: 2026-10-24T04:51:28-04:00
 Branch:    master
-Commit:    32cca68b 2026-10-24 04:29:29 -0400 add prompt
+Commit:    dab72323 2026-10-24 04:51:25 -0400 add prompt
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (888 files)
+## TREE (890 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -106,6 +106,7 @@ app/
                   PickerMap.kt
                   TrackMaps.kt
                 utils/
+                  DelayedTask.kt
                   MapAnimations.kt
                 views/
                   CustomWebView.kt
@@ -925,6 +926,8 @@ app/
                   MapPreferencesTest.kt
                   OsmStyleTest.kt
                   TrackPinTest.kt
+                utils/
+                  DelayedTaskTest.kt
               location/
                 AndroidLocationSourceTest.kt
               math/
@@ -1271,13 +1274,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), location pin colours, map preference bindings, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), location pin colours, map preference bindings, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, delayed map tasks, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started; map views follow their own settings through `MapPreferences` flows collected while resumed, applying only values that changed (including changes made while paused), so no panel, view model or map view registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started; map views follow their own settings through `MapPreferences` flows collected while resumed (in a child scope cancelled on pause that also runs their delayed tasks), applying only values that changed (including changes made while paused), so no panel, view model or map view registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1312,7 +1315,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 15 | Settings and level panel state in view models (`SettingsViewModel`, `LevelViewModel`) built from `SharedPreferences.changes` and collected with `collectAsStateWithLifecycle`; preference writes moved out of the panel controllers, which keep only permission requests, activity recreation, window flags and navigation; the settings screen no longer rebuilds its state (and queries every launcher alias) on unrelated preference changes | Done |
 | 16 | Compass, clock, direction, GPS, trail and measure panel settings as view model `StateFlow`s built with `preference` (`SharedPreferences.watch`, only distinct values); panels apply them with `PanelController.bind` while started; panels and view models no longer register preference listeners; clock time zone, custom location, location provider, GPS target, selected trail and measure follow preferences through flows; trail map clear removed (switching trails redraws from the points flow); duplicate accent recreate in the settings panel removed | Done |
 | 17 | Map view preference listeners (Google and OpenStreetMap bases) replaced by `MapPreferences` flows bound to the map lifecycle: look, compass rotation, pin, bearing, target, auto center, geodesic and wrap settings react only to their own keys (the OpenStreetMap GPS map no longer redraws the target line on every preference write); unused north only preference removed; location pin colours as constants so panel settings load in JVM tests | Done |
-| 18 | Map view timers (heading sensor delay, trail auto center) as lifecycle-bound coroutines instead of `Handler` runnables | Next |
+| 18 | Map view timers (heading sensor delay, trail auto center) as `DelayedTask` coroutines in a scope that lives only while the map is resumed, so pausing cancels them together with the preference flows; `Handler` runnables and the unused pause hook removed | Done |
+| 19 | Sensor display rotation through `ContextCompat.getDisplayOrDefault` instead of the deprecated `WindowManager.defaultDisplay`; remaining deprecation suppressions reviewed | Next |
 
 ## Building
 
@@ -1508,6 +1512,7 @@ dependencies {
     ksp 'androidx.room:room-compiler:2.8.5'
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
 }
 
 ################################################################################
@@ -2965,8 +2970,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.location.Location
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -2975,8 +2978,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
+import app.simple.positional.decorations.utils.DelayedTask
 import app.simple.positional.decorations.utils.animateColors
 import app.simple.positional.decorations.utils.animateTo
+import app.simple.positional.decorations.utils.child
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.util.BitmapHelper.toBitmap
@@ -2998,7 +3003,8 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PatternItem
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlin.math.roundToInt
 
 data class MapLook(val label: Boolean, val satellite: Boolean, val highContrast: Boolean, val buildings: Boolean, val traffic: Boolean)
@@ -3027,12 +3033,13 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     protected var heading = 0f
     protected var headingAccuracy = -1
     protected var animating = false
-    protected val mainHandler = Handler(Looper.getMainLooper())
+    protected var resumedScope: CoroutineScope? = null
+        private set
     protected val accent = context.resolveAttrColor(R.attr.colorAppAccent)
     private var owner: LifecycleOwner? = null
     private var sensorOn = false
     private val headingSensor = HeadingSensor(context, this)
-    private val registerTask = Runnable { registerHeading() }
+    private val registerTask = DelayedTask(SENSOR_DELAY, ::registerHeading)
     private var pin: Marker? = null
     private var pinKey: Any? = null
     private var circle: Circle? = null
@@ -3042,7 +3049,6 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     private val startCap by lazy { cap(R.drawable.ic_trail_start) }
     private val endCap by lazy { cap(R.drawable.seekbar_thumb) }
     private val preferences by lazy { MapPreferences().also(::bindPreferences) }
-    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
     protected open val lookKeys: Set<String> = emptySet()
@@ -3059,7 +3065,6 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     protected open fun onHeadingChanged() {}
     protected open fun onHeadingAccuracyChanged() {}
     protected open fun onResumed() {}
-    protected open fun onPaused() {}
     protected open fun onCompassRotation(enabled: Boolean) {}
 
     protected open fun bindPreferences(preferences: MapPreferences) {
@@ -3078,23 +3083,21 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         override fun onResume(owner: LifecycleOwner) {
             this@GoogleMapView.owner = owner
             this@GoogleMapView.onResume()
-            preferenceJob = preferences.launchIn(owner.lifecycleScope)
+            resumedScope = owner.lifecycleScope.child().also { preferences.launchIn(it) }
             registerHeadingLater()
             onResumed()
         }
 
         override fun onPause(owner: LifecycleOwner) {
-            onPaused()
             unregisterHeading()
-            preferenceJob?.cancel()
-            preferenceJob = null
+            resumedScope?.cancel()
+            resumedScope = null
             this@GoogleMapView.onPause()
         }
 
         override fun onStop(owner: LifecycleOwner) = this@GoogleMapView.onStop()
 
         override fun onDestroy(owner: LifecycleOwner) {
-            mainHandler.removeCallbacksAndMessages(null)
             listOf(pinAnimator, circleAnimator, colorAnimator).forEach { it?.cancel() }
             this@GoogleMapView.owner = null
             this@GoogleMapView.onDestroy()
@@ -3149,12 +3152,11 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     }
 
     protected fun registerHeadingLater() {
-        mainHandler.removeCallbacks(registerTask)
-        mainHandler.postDelayed(registerTask, SENSOR_DELAY)
+        registerTask.schedule(resumedScope)
     }
 
     protected fun unregisterHeading() {
-        mainHandler.removeCallbacks(registerTask)
+        registerTask.cancel()
         if (sensorOn) owner?.let(headingSensor::onPause)
         sensorOn = false
     }
@@ -3719,14 +3721,14 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.location.Location
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
+import app.simple.positional.decorations.utils.DelayedTask
+import app.simple.positional.decorations.utils.child
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.util.ColorUtils.resolveAttrColor
@@ -3743,7 +3745,8 @@ import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.sources.GeoJsonSource
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlin.math.roundToInt
 import org.maplibre.android.geometry.LatLng as LibreLatLng
 
@@ -3756,16 +3759,16 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected var heading = 0f
     protected var headingAccuracy = -1
     protected var animating = false
-    protected val mainHandler = Handler(Looper.getMainLooper())
+    protected var resumedScope: CoroutineScope? = null
+        private set
     private var style: Style? = null
     private var pinKey: Any? = null
     private var owner: LifecycleOwner? = null
     private var sensorOn = false
     private val headingSensor = HeadingSensor(context, this)
-    private val registerTask = Runnable { registerHeading() }
+    private val registerTask = DelayedTask(SENSOR_DELAY, ::registerHeading)
     private val accent = context.resolveAttrColor(R.attr.colorAppAccent)
     private val preferences by lazy { MapPreferences().also(::bindPreferences) }
-    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
     protected open val compassKey: String? = null
@@ -3779,7 +3782,6 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected open fun onCameraMoved() {}
     protected open fun onHeadingChanged() {}
     protected open fun onResumed() {}
-    protected open fun onPaused() {}
     protected open fun onCompassRotation(enabled: Boolean) {}
 
     protected open fun bindPreferences(preferences: MapPreferences) {
@@ -3797,23 +3799,21 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
         override fun onResume(owner: LifecycleOwner) {
             this@OsmMapView.owner = owner
             this@OsmMapView.onResume()
-            preferenceJob = preferences.launchIn(owner.lifecycleScope)
+            resumedScope = owner.lifecycleScope.child().also { preferences.launchIn(it) }
             registerHeadingLater()
             onResumed()
         }
 
         override fun onPause(owner: LifecycleOwner) {
-            onPaused()
             unregisterHeading()
-            preferenceJob?.cancel()
-            preferenceJob = null
+            resumedScope?.cancel()
+            resumedScope = null
             this@OsmMapView.onPause()
         }
 
         override fun onStop(owner: LifecycleOwner) = this@OsmMapView.onStop()
 
         override fun onDestroy(owner: LifecycleOwner) {
-            mainHandler.removeCallbacksAndMessages(null)
             this@OsmMapView.owner = null
             this@OsmMapView.onDestroy()
         }
@@ -3865,12 +3865,11 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     }
 
     protected fun registerHeadingLater() {
-        mainHandler.removeCallbacks(registerTask)
-        mainHandler.postDelayed(registerTask, SENSOR_DELAY)
+        registerTask.schedule(resumedScope)
     }
 
     protected fun unregisterHeading() {
-        mainHandler.removeCallbacks(registerTask)
+        registerTask.cancel()
         if (sensorOn) owner?.let(headingSensor::onPause)
         sensorOn = false
     }
@@ -4228,6 +4227,7 @@ import android.location.Location
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.constants.TrailIcons
+import app.simple.positional.decorations.utils.DelayedTask
 import app.simple.positional.model.TrailPoint
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
@@ -4241,7 +4241,7 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     private var points: List<TrailPoint> = emptyList()
     private val icons = mutableSetOf<Int>()
     private var restore: CameraPosition? = null
-    private val autoCenter = Runnable { recenter() }
+    private val autoCenter = DelayedTask(AUTO_CENTER_DELAY, ::recenter)
 
     override fun startCamera(): CameraPosition {
         val last = MainPreferences.getLastCoordinates()
@@ -4255,9 +4255,7 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
         scheduleAutoCenter()
     }
 
-    override fun onCameraMoved() {
-        mainHandler.removeCallbacks(autoCenter)
-    }
+    override fun onCameraMoved() = autoCenter.cancel()
 
     override fun onStyleReady() {
         icons.clear()
@@ -4269,10 +4267,6 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override fun onHeadingChanged() = drawPuck()
 
     override fun onResumed() = scheduleAutoCenter()
-
-    override fun onPaused() {
-        mainHandler.removeCallbacks(autoCenter)
-    }
 
     override fun updateLocation(location: Location) {
         val first = this.location == null
@@ -4321,8 +4315,7 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     }
 
     private fun scheduleAutoCenter() {
-        mainHandler.removeCallbacks(autoCenter)
-        if (TrailPreferences.getMapAutoCenter()) mainHandler.postDelayed(autoCenter, AUTO_CENTER_DELAY)
+        if (TrailPreferences.getMapAutoCenter()) autoCenter.schedule(resumedScope) else autoCenter.cancel()
     }
 
     private fun recenter() {
@@ -4468,6 +4461,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
 import app.simple.positional.constants.TrailIcons
+import app.simple.positional.decorations.utils.DelayedTask
 import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
 import app.simple.positional.model.TrailPoint
@@ -4573,7 +4567,7 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     private val flags = mutableListOf<Pair<Long, Marker>>()
     private val icons = mutableMapOf<Int, BitmapDescriptor>()
     private var restore: CameraPosition? = null
-    private val autoCenter = Runnable { recenter() }
+    private val autoCenter = DelayedTask(AUTO_CENTER_DELAY, ::recenter)
 
     override fun look() = MapLook(
         TrailPreferences.isLabelOn(),
@@ -4595,9 +4589,7 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
         scheduleAutoCenter()
     }
 
-    override fun onCameraMoved() {
-        mainHandler.removeCallbacks(autoCenter)
-    }
+    override fun onCameraMoved() = autoCenter.cancel()
 
     override fun onReady() {
         drawPoints()
@@ -4606,10 +4598,6 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     }
 
     override fun onResumed() = scheduleAutoCenter()
-
-    override fun onPaused() {
-        mainHandler.removeCallbacks(autoCenter)
-    }
 
     override fun updateLocation(location: Location) {
         val first = this.location == null
@@ -4658,8 +4646,7 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     }
 
     private fun scheduleAutoCenter() {
-        mainHandler.removeCallbacks(autoCenter)
-        if (TrailPreferences.getMapAutoCenter()) mainHandler.postDelayed(autoCenter, AUTO_CENTER_DELAY)
+        if (TrailPreferences.getMapAutoCenter()) autoCenter.schedule(resumedScope) else autoCenter.cancel()
     }
 
     private fun recenter() {
@@ -4830,6 +4817,37 @@ class GoogleMeasureMap(context: Context) : GoogleTrackMap(context), MeasureMap {
         val GUIDE_PATTERN = listOf(Dash(20f), Gap(10f), Dash(30f), Gap(20f), Dash(40f), Gap(30f))
     }
 }
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/decorations/utils/DelayedTask.kt
+################################################################################
+package app.simple.positional.decorations.utils
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
+
+class DelayedTask(private val delayMillis: Long, private val action: () -> Unit) {
+    private var job: Job? = null
+
+    fun schedule(scope: CoroutineScope?) {
+        cancel()
+        job = scope?.launch {
+            delay(delayMillis)
+            action()
+        }
+    }
+
+    fun cancel() {
+        job?.cancel()
+        job = null
+    }
+}
+
+fun CoroutineScope.child(): CoroutineScope = CoroutineScope(coroutineContext + SupervisorJob(coroutineContext.job))
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/utils/MapAnimations.kt
@@ -18070,6 +18088,95 @@ class TrackPinTest {
     fun withoutCompassPinShowsMovement() {
         assertEquals(R.drawable.ic_pin_bearing, TrackPin.drawable(true, false, -1, true))
         assertEquals(R.drawable.ic_pin_no_speed, TrackPin.drawable(true, false, -1, false))
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/decorations/utils/DelayedTaskTest.kt
+################################################################################
+package app.simple.positional.decorations.utils
+
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class DelayedTaskTest {
+    private val scope = TestScope()
+    private var runs = 0
+    private val task = DelayedTask(DELAY) { runs++ }
+
+    private fun advance(millis: Long) {
+        scope.advanceTimeBy(millis)
+        scope.runCurrent()
+    }
+
+    @Test
+    fun runsOnceAfterDelay() {
+        task.schedule(scope)
+        advance(DELAY - 1)
+        assertEquals(0, runs)
+        advance(1)
+        assertEquals(1, runs)
+        advance(DELAY * 3)
+        assertEquals(1, runs)
+    }
+
+    @Test
+    fun rescheduleRestartsDelay() {
+        task.schedule(scope)
+        advance(DELAY - 1)
+        task.schedule(scope)
+        advance(DELAY - 1)
+        assertEquals(0, runs)
+        advance(1)
+        assertEquals(1, runs)
+    }
+
+    @Test
+    fun cancelStopsPendingRun() {
+        task.schedule(scope)
+        advance(DELAY / 2)
+        task.cancel()
+        advance(DELAY * 2)
+        assertEquals(0, runs)
+    }
+
+    @Test
+    fun withoutScopeNothingRuns() {
+        task.schedule(null)
+        advance(DELAY * 2)
+        assertEquals(0, runs)
+    }
+
+    @Test
+    fun cancelledChildStopsTaskButNotParent() {
+        val child = scope.child()
+        task.schedule(child)
+        child.cancel()
+        advance(DELAY * 2)
+        assertEquals(0, runs)
+        assertTrue(scope.isActive)
+        task.schedule(scope)
+        advance(DELAY)
+        assertEquals(1, runs)
+    }
+
+    @Test
+    fun cancelledParentCancelsChild() {
+        val parent = TestScope()
+        val child = parent.child()
+        parent.cancel()
+        assertFalse(child.isActive)
+    }
+
+    private companion object {
+        const val DELAY = 500L
     }
 }
 
