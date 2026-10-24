@@ -38,6 +38,7 @@ import app.simple.positional.ui.navigation.MapSearchRoute
 import app.simple.positional.ui.navigation.MeasuresRoute
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.ui.navigation.SearchResult
+import app.simple.positional.ui.navigation.SearchResultEffect
 import app.simple.positional.ui.navigation.TimeZoneRoute
 import app.simple.positional.ui.navigation.TrailsRoute
 import app.simple.positional.ui.navigation.WebRoute
@@ -65,7 +66,6 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
     private var panel by mutableStateOf(PanelCatalog.LOCATION)
     private var barVisible by mutableStateOf(true)
     private var navController: NavHostController? = null
-    private var searchResult: ((SearchResult) -> Unit)? = null
     private val location: LocationViewModel by viewModels()
 
     private val permissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -99,7 +99,8 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
         val controller = remember(panel) { createPanel(panel, this) }
         DisposableEffect(controller) { onDispose { controller.destroy() } }
         NavHost(nav, startDestination = Routes.PANELS, modifier = Modifier.fillMaxSize().background(colorResource(R.color.mainBackground))) {
-            composable(Routes.PANELS) {
+            composable(Routes.PANELS) { entry ->
+                SearchResultEffect(entry, controller::onSearchResult)
                 Box(Modifier.fillMaxSize()) {
                     controller.Host(topInset)
                     PanelSwitcher(panel, barVisible, ::select, Modifier.align(Alignment.BottomEnd))
@@ -110,8 +111,8 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
             composable(Routes.TIMEZONE) { TimeZoneRoute(this@MainActivity, topInset) }
             composable(Routes.MEASURES) { MeasuresRoute(this@MainActivity, topInset) }
             composable(Routes.TRAILS) { TrailsRoute(this@MainActivity, topInset) }
-            composable(Routes.DIRECTIONS) { DirectionsRoute(this@MainActivity, topInset) }
-            composable(Routes.CUSTOM_LOCATIONS) { CustomLocationsRoute(this@MainActivity, topInset) }
+            composable(Routes.DIRECTIONS) { DirectionsRoute(this@MainActivity, it, topInset) }
+            composable(Routes.CUSTOM_LOCATIONS) { CustomLocationsRoute(this@MainActivity, it, topInset) }
             composable(Routes.MAP_SEARCH) { MapSearchRoute(this@MainActivity) }
             composable(Routes.WEB, arguments = listOf(navArgument(Routes.PAGE_ARGUMENT) { type = NavType.StringType })) { entry ->
                 WebRoute(entry.arguments?.getString(Routes.PAGE_ARGUMENT), this@MainActivity)
@@ -127,14 +128,10 @@ class MainActivity : BaseActivity(), BottomBarHost, AppNavigator {
         navController?.popBackStack()
     }
 
-    override fun search(onResult: (SearchResult) -> Unit) {
-        searchResult = onResult
-        navigate(Routes.MAP_SEARCH)
-    }
-
     override fun deliver(result: SearchResult) {
-        searchResult?.invoke(result)
-        searchResult = null
+        val nav = navController ?: return
+        nav.previousBackStackEntry?.savedStateHandle?.set(Routes.SEARCH_RESULT, result.encode())
+        nav.popBackStack()
     }
 
     override fun showBottomBar(visible: Boolean) {

@@ -35,7 +35,6 @@ import app.simple.positional.ui.compose.GpsScreen
 import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
-import app.simple.positional.ui.compose.MessageDialog
 import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
@@ -44,7 +43,9 @@ import app.simple.positional.ui.compose.CoordinateDetailsDialog
 import app.simple.positional.ui.compose.LocationDetailsDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.util.LocationShare
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.toAnnotatedString
@@ -118,8 +119,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
         val needsPlayServices = !MapSource.isOsm() || MainPreferences.getLocationProvider() == SettingsLabels.PROVIDER_FUSED
         if (needsPlayServices && !LocationPrompt.checkGooglePlayServices(activity)) {
-            val message = getString(R.string.play_services_error)
-            dialogs.show { MessageDialog(message, dialogs::dismiss) }
+            showError(getString(R.string.play_services_error))
         }
 
         if (state.custom) {
@@ -247,7 +247,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun customLocation() {
         val (latitude, longitude) = coordinates()
-        dialogs.show { LocationSummaryDialog(latitude, longitude, state.custom, dialogs::dismiss) }
+        dialogs.show(GpsDialog.Summary(latitude, longitude))
     }
 
     private fun coordinates(): Pair<Double, Double> {
@@ -257,7 +257,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         return stored[0].toDouble() to stored[1].toDouble()
     }
 
-    override fun pinCustomization() = dialogs.show { PinCustomizationDialog(dialogs::dismiss) }
+    override fun pinCustomization() = dialogs.show(GpsDialog.Pin)
 
     override fun locate(close: Boolean) {
         if (getLocationStatus(activity)) {
@@ -278,22 +278,12 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     override fun targetCoordinates() {
         val target = GPSPreferences.getTargetMarkerCoordinates()
         targetForm.fill("", CoordinateInput.format(target[0].toDouble()), CoordinateInput.format(target[1].toDouble()))
-        dialogs.show {
-            TargetCoordinatesDialog(
-                targetForm,
-                onSearch = {
-                    search { result ->
-                        targetForm.fill(result.address, CoordinateInput.format(result.latitude), CoordinateInput.format(result.longitude))
-                    }
-                },
-                onDismiss = dialogs::dismiss,
-            ) { latitude, longitude ->
-                GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
-                GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
-                GPSPreferences.setTargetMarker(true)
-                dialogs.dismiss()
-            }
-        }
+        dialogs.show(GpsDialog.Target)
+    }
+
+    override fun onSearchResult(result: SearchResult) {
+        targetForm.fill(result.address, CoordinateInput.format(result.latitude), CoordinateInput.format(result.longitude))
+        dialogs.show(GpsDialog.Target)
     }
 
     override fun removeTarget() = GPSPreferences.setTargetMarker(false)
@@ -354,13 +344,36 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         LocationShare.share(activity, latitude, longitude, state.address)
     }
 
-    override fun locationDetails() = dialogs.show {
-        LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
-    }
+    override fun locationDetails() = dialogs.show(GpsDialog.Details)
 
     override fun coordinateDetails() {
         val (latitude, longitude) = coordinates()
-        dialogs.show { CoordinateDetailsDialog(latitude, longitude, dialogs::dismiss) }
+        dialogs.show(GpsDialog.Formats(latitude, longitude))
+    }
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            is GpsDialog.Summary -> LocationSummaryDialog(dialog.latitude, dialog.longitude, state.custom, dialogs::dismiss)
+            is GpsDialog.Formats -> CoordinateDetailsDialog(dialog.latitude, dialog.longitude, dialogs::dismiss)
+            GpsDialog.Pin -> PinCustomizationDialog(dialogs::dismiss)
+            GpsDialog.Details -> LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
+            GpsDialog.Target -> TargetCoordinatesDialog(targetForm, onSearch = ::search, onDismiss = dialogs::dismiss) { latitude, longitude ->
+                GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
+                GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
+                GPSPreferences.setTargetMarker(true)
+                dialogs.dismiss()
+            }
+            else -> super.DialogContent(dialog)
+        }
+    }
+
+    private sealed interface GpsDialog : PanelDialog {
+        data class Summary(val latitude: Double, val longitude: Double) : GpsDialog
+        data class Formats(val latitude: Double, val longitude: Double) : GpsDialog
+        data object Pin : GpsDialog
+        data object Details : GpsDialog
+        data object Target : GpsDialog
     }
 
     override fun showTarget() {

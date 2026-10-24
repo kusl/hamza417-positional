@@ -128,7 +128,7 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
                     )
                     RotatingImage(state.needles[0], state.hour, Modifier.size(needleSize))
                     RotatingImage(state.needles[1], state.minute, Modifier.size(needleSize))
-                    RotatingImage(state.needles[2], state.second, Modifier.height(needleSize))
+                    RotatingImage(state.needles[2], state.second, Modifier.size(needleSize))
                 }
                 if (state.customLocation) {
                     Text(

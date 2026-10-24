@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -153,6 +154,7 @@ private fun TrailPoints(state: TrailState, actions: TrailActions) {
                 painterResource(R.drawable.art_trail),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().padding(32.dp),
+                contentScale = ContentScale.FillWidth,
             )
         }
         state.points.forEach { TrailPointRow(it, actions) }

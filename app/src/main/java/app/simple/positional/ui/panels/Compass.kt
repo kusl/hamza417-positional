@@ -22,6 +22,7 @@ import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.flow.filterNotNull
@@ -43,15 +44,19 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
     }
 
     private fun showMenu() = menuSheet.show {
-        PanelMenus.compass(
-            onBloomSkins = {
-                dialogs.show { BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) } }
-            },
-            onPhysicalProperties = {
-                dialogs.show { PhysicalPropertiesDialog(dialogs::dismiss) { openPage(HtmlPage.PHYSICAL_PROPERTIES) } }
-            },
-        )
+        PanelMenus.compass(onBloomSkins = { dialogs.show(CompassDialog.Bloom) }, onPhysicalProperties = { dialogs.show(CompassDialog.Physics) })
     }
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            CompassDialog.Bloom -> BloomSkinDialog(CompassPreferences.getFlowerBloomTheme(), dialogs::dismiss) { CompassPreferences.setFlowerBloom(it) }
+            CompassDialog.Physics -> PhysicalPropertiesDialog(dialogs::dismiss) { openPage(HtmlPage.PHYSICAL_PROPERTIES) }
+            else -> super.DialogContent(dialog)
+        }
+    }
+
+    private enum class CompassDialog : PanelDialog { Bloom, Physics }
 
     init {
         if (!sensor.isAvailable) showSensorError()

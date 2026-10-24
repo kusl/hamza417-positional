@@ -10,16 +10,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import app.simple.positional.R
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.constants.LocationPins
@@ -40,6 +42,7 @@ import app.simple.positional.ui.compose.AccentPalette
 import app.simple.positional.ui.compose.ArtsScreen
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationActions
+import app.simple.positional.ui.compose.CustomLocationForm
 import app.simple.positional.ui.compose.CustomLocationScreen
 import app.simple.positional.ui.compose.DirectionsActions
 import app.simple.positional.ui.compose.DirectionsScreen
@@ -94,7 +97,7 @@ fun TimeZoneRoute(navigator: AppNavigator, topInset: Dp) {
 @Composable
 fun MeasuresRoute(navigator: AppNavigator, topInset: Dp) {
     val viewModel: MeasureViewModel = viewModel()
-    val measures by viewModel.measures.collectAsState()
+    val measures by viewModel.measures.collectAsStateWithLifecycle()
     val records = remember(measures) {
         val selected = MeasurePreferences.getLastSelectedMeasure()
         measures?.map { Record(it.dateCreated, it, it.name.orEmpty(), it.note.orEmpty(), it.dateCreated, it.dateCreated == selected) }
@@ -122,7 +125,7 @@ fun MeasuresRoute(navigator: AppNavigator, topInset: Dp) {
 @Composable
 fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
     val viewModel: TrailsViewModel = viewModel()
-    val trails by viewModel.trails.collectAsState()
+    val trails by viewModel.trails.collectAsStateWithLifecycle()
     val records = remember(trails) {
         val current = TrailPreferences.getCurrentTrail()
         trails?.map { Record(it.keyTag, it, it.trailName.orEmpty(), it.trailNote.orEmpty(), it.dateCreated, it.trailName == current) }
@@ -145,10 +148,10 @@ fun TrailsRoute(navigator: AppNavigator, topInset: Dp) {
 }
 
 @Composable
-fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
+fun DirectionsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topInset: Dp) {
     val context = LocalContext.current
     val viewModel: DirectionsViewModel = viewModel()
-    val directions by viewModel.directions.collectAsState()
+    val directions by viewModel.directions.collectAsStateWithLifecycle()
     val actions = remember(viewModel) {
         object : DirectionsActions {
             override fun create() {
@@ -177,7 +180,7 @@ fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
 
             override fun delete(direction: DirectionModel) = viewModel.delete(direction)
 
-            override fun search() = navigator.search { viewModel.form.fill(it) }
+            override fun search() = navigator.navigate(Routes.MAP_SEARCH)
 
             override fun save(latitude: Double, longitude: Double) = viewModel.save(latitude, longitude)
 
@@ -192,11 +195,12 @@ fun DirectionsRoute(navigator: AppNavigator, topInset: Dp) {
             }
         }
     }
+    SearchResultEffect(entry) { viewModel.form.fill(it) }
     DirectionsScreen(directions, viewModel.editing != null, viewModel.form, topInset, actions)
 }
 
 @Composable
-fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
+fun CustomLocationsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topInset: Dp) {
     val context = LocalContext.current
     val viewModel: CustomLocationViewModel = viewModel()
     LaunchedEffect(viewModel) {
@@ -205,10 +209,10 @@ fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
             viewModel.form.fill(MainPreferences.getAddress(), coordinates[0].toString(), coordinates[1].toString())
         }
     }
-    val locations by viewModel.locations.collectAsState()
+    val locations by viewModel.locations.collectAsStateWithLifecycle()
     val actions = remember(viewModel) {
         object : CustomLocationActions {
-            override fun search() = navigator.search { viewModel.form.fill(it) }
+            override fun search() = navigator.navigate(Routes.MAP_SEARCH)
 
             override fun save(latitude: Double, longitude: Double) = viewModel.save(newLocation(latitude, longitude))
 
@@ -246,6 +250,7 @@ fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
             }
         }
     }
+    SearchResultEffect(entry) { viewModel.form.fill(it) }
     CustomLocationScreen(viewModel.form, locations, topInset, actions)
 }
 
@@ -253,7 +258,7 @@ fun CustomLocationsRoute(navigator: AppNavigator, topInset: Dp) {
 fun MapSearchRoute(navigator: AppNavigator) {
     val context = LocalContext.current
     val viewModel: MapSearchViewModel = viewModel()
-    val suggestions by viewModel.suggestions.collectAsState()
+    val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
     val map = rememberPickerMap()
     LaunchedEffect(map) {
         CoordinateInput.parse(viewModel.form.latitude, viewModel.form.longitude)?.let { (lat, lon) -> map.moveTo(lat, lon, animate = false) }
@@ -278,11 +283,23 @@ fun MapSearchRoute(navigator: AppNavigator) {
                     return
                 }
                 navigator.deliver(SearchResult(form.address.trim(), coordinates.first, coordinates.second))
-                navigator.back()
             }
         }
     }
     MapSearchScreen(viewModel.form, suggestions, map.view, actions)
+}
+
+@Composable
+fun SearchResultEffect(entry: NavBackStackEntry, onResult: (SearchResult) -> Unit) {
+    val latest by rememberUpdatedState(onResult)
+    LaunchedEffect(entry) {
+        val handle = entry.savedStateHandle
+        handle.getStateFlow<Array<String>?>(Routes.SEARCH_RESULT, null).collect { values ->
+            if (values == null) return@collect
+            handle.set<Array<String>?>(Routes.SEARCH_RESULT, null)
+            SearchResult.decode(values)?.let(latest)
+        }
+    }
 }
 
 @Composable
@@ -300,7 +317,7 @@ fun WebRoute(pageName: String?, navigator: AppNavigator) {
     }
 }
 
-private fun app.simple.positional.ui.compose.CustomLocationForm.fill(result: SearchResult) = fill(
+fun CustomLocationForm.fill(result: SearchResult) = fill(
     address = result.address.ifEmpty { address },
     latitude = result.latitude.toString(),
     longitude = result.longitude.toString(),

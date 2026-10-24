@@ -14,15 +14,26 @@ object Routes {
     const val MAP_SEARCH = "map_search"
     const val PAGE_ARGUMENT = "page"
     const val WEB = "web/{$PAGE_ARGUMENT}"
+    const val SEARCH_RESULT = "search_result"
 
     fun web(page: HtmlPage) = "web/${page.name}"
 }
 
-data class SearchResult(val address: String, val latitude: Double, val longitude: Double)
+data class SearchResult(val address: String, val latitude: Double, val longitude: Double) {
+    fun encode(): Array<String> = arrayOf(address, latitude.toString(), longitude.toString())
+
+    companion object {
+        fun decode(values: Array<String>?): SearchResult? {
+            if (values == null || values.size != 3) return null
+            val latitude = values[1].toDoubleOrNull() ?: return null
+            val longitude = values[2].toDoubleOrNull() ?: return null
+            return SearchResult(values[0], latitude, longitude)
+        }
+    }
+}
 
 interface AppNavigator {
     fun navigate(route: String)
     fun back()
-    fun search(onResult: (SearchResult) -> Unit)
     fun deliver(result: SearchResult)
 }

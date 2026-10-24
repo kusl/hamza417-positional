@@ -2,6 +2,7 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
 import android.os.SystemClock
@@ -24,6 +25,7 @@ import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
 import app.simple.positional.ui.compose.LocationSummaryDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.Dispatchers
@@ -53,29 +55,33 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
             topInset,
             onTimezone = { navigate(Routes.TIMEZONE) },
             onMenu = ::showMenu,
-            onLocation = { dialogs.show { LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss) } },
+            onLocation = { dialogs.show(ClockDialog.Location) },
         )
     }
 
     private fun showMenu() = menuSheet.show {
-        PanelMenus.clock(
-            onNeedles = {
-                dialogs.show { ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) } }
-            },
-            onMotionType = ::showMotionTypes,
-        )
+        PanelMenus.clock(onNeedles = { dialogs.show(ClockDialog.Needles) }, onMotionType = { dialogs.show(ClockDialog.Motion) })
     }
 
-    private fun showMotionTypes() {
-        val title = getString(R.string.motion_type)
-        val choices = motionTypes.map { (value, label) -> Choice(value, getString(label)) }
-        dialogs.show {
-            ChoiceDialog(title, choices, ClockPreferences.getMovementType(), onDismiss = dialogs::dismiss) {
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            ClockDialog.Location -> LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss)
+            ClockDialog.Needles -> ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) }
+            ClockDialog.Motion -> ChoiceDialog(
+                stringResource(R.string.motion_type),
+                motionTypes.map { (value, label) -> Choice(value, stringResource(label)) },
+                ClockPreferences.getMovementType(),
+                onDismiss = dialogs::dismiss,
+            ) {
                 ClockPreferences.setMovementType(it)
                 dialogs.dismiss()
             }
+            else -> super.DialogContent(dialog)
         }
     }
+
+    private enum class ClockDialog : PanelDialog { Location, Needles, Motion }
 
     init {
         observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {

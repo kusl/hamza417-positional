@@ -2,6 +2,7 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
 import android.location.Location
@@ -21,6 +22,7 @@ import app.simple.positional.ui.compose.MeasureActions
 import app.simple.positional.ui.compose.MeasureScreen
 import app.simple.positional.ui.compose.MeasureState
 import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
@@ -132,15 +134,21 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         (activity as? BottomBarHost)?.showBottomBar(visible)
     }
 
-    override fun addMeasure() {
-        val title = getString(R.string.create_new)
-        dialogs.show {
-            NameNoteDialog(title, isValid = { it.isNotEmpty() }, onDismiss = dialogs::dismiss) { name, note ->
+    override fun addMeasure() = dialogs.show(NewMeasure)
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        if (dialog == NewMeasure) {
+            NameNoteDialog(stringResource(R.string.create_new), isValid = { it.isNotEmpty() }, onDismiss = dialogs::dismiss) { name, note ->
                 measureViewModel.addMeasure(name, note)
                 dialogs.dismiss()
             }
+        } else {
+            super.DialogContent(dialog)
         }
     }
+
+    private data object NewMeasure : PanelDialog
 
     override fun measures() = navigate(Routes.MEASURES)
 

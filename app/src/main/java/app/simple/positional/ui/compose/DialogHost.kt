@@ -12,17 +12,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import app.simple.positional.R
 
+interface PanelDialog
+
+data class ErrorDialog(val message: String) : PanelDialog
+
 @Stable
 class DialogHost {
-    var content by mutableStateOf<(@Composable () -> Unit)?>(null)
+    var current by mutableStateOf<PanelDialog?>(null)
         private set
 
-    fun show(content: @Composable () -> Unit) {
-        this.content = content
+    fun show(dialog: PanelDialog) {
+        current = dialog
     }
 
     fun dismiss() {
-        content = null
+        current = null
     }
 }
 

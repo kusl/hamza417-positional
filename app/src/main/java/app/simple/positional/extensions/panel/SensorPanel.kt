@@ -3,26 +3,24 @@ package app.simple.positional.extensions.panel
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import app.simple.positional.R
 import app.simple.positional.ui.compose.CalibrationDialog
-import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PanelDialog
 
 abstract class SensorPanel(activity: ComponentActivity) : PanelController(activity) {
     private var calibrationShown = false
     private var accelerometerAccuracy by mutableIntStateOf(-1)
     private var magnetometerAccuracy by mutableIntStateOf(-1)
 
-    protected fun showSensorError() {
-        val message = getString(R.string.sensor_error)
-        dialogs.show { MessageDialog(message, dialogs::dismiss) }
-    }
+    private data object Calibration : PanelDialog
 
-    protected fun showCalibration() {
-        dialogs.show { CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) }
-    }
+    protected fun showSensorError() = showError(getString(R.string.sensor_error))
+
+    protected fun showCalibration() = dialogs.show(Calibration)
 
     protected fun checkCalibration(type: Int, accuracy: Int) {
         when (type) {
@@ -33,5 +31,10 @@ abstract class SensorPanel(activity: ComponentActivity) : PanelController(activi
             calibrationShown = true
             showCalibration()
         }
+    }
+
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        if (dialog == Calibration) CalibrationDialog(accelerometerAccuracy, magnetometerAccuracy, dialogs::dismiss) else super.DialogContent(dialog)
     }
 }

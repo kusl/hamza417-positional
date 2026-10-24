@@ -2,13 +2,13 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.SharedPreferences
 import android.location.Location
 import android.widget.Toast
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
@@ -36,6 +37,7 @@ import app.simple.positional.ui.compose.TrailScreen
 import app.simple.positional.ui.compose.TrailState
 import app.simple.positional.ui.compose.MarkerIconRow
 import app.simple.positional.ui.compose.NameNoteDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.util.DMSConverter
@@ -148,27 +150,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     override fun trails() = navigate(Routes.TRAILS)
 
-    override fun addTrail() {
-        val title = getString(R.string.enter_trail_name)
-        dialogs.show {
-            val existing by trails.trails.collectAsState()
-            NameNoteDialog(
-                title,
-                isValid = { name -> TrailNames.isValid(name, existing.orEmpty().mapNotNull { it.trailName }) },
-                onDismiss = dialogs::dismiss,
-                initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
-                onDraft = { name, note ->
-                    TrailPreferences.setLastTrailName(name)
-                    TrailPreferences.setLastTrailNote(note)
-                },
-            ) { name, note ->
-                trails.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
-                TrailPreferences.setLastTrailName("")
-                TrailPreferences.setLastTrailNote("")
-                dialogs.dismiss()
-            }
-        }
-    }
+    override fun addTrail() = dialogs.show(NewTrail)
 
     override fun menu() = menuSheet.show { PanelMenus.trail { openPage(HtmlPage.TRAIL_HELP) } }
 
@@ -212,33 +194,63 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         if (quick) {
             save(TrailPoint(latitude, longitude, System.currentTimeMillis(), icon, null, null, accuracy))
         } else {
-            showMarkerDialog(icon, latitude, longitude, accuracy)
+            dialogs.show(NewMarker(icon, latitude, longitude, accuracy, System.currentTimeMillis()))
         }
     }
 
-    private fun showMarkerDialog(icon: Int, latitude: Double, longitude: Double, accuracy: Float) {
-        val title = getString(R.string.enter_marker_name)
-        val time = System.currentTimeMillis()
-        dialogs.show {
-            var selected by rememberSaveable { mutableIntStateOf(icon) }
-            NameNoteDialog(
-                title,
-                isValid = { true },
-                onDismiss = dialogs::dismiss,
-                initial = TrailPreferences.getLastMarkerName() to TrailPreferences.getLastMarkerNote(),
-                onDraft = { name, note ->
-                    TrailPreferences.setLastMarkerName(name)
-                    TrailPreferences.setLastMarkerNote(note)
-                },
-                extra = { MarkerIconRow(selected) { selected = it } },
-            ) { name, note ->
-                save(TrailPoint(latitude, longitude, time, selected, note.ifEmpty { null }, name.ifEmpty { null }, accuracy))
-                TrailPreferences.setLastMarkerName("")
-                TrailPreferences.setLastMarkerNote("")
-                dialogs.dismiss()
-            }
+    @Composable
+    override fun DialogContent(dialog: PanelDialog) {
+        when (dialog) {
+            NewTrail -> NewTrailDialog()
+            is NewMarker -> NewMarkerDialog(dialog)
+            else -> super.DialogContent(dialog)
         }
     }
+
+    @Composable
+    private fun NewTrailDialog() {
+        val existing by trails.trails.collectAsStateWithLifecycle()
+        NameNoteDialog(
+            stringResource(R.string.enter_trail_name),
+            isValid = { name -> TrailNames.isValid(name, existing.orEmpty().mapNotNull { it.trailName }) },
+            onDismiss = dialogs::dismiss,
+            initial = TrailPreferences.getLastTrailName() to TrailPreferences.getLastTrailNote(),
+            onDraft = { name, note ->
+                TrailPreferences.setLastTrailName(name)
+                TrailPreferences.setLastTrailNote(note)
+            },
+        ) { name, note ->
+            trails.addTrail(TrailEntry(System.currentTimeMillis(), name, note))
+            TrailPreferences.setLastTrailName("")
+            TrailPreferences.setLastTrailNote("")
+            dialogs.dismiss()
+        }
+    }
+
+    @Composable
+    private fun NewMarkerDialog(marker: NewMarker) {
+        var selected by rememberSaveable(marker) { mutableIntStateOf(marker.icon) }
+        NameNoteDialog(
+            stringResource(R.string.enter_marker_name),
+            isValid = { true },
+            onDismiss = dialogs::dismiss,
+            initial = TrailPreferences.getLastMarkerName() to TrailPreferences.getLastMarkerNote(),
+            onDraft = { name, note ->
+                TrailPreferences.setLastMarkerName(name)
+                TrailPreferences.setLastMarkerNote(note)
+            },
+            extra = { MarkerIconRow(selected) { selected = it } },
+        ) { name, note ->
+            save(TrailPoint(marker.latitude, marker.longitude, marker.time, selected, note.ifEmpty { null }, name.ifEmpty { null }, marker.accuracy))
+            TrailPreferences.setLastMarkerName("")
+            TrailPreferences.setLastMarkerNote("")
+            dialogs.dismiss()
+        }
+    }
+
+    private data object NewTrail : PanelDialog
+
+    private data class NewMarker(val icon: Int, val latitude: Double, val longitude: Double, val accuracy: Float, val time: Long) : PanelDialog
 
     private fun save(point: TrailPoint) {
         trailData.save(point)

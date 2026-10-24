@@ -23,6 +23,9 @@ import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
+import app.simple.positional.ui.compose.ErrorDialog
+import app.simple.positional.ui.compose.MessageDialog
+import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
 import kotlinx.coroutines.flow.Flow
@@ -75,8 +78,15 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
 
     protected fun openPage(page: HtmlPage) = navigate(Routes.web(page))
 
-    protected fun search(onResult: (SearchResult) -> Unit) {
-        (activity as? AppNavigator)?.search(onResult)
+    protected fun search() = navigate(Routes.MAP_SEARCH)
+
+    open fun onSearchResult(result: SearchResult) {}
+
+    protected fun showError(message: String) = dialogs.show(ErrorDialog(message))
+
+    @Composable
+    protected open fun DialogContent(dialog: PanelDialog) {
+        if (dialog is ErrorDialog) MessageDialog(dialog.message, dialogs::dismiss)
     }
 
     protected fun <T> observe(flow: Flow<T>, action: (T) -> Unit) {
@@ -115,6 +125,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
         }
         Content(topInset)
         MenuSheet(menuSheet)
-        dialogs.content?.invoke()
+        dialogs.current?.let { DialogContent(it) }
     }
 }
