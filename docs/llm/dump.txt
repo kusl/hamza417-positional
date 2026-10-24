@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T05:33:05-04:00
+Generated: 2026-10-24T08:20:24-04:00
 Branch:    master
-Commit:    898a73c2 2026-10-24 04:51:34 -0400 run scripts
+Commit:    828aad08 2026-10-24 08:20:19 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (890 files)
+## TREE (889 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -221,6 +221,7 @@ app/
                 DMSConverter.kt
                 Direction.kt
                 DistanceText.kt
+                Geocoding.kt
                 HtmlHelper.kt
                 LocaleHelper.kt
                 LocationExtension.kt
@@ -234,8 +235,6 @@ app/
                 NightMode.kt
                 Ordinal.kt
                 PermissionUtils.kt
-                ReverseGeocoder.kt
-                StatusBarHeight.kt
                 TextViewUtils.kt
                 TimeFormatter.kt
                 TrailNames.kt
@@ -1280,7 +1279,7 @@ Every map (GPS, trail and measure panels and address search) can show either Goo
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started; map views follow their own settings through `MapPreferences` flows collected while resumed (in a child scope cancelled on pause that also runs their delayed tasks), applying only values that changed (including changes made while paused), so no panel, view model or map view registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `BaseActivity` subclasses through `setPositionalContent`, which takes the top inset from the window insets; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started; map views follow their own settings through `MapPreferences` flows collected while resumed (in a child scope cancelled on pause that also runs their delayed tasks), applying only values that changed (including changes made while paused), so no panel, view model or map view registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; address lookups and map search share `Geocoding` (the non-blocking `Geocoder` API on Android 13+), and the GPS panel reverse geocodes only when the position moved at least 25 m. Heading and level sensors read the display rotation from `ContextCompat.getDisplayOrDefault`. A custom location or direction target is stored in one preference edit, so flows never see a half-written location.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1316,7 +1315,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 16 | Compass, clock, direction, GPS, trail and measure panel settings as view model `StateFlow`s built with `preference` (`SharedPreferences.watch`, only distinct values); panels apply them with `PanelController.bind` while started; panels and view models no longer register preference listeners; clock time zone, custom location, location provider, GPS target, selected trail and measure follow preferences through flows; trail map clear removed (switching trails redraws from the points flow); duplicate accent recreate in the settings panel removed | Done |
 | 17 | Map view preference listeners (Google and OpenStreetMap bases) replaced by `MapPreferences` flows bound to the map lifecycle: look, compass rotation, pin, bearing, target, auto center, geodesic and wrap settings react only to their own keys (the OpenStreetMap GPS map no longer redraws the target line on every preference write); unused north only preference removed; location pin colours as constants so panel settings load in JVM tests | Done |
 | 18 | Map view timers (heading sensor delay, trail auto center) as `DelayedTask` coroutines in a scope that lives only while the map is resumed, so pausing cancels them together with the preference flows; `Handler` runnables and the unused pause hook removed | Done |
-| 19 | Sensor display rotation through `ContextCompat.getDisplayOrDefault` instead of the deprecated `WindowManager.defaultDisplay`; remaining deprecation suppressions reviewed | Next |
+| 19 | Sensor display rotation through `ContextCompat.getDisplayOrDefault` instead of the deprecated `WindowManager.defaultDisplay`; status bar height from window insets instead of the internal `status_bar_height` resource; reverse geocoding and map search share `Geocoding`; network check without the deprecated `NetworkInfo`; web view force dark fallback (a no-op on target SDK 33+) removed; custom location and direction target written in one edit with `apply` instead of several `commit`s; unused math helpers removed | Done |
+| 20 | Unused resources (strings, drawables, colors, dimensions) removed, with lint `UnusedResources` enforced in CI | Next |
 
 ## Building
 
@@ -2025,7 +2025,6 @@ import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.compose.SplashScreen
-import app.simple.positional.ui.compose.setPositionalContent
 
 class LauncherActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -2107,7 +2106,6 @@ import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.compose.PanelSwitcher
-import app.simple.positional.ui.compose.setPositionalContent
 import app.simple.positional.ui.panels.Compass
 import app.simple.positional.ui.panels.Direction
 import app.simple.positional.ui.panels.GPS
@@ -4906,27 +4904,21 @@ fun Circle.animateColors(fill: Int, stroke: Int): ValueAnimator {
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/decorations/views/CustomWebView.kt
 ################################################################################
-@file:Suppress("LeakingThis")
-
 package app.simple.positional.decorations.views
 
 import android.content.Context
 import android.content.res.Configuration
-import android.util.AttributeSet
 import android.webkit.WebView
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 
-open class CustomWebView @JvmOverloads constructor(context: Context, attributeSet: AttributeSet? = null) : WebView(context, attributeSet) {
+class CustomWebView(context: Context) : WebView(context) {
     init {
         setBackgroundColor(0)
         settings.setSupportZoom(true)
-        val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+            val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, night)
-        } else if (night && WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-            @Suppress("DEPRECATION")
-            WebSettingsCompat.setForceDark(settings, WebSettingsCompat.FORCE_DARK_ON)
         }
     }
 }
@@ -4946,6 +4938,11 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.core.os.ConfigurationCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -4954,12 +4951,15 @@ import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.ui.compose.PositionalTheme
 import app.simple.positional.util.AccentThemes
 import app.simple.positional.util.ContextUtils
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.widgets.ClockWidgets
 
 open class BaseActivity : ComponentActivity() {
+    private val statusBarTop = mutableIntStateOf(0)
+
     override fun attachBaseContext(newBase: Context) {
         SharedPreferences.init(newBase)
         super.attachBaseContext(ContextUtils.wrap(newBase, ContextUtils.language()))
@@ -4989,6 +4989,14 @@ open class BaseActivity : ComponentActivity() {
         if (!isChangingConfigurations) ClockWidgets.refresh(this)
     }
 
+    protected fun setPositionalContent(content: @Composable (topInset: Dp) -> Unit) {
+        setContentView(ComposeView(this).apply {
+            setContent {
+                PositionalTheme { content(with(LocalDensity.current) { statusBarTop.intValue.toDp() }) }
+            }
+        })
+    }
+
     private fun accentTheme(): Int = AccentThemes.of(this) ?: R.style.Positional.also {
         MainPreferences.setAccentColor(getColor(R.color.positional))
     }
@@ -4996,6 +5004,7 @@ open class BaseActivity : ComponentActivity() {
     private fun keepContentAboveNavigationBar() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            statusBarTop.intValue = insets.top
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left
                 bottomMargin = insets.bottom
@@ -5455,7 +5464,6 @@ enum class ClockMotion(
 package app.simple.positional.math
 
 import android.view.Surface
-import android.view.WindowManager
 import app.simple.positional.math.MathExtensions.normalizeAngle
 import app.simple.positional.math.MathExtensions.toDegrees
 import kotlin.math.atan2
@@ -5467,10 +5475,6 @@ object CompassAzimuth {
         Surface.ROTATION_270 -> azimuth - 90f
         else -> azimuth
     }
-
-    @Suppress("DEPRECATION")
-    fun adjustAzimuthForDisplayRotation(azimuth: Float, windowManager: WindowManager): Float =
-        adjustForRotation(azimuth, windowManager.defaultDisplay.rotation)
 
     fun calculate(gravity: Vector3, magneticField: Vector3): Float {
         val normGravity = gravity.normalize()
@@ -5490,14 +5494,6 @@ object CompassAzimuth {
         val azimuth = if (!(sin == 0f && sin == cos)) atan2(sin, cos) else 0f
 
         return if (azimuth.isNaN() || !azimuth.isFinite()) 0f else normalizeAngle(azimuth.toDegrees())
-    }
-
-    fun calculate(gravity: Vector3, magneticField: Vector3, windowManager: WindowManager): Float {
-        return adjustAzimuthForDisplayRotation(calculate(gravity, magneticField), windowManager)
-    }
-
-    fun inverse(azimuth: Float): Float {
-        return azimuth + 180F
     }
 }
 
@@ -5601,105 +5597,18 @@ object MapInterpolation {
 ################################################################################
 package app.simple.positional.math
 
-import kotlin.math.*
+import kotlin.math.pow
+import kotlin.math.roundToLong
 
-@Suppress("unused")
 object MathExtensions {
-    fun normalizeAngle(angle: Float): Float {
-        return wrap(angle, 0f, 360f) % 360
-    }
+    fun normalizeAngle(angle: Float): Float = (angle % 360f + 360f) % 360f
 
-    fun normalizeAngle(angle: Double): Double {
-        return wrap(angle, 0.0, 360.0) % 360
-    }
+    fun Float.toDegrees(): Float = Math.toDegrees(toDouble()).toFloat()
 
-    private fun wrap(value: Float, min: Float, max: Float): Float {
-        return wrap(value.toDouble(), min.toDouble(), max.toDouble()).toFloat()
-    }
-
-    private fun wrap(value: Double, min: Double, max: Double): Double {
-        val range = max - min
-
-        var newValue = value
-
-        while (newValue > max) {
-            newValue -= range
-        }
-
-        while (newValue < min) {
-            newValue += range
-        }
-
-        return newValue
-    }
-
-    fun sinDegrees(angle: Double): Double {
-        return sin(angle.toRadians())
-    }
-
-    fun tanDegrees(angle: Double): Double {
-        return tan(angle.toRadians())
-    }
-
-    fun tanDegrees(angle: Float): Float {
-        return tan(angle.toRadians())
-    }
-
-    fun cosDegrees(angle: Double): Double {
-        return cos(angle.toRadians())
-    }
-
-    private fun Double.toRadians(): Double {
-        return Math.toRadians(this)
-    }
-
-    private fun Float.toRadians(): Float {
-        return Math.toRadians(this.toDouble()).toFloat()
-    }
-
-    fun clamp(value: Float, minimum: Float, maximum: Float): Float {
-        return min(maximum, max(minimum, value))
-    }
-
-    fun Float.toDegrees(): Float {
-        return Math.toDegrees(this.toDouble()).toFloat()
-    }
-
-    fun Double.toDegrees(): Double {
-        return Math.toDegrees(this)
-    }
-
-    fun round(someValue: Double, places: Int): Double {
-        return try {
-            var value = someValue
-            require(places >= 0)
-            val factor = 10.0.pow(places.toDouble()).toLong()
-            value *= factor
-            value.roundToInt().toDouble() / factor
-        } catch (e: IllegalArgumentException) {
-            Double.NaN
-        }
-    }
-
-    fun Float.round(places: Int): Float {
-        return try {
-            var value = this
-            require(places >= 0)
-            val factor = 10.0.pow(places.toDouble()).toLong()
-            value *= factor
-            val tmp = value.roundToInt()
-            tmp.toFloat() / factor
-        } catch (e: IllegalArgumentException) {
-            Float.NaN
-        }
-    }
-
-    fun Float.toNegative(): Float {
-        return this * -1F
-    }
-
-    fun Int.toNegative(): Float {
-        return this * -1F
+    fun round(value: Double, places: Int): Double {
+        if (places < 0) return Double.NaN
+        val factor = 10.0.pow(places)
+        return (value * factor).roundToLong() / factor
     }
 }
 
@@ -6257,7 +6166,6 @@ object CompassPreferences {
 ################################################################################
 package app.simple.positional.preferences
 
-import android.annotation.SuppressLint
 import app.simple.positional.singleton.SharedPreferences
 
 object DirectionPreferences {
@@ -6267,16 +6175,13 @@ object DirectionPreferences {
     const val useMapsTarget = "direction_use_maps_target"
     const val directionLabel = "direction_target_label"
 
-    @SuppressLint("ApplySharedPref")
-    fun setTargetLatitude(value: Float): Float {
-        SharedPreferences.getSharedPreferences().edit().putFloat(directionLatitude, value).apply()
-        return value
-    }
-
-    @SuppressLint("ApplySharedPref")
-    fun setTargetLongitude(value: Float): Float {
-        SharedPreferences.getSharedPreferences().edit().putFloat(directionLongitude, value).apply()
-        return value
+    fun setTarget(latitude: Float, longitude: Float, label: String, useMaps: Boolean) {
+        SharedPreferences.getSharedPreferences().edit()
+                .putFloat(directionLatitude, latitude)
+                .putFloat(directionLongitude, longitude)
+                .putString(directionLabel, label)
+                .putBoolean(useMapsTarget, useMaps)
+                .apply()
     }
 
     fun getTargetCoordinates(): FloatArray {
@@ -6284,11 +6189,6 @@ object DirectionPreferences {
                 SharedPreferences.getSharedPreferences().getFloat(directionLatitude, 0f),
                 SharedPreferences.getSharedPreferences().getFloat(directionLongitude, 0f)
         )
-    }
-
-    fun setTargetLabel(value: String): String {
-        SharedPreferences.getSharedPreferences().edit().putString(directionLabel, value).apply()
-        return value
     }
 
     fun getTargetLabel(): String? {
@@ -6552,7 +6452,6 @@ object LevelPreferences {
 ################################################################################
 package app.simple.positional.preferences
 
-import android.annotation.SuppressLint
 import androidx.annotation.IntRange
 import app.simple.positional.util.MapSource
 import app.simple.positional.util.NightMode
@@ -6632,23 +6531,21 @@ object MainPreferences {
         return getSharedPreferences().getBoolean(unit, true)
     }
 
-    @SuppressLint("ApplySharedPref")
     fun setCustomCoordinates(value: Boolean) {
-        getSharedPreferences().edit().putBoolean(isCustomCoordinate, value).commit()
+        getSharedPreferences().edit().putBoolean(isCustomCoordinate, value).apply()
+    }
+
+    fun setCustomLocation(latitude: Float, longitude: Float, address: String) {
+        getSharedPreferences().edit()
+                .putFloat(this.latitude, latitude)
+                .putFloat(this.longitude, longitude)
+                .putString(this.address, address)
+                .putBoolean(isCustomCoordinate, true)
+                .apply()
     }
 
     fun isCustomCoordinate(): Boolean {
         return getSharedPreferences().getBoolean(isCustomCoordinate, false)
-    }
-
-    @SuppressLint("ApplySharedPref")
-    fun setLatitude(value: Float) {
-        getSharedPreferences().edit().putFloat(latitude, value).commit()
-    }
-
-    @SuppressLint("ApplySharedPref")
-    fun setLongitude(value: Float) {
-        getSharedPreferences().edit().putFloat(longitude, value).commit()
     }
 
     fun getCoordinates(): FloatArray {
@@ -6675,10 +6572,6 @@ object MainPreferences {
 
     fun getLastAltitude(): Float {
         return getSharedPreferences().getFloat(lastAltitude, 0F)
-    }
-
-    fun setAddress(value: String) {
-        getSharedPreferences().edit().putString(address, value).apply()
     }
 
     fun getAddress(): String {
@@ -7072,7 +6965,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.view.WindowManager
+import android.view.Display
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import app.simple.positional.math.Angle.normalizeEulerAngle
@@ -7081,13 +6975,12 @@ import app.simple.positional.math.LowPassFilter.smoothAndSetReadings
 import app.simple.positional.math.Tilt
 import app.simple.positional.math.Vector3
 
-@Suppress("DEPRECATION")
-private fun WindowManager?.rotation(): Int = this?.defaultDisplay?.rotation ?: 0
-
 abstract class OrientationSensor(context: Context) : SensorEventListener, DefaultLifecycleObserver {
     protected val sensorManager: SensorManager? = context.getSystemService(SensorManager::class.java)
-    protected val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
+    private val display: Display = ContextCompat.getDisplayOrDefault(context)
     protected abstract val sensors: List<Sensor?>
+
+    protected val rotation: Int get() = display.rotation
 
     val isAvailable: Boolean get() = sensors.isNotEmpty() && sensors.all { it != null }
 
@@ -7109,7 +7002,7 @@ class GravitySensor(context: Context, private val onTilt: (Tilt) -> Unit) : Orie
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_GRAVITY) return
         smoothAndSetReadings(readings, event.values, ALPHA)
-        onTilt(Tilt.fromDevice(readings, windowManager.rotation()))
+        onTilt(Tilt.fromDevice(readings, rotation))
     }
 
     private companion object {
@@ -7130,7 +7023,7 @@ class HeadingSensor(context: Context, private val listener: Listener) : Orientat
     )
     private val accelerometer = FloatArray(3)
     private val magnetometer = FloatArray(3)
-    private val rotation = FloatArray(9)
+    private val rotationMatrix = FloatArray(9)
     private val orientation = FloatArray(3)
     var gimbalLock = false
 
@@ -7150,13 +7043,13 @@ class HeadingSensor(context: Context, private val listener: Listener) : Orientat
 
     private fun azimuth(): Float {
         val raw = if (gimbalLock) {
-            if (!SensorManager.getRotationMatrix(rotation, null, accelerometer, magnetometer)) return 0f
-            SensorManager.getOrientation(rotation, orientation)
+            if (!SensorManager.getRotationMatrix(rotationMatrix, null, accelerometer, magnetometer)) return 0f
+            SensorManager.getOrientation(rotationMatrix, orientation)
             Math.toDegrees(orientation[0].toDouble()).toFloat()
         } else {
             CompassAzimuth.calculate(Vector3.from(accelerometer), Vector3.from(magnetometer))
         }
-        return CompassAzimuth.adjustForRotation(raw, windowManager.rotation())
+        return CompassAzimuth.adjustForRotation(raw, rotation)
     }
 
     private companion object {
@@ -8875,7 +8768,7 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.CoordinateFormats
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.LocationShare
-import app.simple.positional.util.ReverseGeocoder
+import app.simple.positional.util.Geocoding
 
 @Composable
 private fun InfoDialog(title: String, onDismiss: () -> Unit, action: Pair<String, () -> Unit>? = null, content: @Composable () -> Unit) {
@@ -8894,7 +8787,7 @@ fun LocationSummaryDialog(latitude: Double, longitude: Double, custom: Boolean, 
     val context = LocalContext.current
     val notAvailable = stringResource(R.string.not_available)
     val address by produceState(if (custom) MainPreferences.getAddress() else "-", latitude, longitude) {
-        if (!custom) value = ReverseGeocoder.addressLine(context, latitude, longitude) ?: notAvailable
+        if (!custom) value = Geocoding.addressLine(context, latitude, longitude) ?: notAvailable
     }
     InfoDialog(
         stringResource(R.string.gps_location),
@@ -10038,7 +9931,6 @@ private const val CELL = 88
 package app.simple.positional.ui.compose
 
 import android.content.Context
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -10047,20 +9939,16 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
 import app.simple.positional.R
-import app.simple.positional.util.StatusBarHeight
 
 object PositionalFonts {
     val regular = FontFamily(Font(R.font.regular))
@@ -10107,15 +9995,6 @@ fun PositionalTheme(content: @Composable () -> Unit) {
         surfaceContainerHighest = switchOff,
     )
     MaterialTheme(colorScheme = colors, typography = typography, content = content)
-}
-
-fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -> Unit) {
-    val topInset = StatusBarHeight.getStatusBarHeight(resources)
-    setContentView(ComposeView(this).apply {
-        setContent {
-            PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
-        }
-    })
 }
 
 ################################################################################
@@ -12174,10 +12053,7 @@ fun DirectionsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topInset:
             override fun dismissEditor() = viewModel.close()
 
             private fun select(direction: DirectionModel, useMapsTarget: Boolean) {
-                DirectionPreferences.setTargetLatitude(direction.latitude.toFloat())
-                DirectionPreferences.setTargetLongitude(direction.longitude.toFloat())
-                DirectionPreferences.setTargetLabel(direction.name.orEmpty())
-                DirectionPreferences.setUseMapsTarget(useMapsTarget)
+                DirectionPreferences.setTarget(direction.latitude.toFloat(), direction.longitude.toFloat(), direction.name.orEmpty(), useMapsTarget)
                 navigator.back()
             }
         }
@@ -12229,10 +12105,7 @@ fun CustomLocationsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topI
             }
 
             private fun use(address: String, latitude: Double, longitude: Double) {
-                MainPreferences.setCustomCoordinates(true)
-                MainPreferences.setLatitude(latitude.toFloat())
-                MainPreferences.setLongitude(longitude.toFloat())
-                MainPreferences.setAddress(address)
+                MainPreferences.setCustomLocation(latitude.toFloat(), longitude.toFloat(), address)
                 navigator.back()
             }
         }
@@ -14048,6 +13921,61 @@ object DistanceText {
 }
 
 ################################################################################
+# FILE: app/src/main/java/app/simple/positional/util/Geocoding.kt
+################################################################################
+package app.simple.positional.util
+
+import android.content.Context
+import android.location.Address
+import android.location.Geocoder
+import android.os.Build
+import androidx.annotation.RequiresApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+
+object Geocoding {
+    @Suppress("DEPRECATION")
+    suspend fun addressLine(context: Context, latitude: Double, longitude: Double): String? = context.geocoder()?.let { geocoder ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            await { geocoder.getFromLocation(latitude, longitude, 1, it) }
+        } else {
+            blocking { geocoder.getFromLocation(latitude, longitude, 1) }
+        }
+    }?.firstOrNull()?.getAddressLine(0)
+
+    @Suppress("DEPRECATION")
+    suspend fun search(context: Context, text: String, limit: Int): List<Address> = context.geocoder()?.let { geocoder ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            await { geocoder.getFromLocationName(text, limit, it) }
+        } else {
+            blocking { geocoder.getFromLocationName(text, limit) }
+        }
+    }.orEmpty()
+
+    private fun Context.geocoder(): Geocoder? =
+        if (Geocoder.isPresent()) Geocoder(applicationContext, LocaleHelper.getAppLocale()) else null
+
+    private suspend fun blocking(lookup: () -> List<Address>?): List<Address> =
+        withContext(Dispatchers.IO) { runCatching(lookup).getOrNull().orEmpty() }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun await(lookup: (Geocoder.GeocodeListener) -> Unit): List<Address> = suspendCancellableCoroutine { continuation ->
+        val listener = object : Geocoder.GeocodeListener {
+            override fun onGeocode(addresses: MutableList<Address>) {
+                if (continuation.isActive) continuation.resume(addresses)
+            }
+
+            override fun onError(errorMessage: String?) {
+                if (continuation.isActive) continuation.resume(emptyList())
+            }
+        }
+        runCatching { lookup(listener) }.onFailure { if (continuation.isActive) continuation.resume(emptyList()) }
+    }
+}
+
+################################################################################
 # FILE: app/src/main/java/app/simple/positional/util/HtmlHelper.kt
 ################################################################################
 package app.simple.positional.util
@@ -14499,27 +14427,12 @@ package app.simple.positional.util
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.os.Build
 
 object NetworkCheck {
-    @Suppress("deprecation")
     fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-                    ?: return false
-            return when {
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                else -> false
-            }
-        }
-        else {
-            val netInfo = connectivityManager.activeNetworkInfo
-            return netInfo != null && netInfo.isConnectedOrConnecting
-        }
+        val connectivityManager = context.getSystemService(ConnectivityManager::class.java) ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 }
 
@@ -14599,68 +14512,6 @@ object PermissionUtils {
 
     private fun granted(context: Context, permission: String) =
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/util/ReverseGeocoder.kt
-################################################################################
-package app.simple.positional.util
-
-import android.content.Context
-import android.location.Address
-import android.location.Geocoder
-import android.os.Build
-import androidx.annotation.RequiresApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
-
-object ReverseGeocoder {
-    suspend fun addressLine(context: Context, latitude: Double, longitude: Double): String? {
-        if (!Geocoder.isPresent()) return null
-        val geocoder = Geocoder(context.applicationContext, LocaleHelper.getAppLocale())
-        val addresses = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocoder.lookup(latitude, longitude)
-        } else {
-            withContext(Dispatchers.IO) {
-                @Suppress("DEPRECATION")
-                runCatching { geocoder.getFromLocation(latitude, longitude, 1) }.getOrNull().orEmpty()
-            }
-        }
-        return addresses.firstOrNull()?.getAddressLine(0)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun Geocoder.lookup(latitude: Double, longitude: Double): List<Address> = suspendCancellableCoroutine { continuation ->
-        runCatching {
-            getFromLocation(latitude, longitude, 1, object : Geocoder.GeocodeListener {
-                override fun onGeocode(addresses: MutableList<Address>) {
-                    if (continuation.isActive) continuation.resume(addresses)
-                }
-
-                override fun onError(errorMessage: String?) {
-                    if (continuation.isActive) continuation.resume(emptyList())
-                }
-            })
-        }.onFailure { if (continuation.isActive) continuation.resume(emptyList()) }
-    }
-}
-
-################################################################################
-# FILE: app/src/main/java/app/simple/positional/util/StatusBarHeight.kt
-################################################################################
-package app.simple.positional.util
-
-import android.annotation.SuppressLint
-import android.content.res.Resources
-
-object StatusBarHeight {
-    @SuppressLint("DiscouragedApi", "InternalInsetResource")
-    fun getStatusBarHeight(resources: Resources): Int {
-        val id = resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (id > 0) resources.getDimensionPixelSize(id) else 0
-    }
 }
 
 ################################################################################
@@ -15246,7 +15097,7 @@ import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import app.simple.positional.util.ReverseGeocoder
+import app.simple.positional.util.Geocoding
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15331,7 +15182,7 @@ class GpsViewModel(application: Application, source: LocationViewModel) : Wrappe
             addressThreshold.reset()
             return context.getString(R.string.internet_connection_alert)
         }
-        return ReverseGeocoder.addressLine(context, point.latitude, point.longitude) ?: context.getString(R.string.no_address_found)
+        return Geocoding.addressLine(context, point.latitude, point.longitude) ?: context.getString(R.string.no_address_found)
     }
 
     private fun customPoint(): LatLng? {
@@ -15450,7 +15301,7 @@ import app.simple.positional.util.Direction
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
-import app.simple.positional.util.ReverseGeocoder
+import app.simple.positional.util.Geocoding
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15500,7 +15351,7 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
 
     private val targetAddress = targetPoint.transformLatest<LatLng?, String?> { point ->
         emit(null)
-        if (point != null) emit(ReverseGeocoder.addressLine(getApplication<Application>(), point.latitude, point.longitude))
+        if (point != null) emit(Geocoding.addressLine(getApplication<Application>(), point.latitude, point.longitude))
     }
 
     val target: StateFlow<Spanned?> = combine(location.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }
@@ -15586,16 +15437,13 @@ package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
 import android.location.Address
-import android.location.Geocoder
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
 import app.simple.positional.ui.compose.MapSearchQuery
-import kotlinx.coroutines.Dispatchers
+import app.simple.positional.util.Geocoding
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15606,9 +15454,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.resume
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class MapSearchViewModel(application: Application) : AndroidViewModel(application) {
@@ -15619,7 +15464,7 @@ class MapSearchViewModel(application: Application) : AndroidViewModel(applicatio
         .debounce { if (it.isEmpty()) 0L else MapSearchQuery.DELAY }
         .map(MapSearchQuery::normalize)
         .distinctUntilChanged()
-        .mapLatest { text -> text?.let { search(it) }.orEmpty().filter { it.hasLatitude() && it.hasLongitude() } }
+        .mapLatest { text -> text?.let { Geocoding.search(getApplication<Application>(), it, MapSearchQuery.MAX_RESULTS) }.orEmpty().filter { it.hasLatitude() && it.hasLongitude() } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
@@ -15640,32 +15485,6 @@ class MapSearchViewModel(application: Application) : AndroidViewModel(applicatio
     fun pick(address: Address) {
         query.value = ""
         form.fill(address.getAddressLine(0) ?: form.address, CoordinateInput.format(address.latitude), CoordinateInput.format(address.longitude))
-    }
-
-    private suspend fun search(text: String): List<Address> {
-        if (!Geocoder.isPresent()) return emptyList()
-        val geocoder = Geocoder(getApplication())
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocoder.searchAsync(text)
-        } else {
-            withContext(Dispatchers.IO) {
-                @Suppress("DEPRECATION")
-                runCatching { geocoder.getFromLocationName(text, MapSearchQuery.MAX_RESULTS) }.getOrNull().orEmpty()
-            }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun Geocoder.searchAsync(text: String): List<Address> = suspendCancellableCoroutine { continuation ->
-        getFromLocationName(text, MapSearchQuery.MAX_RESULTS, object : Geocoder.GeocodeListener {
-            override fun onGeocode(addresses: MutableList<Address>) {
-                if (continuation.isActive) continuation.resume(addresses)
-            }
-
-            override fun onError(errorMessage: String?) {
-                if (continuation.isActive) continuation.resume(emptyList())
-            }
-        })
     }
 }
 
@@ -18298,11 +18117,6 @@ class CompassAzimuthTest {
     }
 
     @Test
-    fun inverseAddsHalfTurn() {
-        assertEquals(190f, CompassAzimuth.inverse(10f), 0f)
-    }
-
-    @Test
     fun adjustsForDisplayRotation() {
         assertEquals(100f, CompassAzimuth.adjustForRotation(100f, 0), 0f)
         assertEquals(-170f, CompassAzimuth.adjustForRotation(100f, 1), 0f)
@@ -18473,9 +18287,7 @@ class MapInterpolationTest {
 ################################################################################
 package app.simple.positional.math
 
-import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.math.MathExtensions.toDegrees
-import app.simple.positional.math.MathExtensions.toNegative
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -18486,33 +18298,23 @@ class MathExtensionsTest {
         assertEquals(10f, MathExtensions.normalizeAngle(370f), 1e-4f)
         assertEquals(350f, MathExtensions.normalizeAngle(-10f), 1e-4f)
         assertEquals(0f, MathExtensions.normalizeAngle(720f), 1e-4f)
-        assertEquals(90.0, MathExtensions.normalizeAngle(-270.0), 1e-9)
+        assertEquals(90f, MathExtensions.normalizeAngle(-270f), 1e-4f)
+        assertEquals(180f, MathExtensions.normalizeAngle(180f), 1e-4f)
     }
 
     @Test
-    fun trigonometryUsesDegrees() {
-        assertEquals(1.0, MathExtensions.sinDegrees(90.0), 1e-9)
-        assertEquals(-1.0, MathExtensions.cosDegrees(180.0), 1e-9)
-        assertEquals(1.0, MathExtensions.tanDegrees(45.0), 1e-9)
-        assertEquals(1f, MathExtensions.tanDegrees(45f), 1e-5f)
-    }
-
-    @Test
-    fun clampLimitsValue() {
-        assertEquals(5f, MathExtensions.clamp(10f, 0f, 5f), 0f)
-        assertEquals(0f, MathExtensions.clamp(-3f, 0f, 5f), 0f)
-        assertEquals(2.5f, MathExtensions.clamp(2.5f, 0f, 5f), 0f)
-    }
-
-    @Test
-    fun roundingAndConversions() {
+    fun roundsToPlaces() {
         assertEquals(3.14, MathExtensions.round(3.14159, 2), 1e-12)
+        assertEquals(2.72, MathExtensions.round(2.7182, 2), 1e-12)
+        assertEquals(-1.5, MathExtensions.round(-1.54, 1), 1e-12)
+        assertEquals(90.123457, MathExtensions.round(90.1234567, 6), 1e-12)
+        assertEquals(12345678.9, MathExtensions.round(12345678.94, 1), 1e-6)
         assertTrue(MathExtensions.round(1.0, -1).isNaN())
-        assertEquals(2.7f, 2.7182f.round(1), 1e-6f)
-        assertEquals(180.0, Math.PI.toDegrees(), 1e-9)
+    }
+
+    @Test
+    fun convertsRadiansToDegrees() {
         assertEquals(90f, (Math.PI / 2).toFloat().toDegrees(), 1e-4f)
-        assertEquals(-4f, 4f.toNegative(), 0f)
-        assertEquals(-4f, 4.toNegative(), 0f)
     }
 }
 
