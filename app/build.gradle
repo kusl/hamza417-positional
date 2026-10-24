@@ -23,10 +23,7 @@ android {
         targetSdk = 37
         versionCode = (env('VERSION_CODE') ?: '20260512') as int
         versionName = env('VERSION_NAME') ?: 'v2026.05.12'
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-        vectorDrawables.useSupportLibrary = true
         manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
-        resValue 'string', 'versionName', versionName
         buildConfigField 'boolean', 'HAS_MAPS_KEY', mapsApiKey.isEmpty() ? 'false' : 'true'
 
         ndk {
@@ -64,6 +61,10 @@ android {
         }
     }
 
+    lint {
+        fatal.add('UnusedResources')
+    }
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
@@ -84,7 +85,6 @@ android {
     buildFeatures {
         buildConfig true
         compose true
-        resValues true
     }
 }
 

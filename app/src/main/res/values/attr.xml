@@ -2,5 +2,4 @@
 <resources>
     <attr name="colorAppAccent" format="color" />
     <attr name="colorAppAccentLight" format="color" />
-    <attr name="colorAccentRipple" format="color" />
 </resources>

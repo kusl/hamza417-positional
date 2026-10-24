@@ -82,7 +82,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Ba
 | 17 | Map view preference listeners (Google and OpenStreetMap bases) replaced by `MapPreferences` flows bound to the map lifecycle: look, compass rotation, pin, bearing, target, auto center, geodesic and wrap settings react only to their own keys (the OpenStreetMap GPS map no longer redraws the target line on every preference write); unused north only preference removed; location pin colours as constants so panel settings load in JVM tests | Done |
 | 18 | Map view timers (heading sensor delay, trail auto center) as `DelayedTask` coroutines in a scope that lives only while the map is resumed, so pausing cancels them together with the preference flows; `Handler` runnables and the unused pause hook removed | Done |
 | 19 | Sensor display rotation through `ContextCompat.getDisplayOrDefault` instead of the deprecated `WindowManager.defaultDisplay`; status bar height from window insets instead of the internal `status_bar_height` resource; reverse geocoding and map search share `Geocoding`; network check without the deprecated `NetworkInfo`; web view force dark fallback (a no-op on target SDK 33+) removed; custom location and direction target written in one edit with `apply` instead of several `commit`s; unused math helpers removed | Done |
-| 20 | Unused resources (strings, drawables, colors, dimensions) removed, with lint `UnusedResources` enforced in CI | Next |
+| 20 | Unused resources removed (accent ripple attribute, `colorAccent`, animation duration, bold font, stale lint keep file, generated `versionName` string) and lint `UnusedResources` made fatal, so CI and `assembleRelease` fail on any unused resource; unused instrumentation runner and support vector flag removed | Done |
+| 21 | Launcher art vectors (about 17 MB of path data) rewritten with reduced coordinate precision to shrink the APK and drawable inflation time | Next |
 
 ## Building
 
@@ -107,7 +108,7 @@ Optional `local.properties` keys (environment variables of the same name take pr
 
 `.github/workflows/build.yml` runs on every push and pull request:
 
-1. Unit tests, release lint checks (the same fatal checks that gate `assembleRelease`) and a debug build; the build fails if an exported Room schema identity hash changed.
+1. Unit tests, release lint checks (the same fatal checks that gate `assembleRelease`, including `UnusedResources`) and a debug build; the build fails if an exported Room schema identity hash changed.
 2. On pushes to `master` only: a signed release APK, published as a full GitHub release tagged `v1.0.<run number>`.
 
 Required secrets: `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_PASSWORD`, `KEY_ALIAS`. Optional: `MAPS_API_KEY`.

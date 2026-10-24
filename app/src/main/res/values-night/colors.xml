@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorAccent">#000000</color>
-
     <color name="mainBackground">#202020</color>
     <color name="iconColor">#F3F3F3</color>
     <color name="textTertiary">#B3B3B3</color>
