@@ -3,7 +3,6 @@ package app.simple.positional.viewmodels.viewmodel
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.simple.positional.R
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.CompassBloom.compassBloomRes
 import app.simple.positional.constants.LocationPins
@@ -51,7 +50,7 @@ data class ClockSettings(val motion: ClockMotion, val face24: Boolean, val needl
     companion object {
         fun needles(theme: Int): List<Int> = clockNeedleSkins.getOrElse(theme) { clockNeedleSkins[0] }.toList()
 
-        fun pin(skin: Int): Int = LocationPins.locationsPins.getOrElse(skin) { R.drawable.ic_pin_01 }
+        fun pin(skin: Int): Int = LocationPins.pin(skin)
     }
 }
 

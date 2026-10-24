@@ -2,7 +2,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Point
@@ -13,10 +12,10 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import com.google.android.gms.maps.model.LatLng
 import org.maplibre.android.MapLibre
@@ -31,12 +30,12 @@ import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue
 import org.maplibre.android.style.sources.GeoJsonSource
+import kotlinx.coroutines.Job
 import kotlin.math.roundToInt
 import org.maplibre.android.geometry.LatLng as LibreLatLng
 
 @SuppressLint("ViewConstructor")
-abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), MapHost, HeadingSensor.Listener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), MapHost, HeadingSensor.Listener {
     override val view: View get() = this
     protected var map: MapLibreMap? = null
     protected var mapCallbacks: MapsCallbacks? = null
@@ -52,8 +51,11 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     private val headingSensor = HeadingSensor(context, this)
     private val registerTask = Runnable { registerHeading() }
     private val accent = context.resolveAttrColor(R.attr.colorAppAccent)
+    private val preferences by lazy { MapPreferences().also(::bindPreferences) }
+    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
+    protected open val compassKey: String? = null
     protected abstract fun startCamera(): CameraPosition
     protected abstract fun onCameraIdle(position: CameraPosition)
     protected open fun onStyleReady() {}
@@ -65,6 +67,16 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
     protected open fun onHeadingChanged() {}
     protected open fun onResumed() {}
     protected open fun onPaused() {}
+    protected open fun onCompassRotation(enabled: Boolean) {}
+
+    protected open fun bindPreferences(preferences: MapPreferences) {
+        compassKey?.let { key ->
+            preferences.watch(key, read = { compassRotation }) { enabled ->
+                if (enabled) registerHeadingLater() else unregisterHeading()
+                onCompassRotation(enabled)
+            }
+        }
+    }
 
     override val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) = this@OsmMapView.onStart()
@@ -72,7 +84,7 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
         override fun onResume(owner: LifecycleOwner) {
             this@OsmMapView.owner = owner
             this@OsmMapView.onResume()
-            getSharedPreferences().registerOnSharedPreferenceChangeListener(this@OsmMapView)
+            preferenceJob = preferences.launchIn(owner.lifecycleScope)
             registerHeadingLater()
             onResumed()
         }
@@ -80,7 +92,8 @@ abstract class OsmMapView(context: Context) : MapView(OsmTiles.init(context)), M
         override fun onPause(owner: LifecycleOwner) {
             onPaused()
             unregisterHeading()
-            getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this@OsmMapView)
+            preferenceJob?.cancel()
+            preferenceJob = null
             this@OsmMapView.onPause()
         }
 

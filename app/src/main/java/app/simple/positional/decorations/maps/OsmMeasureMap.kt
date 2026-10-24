@@ -2,7 +2,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
@@ -15,6 +14,7 @@ import org.maplibre.android.camera.CameraPosition
 @SuppressLint("ViewConstructor")
 class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
     override val compassRotation get() = MeasurePreferences.isCompassRotation()
+    override val compassKey get() = MeasurePreferences.COMPASS_ROTATION
     private val measurePoints = mutableListOf<MeasurePoint>()
     override val points: List<MeasurePoint> get() = measurePoints
     private var restore: CameraPosition? = null
@@ -130,13 +130,12 @@ class OsmMeasureMap(context: Context) : OsmPanelMap(context), MeasureMap {
         )
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MeasurePreferences.COMPASS_ROTATION -> {
-                if (MeasurePreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            MeasurePreferences.POLYLINES_WRAPPED -> if (MeasurePreferences.arePolylinesWrapped()) {
+    override fun onCompassRotation(enabled: Boolean) = drawPuck()
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(MeasurePreferences.POLYLINES_WRAPPED, read = MeasurePreferences::arePolylinesWrapped) { wrapped ->
+            if (wrapped) {
                 wrap(animate = true)
             } else {
                 restore?.let(::animateTo)

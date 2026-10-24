@@ -594,3 +594,58 @@ notifications
 2026-10-24T07:08:31.4618556Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
 2026-10-24T07:08:31.4861920Z Removing credentials config '/home/runner/work/_temp/git-credentials-b930d438-0b48-47fb-812c-2c227febb82f.config'
 2026-10-24T07:08:31.5018129Z Cleaning up orphan processes
+
+
+
+
+Claude
+/
+dump.txt
+dump.txt
+TXT
+
+Please continue with the next phase I must be honest though. I don't actually know what I am doing with this trail and all when testing :eek: also github actions is failing 2026-10-24T07:06:14.2072665Z Current runner version: '2.338.0' 2026-10-24T07:06:14.2098791Z ##[group]Runner Image Provisi
+
+pasted
+
+Please continue with the next phase 
+I must be honest though. 
+I don't actually know what I am doing with this trail and all when testing 
+:eek:
+
+Ran 30 commands, read memory, shared files
+Extract phase17.tar.gz at the repo root. It has 16 changed or new files, and there are no files to delete.
+
+CI failure
+The failing test was PanelSettingsTest.unknownPinSkinFallsBackToDefault. LocationPins built its circle colours with Color.parseColor. That is an Android API, and it throws inside JVM unit tests, so the object crashed while loading. The colours are now plain constants, and the fill colour is computed from the stroke colour. GpsPin got the same change. A new LocationPinsTest covers the colours.
+
+Phase 17
+
+Map views no longer register their own preference listeners. They declare bindings in a new MapPreferences, which runs only while the map is resumed. Each binding applies only values that actually changed, including changes you made while the map was paused.
+Compass rotation handling now lives in the two base map classes (Google and OpenStreetMap) instead of being copied into five subclasses.
+The OpenStreetMap GPS map used to redraw the target line on every preference write. It now redraws only when target settings change.
+The “north only” preference was removed because nothing read it.
+New tests: MapPreferencesTest. The README marks phase 17 as done and phase 18 as next.
+Testing Trail
+Trail does not record your path automatically. You drop points yourself, and the app joins them into a line:
+
+Open the Trail panel and tap the add button. The first time, it asks you to name a new trail.
+Walk somewhere, then tap add again. Pick a marker icon, and a point is saved at your current location.
+Long-press anywhere on the map to drop a point there instead. This is handy for testing from your couch.
+After a few points you should see a connected line. Try undo (removes the last point), wrap (zooms to fit the whole trail) and the compass toggle.
+Saved trails are listed in the trails screen. Switch between them and check that each one redraws correctly.
+To exercise this phase on the Nord, toggle compass rotation and auto center from the Trail menu, and check that the map reacts immediately. Then change the pin skin from the GPS menu and check that the pin updates.
+
+Phase17.tar
+GZ
+
+You’ve used 81% of your weekly limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+
+
+
+Claude finished the response

@@ -2,7 +2,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.MapSource
 import com.google.android.gms.maps.model.LatLng
@@ -23,7 +22,6 @@ interface PickerMap : MapHost {
 @SuppressLint("ViewConstructor")
 class GooglePickerMap(context: Context) : GoogleMapView(context), PickerMap {
     override val compassRotation = false
-    override val lookKeys: Set<String> = emptySet()
     override var onIdle: ((Double, Double) -> Unit)? = null
     private var pending: LatLng? = null
 
@@ -73,6 +71,4 @@ class OsmPickerMap(context: Context) : OsmMapView(context), PickerMap {
         val position = camera(latitude, longitude, PickerMap.ZOOM, 0f, 0f)
         if (animate) animateTo(position) else moveCamera(position)
     }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) = Unit
 }

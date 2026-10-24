@@ -2,7 +2,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.core.content.ContextCompat
 import app.simple.positional.R
@@ -16,6 +15,7 @@ import org.maplibre.android.camera.CameraPosition
 @SuppressLint("ViewConstructor")
 class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
     override val compassRotation get() = TrailPreferences.isCompassRotation()
+    override val compassKey get() = TrailPreferences.compass
     private var points: List<TrailPoint> = emptyList()
     private val icons = mutableSetOf<Int>()
     private var restore: CameraPosition? = null
@@ -140,14 +140,11 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
 
     private fun iconName(position: Int) = "trail-$position"
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            TrailPreferences.compass -> {
-                if (TrailPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            TrailPreferences.mapAutoCenter -> scheduleAutoCenter()
-        }
+    override fun onCompassRotation(enabled: Boolean) = drawPuck()
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(TrailPreferences.mapAutoCenter, read = TrailPreferences::getMapAutoCenter) { scheduleAutoCenter() }
     }
 
     private companion object {

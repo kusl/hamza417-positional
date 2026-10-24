@@ -9,8 +9,8 @@ object GPSPreferences {
     private const val mapBearing = "map_bearing_value"
     const val mapTargetMarkerLatitude = "target_marker_latitude"
     const val mapTargetMarkerLongitude = "target_marker_longitude"
-    private const val mapTargetMarkerStartLatitude = "target_start_latitude"
-    private const val mapTargetMarkerStartLongitude = "target_start_longitude"
+    const val mapTargetMarkerStartLatitude = "target_start_latitude"
+    const val mapTargetMarkerStartLongitude = "target_start_longitude"
 
     const val pinSize = "map_pin_size"
     const val pinOpacity = "pin_opacity"
@@ -23,7 +23,6 @@ object GPSPreferences {
     const val pinSkin = "current_pin_skin"
     const val compassRotation = "is_location_map_compass_rotation"
     const val toolsGravity = "is_tools_gravity_left"
-    const val isNorthOnly = "is_map_north_only"
     const val mapTargetMarker = "target_marker_state"
     const val isTargetMarkerMode = "target_marker_mode"
     const val trafficMode = "traffic_on_maps"
@@ -114,14 +113,6 @@ object GPSPreferences {
 
     fun isBearingRotation(): Boolean {
         return getSharedPreferences().getBoolean(useBearingRotation, false)
-    }
-
-    fun setNorthOnly(boolean: Boolean) {
-        getSharedPreferences().edit().putBoolean(isNorthOnly, boolean).apply()
-    }
-
-    fun isNorthOnly(): Boolean {
-        return getSharedPreferences().getBoolean(isNorthOnly, true)
     }
 
     fun setPinSize(value: Int) {

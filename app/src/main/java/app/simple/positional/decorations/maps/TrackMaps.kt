@@ -96,11 +96,14 @@ abstract class GoogleTrackMap(context: Context) : GooglePanelMap(context) {
     }
 
     override fun onHeadingAccuracyChanged() = drawPuck()
+
+    override fun onCompassRotation(enabled: Boolean) = drawPuck()
 }
 
 @SuppressLint("ViewConstructor")
 class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     override val compassRotation get() = TrailPreferences.isCompassRotation()
+    override val compassKey get() = TrailPreferences.compass
     override val lookKeys: Set<String> = setOf(
         TrailPreferences.trailLabelMode,
         TrailPreferences.trailSatellite,
@@ -224,15 +227,10 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
         BitmapDescriptorFactory.fromBitmap(TrailIcons.icons.getOrElse(position) { TrailIcons.icons[0] }.toBitmap(context, ICON_SIZE))
     }
 
-    override fun onPreference(key: String?) {
-        when (key) {
-            TrailPreferences.compass -> {
-                if (TrailPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            TrailPreferences.mapAutoCenter -> scheduleAutoCenter()
-            TrailPreferences.geodesic -> path?.isGeodesic = TrailPreferences.isTrailGeodesic()
-        }
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(TrailPreferences.mapAutoCenter, read = TrailPreferences::getMapAutoCenter) { scheduleAutoCenter() }
+        preferences.watch(TrailPreferences.geodesic, read = TrailPreferences::isTrailGeodesic) { path?.isGeodesic = it }
     }
 
     private companion object {
@@ -244,6 +242,7 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
 @SuppressLint("ViewConstructor")
 class GoogleMeasureMap(context: Context) : GoogleTrackMap(context), MeasureMap {
     override val compassRotation get() = MeasurePreferences.isCompassRotation()
+    override val compassKey get() = MeasurePreferences.COMPASS_ROTATION
     override val lookKeys: Set<String> = setOf(
         MeasurePreferences.LABEL_MODE,
         MeasurePreferences.SATELLITE_MAP,
@@ -356,13 +355,10 @@ class GoogleMeasureMap(context: Context) : GoogleTrackMap(context), MeasureMap {
         target()?.let { mapCallbacks?.onCameraDistance(it) }
     }
 
-    override fun onPreference(key: String?) {
-        when (key) {
-            MeasurePreferences.COMPASS_ROTATION -> {
-                if (MeasurePreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-                drawPuck()
-            }
-            MeasurePreferences.POLYLINES_WRAPPED -> if (MeasurePreferences.arePolylinesWrapped()) {
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        preferences.watch(MeasurePreferences.POLYLINES_WRAPPED, read = MeasurePreferences::arePolylinesWrapped) { wrapped ->
+            if (wrapped) {
                 wrap(animate = true)
             } else {
                 restore?.let(::animateTo)

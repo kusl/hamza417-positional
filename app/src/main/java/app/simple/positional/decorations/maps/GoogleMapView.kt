@@ -3,7 +3,6 @@ package app.simple.positional.decorations.maps
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.location.Location
@@ -15,12 +14,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RawRes
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.decorations.utils.animateColors
 import app.simple.positional.decorations.utils.animateTo
 import app.simple.positional.extensions.maps.MapsCallbacks
 import app.simple.positional.sensors.HeadingSensor
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.BitmapHelper.toBitmap
 import app.simple.positional.util.ColorUtils.resolveAttrColor
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -40,6 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PatternItem
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.Job
 import kotlin.math.roundToInt
 
 data class MapLook(val label: Boolean, val satellite: Boolean, val highContrast: Boolean, val buildings: Boolean, val traffic: Boolean)
@@ -60,8 +60,7 @@ object GoogleMapStyle {
 }
 
 @SuppressLint("ViewConstructor")
-abstract class GoogleMapView(context: Context) : MapView(context), MapHost, HeadingSensor.Listener,
-    SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class GoogleMapView(context: Context) : MapView(context), MapHost, HeadingSensor.Listener {
     override val view: View get() = this
     protected var map: GoogleMap? = null
     protected var mapCallbacks: MapsCallbacks? = null
@@ -83,9 +82,12 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     private var colorAnimator: ValueAnimator? = null
     private val startCap by lazy { cap(R.drawable.ic_trail_start) }
     private val endCap by lazy { cap(R.drawable.seekbar_thumb) }
+    private val preferences by lazy { MapPreferences().also(::bindPreferences) }
+    private var preferenceJob: Job? = null
 
     protected abstract val compassRotation: Boolean
-    protected abstract val lookKeys: Set<String>
+    protected open val lookKeys: Set<String> = emptySet()
+    protected open val compassKey: String? = null
     protected abstract fun look(): MapLook
     protected abstract fun startCamera(): CameraPosition
     protected abstract fun onCameraIdle(position: CameraPosition)
@@ -99,7 +101,17 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
     protected open fun onHeadingAccuracyChanged() {}
     protected open fun onResumed() {}
     protected open fun onPaused() {}
-    protected open fun onPreference(key: String?) {}
+    protected open fun onCompassRotation(enabled: Boolean) {}
+
+    protected open fun bindPreferences(preferences: MapPreferences) {
+        if (lookKeys.isNotEmpty()) preferences.watch(*lookKeys.toTypedArray(), read = ::look, apply = ::applyLook)
+        compassKey?.let { key ->
+            preferences.watch(key, read = { compassRotation }) { enabled ->
+                if (enabled) registerHeadingLater() else unregisterHeading()
+                onCompassRotation(enabled)
+            }
+        }
+    }
 
     override val lifecycleObserver = object : DefaultLifecycleObserver {
         override fun onStart(owner: LifecycleOwner) = this@GoogleMapView.onStart()
@@ -107,7 +119,7 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         override fun onResume(owner: LifecycleOwner) {
             this@GoogleMapView.owner = owner
             this@GoogleMapView.onResume()
-            getSharedPreferences().registerOnSharedPreferenceChangeListener(this@GoogleMapView)
+            preferenceJob = preferences.launchIn(owner.lifecycleScope)
             registerHeadingLater()
             onResumed()
         }
@@ -115,7 +127,8 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         override fun onPause(owner: LifecycleOwner) {
             onPaused()
             unregisterHeading()
-            getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this@GoogleMapView)
+            preferenceJob?.cancel()
+            preferenceJob = null
             this@GoogleMapView.onPause()
         }
 
@@ -140,7 +153,7 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         map.uiSettings.isCompassEnabled = false
         map.uiSettings.isMapToolbarEnabled = false
         map.uiSettings.isMyLocationButtonEnabled = false
-        applyLook()
+        applyLook(look())
         map.moveCamera(CameraUpdateFactory.newCameraPosition(startCamera()))
         map.setOnMapClickListener { onClick(it) }
         map.setOnMapLongClickListener { mapCallbacks?.onMapLongClicked(it) }
@@ -156,13 +169,8 @@ abstract class GoogleMapView(context: Context) : MapView(context), MapHost, Head
         animate().alpha(1f).setDuration(FADE).start()
     }
 
-    final override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in lookKeys) applyLook() else onPreference(key)
-    }
-
-    private fun applyLook() {
+    private fun applyLook(look: MapLook) {
         val map = map ?: return
-        val look = look()
         val night = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         map.mapType = GoogleMapStyle.type(look.satellite, look.label)
         runCatching { map.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, GoogleMapStyle.raw(look.label, look.highContrast, night))) }

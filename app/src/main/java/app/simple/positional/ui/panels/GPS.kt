@@ -184,7 +184,6 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     override fun rotate(rotation: MapRotation) {
         GPSPreferences.setCompassRotation(rotation == MapRotation.Compass)
         GPSPreferences.setBearingRotation(rotation == MapRotation.Bearing)
-        GPSPreferences.setNorthOnly(rotation == MapRotation.North)
     }
 
     override fun sheet(open: Boolean) {

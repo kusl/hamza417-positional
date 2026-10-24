@@ -3,7 +3,6 @@ package app.simple.positional.decorations.maps
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.Point
 import android.location.Location
 import android.view.MotionEvent
@@ -50,7 +49,7 @@ interface GpsMap : PanelMap {
 }
 
 object GpsPin {
-    private val customGradient = intArrayOf(Color.parseColor("#FF1B50"), Color.parseColor("#e11677"))
+    private val customGradient = intArrayOf(0xFFFF1B50.toInt(), 0xFFE11677.toInt())
 
     fun bitmap(context: Context, custom: Boolean, moving: Boolean): Bitmap {
         val icon = if (moving && !custom) R.drawable.ic_bearing_marker else LocationPins.getLocationPin()
@@ -59,11 +58,36 @@ object GpsPin {
     }
 }
 
+object GpsMapPreferences {
+    private val targetKeys = arrayOf(
+        GPSPreferences.mapTargetMarker,
+        GPSPreferences.mapTargetMarkerLatitude,
+        GPSPreferences.mapTargetMarkerLongitude,
+        GPSPreferences.mapTargetMarkerStartLatitude,
+        GPSPreferences.mapTargetMarkerStartLongitude,
+    )
+
+    fun bind(preferences: MapPreferences, onPin: () -> Unit, onBearing: () -> Unit, onTarget: () -> Unit) {
+        preferences.watch(GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity, read = ::pinStyle) { onPin() }
+        preferences.watch(GPSPreferences.useBearingRotation, read = GPSPreferences::isBearingRotation) { onBearing() }
+        preferences.watch(*targetKeys, read = ::targetState) { onTarget() }
+    }
+
+    private fun pinStyle() = Triple(GPSPreferences.getPinSkin(), GPSPreferences.getPinSize(), GPSPreferences.getPinOpacity())
+
+    private fun targetState() = Triple(
+        GPSPreferences.isTargetMarkerSet(),
+        GPSPreferences.getTargetMarkerCoordinates().toList(),
+        GPSPreferences.getTargetMarkerStartCoordinates().toList(),
+    )
+}
+
 @SuppressLint("ViewConstructor")
 class GoogleGpsMap(context: Context) : GooglePanelMap(context), GpsMap {
     override var isMapMovementEnabled = true
     override var onTouch: ((MotionEvent) -> Unit)? = null
     override val compassRotation get() = GPSPreferences.isCompassRotation()
+    override val compassKey get() = GPSPreferences.compassRotation
     override val lookKeys: Set<String> = setOf(
         GPSPreferences.GPSLabelMode,
         GPSPreferences.GPSSatellite,
@@ -191,15 +215,15 @@ class GoogleGpsMap(context: Context) : GooglePanelMap(context), GpsMap {
         targetLine?.let { it.points = points } ?: run { targetLine = line(points) }
     }
 
-    override fun onPreference(key: String?) {
-        when (key) {
-            GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity -> {
-                invalidatePin()
-                drawPin()
-            }
-            GPSPreferences.compassRotation -> if (GPSPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-            GPSPreferences.useBearingRotation, GPSPreferences.isNorthOnly -> rotate(bearing(), animate = true)
-            GPSPreferences.mapTargetMarker, GPSPreferences.mapTargetMarkerLatitude, GPSPreferences.mapTargetMarkerLongitude -> drawTarget()
-        }
+    override fun onCompassRotation(enabled: Boolean) = rotate(bearing(), animate = true)
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        GpsMapPreferences.bind(preferences, onPin = ::redrawPin, onBearing = { rotate(bearing(), animate = true) }, onTarget = ::drawTarget)
+    }
+
+    private fun redrawPin() {
+        invalidatePin()
+        drawPin()
     }
 }

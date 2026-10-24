@@ -2,7 +2,6 @@ package app.simple.positional.decorations.maps
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Point
 import android.location.Location
 import android.view.MotionEvent
@@ -19,6 +18,7 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
     override var isMapMovementEnabled = true
     override var onTouch: ((MotionEvent) -> Unit)? = null
     override val compassRotation get() = GPSPreferences.isCompassRotation()
+    override val compassKey get() = GPSPreferences.compassRotation
     private val custom = MainPreferences.isCustomCoordinate()
     private val customPoint = MainPreferences.getCoordinates().let { it[0].toDouble() to it[1].toDouble() }
 
@@ -128,15 +128,15 @@ class OsmGpsMap(context: Context) : OsmPanelMap(context), GpsMap {
         source(OsmStyle.LINE, OsmStyle.line(if (custom) listOf(current, target) else listOf(start, current, target)))
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            GPSPreferences.pinSkin, GPSPreferences.pinSize, GPSPreferences.pinOpacity -> {
-                invalidatePin()
-                drawPin()
-            }
-            GPSPreferences.compassRotation -> if (GPSPreferences.isCompassRotation()) registerHeadingLater() else unregisterHeading()
-            GPSPreferences.useBearingRotation, GPSPreferences.isNorthOnly -> rotate(bearing(), animate = true)
-            else -> drawTarget()
-        }
+    override fun onCompassRotation(enabled: Boolean) = rotate(bearing(), animate = true)
+
+    override fun bindPreferences(preferences: MapPreferences) {
+        super.bindPreferences(preferences)
+        GpsMapPreferences.bind(preferences, onPin = ::redrawPin, onBearing = { rotate(bearing(), animate = true) }, onTarget = ::drawTarget)
+    }
+
+    private fun redrawPin() {
+        invalidatePin()
+        drawPin()
     }
 }
