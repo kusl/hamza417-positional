@@ -5,4 +5,6 @@ Please continue with the next phase
 also I have noticed that the second hand is completely missing from the clock. 
 The sweeping circle is still there and the minute and hour hands are there
 but not the second hand 
+the second hand is still there when you go to the modal / dialog that selects the needle
+so I know I am not imagining it. it really should be there. 
 please fix all defects and regressions 
