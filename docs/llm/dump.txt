@@ -1,12 +1,12 @@
 # REPOSITORY CONTEXT DUMP
-Generated: 2026-10-24T02:38:19-04:00
+Generated: 2026-10-24T03:04:40-04:00
 Branch:    master
-Commit:    5973d629 2026-10-24 02:38:13 -0400 add claude response
+Commit:    dd1a82ed 2026-10-24 03:04:36 -0400 add claude response
 Remote:    git@github.com:kusl/hamza417-positional.git
 
 ## STATUS
 
-## TREE (883 files)
+## TREE (885 files)
 .gitattributes
 .github/
   ISSUE_TEMPLATE/
@@ -251,6 +251,7 @@ app/
                   LocationViewModel.kt
                   MapSearchViewModel.kt
                   MeasureViewModel.kt
+                  PanelSettings.kt
                   SettingsViewModel.kt
                   TrailDataViewModel.kt
                   TrailsViewModel.kt
@@ -967,6 +968,7 @@ app/
                 TwilightTest.kt
               viewmodels/
                 viewmodel/
+                  PanelSettingsTest.kt
                   SettingsViewModelTest.kt
                   SkyPositionTest.kt
               widgets/
@@ -1266,13 +1268,13 @@ Report bugs and requests in this repository's [issues](https://github.com/kusl/h
 - UI is being migrated to Jetpack Compose (see below).
 - Release builds come from CI on every push to `master`.
 - Legal pages rewritten for this fork; no license checks, analytics or crash reporting.
-- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
+- Dead code, unused resources and source comments removed; unit tests for menu and dialog state, panel catalog, panel settings (map rotation, bloom, needle and pin fallbacks), series statistics and sample windows, fix latency, location sharing, math, utilities, launcher icons, settings labels, accent palette, coordinate input, help pages, arts catalog, address search, time zone catalog, trail name rules, search result encoding, sun and moon refresh distance, settings theme and corner values, location provider choice, map source choice, Google map type and style, OpenStreetMap style and geometry, tracking pins, map animation interpolation, measure storage, widget day and night changes, needle physics, tilt, clock motion, sensor accuracy, twilight times, geodesic distance and path length, distance units, the speedometer dial and a check that every drawable drawn by Compose is a vector or bitmap.
 
 Every map (GPS, trail and measure panels and address search) can show either Google Maps or OpenStreetMap (Settings > Map source). Automatic uses OpenStreetMap when the build has no Maps API key and Google Maps otherwise. The SDK gives no signal when a key is rejected or over quota, so if the Google map stays blank pick OpenStreetMap. OpenStreetMap is drawn with MapLibre Native from `tile.openstreetmap.org`, keeps up to 128 MB of tiles in MapLibre's cache, and darkens tiles in night mode. Google-only options (satellite, labels, traffic, buildings, high contrast, geodesic trails) have no effect on it; traffic is drawn only on the GPS map. With compass rotation the map follows your position only when the pin leaves the screen, so the heading keeps turning the map. With OpenStreetMap the GPS panel only asks for Google Play services when the fused location provider is selected. Location uses Google Play services or the Android provider as set in Settings. Both are cold flows (`LocationSource`) collected by `LocationViewModel` only while a panel that shows location is started (they stop 5 s after the last one stops, so the level and settings panels and the background use no location), request one fix per second, and fall back from GPS to network to passive as providers are switched; with approximate location only, the Android provider uses the network. The last position, used by widgets and as a map starting point, is saved only after moving 50 m.
 
 ## Compose migration
 
-New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`). Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
+New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `ComponentActivity` subclasses through `setPositionalContent`; no AppCompat, Material Components or fragments are used. Panels are `PanelController` classes (no fragments): each owns a child lifecycle that follows the activity while the panel is shown and is destroyed when another panel is picked, so sensors, maps, location observers and coroutines stop with it. Shared theme, components, dialogs and screens live in `ui/compose/`. A panel shows a dialog by putting a `PanelDialog` value in its `DialogHost` and draws it in `DialogContent`. View models expose `StateFlow` (no `LiveData`); preferences reach panels as view model `StateFlow`s built with `preference`, which panels apply with `bind` while started, so no panel or view model registers a preference listener. Text a panel shows (rows, summaries, addresses) is built by its view model, created by `PanelController.panelModel` with the shared `LocationViewModel`, and collected by the screen with `collectAsStateWithLifecycle`; panel controllers keep only sensors, maps, needle animation, preference toggles and actions, and use `PanelController.observe` for map updates. View model flows stop 5 s after the last screen stops collecting, so location, the GPS target summary and address lookups run only while a panel that shows them is visible. Saved lists and the selected measure observe Room through `Flow` and write with `NonCancellable` so edits survive closing a screen. Sensor panels register sensors only while resumed (at game rate, not fastest), animate needles only until they settle, and pause the clock with the frame clock when the app is in the background. Map panels share `MapPanelScaffold` (toolbar, tools, bottom sheet handle, landscape side column) and the map views (`GoogleMapView` and `OsmMapView` bases) follow the panel lifecycle and share pin, accuracy circle, line, heading sensor and camera code; each trail or measure is one line updated in place; the GPS panel reverse geocodes with the non-blocking `Geocoder` API on Android 13+ and only when the position moved at least 25 m.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -1305,7 +1307,8 @@ New UI is written in Jetpack Compose (Material 3, Compose BOM) and hosted in `Co
 | 14a | Panel dialogs as state (`PanelDialog` values rendered by each panel) instead of stored composables; map search result returned through the previous back stack entry's `SavedStateHandle`, so it survives configuration changes; sub screens collect with `collectAsStateWithLifecycle`; clock second hand drawn at full size again; empty trail art scaled to width | Done |
 | 14b | Panel info in view models (`ClockViewModel`, `CompassViewModel`, `DirectionViewModel`, `GpsViewModel`, trail and measure summaries) built on `Dispatchers.Default` and collected with `collectAsStateWithLifecycle`, so it survives rotation and panel switches; GPS address lookup moved into the view model; sun and moon report recomputed once a minute or after moving 1 km instead of on every fix; the clock no longer turns on location with a custom location; view models react to unit, coordinate format and clock format changes through `SharedPreferences.changes`; localized context cached per language | Done |
 | 15 | Settings and level panel state in view models (`SettingsViewModel`, `LevelViewModel`) built from `SharedPreferences.changes` and collected with `collectAsStateWithLifecycle`; preference writes moved out of the panel controllers, which keep only permission requests, activity recreation, window flags and navigation; the settings screen no longer rebuilds its state (and queries every launcher alias) on unrelated preference changes | Done |
-| 16 | Remaining panel preference listeners (compass, clock, direction, GPS, trail, measure) as view model flows | Next |
+| 16 | Compass, clock, direction, GPS, trail and measure panel settings as view model `StateFlow`s built with `preference` (`SharedPreferences.watch`, only distinct values); panels apply them with `PanelController.bind` while started; panels and view models no longer register preference listeners; clock time zone, custom location, location provider, GPS target, selected trail and measure follow preferences through flows; trail map clear removed (switching trails redraws from the points flow); duplicate accent recreate in the settings panel removed | Done |
+| 17 | Map view preference listeners (Google and OpenStreetMap bases) as flows | Next |
 
 ## Building
 
@@ -4243,11 +4246,6 @@ class OsmTrailMap(context: Context) : OsmPanelMap(context), TrailMap {
         animateTo(camera(latitude, longitude, zoom, TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
     }
 
-    override fun clear() {
-        points = emptyList()
-        drawPoints()
-    }
-
     private fun wrap(animate: Boolean) {
         if (!TrailPreferences.arePolylinesWrapped()) restore = map?.cameraPosition
         if (fit(points.map { it.latitude to it.longitude }, animate)) TrailPreferences.setWrapStatus(true)
@@ -4432,7 +4430,6 @@ interface TrailMap : PanelMap {
     fun removeLast()
     fun toggleWrap()
     fun moveTo(latitude: Double, longitude: Double, zoom: Float)
-    fun clear()
 
     companion object {
         fun create(context: Context): TrailMap = if (MapSource.isOsm()) OsmTrailMap(context) else GoogleTrailMap(context)
@@ -4588,11 +4585,6 @@ class GoogleTrailMap(context: Context) : GoogleTrackMap(context), TrailMap {
     override fun moveTo(latitude: Double, longitude: Double, zoom: Float) {
         TrailPreferences.setWrapStatus(false)
         animateTo(camera(LatLng(latitude, longitude), zoom, TrailPreferences.getMapTilt(), TrailPreferences.getMapBearing()))
-    }
-
-    override fun clear() {
-        points = emptyList()
-        drawPoints()
     }
 
     private fun wrap(animate: Boolean) {
@@ -4968,7 +4960,6 @@ package app.simple.positional.extensions.panel
 
 import android.app.Application
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -4991,7 +4982,6 @@ import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.navigation.AppNavigator
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.ui.navigation.SearchResult
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.ui.compose.DialogHost
 import app.simple.positional.ui.compose.ErrorDialog
 import app.simple.positional.ui.compose.MessageDialog
@@ -5000,10 +4990,11 @@ import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
 import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
-abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
+abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner {
     private val registry = LifecycleRegistry(this)
     private val launchers = mutableListOf<ActivityResultLauncher<*>>()
     private var destroyed = false
@@ -5024,10 +5015,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected val locationModel: LocationViewModel by lazy { ViewModelProvider(activity)[LocationViewModel::class.java] }
     protected val isLandscapeOrientation: Boolean = activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    init {
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-    }
-
     @Composable
     abstract fun Content(topInset: Dp)
 
@@ -5036,8 +5023,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected open fun onPause() {}
 
     protected open fun onCleared() {}
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
 
     protected fun getString(@StringRes id: Int): String = activity.getString(id)
 
@@ -5069,6 +5054,11 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { action(it) } } }
     }
 
+    protected fun <T> bind(flow: StateFlow<T>, action: (T) -> Unit) {
+        action(flow.value)
+        observe(flow, action)
+    }
+
     protected fun <I, O> register(contract: ActivityResultContract<I, O>, callback: (O) -> Unit): ActivityResultLauncher<I> =
         activity.activityResultRegistry.register("${javaClass.name}#${launchers.size}", contract, callback).also { launchers += it }
 
@@ -5086,7 +5076,6 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     fun destroy() {
         if (destroyed) return
         destroyed = true
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
         launchers.forEach { it.unregister() }
         if (registry.currentState.isAtLeast(Lifecycle.State.CREATED)) registry.currentState = Lifecycle.State.DESTROYED
         onCleared()
@@ -5156,32 +5145,18 @@ package app.simple.positional.extensions.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.lifecycle.AndroidViewModel
-import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.ContextUtils
 
-open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
+open class WrappedViewModel(application: Application) : AndroidViewModel(application) {
     @Volatile
     private var localized: Pair<String, Context>? = null
-
-    init {
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-    }
 
     protected fun getContext(): Context {
         val language = ContextUtils.language()
         localized?.let { (code, context) -> if (code == language) return context }
         return ContextUtils.wrap(getApplication<Application>().applicationContext, language, applyNightMode = false)
             .also { localized = language to it }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
-
-    override fun onCleared() {
-        super.onCleared()
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 }
 
@@ -7151,6 +7126,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 object SharedPreferences {
     const val preferences = "Preferences"
@@ -7177,6 +7154,8 @@ object SharedPreferences {
         send(Unit)
         awaitClose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
     }.conflate()
+
+    fun <T> watch(vararg keys: String, read: () -> T): Flow<T> = changes(*keys).map { read() }.distinctUntilChanged()
 }
 
 ################################################################################
@@ -12412,38 +12391,37 @@ class ClockReport(private val context: Context) {
 ################################################################################
 package app.simple.positional.ui.panels
 
+import android.hardware.Sensor
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.simple.positional.viewmodels.viewmodel.CompassViewModel
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
-import android.hardware.Sensor
-import android.os.SystemClock
-import app.simple.positional.constants.CompassBloom.compassBloomRes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.ui.compose.BloomSkinDialog
-import app.simple.positional.ui.compose.PhysicalPropertiesDialog
 import app.simple.positional.extensions.panel.SensorPanel
 import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.sensors.HeadingSensor
+import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
-import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
+import app.simple.positional.ui.compose.PhysicalPropertiesDialog
+import app.simple.positional.ui.compose.axisRows
+import app.simple.positional.viewmodels.viewmodel.CompassSettings
+import app.simple.positional.viewmodels.viewmodel.CompassViewModel
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
-    private val sensor: HeadingSensor
+    private val sensor = HeadingSensor(activity, this)
     private val viewModel = panelModel(CompassViewModel::class, ::CompassViewModel)
     private var lastReadings = 0L
 
     init {
-        sensor = HeadingSensor(activity, this)
         lifecycle.addObserver(sensor)
-        applyPreferences()
+        bind(viewModel.settings, ::applySettings)
+        if (!sensor.isAvailable) showSensorError()
     }
 
     @Composable
@@ -12467,10 +12445,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     private enum class CompassDialog : PanelDialog { Bloom, Physics }
 
-    init {
-        if (!sensor.isAvailable) showSensorError()
-    }
-
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
     override fun onAccuracy(type: Int, accuracy: Int) {
@@ -12489,30 +12463,16 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
         state.magnetometer = axisRows(magnetometer)
     }
 
-    private fun applyPreferences() {
-        sensor.gimbalLock = CompassPreferences.isUsingGimbalLock()
-        state.physics = CompassPreferences.isUsingPhysicalProperties()
-        state.directionCode = CompassPreferences.getDirectionCode()
-        state.bloom = if (CompassPreferences.isFlowerBloomOn()) compassBloomRes.getOrNull(CompassPreferences.getFlowerBloomTheme()) else null
-        state.configure(CompassPreferences.getRotationalInertia(), CompassPreferences.getDampingCoefficient(), CompassPreferences.getMagneticCoefficient())
+    private fun applySettings(settings: CompassSettings) {
+        sensor.gimbalLock = settings.gimbalLock
+        state.physics = settings.physics
+        state.directionCode = settings.directionCode
+        state.bloom = settings.bloom
+        state.configure(settings.inertia, settings.damping, settings.magnetic)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in compassKeys) applyPreferences()
-    }
-
-    companion object {
-        private const val READINGS_INTERVAL = 250L
-        private val compassKeys = setOf(
-            CompassPreferences.direction_code,
-            CompassPreferences.flowerBloom,
-            CompassPreferences.flowerBloomTheme,
-            CompassPreferences.dampingCoefficient,
-            CompassPreferences.magneticCoefficient,
-            CompassPreferences.rotationalInertia,
-            CompassPreferences.usePhysicalProperties,
-            CompassPreferences.useGimbalLock,
-        )
+    private companion object {
+        const val READINGS_INTERVAL = 250L
     }
 }
 
@@ -12521,7 +12481,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 ################################################################################
 package app.simple.positional.ui.panels
 
-import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -12529,7 +12488,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.extensions.panel.SensorPanel
-import app.simple.positional.preferences.DirectionPreferences
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.ui.compose.DirectionPanel
 import app.simple.positional.ui.compose.DirectionState
@@ -12539,12 +12497,11 @@ import app.simple.positional.viewmodels.viewmodel.DirectionViewModel
 
 class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = DirectionState()
-    private val sensor: HeadingSensor
+    private val sensor = HeadingSensor(activity, this)
     private val viewModel = panelModel(DirectionViewModel::class, ::DirectionViewModel)
 
     init {
-        sensor = HeadingSensor(activity, this)
-        sensor.gimbalLock = DirectionPreferences.isGimbalLock()
+        bind(viewModel.gimbalLock) { sensor.gimbalLock = it }
         lifecycle.addObserver(sensor)
         if (!sensor.isAvailable) showSensorError()
     }
@@ -12568,10 +12525,6 @@ class Direction(activity: ComponentActivity) : SensorPanel(activity), HeadingSen
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
 
     override fun onAccuracy(type: Int, accuracy: Int) = checkCalibration(type, accuracy)
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == DirectionPreferences.directionGimbalLock) sensor.gimbalLock = DirectionPreferences.isGimbalLock()
-    }
 }
 
 ################################################################################
@@ -12584,7 +12537,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.SharedPreferences
 import android.location.Location
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
@@ -12594,7 +12546,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.constants.LocationPins
 import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.GpsMap
 import app.simple.positional.extensions.panel.PanelController
@@ -12607,6 +12558,7 @@ import app.simple.positional.ui.compose.GpsScreen
 import app.simple.positional.ui.compose.GpsState
 import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.MapRotation
+import app.simple.positional.viewmodels.viewmodel.GpsSettings
 import app.simple.positional.ui.compose.PinCustomizationDialog
 import app.simple.positional.ui.compose.CoordinateInput
 import app.simple.positional.ui.compose.CustomLocationForm
@@ -12641,7 +12593,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     init {
         state.fullScreen = !isLandscapeOrientation && consumeFullScreenShortcut()
-        readPreferences()
+        bind(viewModel.settings, ::applySettings)
     }
 
     init {
@@ -12677,17 +12629,13 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         }
     }
 
-    private fun readPreferences() {
-        state.pin = LocationPins.getLocationPin()
-        state.targetMode = GPSPreferences.isTargetMarkerMode()
-        state.targetSet = GPSPreferences.isTargetMarkerSet()
-        state.toolsLeft = GPSPreferences.isToolsGravityLeft()
-        state.volumeKeys = GPSPreferences.isUsingVolumeKeys()
-        state.rotation = when {
-            GPSPreferences.isCompassRotation() -> MapRotation.Compass
-            GPSPreferences.isBearingRotation() -> MapRotation.Bearing
-            else -> MapRotation.North
-        }
+    private fun applySettings(settings: GpsSettings) {
+        state.pin = settings.pin
+        state.targetMode = settings.targetMode
+        state.targetSet = settings.targetSet
+        state.toolsLeft = settings.toolsLeft
+        state.volumeKeys = settings.volumeKeys
+        state.rotation = settings.rotation
     }
 
     private fun consumeFullScreenShortcut(): Boolean {
@@ -12877,23 +12825,9 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun recenter() = maps.resetCamera(GPSPreferences.getMapZoom())
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in gpsKeys) readPreferences()
-    }
-
-    companion object {
-        private const val FULL_SCREEN_ACTION = "action_map_panel_full"
-        private const val CLOSE_ZOOM = 18F
-        private val gpsKeys = setOf(
-            GPSPreferences.pinSkin,
-            GPSPreferences.toolsGravity,
-            GPSPreferences.isTargetMarkerMode,
-            GPSPreferences.mapTargetMarker,
-            GPSPreferences.compassRotation,
-            GPSPreferences.useBearingRotation,
-            GPSPreferences.isNorthOnly,
-            GPSPreferences.useVolumeKeys,
-        )
+    private companion object {
+        const val FULL_SCREEN_ACTION = "action_map_panel_full"
+        const val CLOSE_ZOOM = 18F
     }
 }
 
@@ -12944,7 +12878,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
 import android.location.Location
 import androidx.lifecycle.ViewModelProvider
 import app.simple.positional.R
@@ -12966,6 +12899,7 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
+import app.simple.positional.viewmodels.viewmodel.MapTools
 import app.simple.positional.viewmodels.viewmodel.MeasureViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.filterNotNull
@@ -12973,17 +12907,13 @@ import app.simple.positional.model.Measure as MeasureModel
 
 class Measure(activity: ComponentActivity) : PanelController(activity), MeasureActions, MapsCallbacks {
     private val state = MeasureState()
-    private val measureViewModel: MeasureViewModel
+    private val measureViewModel = ViewModelProvider(activity)[MeasureViewModel::class.java]
     private val maps: MeasureMap
     private var location: Location? = null
     private var shown: Long? = null
 
     init {
-        measureViewModel = ViewModelProvider(activity)[MeasureViewModel::class.java]
-        readPreferences()
-    }
-
-    init {
+        bind(measureViewModel.tools, ::applySettings)
         maps = MeasureMap.create(activity).apply { setCallbacks(this@Measure) }
     }
 
@@ -13052,10 +12982,10 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
         state.current = ""
     }
 
-    private fun readPreferences() {
-        state.toolsLeft = MeasurePreferences.isToolsGravityToLeft()
-        state.compass = MeasurePreferences.isCompassRotation()
-        state.wrapped = MeasurePreferences.arePolylinesWrapped()
+    private fun applySettings(tools: MapTools) {
+        state.toolsLeft = tools.toolsLeft
+        state.compass = tools.compass
+        state.wrapped = tools.wrapped
     }
 
     private fun bottomBar(visible: Boolean) {
@@ -13105,14 +13035,8 @@ class Measure(activity: ComponentActivity) : PanelController(activity), MeasureA
 
     override fun toggleToolsSide() = MeasurePreferences.invertToolsGravity()
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MeasurePreferences.TOOLS_GRAVITY, MeasurePreferences.COMPASS_ROTATION, MeasurePreferences.POLYLINES_WRAPPED -> readPreferences()
-        }
-    }
-
-    companion object {
-        private const val CLOSE_ZOOM = 18F
+    private companion object {
+        const val CLOSE_ZOOM = 18F
     }
 }
 
@@ -13123,7 +13047,6 @@ package app.simple.positional.ui.panels
 
 import android.Manifest
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.provider.Settings as AndroidSettings
 import android.view.WindowManager
@@ -13137,7 +13060,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.SettingsActions
 import app.simple.positional.ui.compose.SettingsScreen
 import app.simple.positional.ui.navigation.Routes
@@ -13165,10 +13087,6 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
     override fun onResume() {
         appSettingsOpened = false
         viewModel.refresh()
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == MainPreferences.accentColor) activity.recreate()
     }
 
     override fun requestPermission() {
@@ -13243,7 +13161,6 @@ class Settings(activity: ComponentActivity) : PanelController(activity), Setting
 ################################################################################
 package app.simple.positional.ui.panels
 
-import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13251,13 +13168,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
-import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
-import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.panel.PanelController
-import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
-import app.simple.positional.preferences.GPSPreferences
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
@@ -13267,6 +13179,7 @@ import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.viewmodels.viewmodel.ClockSettings
 import app.simple.positional.viewmodels.viewmodel.ClockViewModel
 
 class Time(activity: ComponentActivity) : PanelController(activity) {
@@ -13274,7 +13187,7 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
     private val viewModel = panelModel(ClockViewModel::class, ::ClockViewModel)
 
     init {
-        applyPreferences()
+        bind(viewModel.settings, ::applySettings)
     }
 
     @Composable
@@ -13321,32 +13234,21 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
 
     private enum class ClockDialog : PanelDialog { Location, Needles, Motion }
 
-    private fun applyPreferences() {
-        state.motion = ClockMotion.of(ClockPreferences.getMovementType())
-        state.face24 = ClockPreferences.isClockFace24Hour()
-        state.needles = clockNeedleSkins.getOrElse(ClockPreferences.getClockNeedleTheme()) { clockNeedleSkins[0] }.toList()
-        state.pin = LocationPins.locationsPins.getOrElse(GPSPreferences.getPinSkin()) { R.drawable.ic_pin_01 }
-        state.customLocation = MainPreferences.isCustomCoordinate()
+    private fun applySettings(settings: ClockSettings) {
+        state.motion = settings.motion
+        state.face24 = settings.face24
+        state.needles = settings.needles
+        state.pin = settings.pin
+        state.customLocation = settings.customLocation
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key in clockKeys) applyPreferences()
-    }
-
-    companion object {
-        private val motionTypes = listOf(
+    private companion object {
+        val motionTypes = listOf(
             "smooth" to R.string.motion_type_smooth,
             "tick" to R.string.motion_type_tick,
             "oscillate" to R.string.tick_oscillate,
             "tick_smooth" to R.string.tick_smooth,
             "mechanical" to R.string.mechanical,
-        )
-        private val clockKeys = setOf(
-            ClockPreferences.clockNeedleMovementType,
-            ClockPreferences.clockNeedle,
-            ClockPreferences.is24HourFace,
-            MainPreferences.isCustomCoordinate,
-            GPSPreferences.pinSkin,
         )
     }
 }
@@ -13362,7 +13264,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.SharedPreferences
 import android.location.Location
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -13394,6 +13295,7 @@ import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.TrailNames
+import app.simple.positional.viewmodels.viewmodel.MapTools
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -13408,10 +13310,7 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private var pending: Triple<Double, Double, Float>? = null
 
     init {
-        readPreferences()
-    }
-
-    init {
+        bind(trailData.tools, ::applySettings)
         maps = TrailMap.create(activity).apply { setCallbacks(this@Trail) }
     }
 
@@ -13435,10 +13334,10 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
         observe(trailData.points, maps::showPoints)
     }
 
-    private fun readPreferences() {
-        state.toolsLeft = TrailPreferences.isToolsGravityToLeft()
-        state.compass = TrailPreferences.isCompassRotation()
-        state.wrapped = TrailPreferences.arePolylinesWrapped()
+    private fun applySettings(tools: MapTools) {
+        state.toolsLeft = tools.toolsLeft
+        state.compass = tools.compass
+        state.wrapped = tools.wrapped
     }
 
     private fun bottomBar(visible: Boolean) {
@@ -13591,19 +13490,9 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     override fun share(item: TrailPointItem) = MapIntents.open(activity, item.point.latitude, item.point.longitude)
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            TrailPreferences.selectedTrail -> {
-                maps.clear()
-                trailData.select(TrailPreferences.getCurrentTrail())
-            }
-            TrailPreferences.toolsMenuGravity, TrailPreferences.compass, TrailPreferences.wrapped -> readPreferences()
-        }
-    }
-
-    companion object {
-        private const val CLOSE_ZOOM = 18F
-        private const val FOCUS_ZOOM = 15F
+    private companion object {
+        const val CLOSE_ZOOM = 18F
+        const val FOCUS_ZOOM = 15F
     }
 }
 
@@ -14921,11 +14810,12 @@ object UTMConverter {
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.ClockMotion
 import app.simple.positional.math.GeoDistance
 import app.simple.positional.preferences.ClockPreferences
+import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences.changes
 import app.simple.positional.ui.compose.ClockTime
@@ -14935,10 +14825,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -14956,25 +14844,40 @@ data class SkyPosition(val latitude: Double, val longitude: Double, val altitude
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ClockViewModel(application: Application, location: LocationViewModel) : WrappedViewModel(application) {
-    private val custom = MutableStateFlow(customPosition())
-    private val mutableZone = MutableStateFlow(storedZone())
+    private val custom = preference(MainPreferences.isCustomCoordinate, MainPreferences.latitude, MainPreferences.longitude, read = ::customPosition)
 
-    val zone: StateFlow<ZoneId> = mutableZone.asStateFlow()
+    val zone: StateFlow<ZoneId> = preference(ClockPreferences.timezone, read = ::storedZone)
+
+    val settings: StateFlow<ClockSettings> = preference(
+        ClockPreferences.clockNeedleMovementType,
+        ClockPreferences.clockNeedle,
+        ClockPreferences.is24HourFace,
+        MainPreferences.isCustomCoordinate,
+        GPSPreferences.pinSkin,
+    ) {
+        ClockSettings(
+            motion = ClockMotion.of(ClockPreferences.getMovementType()),
+            face24 = ClockPreferences.isClockFace24Hour(),
+            needles = ClockSettings.needles(ClockPreferences.getClockNeedleTheme()),
+            pin = ClockSettings.pin(GPSPreferences.getPinSkin()),
+            customLocation = MainPreferences.isCustomCoordinate(),
+        )
+    }
 
     val position: StateFlow<SkyPosition> = custom
         .flatMapLatest { fixed ->
             if (fixed != null) flowOf(fixed) else location.location.filterNotNull().map { SkyPosition(it.latitude, it.longitude, it.altitude) }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), custom.value ?: storedPosition())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), customPosition() ?: storedPosition())
 
-    val time: StateFlow<ClockTime> = combine(mutableZone, changes(ClockPreferences.isUsingAmPm)) { zone, _ -> zone }
+    val time: StateFlow<ClockTime> = combine(zone, changes(ClockPreferences.isUsingAmPm)) { zone, _ -> zone }
         .flatMapLatest { zone -> ticker(SECOND) { report().time(zone) } }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), ClockTime())
 
     val sky: StateFlow<SkyReport?> = combine(
         position.distinctUntilChanged { old, new -> old.isNear(new, SKY_DISTANCE) },
-        mutableZone,
+        zone,
         changes(MainPreferences.unit, ClockPreferences.isUsingAmPm, ClockPreferences.isUsingSecondsPrecision),
     ) { position, zone, _ -> position to zone }
         .flatMapLatest { (position, zone) -> ticker(MINUTE) { report().sky(position.latitude, position.longitude, position.altitude, zone) } }
@@ -14987,13 +14890,6 @@ class ClockViewModel(application: Application, location: LocationViewModel) : Wr
         while (true) {
             emit(value())
             delay(period - System.currentTimeMillis() % period)
-        }
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            ClockPreferences.timezone -> mutableZone.value = storedZone()
-            MainPreferences.isCustomCoordinate, MainPreferences.latitude, MainPreferences.longitude -> custom.value = customPosition()
         }
     }
 
@@ -15030,6 +14926,7 @@ import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.math.MathExtensions.round
+import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.ui.compose.InfoRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -15044,6 +14941,27 @@ class CompassViewModel(application: Application, location: LocationViewModel) : 
         .map(::fieldRows)
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    val settings: StateFlow<CompassSettings> = preference(
+        CompassPreferences.direction_code,
+        CompassPreferences.flowerBloom,
+        CompassPreferences.flowerBloomTheme,
+        CompassPreferences.dampingCoefficient,
+        CompassPreferences.magneticCoefficient,
+        CompassPreferences.rotationalInertia,
+        CompassPreferences.usePhysicalProperties,
+        CompassPreferences.useGimbalLock,
+    ) {
+        CompassSettings(
+            gimbalLock = CompassPreferences.isUsingGimbalLock(),
+            physics = CompassPreferences.isUsingPhysicalProperties(),
+            directionCode = CompassPreferences.getDirectionCode(),
+            bloom = CompassSettings.bloom(CompassPreferences.isFlowerBloomOn(), CompassPreferences.getFlowerBloomTheme()),
+            inertia = CompassPreferences.getRotationalInertia(),
+            damping = CompassPreferences.getDampingCoefficient(),
+            magnetic = CompassPreferences.getMagneticCoefficient(),
+        )
+    }
 
     private fun fieldRows(location: Location): List<InfoRow> {
         val field = GeomagneticField(location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), location.time)
@@ -15132,6 +15050,8 @@ class DirectionViewModel(application: Application, location: LocationViewModel) 
     val info: StateFlow<DirectionInfo> = combine(changes(*KEYS), location.location) { _, fix -> info(fix) }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), DirectionInfo())
+
+    val gimbalLock: StateFlow<Boolean> = preference(DirectionPreferences.directionGimbalLock) { DirectionPreferences.isGimbalLock() }
 
     private fun info(fix: Location?): DirectionInfo {
         val context = getContext()
@@ -15241,6 +15161,7 @@ import android.location.Location
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
+import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
 import app.simple.positional.math.Latency
 import app.simple.positional.math.MathExtensions.round
@@ -15248,6 +15169,7 @@ import app.simple.positional.math.MovementThreshold
 import app.simple.positional.math.UnitConverter.toFeet
 import app.simple.positional.math.UnitConverter.toKiloMetersPerHour
 import app.simple.positional.math.UnitConverter.toMilesPerHour
+import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences.changes
 import app.simple.positional.ui.compose.GpsInfo
@@ -15317,6 +15239,25 @@ class GpsViewModel(application: Application, source: LocationViewModel) : Wrappe
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), GpsInfo(custom = MainPreferences.isCustomCoordinate()))
+
+    val settings: StateFlow<GpsSettings> = preference(
+        GPSPreferences.pinSkin,
+        GPSPreferences.toolsGravity,
+        GPSPreferences.isTargetMarkerMode,
+        GPSPreferences.mapTargetMarker,
+        GPSPreferences.compassRotation,
+        GPSPreferences.useBearingRotation,
+        GPSPreferences.useVolumeKeys,
+    ) {
+        GpsSettings(
+            pin = LocationPins.getLocationPin(),
+            targetMode = GPSPreferences.isTargetMarkerMode(),
+            targetSet = GPSPreferences.isTargetMarkerSet(),
+            toolsLeft = GPSPreferences.isToolsGravityLeft(),
+            volumeKeys = GPSPreferences.isUsingVolumeKeys(),
+            rotation = GpsSettings.rotation(GPSPreferences.isCompassRotation(), GPSPreferences.isBearingRotation()),
+        )
+    }
 
     private suspend fun lookup(point: LatLng): String {
         val context = getContext()
@@ -15408,24 +15349,13 @@ class GpsViewModel(application: Application, source: LocationViewModel) : Wrappe
 package app.simple.positional.viewmodels.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import app.simple.positional.preferences.LevelPreferences
-import app.simple.positional.singleton.SharedPreferences
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 
 class LevelViewModel : ViewModel() {
-    val square: StateFlow<Boolean> = SharedPreferences.changes(LevelPreferences.isSquareStyle)
-        .map { LevelPreferences.isSquareStyle() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), LevelPreferences.isSquareStyle())
+    val square: StateFlow<Boolean> = preference(LevelPreferences.isSquareStyle) { LevelPreferences.isSquareStyle() }
 
     fun toggleStyle() = LevelPreferences.setSquareStyle(!LevelPreferences.isSquareStyle())
-
-    private companion object {
-        const val STOP_TIMEOUT = 5_000L
-    }
 }
 
 ################################################################################
@@ -15435,7 +15365,6 @@ package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.location.Location
 import android.os.SystemClock
 import android.text.Spanned
@@ -15479,13 +15408,13 @@ import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocationViewModel(application: Application) : WrappedViewModel(application) {
-    private val providerSetting = MutableStateFlow(MainPreferences.getLocationProvider())
+    private val providerSetting = preference(MainPreferences.locationProvider) { MainPreferences.getLocationProvider() }
     private val restarts = MutableStateFlow(0)
     private val saved = MovementThreshold(SAVE_DISTANCE)
     private val mutableLatency = MutableStateFlow<Latency?>(null)
     private val mutableAccuracy = MutableStateFlow(emptyList<Float>())
     private val mutableAltitude = MutableStateFlow(emptyList<Float>())
-    private val targetPoint = MutableStateFlow(currentTarget())
+    private val targetPoint = preference(GPSPreferences.mapTargetMarker, GPSPreferences.mapTargetMarkerLatitude, GPSPreferences.mapTargetMarkerLongitude, read = ::currentTarget)
     private var lastFix = SystemClock.elapsedRealtime()
 
     private val events = combine(providerSetting, restarts) { provider, _ -> provider }
@@ -15566,15 +15495,6 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
             (seconds / HOUR % 24).toString(),
             (seconds / MINUTE % 60).toString(),
         )
-    }
-
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        when (key) {
-            MainPreferences.locationProvider -> providerSetting.value = MainPreferences.getLocationProvider()
-            GPSPreferences.mapTargetMarker,
-            GPSPreferences.mapTargetMarkerLatitude,
-            GPSPreferences.mapTargetMarkerLongitude -> targetPoint.value = currentTarget()
-        }
     }
 
     private companion object {
@@ -15689,7 +15609,6 @@ class MapSearchViewModel(application: Application) : AndroidViewModel(applicatio
 package app.simple.positional.viewmodels.viewmodel
 
 import android.app.Application
-import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
 import app.simple.positional.R
 import app.simple.positional.database.instances.MeasureDatabase
@@ -15705,7 +15624,6 @@ import app.simple.positional.util.DistanceText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -15720,7 +15638,7 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalCoroutinesApi::class)
 class MeasureViewModel(application: Application) : WrappedViewModel(application) {
     private val dao = MeasureDatabase.getInstance(application).measureDao()
-    private val selected = MutableStateFlow(MeasurePreferences.getLastSelectedMeasure())
+    private val selected = preference(MeasurePreferences.LAST_SELECTED_MEASURE) { MeasurePreferences.getLastSelectedMeasure() }
     private val writes = Mutex()
 
     val measures: StateFlow<List<Measure>?> = dao.observeAll()
@@ -15733,6 +15651,10 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     val summary: StateFlow<List<InfoRow>> = combine(measure, changes(MainPreferences.unit)) { measure, _ -> summary(measure?.points.orEmpty()) }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    val tools: StateFlow<MapTools> = preference(MeasurePreferences.TOOLS_GRAVITY, MeasurePreferences.COMPASS_ROTATION, MeasurePreferences.POLYLINES_WRAPPED) {
+        MapTools(MeasurePreferences.isToolsGravityToLeft(), MeasurePreferences.isCompassRotation(), MeasurePreferences.arePolylinesWrapped())
+    }
 
     private fun summary(points: List<MeasurePoint>): List<InfoRow> {
         val context = getContext()
@@ -15764,7 +15686,7 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     }
 
     private fun editPoints(change: (List<MeasurePoint>) -> List<MeasurePoint>) {
-        val id = selected.value
+        val id = MeasurePreferences.getLastSelectedMeasure()
         persist {
             val current = dao.getMeasureById(id) ?: return@persist
             dao.updateMeasure(Measure(current.dateCreated, current.name, current.note, ArrayList(change(current.points))))
@@ -15775,14 +15697,75 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
         viewModelScope.launch { withContext(NonCancellable) { writes.withLock { block() } } }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == MeasurePreferences.LAST_SELECTED_MEASURE) selected.value = MeasurePreferences.getLastSelectedMeasure()
-    }
-
     private companion object {
         const val STOP_TIMEOUT = 5_000L
     }
 }
+
+################################################################################
+# FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/PanelSettings.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import androidx.annotation.DrawableRes
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
+import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
+import app.simple.positional.constants.CompassBloom.compassBloomRes
+import app.simple.positional.constants.LocationPins
+import app.simple.positional.math.ClockMotion
+import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.ui.compose.MapRotation
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+
+data class MapTools(val toolsLeft: Boolean, val compass: Boolean, val wrapped: Boolean)
+
+data class GpsSettings(
+    @param:DrawableRes val pin: Int,
+    val targetMode: Boolean,
+    val targetSet: Boolean,
+    val toolsLeft: Boolean,
+    val volumeKeys: Boolean,
+    val rotation: MapRotation,
+) {
+    companion object {
+        fun rotation(compass: Boolean, bearing: Boolean): MapRotation = when {
+            compass -> MapRotation.Compass
+            bearing -> MapRotation.Bearing
+            else -> MapRotation.North
+        }
+    }
+}
+
+data class CompassSettings(
+    val gimbalLock: Boolean,
+    val physics: Boolean,
+    val directionCode: Boolean,
+    val bloom: Int?,
+    val inertia: Float,
+    val damping: Float,
+    val magnetic: Float,
+) {
+    companion object {
+        fun bloom(on: Boolean, theme: Int): Int? = if (on) compassBloomRes.getOrNull(theme) else null
+    }
+}
+
+data class ClockSettings(val motion: ClockMotion, val face24: Boolean, val needles: List<Int>, @param:DrawableRes val pin: Int, val customLocation: Boolean) {
+    companion object {
+        fun needles(theme: Int): List<Int> = clockNeedleSkins.getOrElse(theme) { clockNeedleSkins[0] }.toList()
+
+        fun pin(skin: Int): Int = LocationPins.locationsPins.getOrElse(skin) { R.drawable.ic_pin_01 }
+    }
+}
+
+private const val STOP_TIMEOUT = 5_000L
+
+fun <T> ViewModel.preference(vararg keys: String, read: () -> T): StateFlow<T> =
+    SharedPreferences.watch(*keys, read = read).stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), read())
 
 ################################################################################
 # FILE: app/src/main/java/app/simple/positional/viewmodels/viewmodel/SettingsViewModel.kt
@@ -15924,7 +15907,6 @@ import app.simple.positional.util.TimeFormatter.formatDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -15937,7 +15919,11 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TrailDataViewModel(application: Application) : WrappedViewModel(application) {
-    private val name = MutableStateFlow(TrailPreferences.getCurrentTrail())
+    private val name = preference(TrailPreferences.selectedTrail) { TrailPreferences.getCurrentTrail() }
+
+    val tools: StateFlow<MapTools> = preference(TrailPreferences.toolsMenuGravity, TrailPreferences.compass, TrailPreferences.wrapped) {
+        MapTools(TrailPreferences.isToolsGravityToLeft(), TrailPreferences.isCompassRotation(), TrailPreferences.arePolylinesWrapped())
+    }
 
     val points: StateFlow<List<TrailPoint>> = name
         .flatMapLatest { if (it.isEmpty()) flowOf(emptyList()) else dao(it).observeAll() }
@@ -15948,10 +15934,6 @@ class TrailDataViewModel(application: Application) : WrappedViewModel(applicatio
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), TrailInfo())
-
-    fun select(trail: String) {
-        name.value = trail
-    }
 
     fun save(point: TrailPoint) = persist { dao(it).insertTrailData(point) }
 
@@ -15993,7 +15975,7 @@ class TrailDataViewModel(application: Application) : WrappedViewModel(applicatio
     private fun dao(trail: String) = TrailPointDatabase.getInstance(getApplication(), trail).trailDataDao()
 
     private fun persist(block: suspend (String) -> Unit) {
-        val trail = name.value
+        val trail = TrailPreferences.getCurrentTrail()
         if (trail.isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) { withContext(NonCancellable) { block(trail) } }
     }
@@ -19304,6 +19286,54 @@ class TwilightTest {
     @Test
     fun phasesHaveDistinctColors() {
         assertEquals(TwilightPhase.entries.size, TwilightPhase.entries.map { it.color }.toSet().size)
+    }
+}
+
+################################################################################
+# FILE: app/src/test/java/app/simple/positional/viewmodels/viewmodel/PanelSettingsTest.kt
+################################################################################
+package app.simple.positional.viewmodels.viewmodel
+
+import app.simple.positional.R
+import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
+import app.simple.positional.constants.CompassBloom.compassBloomRes
+import app.simple.positional.constants.LocationPins
+import app.simple.positional.ui.compose.MapRotation
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class PanelSettingsTest {
+    @Test
+    fun compassRotationWinsOverBearing() {
+        assertEquals(MapRotation.Compass, GpsSettings.rotation(compass = true, bearing = true))
+        assertEquals(MapRotation.Bearing, GpsSettings.rotation(compass = false, bearing = true))
+        assertEquals(MapRotation.North, GpsSettings.rotation(compass = false, bearing = false))
+    }
+
+    @Test
+    fun bloomIsHiddenWhenOffOrUnknown() {
+        assertNull(CompassSettings.bloom(false, 0))
+        assertNull(CompassSettings.bloom(true, compassBloomRes.size))
+        assertEquals(compassBloomRes[1], CompassSettings.bloom(true, 1))
+    }
+
+    @Test
+    fun unknownNeedleSkinFallsBackToFirst() {
+        assertEquals(clockNeedleSkins[0].toList(), ClockSettings.needles(-1))
+        assertEquals(clockNeedleSkins.last().toList(), ClockSettings.needles(clockNeedleSkins.lastIndex))
+    }
+
+    @Test
+    fun unknownPinSkinFallsBackToDefault() {
+        assertEquals(R.drawable.ic_pin_01, ClockSettings.pin(LocationPins.locationsPins.size))
+        assertEquals(LocationPins.locationsPins[2], ClockSettings.pin(2))
+    }
+
+    @Test
+    fun settingsCompareByValue() {
+        assertEquals(MapTools(toolsLeft = true, compass = false, wrapped = true), MapTools(toolsLeft = true, compass = false, wrapped = true))
+        assertEquals(ClockSettings.needles(1), ClockSettings.needles(1))
     }
 }
 
