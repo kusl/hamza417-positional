@@ -1,5 +1,6 @@
 package app.simple.positional.widgets
 
+import android.appwidget.AppWidgetManager
 import android.content.Context
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
@@ -7,6 +8,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -21,8 +23,10 @@ import androidx.glance.layout.padding
 import app.simple.positional.R
 import app.simple.positional.constants.LauncherBackground
 import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.util.ArtRaster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 class SunTimeWidgetArt : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = SunTimeArtGlance()
@@ -36,7 +40,7 @@ class SunTimeArtGlance : GlanceAppWidget() {
         val pin = WidgetSky.pin()
         val title = context.getString(R.string.app_name)
         val updated = WidgetSky.updated(context, pattern)
-        val art = LauncherBackground.vectorBackground.random()
+        val art = ArtRaster.render(context, LauncherBackground.vectorBackground.random(), artWidth(context, id))
         provideContent {
             Box(
                 GlanceModifier.fillMaxSize().background(ImageProvider(R.drawable.bg_widget)).cornerRadius(20.dp),
@@ -49,5 +53,16 @@ class SunTimeArtGlance : GlanceAppWidget() {
                 }
             }
         }
+    }
+
+    private fun artWidth(context: Context, id: GlanceId): Int {
+        val metrics = context.resources.displayMetrics
+        val widgetId = GlanceAppWidgetManager(context).getAppWidgetId(id)
+        val dp = AppWidgetManager.getInstance(context).getAppWidgetOptions(widgetId).getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+        return ((if (dp > 0) dp else FALLBACK_WIDTH) * metrics.density).roundToInt().coerceAtMost(metrics.widthPixels)
+    }
+
+    private companion object {
+        const val FALLBACK_WIDTH = 320
     }
 }

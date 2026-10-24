@@ -1,6 +1,7 @@
 package app.simple.positional.ui.compose
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,27 +19,35 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import app.simple.positional.R
 import app.simple.positional.constants.LauncherBackground
+import app.simple.positional.util.ArtRaster
 import app.simple.positional.util.BitmapHelper.addLinearGradient
 import app.simple.positional.util.BitmapHelper.toBitmapKeepingSize
 
@@ -96,11 +105,23 @@ private fun ArtCard(art: Art, index: Int, count: Int, cornerRadius: Dp, pin: Int
             )
             Image(icon, contentDescription = null, modifier = Modifier.padding(20.dp).size(dimensionResource(R.dimen.launcher_app_icon_dimen)))
         }
-        Image(
-            painterResource(art.background),
-            contentDescription = null,
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
-            contentScale = ContentScale.FillWidth,
-        )
+        LauncherArt(art.background, Modifier.align(Alignment.BottomCenter).fillMaxWidth())
+    }
+}
+
+@Composable
+fun LauncherArt(@DrawableRes art: Int, modifier: Modifier, crop: Boolean = false) {
+    val context = LocalContext.current
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    val width = size.width
+    val height = if (crop) size.height else 0
+    val bitmap by produceState<ImageBitmap?>(null, art, width, height) {
+        if (width > 0 && (!crop || height > 0)) value = ArtRaster.render(context, art, width, height).asImageBitmap()
+    }
+    val fade by animateFloatAsState(if (bitmap == null) 0f else 1f, label = "art")
+    Box(modifier.onSizeChanged { size = it }) {
+        bitmap?.let {
+            Image(it, contentDescription = null, modifier = Modifier.fillMaxWidth().graphicsLayer { alpha = fade }, contentScale = ContentScale.FillWidth)
+        }
     }
 }

@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -89,7 +88,7 @@ fun SplashScreen(onFinished: () -> Unit) {
                 }
             },
     ) {
-        Image(painterResource(background), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        LauncherArt(background, Modifier.fillMaxSize(), crop = true)
         Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Image(
                 painterResource(LocationPins.getLocationPin()),
