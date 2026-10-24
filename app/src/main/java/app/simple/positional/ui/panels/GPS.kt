@@ -9,11 +9,9 @@ import android.content.SharedPreferences
 import android.location.Location
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.compose.ui.unit.IntOffset
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import app.simple.positional.R
 import app.simple.positional.callbacks.BottomBarHost
@@ -22,11 +20,6 @@ import app.simple.positional.database.instances.LocationDatabase
 import app.simple.positional.decorations.maps.GpsMap
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapsCallbacks
-import app.simple.positional.math.MathExtensions.round
-import app.simple.positional.math.MovementThreshold
-import app.simple.positional.math.UnitConverter.toFeet
-import app.simple.positional.math.UnitConverter.toKiloMetersPerHour
-import app.simple.positional.math.UnitConverter.toMilesPerHour
 import app.simple.positional.model.Locations
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
@@ -48,52 +41,28 @@ import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.ui.navigation.SearchResult
 import app.simple.positional.ui.compose.SettingsLabels
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.ui.compose.toAnnotatedString
-import app.simple.positional.util.DMSConverter
-import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
-import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
 import app.simple.positional.util.MapSource
-import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import app.simple.positional.util.ReverseGeocoder
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
+import app.simple.positional.viewmodels.viewmodel.GpsViewModel
 import com.google.android.gms.maps.model.LatLng
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, MapsCallbacks {
-    private val state: GpsState
+    private val state = GpsState()
     private val targetForm = CustomLocationForm()
-    private var accuracySeries by mutableStateOf(emptyList<Float>())
-    private var altitudeSeries by mutableStateOf(emptyList<Float>())
     private val maps: GpsMap
-    private val viewModel: LocationViewModel
-    private val addressThreshold = MovementThreshold(ADDRESS_DISTANCE)
-    private var addressJob: Job? = null
+    private val viewModel = panelModel(GpsViewModel::class, ::GpsViewModel)
     private var location: Location? = null
     private var pressed: LatLng? = null
-    private var accuracyRow = InfoRow("")
-    private var altitudeRow = InfoRow("")
-    private var latencyRow = InfoRow("")
 
     init {
-        viewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
-        state = GpsState(MainPreferences.isCustomCoordinate())
         state.fullScreen = !isLandscapeOrientation && consumeFullScreenShortcut()
         readPreferences()
-        accuracyRow = InfoRow(getString(R.string.gps_accuracy), PENDING)
-        altitudeRow = InfoRow(getString(R.string.gps_altitude), PENDING)
-        latencyRow = InfoRow(getString(R.string.gps_latency), PENDING)
-        publishLocationRows()
-        state.provider = providerRows(PENDING)
-        state.movement = listOf(R.string.gps_bearing, R.string.gps_direction, R.string.gps_speed).map { InfoRow(getString(it), PENDING) }
-        state.coordinates = listOf(R.string.gps_latitude, R.string.gps_longitude).map { InfoRow(getString(it), PENDING) }
-        state.address = PENDING
     }
 
     init {
@@ -110,7 +79,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     @Composable
     override fun Content(topInset: Dp) {
-        GpsScreen(state, maps.view, topInset, isLandscapeOrientation, this)
+        val info by viewModel.info.collectAsStateWithLifecycle()
+        GpsScreen(state, info, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
@@ -122,85 +92,10 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
             showError(getString(R.string.play_services_error))
         }
 
-        if (state.custom) {
-            val coordinates = MainPreferences.getCoordinates()
-            showCoordinates(coordinates[0].toDouble(), coordinates[1].toDouble())
+        observe(locationModel.location.filterNotNull()) {
+            location = it
+            if (!MainPreferences.isCustomCoordinate()) maps.updateLocation(it)
         }
-
-        observe(viewModel.location.filterNotNull(), ::onLocation)
-        observe(viewModel.provider.filterNotNull()) {
-            state.enabled = getLocationStatus(activity)
-            state.provider = providerRows(it)
-        }
-        observe(viewModel.latency.filterNotNull()) {
-            val unit = getString(if (it.inSeconds) R.string.seconds else R.string.milliseconds)
-            latencyRow = InfoRow(getString(R.string.gps_latency), "${it.value} $unit", it.isLate)
-            publishLocationRows()
-        }
-        observe(viewModel.target.filterNotNull()) { state.target = it.toAnnotatedString() }
-        observe(viewModel.accuracySeries) { accuracySeries = it }
-        observe(viewModel.altitudeSeries) { altitudeSeries = it }
-    }
-
-    override fun onCleared() {
-        addressJob?.cancel()
-        addressThreshold.reset()
-    }
-
-    private fun onLocation(location: Location) {
-        this.location = location
-
-        val metric = MainPreferences.isMetric()
-        val length = getString(if (metric) R.string.meter else R.string.feet)
-        val accuracy = if (metric) location.accuracy.toDouble() else location.accuracy.toDouble().toFeet()
-        val altitude = if (metric) location.altitude else location.altitude.toFeet()
-        val kmh = location.speed.toDouble().toKiloMetersPerHour()
-        val speed = if (metric) kmh else kmh.toMilesPerHour()
-        val direction = if (location.speed > 0f) getDirectionNameFromAzimuth(activity, location.bearing.toDouble()) else getString(R.string.not_available)
-
-        state.fixed = true
-        state.enabled = getLocationStatus(activity)
-        state.provider = providerRows(location.provider?.uppercase(LocaleHelper.getAppLocale()) ?: getString(R.string.not_available))
-        accuracyRow = InfoRow(getString(R.string.gps_accuracy), "${round(accuracy, 2)} $length")
-        altitudeRow = InfoRow(getString(R.string.gps_altitude), "${round(altitude, 2)} $length")
-        publishLocationRows()
-        state.movement = listOf(
-            InfoRow(getString(R.string.gps_bearing), "${location.bearing}°"),
-            InfoRow(getString(R.string.gps_direction), direction),
-            InfoRow(getString(R.string.gps_speed), "${round(speed, 2)} ${getString(if (metric) R.string.kilometer_hour else R.string.miles_hour)}"),
-        )
-        state.speed = if (metric) location.speed.toKiloMetersPerHour() else location.speed.toMilesPerHour()
-
-        if (!state.custom) {
-            maps.updateLocation(location)
-            showCoordinates(location.latitude, location.longitude)
-        }
-    }
-
-    private fun showCoordinates(latitude: Double, longitude: Double) {
-        state.coordinates = listOf(
-            InfoRow(getString(R.string.gps_latitude), DMSConverter.getFormattedLatitude(latitude, activity)),
-            InfoRow(getString(R.string.gps_longitude), DMSConverter.getFormattedLongitude(longitude, activity)),
-        )
-        if (!addressThreshold.accept(latitude, longitude)) return
-        addressJob?.cancel()
-        addressJob = owner.lifecycleScope.launch {
-            state.address = if (isNetworkAvailable(activity)) {
-                ReverseGeocoder.addressLine(activity, latitude, longitude) ?: getString(R.string.no_address_found)
-            } else {
-                addressThreshold.reset()
-                getString(R.string.internet_connection_alert)
-            }
-        }
-    }
-
-    private fun providerRows(source: String) = listOf(
-        InfoRow(getString(R.string.gps_status), getString(if (getLocationStatus(activity)) R.string.gps_enabled else R.string.gps_disabled)),
-        InfoRow(getString(R.string.gps_source), source),
-    )
-
-    private fun publishLocationRows() {
-        state.location = listOf(accuracyRow, altitudeRow, latencyRow)
     }
 
     private fun readPreferences() {
@@ -251,9 +146,10 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     }
 
     private fun coordinates(): Pair<Double, Double> {
+        val custom = MainPreferences.isCustomCoordinate()
         val current = location
-        if (!state.custom && current != null) return current.latitude to current.longitude
-        val stored = if (state.custom) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
+        if (!custom && current != null) return current.latitude to current.longitude
+        val stored = if (custom) MainPreferences.getCoordinates() else MainPreferences.getLastCoordinates()
         return stored[0].toDouble() to stored[1].toDouble()
     }
 
@@ -310,7 +206,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
         val entry = Locations().apply {
             latitude = current.latitude
             longitude = current.longitude
-            address = state.address
+            address = viewModel.info.value.address
             date = System.currentTimeMillis()
         }
         val dao = LocationDatabase.getInstance(activity).locationDao()
@@ -322,12 +218,13 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun copy() {
         val clipboard = activity.getSystemService<ClipboardManager>() ?: return
+        val info = viewModel.info.value
         val text = buildString {
-            section(getString(R.string.gps_provider), state.provider)
-            section(getString(R.string.gps_location), state.location)
-            section(getString(R.string.gps_movement), state.movement)
-            if (state.custom) append(getString(R.string.specified_location_notice)).append("\n\n")
-            section(getString(R.string.gps_coordinates), state.coordinates + InfoRow(getString(R.string.gps_address) + ":", state.address))
+            section(getString(R.string.gps_provider), info.provider)
+            section(getString(R.string.gps_location), info.location)
+            section(getString(R.string.gps_movement), info.movement)
+            if (info.custom) append(getString(R.string.specified_location_notice)).append("\n\n")
+            section(getString(R.string.gps_coordinates), info.coordinates + InfoRow(getString(R.string.gps_address) + ":", info.address))
         }.trim()
         clipboard.setPrimaryClip(ClipData.newPlainText(getString(R.string.gps_info), text))
         state.message = R.string.info_copied
@@ -341,7 +238,7 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
 
     override fun share() {
         val (latitude, longitude) = coordinates()
-        LocationShare.share(activity, latitude, longitude, state.address)
+        LocationShare.share(activity, latitude, longitude, viewModel.info.value.address)
     }
 
     override fun locationDetails() = dialogs.show(GpsDialog.Details)
@@ -354,10 +251,15 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     @Composable
     override fun DialogContent(dialog: PanelDialog) {
         when (dialog) {
-            is GpsDialog.Summary -> LocationSummaryDialog(dialog.latitude, dialog.longitude, state.custom, dialogs::dismiss)
+            is GpsDialog.Summary -> LocationSummaryDialog(dialog.latitude, dialog.longitude, MainPreferences.isCustomCoordinate(), dialogs::dismiss)
             is GpsDialog.Formats -> CoordinateDetailsDialog(dialog.latitude, dialog.longitude, dialogs::dismiss)
             GpsDialog.Pin -> PinCustomizationDialog(dialogs::dismiss)
-            GpsDialog.Details -> LocationDetailsDialog(state.location, accuracySeries, altitudeSeries, MainPreferences.isMetric(), dialogs::dismiss)
+            GpsDialog.Details -> {
+                val info by viewModel.info.collectAsStateWithLifecycle()
+                val accuracy by locationModel.accuracySeries.collectAsStateWithLifecycle()
+                val altitude by locationModel.altitudeSeries.collectAsStateWithLifecycle()
+                LocationDetailsDialog(info.location, accuracy, altitude, MainPreferences.isMetric(), dialogs::dismiss)
+            }
             GpsDialog.Target -> TargetCoordinatesDialog(targetForm, onSearch = ::search, onDismiss = dialogs::dismiss) { latitude, longitude ->
                 GPSPreferences.setTargetMarkerLatitude(latitude.toFloat())
                 GPSPreferences.setTargetMarkerLongitude(longitude.toFloat())
@@ -401,10 +303,8 @@ class GPS(activity: ComponentActivity) : PanelController(activity), GpsActions, 
     }
 
     companion object {
-        private const val PENDING = "-"
         private const val FULL_SCREEN_ACTION = "action_map_panel_full"
         private const val CLOSE_ZOOM = 18F
-        private const val ADDRESS_DISTANCE = 25.0
         private val gpsKeys = setOf(
             GPSPreferences.pinSkin,
             GPSPreferences.toolsGravity,

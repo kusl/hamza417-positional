@@ -22,10 +22,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,18 +51,23 @@ import kotlinx.coroutines.delay
 
 enum class MapRotation { Compass, Bearing, North }
 
+@Immutable
+data class GpsInfo(
+    val provider: List<InfoRow> = emptyList(),
+    val location: List<InfoRow> = emptyList(),
+    val movement: List<InfoRow> = emptyList(),
+    val coordinates: List<InfoRow> = emptyList(),
+    val address: String = "",
+    val target: AnnotatedString = AnnotatedString(""),
+    val speed: Float = 0f,
+    val fixed: Boolean = false,
+    val enabled: Boolean = true,
+    val custom: Boolean = false,
+)
+
 @Stable
-class GpsState(val custom: Boolean) {
-    var provider by mutableStateOf(emptyList<InfoRow>())
-    var location by mutableStateOf(emptyList<InfoRow>())
-    var movement by mutableStateOf(emptyList<InfoRow>())
-    var coordinates by mutableStateOf(emptyList<InfoRow>())
-    var address by mutableStateOf("")
-    var target by mutableStateOf(AnnotatedString(""))
-    var speed by mutableFloatStateOf(0f)
+class GpsState {
     var message by mutableStateOf<Int?>(null)
-    var fixed by mutableStateOf(false)
-    var enabled by mutableStateOf(true)
     var pin by mutableIntStateOf(R.drawable.ic_place_custom)
     var targetMode by mutableStateOf(false)
     var targetSet by mutableStateOf(false)
@@ -99,7 +104,7 @@ interface GpsActions {
 }
 
 @Composable
-fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, actions: GpsActions) {
+fun GpsScreen(state: GpsState, info: GpsInfo, map: View, topInset: Dp, landscape: Boolean, actions: GpsActions) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(state.volumeKeys) { if (state.volumeKeys) runCatching { focus.requestFocus() } }
     val keys = Modifier
@@ -124,11 +129,11 @@ fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, acti
         modifier = keys,
         toolbar = {
             MapToolbar(stringResource(R.string.gps_location)) {
-                MapToolButton(if (state.custom) R.drawable.ic_place_custom else state.pin, tint = false, onLongClick = actions::pinCustomization, onClick = actions::customLocation)
+                MapToolButton(if (info.custom) R.drawable.ic_place_custom else state.pin, tint = false, onLongClick = actions::pinCustomization, onClick = actions::customLocation)
                 IconAction(R.drawable.ic_menu, stringResource(R.string.gps_location), actions::menu)
             }
         },
-        tools = { horizontal -> GpsTools(state, actions, horizontal) },
+        tools = { horizontal -> GpsTools(state, info, actions, horizontal) },
         overlay = {
             if (state.targetMode) MapCrosshair()
             state.pressed?.let { point ->
@@ -140,16 +145,16 @@ fun GpsScreen(state: GpsState, map: View, topInset: Dp, landscape: Boolean, acti
                 }
             }
         },
-        side = { GpsInfo(state, actions) },
+        side = { GpsDetails(state, info, actions) },
         bottom = { SheetHandle { actions.sheet(true) } },
     )
-    if (state.sheet && !landscape) InfoSheet(state, actions)
+    if (state.sheet && !landscape) InfoSheet(state, info, actions)
 }
 
 @Composable
-private fun GpsTools(state: GpsState, actions: GpsActions, horizontal: Boolean) {
+private fun GpsTools(state: GpsState, info: GpsInfo, actions: GpsActions, horizontal: Boolean) {
     if (!horizontal) AlignToolButton(state.toolsLeft, actions::toggleToolsSide)
-    LocationToolButton(state.fixed, state.enabled, actions::locate)
+    LocationToolButton(info.fixed, info.enabled, actions::locate)
     if (state.targetSet) {
         ConfirmToolButton(R.drawable.ic_clear, actions::removeTarget)
     } else {
@@ -157,27 +162,27 @@ private fun GpsTools(state: GpsState, actions: GpsActions, horizontal: Boolean) 
     }
     if (state.targetMode) MapToolButton(R.drawable.ic_check, onClick = actions::confirmTarget)
     MapToolButton(R.drawable.ic_compass_on, alpha = toggleAlpha(state.rotation == MapRotation.Compass)) { actions.rotate(MapRotation.Compass) }
-    if (!state.custom) MapToolButton(R.drawable.ic_bearing_rotation, alpha = toggleAlpha(state.rotation == MapRotation.Bearing)) { actions.rotate(MapRotation.Bearing) }
+    if (!info.custom) MapToolButton(R.drawable.ic_bearing_rotation, alpha = toggleAlpha(state.rotation == MapRotation.Bearing)) { actions.rotate(MapRotation.Bearing) }
     MapToolButton(R.drawable.ic_north_only, alpha = toggleAlpha(state.rotation == MapRotation.North)) { actions.rotate(MapRotation.North) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun InfoSheet(state: GpsState, actions: GpsActions) {
+private fun InfoSheet(state: GpsState, info: GpsInfo, actions: GpsActions) {
     ModalBottomSheet(
         onDismissRequest = { actions.sheet(false) },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()) {
-            GpsInfo(state, actions)
+            GpsDetails(state, info, actions)
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun GpsInfo(state: GpsState, actions: GpsActions) {
+private fun GpsDetails(state: GpsState, info: GpsInfo, actions: GpsActions) {
     var shareMenu by remember { mutableStateOf(false) }
     LaunchedEffect(state.message) {
         if (state.message != null) {
@@ -190,14 +195,14 @@ private fun GpsInfo(state: GpsState, actions: GpsActions) {
             AnimatedContent(state.message ?: R.string.gps_info, modifier = Modifier.weight(1f), label = "message") {
                 Text(stringResource(it), style = MaterialTheme.typography.titleLarge)
             }
-            if (!state.custom) IconAction(R.drawable.ic_save, stringResource(R.string.location_saved), actions::save)
+            if (!info.custom) IconAction(R.drawable.ic_save, stringResource(R.string.location_saved), actions::save)
             IconAction(R.drawable.ic_content_copy, stringResource(R.string.info_copied), actions::copy)
         }
-        InfoSection(stringResource(R.string.gps_provider), state.provider)
-        InfoSection(stringResource(R.string.gps_location), state.location, modifier = Modifier.combinedClickable(onClick = actions::locationDetails))
-        InfoSection(stringResource(R.string.gps_movement), state.movement)
-        Speedometer(state.speed)
-        if (state.custom) {
+        InfoSection(stringResource(R.string.gps_provider), info.provider)
+        InfoSection(stringResource(R.string.gps_location), info.location, modifier = Modifier.combinedClickable(onClick = actions::locationDetails))
+        InfoSection(stringResource(R.string.gps_movement), info.movement)
+        Speedometer(info.speed)
+        if (info.custom) {
             HorizontalDivider(thickness = Dp.Hairline, color = MaterialTheme.colorScheme.outline)
             Text(
                 stringResource(R.string.specified_location_notice),
@@ -206,12 +211,12 @@ private fun GpsInfo(state: GpsState, actions: GpsActions) {
                 modifier = Modifier.padding(10.dp),
             )
         }
-        TargetSection(state.target, Modifier.combinedClickable(onClick = actions::showTarget))
+        TargetSection(info.target, Modifier.combinedClickable(onClick = actions::showTarget))
         Box {
             InfoSection(
                 stringResource(R.string.gps_coordinates),
-                state.coordinates + InfoRow(stringResource(R.string.gps_address) + ":", state.address),
-                graphic = painterResource(if (state.custom) R.drawable.ic_place_custom else state.pin),
+                info.coordinates + InfoRow(stringResource(R.string.gps_address) + ":", info.address),
+                graphic = painterResource(if (info.custom) R.drawable.ic_place_custom else state.pin),
                 modifier = Modifier.combinedClickable(onLongClick = { shareMenu = true }, onClick = actions::coordinateDetails),
             )
             DropdownMenu(expanded = shareMenu, onDismissRequest = { shareMenu = false }) {

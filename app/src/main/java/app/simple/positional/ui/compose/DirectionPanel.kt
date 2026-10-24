@@ -11,12 +11,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -28,14 +27,19 @@ import app.simple.positional.R
 import app.simple.positional.math.Angle.normalizeEulerAngle
 import kotlin.math.abs
 
+@Immutable
+data class DirectionInfo(
+    val target: String = "",
+    val coordinates: List<InfoRow> = emptyList(),
+    val displacement: String = "",
+    val bearing: Float = 0f,
+)
+
 @Stable
 class DirectionState {
     val dial = RotationState(0.5f, 8f, 5000f)
     val arrow = RotationState(1f, 8f, 5000f)
     var bearing = 0f
-    var target by mutableStateOf("")
-    var displacement by mutableStateOf("")
-    var coordinates by mutableStateOf(emptyList<InfoRow>())
 
     fun onHeading(azimuth: Float) {
         dial.update(-azimuth, true)
@@ -44,7 +48,7 @@ class DirectionState {
 }
 
 @Composable
-fun DirectionPanel(state: DirectionState, topInset: Dp, onCalibrate: () -> Unit, onTarget: () -> Unit, onMenu: () -> Unit) {
+fun DirectionPanel(state: DirectionState, info: DirectionInfo, topInset: Dp, onCalibrate: () -> Unit, onTarget: () -> Unit, onMenu: () -> Unit) {
     val azimuth by remember(state) { derivedStateOf { abs(state.dial.angle.normalizeEulerAngle(true).toInt()) } }
     val bearing by remember(state) { derivedStateOf { abs(state.arrow.angle.normalizeEulerAngle(false).toInt()) } }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -77,12 +81,12 @@ fun DirectionPanel(state: DirectionState, topInset: Dp, onCalibrate: () -> Unit,
                 InfoSection(
                     stringResource(R.string.gps_location),
                     listOf(
-                        InfoRow("${stringResource(R.string.target)}:", state.target),
+                        InfoRow("${stringResource(R.string.target)}:", info.target),
                         InfoRow(stringResource(R.string.gps_bearing), "$bearing°"),
-                        InfoRow(stringResource(R.string.gps_displacement), state.displacement),
+                        InfoRow(stringResource(R.string.gps_displacement), info.displacement),
                     ),
                 )
-                InfoSection(stringResource(R.string.gps_coordinates), state.coordinates)
+                InfoSection(stringResource(R.string.gps_coordinates), info.coordinates)
                 InfoSection(stringResource(R.string.compass), listOf(InfoRow(stringResource(R.string.moon_azimuth), "$azimuth°")))
             }
         }

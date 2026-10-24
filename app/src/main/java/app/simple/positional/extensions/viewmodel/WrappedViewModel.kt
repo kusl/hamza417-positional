@@ -9,12 +9,19 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import app.simple.positional.util.ContextUtils
 
 open class WrappedViewModel(application: Application) : AndroidViewModel(application), OnSharedPreferenceChangeListener {
+    @Volatile
+    private var localized: Pair<String, Context>? = null
+
     init {
         getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
 
-    protected fun getContext(): Context =
-        ContextUtils.wrap(getApplication<Application>().applicationContext, ContextUtils.language(), applyNightMode = false)
+    protected fun getContext(): Context {
+        val language = ContextUtils.language()
+        localized?.let { (code, context) -> if (code == language) return context }
+        return ContextUtils.wrap(getApplication<Application>().applicationContext, language, applyNightMode = false)
+            .also { localized = language to it }
+    }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {}
 

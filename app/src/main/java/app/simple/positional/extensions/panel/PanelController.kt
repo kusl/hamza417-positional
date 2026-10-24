@@ -1,5 +1,6 @@
 package app.simple.positional.extensions.panel
 
+import android.app.Application
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
@@ -15,8 +16,11 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.viewModelFactory
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.navigation.AppNavigator
 import app.simple.positional.ui.navigation.Routes
@@ -28,8 +32,10 @@ import app.simple.positional.ui.compose.MessageDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.MenuSheet
 import app.simple.positional.ui.compose.MenuSheetState
+import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlin.reflect.KClass
 
 abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner, SharedPreferences.OnSharedPreferenceChangeListener {
     private val registry = LifecycleRegistry(this)
@@ -49,6 +55,7 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected val owner: LifecycleOwner get() = this
     protected val dialogs = DialogHost()
     protected val menuSheet = MenuSheetState()
+    protected val locationModel: LocationViewModel by lazy { ViewModelProvider(activity)[LocationViewModel::class.java] }
     protected val isLandscapeOrientation: Boolean = activity.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     init {
@@ -88,6 +95,9 @@ abstract class PanelController(val activity: ComponentActivity) : LifecycleOwner
     protected open fun DialogContent(dialog: PanelDialog) {
         if (dialog is ErrorDialog) MessageDialog(dialog.message, dialogs::dismiss)
     }
+
+    protected fun <T : ViewModel> panelModel(type: KClass<T>, create: (Application, LocationViewModel) -> T): T =
+        ViewModelProvider(activity, viewModelFactory { addInitializer(type) { create(activity.application, locationModel) } })[type.java]
 
     protected fun <T> observe(flow: Flow<T>, action: (T) -> Unit) {
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.STARTED) { flow.collect { action(it) } } }

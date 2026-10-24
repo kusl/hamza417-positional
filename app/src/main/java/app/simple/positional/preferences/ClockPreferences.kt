@@ -4,8 +4,8 @@ import app.simple.positional.singleton.SharedPreferences.getSharedPreferences
 import java.util.Calendar
 
 object ClockPreferences {
-    private const val isUsingSecondsPrecision = "is_using_seconds_precision"
-    private const val isUsingAmPm = "is_clock_time_type_am_pm"
+    const val isUsingSecondsPrecision = "is_using_seconds_precision"
+    const val isUsingAmPm = "is_clock_time_type_am_pm"
     const val clockNeedleMovementType = "clock_needle_movement_type_updated"
     const val clockNeedle = "clock_needle_res_value"
     const val timezone = "custom_timezone"

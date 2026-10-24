@@ -63,7 +63,6 @@ class CompassState {
     var magnetometerAccuracy by mutableIntStateOf(-1)
     var accelerometer by mutableStateOf(emptyList<InfoRow>())
     var magnetometer by mutableStateOf(emptyList<InfoRow>())
-    var field by mutableStateOf(emptyList<InfoRow>())
     var physics = true
     private var dragging = false
     private var target = 0f
@@ -118,7 +117,7 @@ class CompassState {
 }
 
 @Composable
-fun CompassScreen(state: CompassState, topInset: Dp, onCalibrate: () -> Unit, onMenu: () -> Unit) {
+fun CompassScreen(state: CompassState, field: List<InfoRow>, topInset: Dp, onCalibrate: () -> Unit, onMenu: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val degrees by remember(state) { derivedStateOf { abs(state.dial.angle.normalizeEulerAngle(true).toInt()) } }
@@ -189,7 +188,7 @@ fun CompassScreen(state: CompassState, topInset: Dp, onCalibrate: () -> Unit, on
                 )
                 InfoSection(stringResource(R.string.accelerometer), state.accelerometer)
                 InfoSection(stringResource(R.string.magnetometer), state.magnetometer)
-                InfoSection(stringResource(R.string.compass_field), state.field)
+                InfoSection(stringResource(R.string.compass_field), field)
             }
         }
     }

@@ -70,15 +70,12 @@ class ClockState {
     val minute = RotationState(0.5f, 8f, 5000f)
     val second = RotationState()
     val sweep = RotationState()
-    var zone by mutableStateOf<ZoneId>(ZoneId.systemDefault())
     var motion by mutableStateOf(ClockMotion.TICK)
     var face24 by mutableStateOf(false)
     var needles by mutableStateOf(clockNeedleSkins[0].toList())
     var daytime by mutableStateOf(true)
     var customLocation by mutableStateOf(false)
     var pin by mutableIntStateOf(R.drawable.ic_pin_01)
-    var time by mutableStateOf(ClockTime())
-    var sky by mutableStateOf<SkyReport?>(null)
 
     fun show(now: ZonedDateTime) {
         hour.update(if (face24) getHoursInDegreesFor24(now) else getHoursInDegrees(now), true)
@@ -91,12 +88,12 @@ class ClockState {
 }
 
 @Composable
-fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu: () -> Unit, onLocation: () -> Unit) {
+fun ClockScreen(state: ClockState, zone: ZoneId, time: ClockTime, sky: SkyReport?, topInset: Dp, onTimezone: () -> Unit, onMenu: () -> Unit, onLocation: () -> Unit) {
     val motion = state.motion
-    LaunchedEffect(state, motion, state.zone, state.face24) {
+    LaunchedEffect(state, motion, zone, state.face24) {
         listOf(state.second, state.sweep).forEach { it.configure(motion.inertia, motion.damping, motion.magnetic) }
         while (true) {
-            state.show(ZonedDateTime.now(state.zone))
+            state.show(ZonedDateTime.now(zone))
             if (motion.intervalMillis > 0) delay(motion.intervalMillis - System.currentTimeMillis() % motion.intervalMillis)
             withFrameMillis { }
         }
@@ -139,9 +136,9 @@ fun ClockScreen(state: ClockState, topInset: Dp, onTimezone: () -> Unit, onMenu:
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 10.dp),
                     )
                 }
-                InfoSection(stringResource(R.string.local_time), state.time.local, painterResource(R.drawable.ic_access_time))
-                InfoSection(stringResource(R.string.utc_time), state.time.utc)
-                state.sky?.let { SkySections(it) }
+                InfoSection(stringResource(R.string.local_time), time.local, painterResource(R.drawable.ic_access_time))
+                InfoSection(stringResource(R.string.utc_time), time.utc)
+                sky?.let { SkySections(it) }
             }
         }
     }

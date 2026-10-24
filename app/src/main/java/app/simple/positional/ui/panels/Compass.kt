@@ -2,34 +2,30 @@ package app.simple.positional.ui.panels
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.simple.positional.viewmodels.viewmodel.CompassViewModel
 import androidx.compose.ui.unit.Dp
 import android.content.SharedPreferences
-import android.hardware.GeomagneticField
 import android.hardware.Sensor
-import android.location.Location
 import android.os.SystemClock
-import androidx.lifecycle.ViewModelProvider
-import app.simple.positional.R
 import app.simple.positional.constants.CompassBloom.compassBloomRes
 import app.simple.positional.constants.HtmlPage
 import app.simple.positional.ui.compose.BloomSkinDialog
 import app.simple.positional.ui.compose.PhysicalPropertiesDialog
 import app.simple.positional.extensions.panel.SensorPanel
-import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.preferences.CompassPreferences
 import app.simple.positional.sensors.HeadingSensor
 import app.simple.positional.ui.compose.CompassScreen
 import app.simple.positional.ui.compose.CompassState
-import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.axisRows
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import kotlinx.coroutines.flow.filterNotNull
 
 class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSensor.Listener {
     private val state = CompassState()
     private val sensor: HeadingSensor
+    private val viewModel = panelModel(CompassViewModel::class, ::CompassViewModel)
     private var lastReadings = 0L
 
     init {
@@ -40,7 +36,8 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     @Composable
     override fun Content(topInset: Dp) {
-        CompassScreen(state, topInset, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
+        val field by viewModel.field.collectAsStateWithLifecycle()
+        CompassScreen(state, field, topInset, onCalibrate = { showCalibration() }, onMenu = ::showMenu)
     }
 
     private fun showMenu() = menuSheet.show {
@@ -60,7 +57,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
 
     init {
         if (!sensor.isAvailable) showSensorError()
-        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull(), ::showField)
     }
 
     override fun onHeading(azimuth: Float) = state.onHeading(azimuth)
@@ -79,15 +75,6 @@ class Compass(activity: ComponentActivity) : SensorPanel(activity), HeadingSenso
         lastReadings = now
         state.accelerometer = axisRows(accelerometer)
         state.magnetometer = axisRows(magnetometer)
-    }
-
-    private fun showField(location: Location) {
-        val field = GeomagneticField(location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), location.time)
-        state.field = listOf(
-            InfoRow(getString(R.string.compass_inclination), "${round(field.inclination.toDouble(), 2)}°"),
-            InfoRow(getString(R.string.compass_declination), "${round(field.declination.toDouble(), 2)}°"),
-            InfoRow(getString(R.string.compass_field_strength), "${round(field.fieldStrength.toDouble(), 2)} nT"),
-        )
     }
 
     private fun applyPreferences() {

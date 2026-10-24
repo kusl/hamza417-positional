@@ -3,17 +3,26 @@ package app.simple.positional.viewmodels.viewmodel
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.lifecycle.viewModelScope
+import app.simple.positional.R
 import app.simple.positional.database.instances.MeasureDatabase
 import app.simple.positional.extensions.viewmodel.WrappedViewModel
+import app.simple.positional.math.GeoDistance
 import app.simple.positional.model.Measure
 import app.simple.positional.model.MeasurePoint
+import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.MeasurePreferences
+import app.simple.positional.singleton.SharedPreferences.changes
+import app.simple.positional.ui.compose.InfoRow
+import app.simple.positional.util.DistanceText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -32,6 +41,19 @@ class MeasureViewModel(application: Application) : WrappedViewModel(application)
     val measure: StateFlow<Measure?> = selected
         .flatMapLatest { dao.observeById(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), null)
+
+    val summary: StateFlow<List<InfoRow>> = combine(measure, changes(MainPreferences.unit)) { measure, _ -> summary(measure?.points.orEmpty()) }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT), emptyList())
+
+    private fun summary(points: List<MeasurePoint>): List<InfoRow> {
+        val context = getContext()
+        val meters = GeoDistance.path(points.map { it.latitude to it.longitude })
+        return listOf(
+            InfoRow(context.getString(R.string.total), points.size.toString()),
+            InfoRow(context.getString(R.string.gps_displacement), DistanceText.format(context, meters, MainPreferences.isMetric())),
+        )
+    }
 
     fun addMeasure(name: String, note: String) {
         val created = Measure(System.currentTimeMillis(), name, note)

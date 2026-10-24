@@ -26,7 +26,6 @@ import app.simple.positional.R
 class MeasureState {
     var selected by mutableStateOf(false)
     var name by mutableStateOf("")
-    var summary by mutableStateOf(emptyList<InfoRow>())
     var current by mutableStateOf("")
     var hasPoints by mutableStateOf(false)
     var fixed by mutableStateOf(false)
@@ -50,7 +49,7 @@ interface MeasureActions {
 }
 
 @Composable
-fun MeasureScreen(state: MeasureState, map: View, topInset: Dp, actions: MeasureActions) {
+fun MeasureScreen(state: MeasureState, summary: List<InfoRow>, map: View, topInset: Dp, actions: MeasureActions) {
     MapPanelScaffold(
         map = map,
         topInset = topInset,
@@ -77,12 +76,12 @@ fun MeasureScreen(state: MeasureState, map: View, topInset: Dp, actions: Measure
             }
         },
         overlay = { if (state.selected) MapCrosshair() },
-        bottom = { if (state.selected) MeasureCard(state) },
+        bottom = { if (state.selected) MeasureCard(state, summary) },
     )
 }
 
 @Composable
-private fun MeasureCard(state: MeasureState) {
+private fun MeasureCard(state: MeasureState, summary: List<InfoRow>) {
     Surface(
         Modifier
             .navigationBarsPadding()
@@ -94,7 +93,7 @@ private fun MeasureCard(state: MeasureState) {
         shadowElevation = 5.dp,
     ) {
         Column(Modifier.padding(horizontal = 6.dp)) {
-            InfoSection(state.name, state.summary)
+            InfoSection(state.name, summary)
             if (state.current.isNotEmpty()) {
                 Text(
                     state.current,

@@ -15,22 +15,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.content.getSystemService
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
 import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.callbacks.BottomBarHost
-import app.simple.positional.constants.TrailIcons
 import app.simple.positional.decorations.maps.TrailMap
 import app.simple.positional.extensions.panel.PanelController
 import app.simple.positional.extensions.maps.MapsCallbacks
-import app.simple.positional.math.GeoDistance
-import app.simple.positional.math.MathExtensions.round
 import app.simple.positional.model.TrailEntry
 import app.simple.positional.model.TrailPoint
-import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.preferences.TrailPreferences
-import app.simple.positional.ui.compose.InfoRow
 import app.simple.positional.ui.compose.TrailActions
 import app.simple.positional.ui.compose.TrailPointItem
 import app.simple.positional.ui.compose.TrailScreen
@@ -40,14 +34,10 @@ import app.simple.positional.ui.compose.NameNoteDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
 import app.simple.positional.constants.HtmlPage
-import app.simple.positional.util.DMSConverter
-import app.simple.positional.util.DistanceText
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.LocationPrompt
 import app.simple.positional.util.MapIntents
-import app.simple.positional.util.TimeFormatter.formatDate
 import app.simple.positional.util.TrailNames
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailDataViewModel
 import app.simple.positional.viewmodels.viewmodel.TrailsViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -57,13 +47,11 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
     private val state = TrailState()
     private val trailData: TrailDataViewModel by activity.viewModels()
     private val trails: TrailsViewModel by activity.viewModels()
-    private val locationViewModel: LocationViewModel
     private val maps: TrailMap
     private var location: Location? = null
     private var pending: Triple<Double, Double, Float>? = null
 
     init {
-        locationViewModel = ViewModelProvider(activity)[LocationViewModel::class.java]
         readPreferences()
     }
 
@@ -73,50 +61,22 @@ class Trail(activity: ComponentActivity) : PanelController(activity), TrailActio
 
     @Composable
     override fun Content(topInset: Dp) {
-        TrailScreen(state, maps.view, topInset, isLandscapeOrientation, this)
+        val info by trailData.info.collectAsStateWithLifecycle()
+        TrailScreen(state, info, maps.view, topInset, isLandscapeOrientation, this)
     }
 
     init {
         owner.lifecycle.addObserver(maps.lifecycleObserver)
         if (state.fullScreen) bottomBar(visible = false)
 
-        observe(locationViewModel.location.filterNotNull()) {
+        observe(locationModel.location.filterNotNull()) {
             location = it
             state.fixed = true
             state.enabled = getLocationStatus(activity)
             maps.updateLocation(it)
         }
-        observe(locationViewModel.provider) { state.enabled = getLocationStatus(activity) }
-        observe(trailData.trail) { state.trail = it }
-        observe(trailData.points, ::showPoints)
-    }
-
-    private fun showPoints(points: List<TrailPoint>) {
-        maps.showPoints(points)
-        val metric = MainPreferences.isMetric()
-        val distance = GeoDistance.path(points.map { it.latitude to it.longitude })
-        state.summary = listOf(
-            InfoRow(getString(R.string.total), points.size.toString()),
-            InfoRow(getString(R.string.gps_displacement), DistanceText.format(activity, distance, metric)),
-        )
-        state.points = points.asReversed().map { item(it, metric) }
-    }
-
-    private fun item(point: TrailPoint, metric: Boolean): TrailPointItem {
-        val (accuracy, unit) = DistanceText.parts(point.accuracy.toDouble(), metric)
-        return TrailPointItem(
-            point = point,
-            icon = TrailIcons.icons.getOrElse(point.iconPosition) { TrailIcons.icons[0] },
-            name = point.name.orEmpty().ifEmpty { "--" },
-            note = point.note.orEmpty().ifEmpty { getString(R.string.not_available) },
-            coordinates = getString(
-                R.string.coordinates_format,
-                DMSConverter.getFormattedLatitude(point.latitude, activity),
-                DMSConverter.getFormattedLongitude(point.longitude, activity),
-            ),
-            accuracy = getString(R.string.trail_data_accuracy, round(accuracy, 1).toString(), getString(unit)),
-            date = point.timeAdded.formatDate(),
-        )
+        observe(locationModel.provider) { state.enabled = getLocationStatus(activity) }
+        observe(trailData.points, maps::showPoints)
     }
 
     private fun readPreferences() {

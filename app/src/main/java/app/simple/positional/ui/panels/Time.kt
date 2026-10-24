@@ -1,17 +1,13 @@
 package app.simple.positional.ui.panels
 
+import android.content.SharedPreferences
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import android.content.SharedPreferences
-import android.os.SystemClock
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.simple.positional.R
-import app.simple.positional.ui.navigation.Routes
 import app.simple.positional.constants.ClockSkinsConstants.clockNeedleSkins
 import app.simple.positional.constants.LocationPins
 import app.simple.positional.extensions.panel.PanelController
@@ -19,39 +15,35 @@ import app.simple.positional.math.ClockMotion
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.GPSPreferences
 import app.simple.positional.preferences.MainPreferences
-import app.simple.positional.ui.compose.ClockScreen
-import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.Choice
 import app.simple.positional.ui.compose.ChoiceDialog
 import app.simple.positional.ui.compose.ClockNeedleDialog
+import app.simple.positional.ui.compose.ClockScreen
+import app.simple.positional.ui.compose.ClockState
 import app.simple.positional.ui.compose.LocationSummaryDialog
 import app.simple.positional.ui.compose.PanelDialog
 import app.simple.positional.ui.compose.PanelMenus
-import app.simple.positional.viewmodels.viewmodel.LocationViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.time.ZoneId
+import app.simple.positional.ui.navigation.Routes
+import app.simple.positional.viewmodels.viewmodel.ClockViewModel
 
 class Time(activity: ComponentActivity) : PanelController(activity) {
     private val state = ClockState()
-    private val report: ClockReport
-    private var latitude = 0.0
-    private var longitude = 0.0
-    private var altitude = 0.0
-    private var lastSky = 0L
+    private val viewModel = panelModel(ClockViewModel::class, ::ClockViewModel)
 
     init {
-        report = ClockReport(activity)
         applyPreferences()
     }
 
     @Composable
     override fun Content(topInset: Dp) {
+        val zone by viewModel.zone.collectAsStateWithLifecycle()
+        val time by viewModel.time.collectAsStateWithLifecycle()
+        val sky by viewModel.sky.collectAsStateWithLifecycle()
         ClockScreen(
             state,
+            zone,
+            time,
+            sky,
             topInset,
             onTimezone = { navigate(Routes.TIMEZONE) },
             onMenu = ::showMenu,
@@ -66,7 +58,10 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
     @Composable
     override fun DialogContent(dialog: PanelDialog) {
         when (dialog) {
-            ClockDialog.Location -> LocationSummaryDialog(latitude, longitude, state.customLocation, dialogs::dismiss)
+            ClockDialog.Location -> {
+                val position by viewModel.position.collectAsStateWithLifecycle()
+                LocationSummaryDialog(position.latitude, position.longitude, state.customLocation, dialogs::dismiss)
+            }
             ClockDialog.Needles -> ClockNeedleDialog(ClockPreferences.getClockNeedleTheme(), dialogs::dismiss) { ClockPreferences.setClockNeedleTheme(it) }
             ClockDialog.Motion -> ChoiceDialog(
                 stringResource(R.string.motion_type),
@@ -83,67 +78,19 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
 
     private enum class ClockDialog : PanelDialog { Location, Needles, Motion }
 
-    init {
-        observe(ViewModelProvider(activity)[LocationViewModel::class.java].location.filterNotNull()) {
-            if (state.customLocation) return@observe
-            latitude = it.latitude
-            longitude = it.longitude
-            altitude = it.altitude
-            if (SystemClock.elapsedRealtime() - lastSky > SKY_MIN_INTERVAL) refreshSkyAsync()
-        }
-        owner.lifecycleScope.launch {
-            owner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                launch {
-                    while (true) {
-                        val zone = state.zone
-                        state.time = withContext(Dispatchers.Default) { report.time(zone) }
-                        delay(1000L - System.currentTimeMillis() % 1000L)
-                    }
-                }
-                while (true) {
-                    refreshSky()
-                    delay(SKY_INTERVAL)
-                }
-            }
-        }
-    }
-
-    private suspend fun refreshSky() {
-        lastSky = SystemClock.elapsedRealtime()
-        val zone = state.zone
-        state.sky = withContext(Dispatchers.Default) { report.sky(latitude, longitude, altitude, zone) }
-    }
-
-    private fun refreshSkyAsync() {
-        owner.lifecycleScope.launch { refreshSky() }
-    }
-
     private fun applyPreferences() {
-        state.zone = runCatching { ZoneId.of(ClockPreferences.getTimeZone()) }.getOrDefault(ZoneId.systemDefault())
         state.motion = ClockMotion.of(ClockPreferences.getMovementType())
         state.face24 = ClockPreferences.isClockFace24Hour()
         state.needles = clockNeedleSkins.getOrElse(ClockPreferences.getClockNeedleTheme()) { clockNeedleSkins[0] }.toList()
         state.pin = LocationPins.locationsPins.getOrElse(GPSPreferences.getPinSkin()) { R.drawable.ic_pin_01 }
         state.customLocation = MainPreferences.isCustomCoordinate()
-        if (state.customLocation) {
-            latitude = MainPreferences.getCoordinates()[0].toDouble()
-            longitude = MainPreferences.getCoordinates()[1].toDouble()
-            altitude = 0.0
-        } else {
-            latitude = MainPreferences.getLastCoordinates()[0].toDouble()
-            longitude = MainPreferences.getLastCoordinates()[1].toDouble()
-            altitude = MainPreferences.getLastAltitude().toDouble()
-        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key !in clockKeys) return
-        applyPreferences()
-        refreshSkyAsync()
+        if (key in clockKeys) applyPreferences()
     }
 
     companion object {
-        private const val SKY_INTERVAL = 60_000L
         private val motionTypes = listOf(
             "smooth" to R.string.motion_type_smooth,
             "tick" to R.string.motion_type_tick,
@@ -151,16 +98,11 @@ class Time(activity: ComponentActivity) : PanelController(activity) {
             "tick_smooth" to R.string.tick_smooth,
             "mechanical" to R.string.mechanical,
         )
-        private const val SKY_MIN_INTERVAL = 10_000L
         private val clockKeys = setOf(
             ClockPreferences.clockNeedleMovementType,
             ClockPreferences.clockNeedle,
-            ClockPreferences.timezone,
             ClockPreferences.is24HourFace,
             MainPreferences.isCustomCoordinate,
-            MainPreferences.latitude,
-            MainPreferences.longitude,
-            MainPreferences.unit,
             GPSPreferences.pinSkin,
         )
     }

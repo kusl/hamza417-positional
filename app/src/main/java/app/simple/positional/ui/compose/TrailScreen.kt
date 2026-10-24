@@ -62,11 +62,11 @@ data class TrailPointItem(
     val date: String,
 )
 
+@Immutable
+data class TrailInfo(val trail: String = "", val summary: List<InfoRow> = emptyList(), val points: List<TrailPointItem> = emptyList())
+
 @Stable
 class TrailState {
-    var trail by mutableStateOf("")
-    var summary by mutableStateOf(emptyList<InfoRow>())
-    var points by mutableStateOf(emptyList<TrailPointItem>())
     var fixed by mutableStateOf(false)
     var enabled by mutableStateOf(true)
     var toolsLeft by mutableStateOf(false)
@@ -97,7 +97,7 @@ interface TrailActions {
 }
 
 @Composable
-fun TrailScreen(state: TrailState, map: View, topInset: Dp, landscape: Boolean, actions: TrailActions) {
+fun TrailScreen(state: TrailState, info: TrailInfo, map: View, topInset: Dp, landscape: Boolean, actions: TrailActions) {
     MapPanelScaffold(
         map = map,
         topInset = topInset,
@@ -114,42 +114,42 @@ fun TrailScreen(state: TrailState, map: View, topInset: Dp, landscape: Boolean, 
         tools = { horizontal ->
             if (!horizontal) AlignToolButton(state.toolsLeft, actions::toggleToolsSide)
             LocationToolButton(state.fixed, state.enabled, actions::locate)
-            if (state.points.isNotEmpty()) {
+            if (info.points.isNotEmpty()) {
                 MapToolButton(if (state.wrapped) R.drawable.ic_close_fullscreen else R.drawable.ic_full_screen, onClick = actions::wrap)
             }
             MapToolButton(if (state.compass) R.drawable.ic_compass_on else R.drawable.ic_compass_off, onClick = actions::toggleCompass)
             MapToolButton(R.drawable.ic_add_location, onClick = actions::addPoint)
-            if (state.points.isNotEmpty()) ConfirmToolButton(R.drawable.ic_backspace, actions::removeLast)
+            if (info.points.isNotEmpty()) ConfirmToolButton(R.drawable.ic_backspace, actions::removeLast)
         },
-        side = { TrailPoints(state, actions) },
+        side = { TrailPoints(info, actions) },
         bottom = { SheetHandle { actions.sheet(true) } },
     )
-    if (state.sheet && !landscape) TrailSheet(state, actions)
+    if (state.sheet && !landscape) TrailSheet(info, actions)
     if (state.pickingMarker) MarkerPicker(actions) { state.pickingMarker = false }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TrailSheet(state: TrailState, actions: TrailActions) {
+private fun TrailSheet(info: TrailInfo, actions: TrailActions) {
     ModalBottomSheet(
         onDismissRequest = { actions.sheet(false) },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding()) {
-            TrailPoints(state, actions)
+            TrailPoints(info, actions)
         }
     }
 }
 
 @Composable
-private fun TrailPoints(state: TrailState, actions: TrailActions) {
+private fun TrailPoints(info: TrailInfo, actions: TrailActions) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InfoSection(state.trail.ifEmpty { stringResource(R.string.not_available) }, state.summary, modifier = Modifier.weight(1f))
+            InfoSection(info.trail.ifEmpty { stringResource(R.string.not_available) }, info.summary, modifier = Modifier.weight(1f))
             IconAction(R.drawable.ic_add_location, stringResource(R.string.trail), actions::addPoint)
         }
-        if (state.points.isEmpty()) {
+        if (info.points.isEmpty()) {
             Image(
                 painterResource(R.drawable.art_trail),
                 contentDescription = null,
@@ -157,7 +157,7 @@ private fun TrailPoints(state: TrailState, actions: TrailActions) {
                 contentScale = ContentScale.FillWidth,
             )
         }
-        state.points.forEach { TrailPointRow(it, actions) }
+        info.points.forEach { TrailPointRow(it, actions) }
     }
 }
 
