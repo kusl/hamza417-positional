@@ -2,3 +2,99 @@
 83
 
 Please continue with the next phase 
+
+Claude
+/
+Please continue with the next phase
+
+Ran 34 commands, read memory, and 3 more tools
+Picking up an ongoing multi-phase project.
+Counting letter occurrences within a specific word.
+Debugging a clip-path detection issue for full viewport coverage.
+Building a converter from vector drawings to SVG format.
+Untangling how pixel scaling affects the intensity threshold.
+Testing image conversion across all files for size and quality.
+Debugging an XML namespace error in the app resources.
+Fixing vector drawable attributes and checking lint warnings.
+View crop
+crop.png
+Checking image quality and file size against target limits.
+Untangling how child elements get cleared during tree traversal.
+Debugging how path rounding affects bounding box and clipping.
+Untangling edge cases in parsing number formatting logic.
+Revamping launcher visuals and reviewing splash screen loading.
+Checking lint warnings and drawable naming conventions across the repo.
+Writing a unit test for launcher background resource counts.
+Verifying the test logic against a number-matching pattern.
+Reviewing Kotlin syntax details for regex and string checks.
+Improving performance of a splash and arts screen.
+Checking file size reduction and lint impact claims.
+Presented file
+Phase 21 is in positional-phase21.tar.gz, which holds 93 files: the 91 launcher_*.xml art vectors, README.md, and the new app/src/test/java/app/simple/positional/constants/LauncherArtTest.kt. Extract it at the repo root. There are no files to delete.
+
+What changed in the art vectors
+
+Rounding: coordinates are rounded to 0.1 viewport units. The rounding is applied to absolute positions, and relative values are recomputed from the rounded points, so errors don’t build up along long relative paths.
+Shorter path syntax: the output uses the shortest number form (.5, - as separator) and leaves out repeated command letters. Zero-length line segments are dropped, except in paths that use s, because there dropping them would change the curve.
+Default attributes removed: fillType="nonZero", alpha of 1, gradient type="linear" and tileMode="clamp" are gone. Paths with a transparent strokeColor also lose all their stroke attributes.
+Clips: clips that cover the whole viewport are removed. Rectangle clips are also removed when the exact Bézier bounds of everything inside them (plus stroke width) already fit within the rectangle. Groups left with no attributes are unwrapped. This removes about 2,300 of the 5,500 clip paths. Each clip is a canvas clip on every draw, so this also cuts drawing work.
+Size: about 36% smaller, from 16.2 MB to 10.4 MB of XML.
+Visual check: I converted each original and new vector to SVG and rendered both at 2400 px wide. The average pixel difference is 0.04/255. The worst case was a few anti-aliased edge pixels, and side by side the two versions look the same.
+Test and docs
+
+LauncherArtTest:
+every art has a colour pair, and the art count matches the drawables;
+every pathData is fully parsed with the correct number of arguments for each command;
+every non-arc number has at most one decimal.
+README: phase 21 is marked done, and the test list is updated. Phase 22 is next: rasterise the launcher art once at display size, off the main thread, for the splash screen, arts pager and sun time art widget.
+There’s no Android SDK here, so CI will run the first real build and lint.
+
+Worth checking on the Nord
+
+Open the app several times so you see a few different splash arts, day and night.
+Scroll through the arts pager in Settings and look for missing shapes or shapes spilling past their edges.
+Check that the sun time art widget still draws.
+Positional phase21.tar
+GZ
+
+
+You’ve used 84% of your weekly limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+15
+84
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
