@@ -1,6 +1,5 @@
 package app.simple.positional.preferences
 
-import android.annotation.SuppressLint
 import androidx.annotation.IntRange
 import app.simple.positional.util.MapSource
 import app.simple.positional.util.NightMode
@@ -80,23 +79,21 @@ object MainPreferences {
         return getSharedPreferences().getBoolean(unit, true)
     }
 
-    @SuppressLint("ApplySharedPref")
     fun setCustomCoordinates(value: Boolean) {
-        getSharedPreferences().edit().putBoolean(isCustomCoordinate, value).commit()
+        getSharedPreferences().edit().putBoolean(isCustomCoordinate, value).apply()
+    }
+
+    fun setCustomLocation(latitude: Float, longitude: Float, address: String) {
+        getSharedPreferences().edit()
+                .putFloat(this.latitude, latitude)
+                .putFloat(this.longitude, longitude)
+                .putString(this.address, address)
+                .putBoolean(isCustomCoordinate, true)
+                .apply()
     }
 
     fun isCustomCoordinate(): Boolean {
         return getSharedPreferences().getBoolean(isCustomCoordinate, false)
-    }
-
-    @SuppressLint("ApplySharedPref")
-    fun setLatitude(value: Float) {
-        getSharedPreferences().edit().putFloat(latitude, value).commit()
-    }
-
-    @SuppressLint("ApplySharedPref")
-    fun setLongitude(value: Float) {
-        getSharedPreferences().edit().putFloat(longitude, value).commit()
     }
 
     fun getCoordinates(): FloatArray {
@@ -123,10 +120,6 @@ object MainPreferences {
 
     fun getLastAltitude(): Float {
         return getSharedPreferences().getFloat(lastAltitude, 0F)
-    }
-
-    fun setAddress(value: String) {
-        getSharedPreferences().edit().putString(address, value).apply()
     }
 
     fun getAddress(): String {

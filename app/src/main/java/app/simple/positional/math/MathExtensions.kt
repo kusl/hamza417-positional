@@ -1,103 +1,16 @@
 package app.simple.positional.math
 
-import kotlin.math.*
+import kotlin.math.pow
+import kotlin.math.roundToLong
 
-@Suppress("unused")
 object MathExtensions {
-    fun normalizeAngle(angle: Float): Float {
-        return wrap(angle, 0f, 360f) % 360
-    }
+    fun normalizeAngle(angle: Float): Float = (angle % 360f + 360f) % 360f
 
-    fun normalizeAngle(angle: Double): Double {
-        return wrap(angle, 0.0, 360.0) % 360
-    }
+    fun Float.toDegrees(): Float = Math.toDegrees(toDouble()).toFloat()
 
-    private fun wrap(value: Float, min: Float, max: Float): Float {
-        return wrap(value.toDouble(), min.toDouble(), max.toDouble()).toFloat()
-    }
-
-    private fun wrap(value: Double, min: Double, max: Double): Double {
-        val range = max - min
-
-        var newValue = value
-
-        while (newValue > max) {
-            newValue -= range
-        }
-
-        while (newValue < min) {
-            newValue += range
-        }
-
-        return newValue
-    }
-
-    fun sinDegrees(angle: Double): Double {
-        return sin(angle.toRadians())
-    }
-
-    fun tanDegrees(angle: Double): Double {
-        return tan(angle.toRadians())
-    }
-
-    fun tanDegrees(angle: Float): Float {
-        return tan(angle.toRadians())
-    }
-
-    fun cosDegrees(angle: Double): Double {
-        return cos(angle.toRadians())
-    }
-
-    private fun Double.toRadians(): Double {
-        return Math.toRadians(this)
-    }
-
-    private fun Float.toRadians(): Float {
-        return Math.toRadians(this.toDouble()).toFloat()
-    }
-
-    fun clamp(value: Float, minimum: Float, maximum: Float): Float {
-        return min(maximum, max(minimum, value))
-    }
-
-    fun Float.toDegrees(): Float {
-        return Math.toDegrees(this.toDouble()).toFloat()
-    }
-
-    fun Double.toDegrees(): Double {
-        return Math.toDegrees(this)
-    }
-
-    fun round(someValue: Double, places: Int): Double {
-        return try {
-            var value = someValue
-            require(places >= 0)
-            val factor = 10.0.pow(places.toDouble()).toLong()
-            value *= factor
-            value.roundToInt().toDouble() / factor
-        } catch (e: IllegalArgumentException) {
-            Double.NaN
-        }
-    }
-
-    fun Float.round(places: Int): Float {
-        return try {
-            var value = this
-            require(places >= 0)
-            val factor = 10.0.pow(places.toDouble()).toLong()
-            value *= factor
-            val tmp = value.roundToInt()
-            tmp.toFloat() / factor
-        } catch (e: IllegalArgumentException) {
-            Float.NaN
-        }
-    }
-
-    fun Float.toNegative(): Float {
-        return this * -1F
-    }
-
-    fun Int.toNegative(): Float {
-        return this * -1F
+    fun round(value: Double, places: Int): Double {
+        if (places < 0) return Double.NaN
+        val factor = 10.0.pow(places)
+        return (value * factor).roundToLong() / factor
     }
 }

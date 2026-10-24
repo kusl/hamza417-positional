@@ -48,7 +48,6 @@ import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.compose.PanelSwitcher
-import app.simple.positional.ui.compose.setPositionalContent
 import app.simple.positional.ui.panels.Compass
 import app.simple.positional.ui.panels.Direction
 import app.simple.positional.ui.panels.GPS

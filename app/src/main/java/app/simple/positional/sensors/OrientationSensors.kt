@@ -5,7 +5,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.view.WindowManager
+import android.view.Display
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import app.simple.positional.math.Angle.normalizeEulerAngle
@@ -14,13 +15,12 @@ import app.simple.positional.math.LowPassFilter.smoothAndSetReadings
 import app.simple.positional.math.Tilt
 import app.simple.positional.math.Vector3
 
-@Suppress("DEPRECATION")
-private fun WindowManager?.rotation(): Int = this?.defaultDisplay?.rotation ?: 0
-
 abstract class OrientationSensor(context: Context) : SensorEventListener, DefaultLifecycleObserver {
     protected val sensorManager: SensorManager? = context.getSystemService(SensorManager::class.java)
-    protected val windowManager: WindowManager? = context.getSystemService(WindowManager::class.java)
+    private val display: Display = ContextCompat.getDisplayOrDefault(context)
     protected abstract val sensors: List<Sensor?>
+
+    protected val rotation: Int get() = display.rotation
 
     val isAvailable: Boolean get() = sensors.isNotEmpty() && sensors.all { it != null }
 
@@ -42,7 +42,7 @@ class GravitySensor(context: Context, private val onTilt: (Tilt) -> Unit) : Orie
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type != Sensor.TYPE_GRAVITY) return
         smoothAndSetReadings(readings, event.values, ALPHA)
-        onTilt(Tilt.fromDevice(readings, windowManager.rotation()))
+        onTilt(Tilt.fromDevice(readings, rotation))
     }
 
     private companion object {
@@ -63,7 +63,7 @@ class HeadingSensor(context: Context, private val listener: Listener) : Orientat
     )
     private val accelerometer = FloatArray(3)
     private val magnetometer = FloatArray(3)
-    private val rotation = FloatArray(9)
+    private val rotationMatrix = FloatArray(9)
     private val orientation = FloatArray(3)
     var gimbalLock = false
 
@@ -83,13 +83,13 @@ class HeadingSensor(context: Context, private val listener: Listener) : Orientat
 
     private fun azimuth(): Float {
         val raw = if (gimbalLock) {
-            if (!SensorManager.getRotationMatrix(rotation, null, accelerometer, magnetometer)) return 0f
-            SensorManager.getOrientation(rotation, orientation)
+            if (!SensorManager.getRotationMatrix(rotationMatrix, null, accelerometer, magnetometer)) return 0f
+            SensorManager.getOrientation(rotationMatrix, orientation)
             Math.toDegrees(orientation[0].toDouble()).toFloat()
         } else {
             CompassAzimuth.calculate(Vector3.from(accelerometer), Vector3.from(magnetometer))
         }
-        return CompassAzimuth.adjustForRotation(raw, windowManager.rotation())
+        return CompassAzimuth.adjustForRotation(raw, rotation)
     }
 
     private companion object {

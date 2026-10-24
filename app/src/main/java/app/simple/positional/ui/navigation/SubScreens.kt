@@ -187,10 +187,7 @@ fun DirectionsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topInset:
             override fun dismissEditor() = viewModel.close()
 
             private fun select(direction: DirectionModel, useMapsTarget: Boolean) {
-                DirectionPreferences.setTargetLatitude(direction.latitude.toFloat())
-                DirectionPreferences.setTargetLongitude(direction.longitude.toFloat())
-                DirectionPreferences.setTargetLabel(direction.name.orEmpty())
-                DirectionPreferences.setUseMapsTarget(useMapsTarget)
+                DirectionPreferences.setTarget(direction.latitude.toFloat(), direction.longitude.toFloat(), direction.name.orEmpty(), useMapsTarget)
                 navigator.back()
             }
         }
@@ -242,10 +239,7 @@ fun CustomLocationsRoute(navigator: AppNavigator, entry: NavBackStackEntry, topI
             }
 
             private fun use(address: String, latitude: Double, longitude: Double) {
-                MainPreferences.setCustomCoordinates(true)
-                MainPreferences.setLatitude(latitude.toFloat())
-                MainPreferences.setLongitude(longitude.toFloat())
-                MainPreferences.setAddress(address)
+                MainPreferences.setCustomLocation(latitude.toFloat(), longitude.toFloat(), address)
                 navigator.back()
             }
         }

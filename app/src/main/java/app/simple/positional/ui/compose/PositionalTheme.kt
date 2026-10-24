@@ -1,7 +1,6 @@
 package app.simple.positional.ui.compose
 
 import android.content.Context
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -10,20 +9,16 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.use
 import app.simple.positional.R
-import app.simple.positional.util.StatusBarHeight
 
 object PositionalFonts {
     val regular = FontFamily(Font(R.font.regular))
@@ -70,13 +65,4 @@ fun PositionalTheme(content: @Composable () -> Unit) {
         surfaceContainerHighest = switchOff,
     )
     MaterialTheme(colorScheme = colors, typography = typography, content = content)
-}
-
-fun ComponentActivity.setPositionalContent(content: @Composable (topInset: Dp) -> Unit) {
-    val topInset = StatusBarHeight.getStatusBarHeight(resources)
-    setContentView(ComposeView(this).apply {
-        setContent {
-            PositionalTheme { content(with(LocalDensity.current) { topInset.toDp() }) }
-        }
-    })
 }

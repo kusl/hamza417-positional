@@ -7,7 +7,6 @@ import app.simple.positional.preferences.FragmentPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.ui.compose.PanelCatalog
 import app.simple.positional.ui.compose.SplashScreen
-import app.simple.positional.ui.compose.setPositionalContent
 
 class LauncherActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

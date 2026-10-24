@@ -25,7 +25,7 @@ import app.simple.positional.util.Direction.getDirectionNameFromAzimuth
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.util.LocationExtension.getLocationStatus
 import app.simple.positional.util.NetworkCheck.isNetworkAvailable
-import app.simple.positional.util.ReverseGeocoder
+import app.simple.positional.util.Geocoding
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -110,7 +110,7 @@ class GpsViewModel(application: Application, source: LocationViewModel) : Wrappe
             addressThreshold.reset()
             return context.getString(R.string.internet_connection_alert)
         }
-        return ReverseGeocoder.addressLine(context, point.latitude, point.longitude) ?: context.getString(R.string.no_address_found)
+        return Geocoding.addressLine(context, point.latitude, point.longitude) ?: context.getString(R.string.no_address_found)
     }
 
     private fun customPoint(): LatLng? {

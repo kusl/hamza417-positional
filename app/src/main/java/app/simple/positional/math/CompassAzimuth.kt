@@ -1,7 +1,6 @@
 package app.simple.positional.math
 
 import android.view.Surface
-import android.view.WindowManager
 import app.simple.positional.math.MathExtensions.normalizeAngle
 import app.simple.positional.math.MathExtensions.toDegrees
 import kotlin.math.atan2
@@ -13,10 +12,6 @@ object CompassAzimuth {
         Surface.ROTATION_270 -> azimuth - 90f
         else -> azimuth
     }
-
-    @Suppress("DEPRECATION")
-    fun adjustAzimuthForDisplayRotation(azimuth: Float, windowManager: WindowManager): Float =
-        adjustForRotation(azimuth, windowManager.defaultDisplay.rotation)
 
     fun calculate(gravity: Vector3, magneticField: Vector3): Float {
         val normGravity = gravity.normalize()
@@ -36,13 +31,5 @@ object CompassAzimuth {
         val azimuth = if (!(sin == 0f && sin == cos)) atan2(sin, cos) else 0f
 
         return if (azimuth.isNaN() || !azimuth.isFinite()) 0f else normalizeAngle(azimuth.toDegrees())
-    }
-
-    fun calculate(gravity: Vector3, magneticField: Vector3, windowManager: WindowManager): Float {
-        return adjustAzimuthForDisplayRotation(calculate(gravity, magneticField), windowManager)
-    }
-
-    fun inverse(azimuth: Float): Float {
-        return azimuth + 180F
     }
 }

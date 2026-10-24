@@ -36,7 +36,7 @@ import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.util.CoordinateFormats
 import app.simple.positional.util.DMSConverter
 import app.simple.positional.util.LocationShare
-import app.simple.positional.util.ReverseGeocoder
+import app.simple.positional.util.Geocoding
 
 @Composable
 private fun InfoDialog(title: String, onDismiss: () -> Unit, action: Pair<String, () -> Unit>? = null, content: @Composable () -> Unit) {
@@ -55,7 +55,7 @@ fun LocationSummaryDialog(latitude: Double, longitude: Double, custom: Boolean, 
     val context = LocalContext.current
     val notAvailable = stringResource(R.string.not_available)
     val address by produceState(if (custom) MainPreferences.getAddress() else "-", latitude, longitude) {
-        if (!custom) value = ReverseGeocoder.addressLine(context, latitude, longitude) ?: notAvailable
+        if (!custom) value = Geocoding.addressLine(context, latitude, longitude) ?: notAvailable
     }
     InfoDialog(
         stringResource(R.string.gps_location),

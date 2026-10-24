@@ -10,6 +10,11 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.core.os.ConfigurationCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,12 +23,15 @@ import app.simple.positional.R
 import app.simple.positional.preferences.ClockPreferences
 import app.simple.positional.preferences.MainPreferences
 import app.simple.positional.singleton.SharedPreferences
+import app.simple.positional.ui.compose.PositionalTheme
 import app.simple.positional.util.AccentThemes
 import app.simple.positional.util.ContextUtils
 import app.simple.positional.util.LocaleHelper
 import app.simple.positional.widgets.ClockWidgets
 
 open class BaseActivity : ComponentActivity() {
+    private val statusBarTop = mutableIntStateOf(0)
+
     override fun attachBaseContext(newBase: Context) {
         SharedPreferences.init(newBase)
         super.attachBaseContext(ContextUtils.wrap(newBase, ContextUtils.language()))
@@ -53,6 +61,14 @@ open class BaseActivity : ComponentActivity() {
         if (!isChangingConfigurations) ClockWidgets.refresh(this)
     }
 
+    protected fun setPositionalContent(content: @Composable (topInset: Dp) -> Unit) {
+        setContentView(ComposeView(this).apply {
+            setContent {
+                PositionalTheme { content(with(LocalDensity.current) { statusBarTop.intValue.toDp() }) }
+            }
+        })
+    }
+
     private fun accentTheme(): Int = AccentThemes.of(this) ?: R.style.Positional.also {
         MainPreferences.setAccentColor(getColor(R.color.positional))
     }
@@ -60,6 +76,7 @@ open class BaseActivity : ComponentActivity() {
     private fun keepContentAboveNavigationBar() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            statusBarTop.intValue = insets.top
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.left
                 bottomMargin = insets.bottom

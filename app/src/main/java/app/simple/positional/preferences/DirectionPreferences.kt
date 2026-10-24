@@ -1,6 +1,5 @@
 package app.simple.positional.preferences
 
-import android.annotation.SuppressLint
 import app.simple.positional.singleton.SharedPreferences
 
 object DirectionPreferences {
@@ -10,16 +9,13 @@ object DirectionPreferences {
     const val useMapsTarget = "direction_use_maps_target"
     const val directionLabel = "direction_target_label"
 
-    @SuppressLint("ApplySharedPref")
-    fun setTargetLatitude(value: Float): Float {
-        SharedPreferences.getSharedPreferences().edit().putFloat(directionLatitude, value).apply()
-        return value
-    }
-
-    @SuppressLint("ApplySharedPref")
-    fun setTargetLongitude(value: Float): Float {
-        SharedPreferences.getSharedPreferences().edit().putFloat(directionLongitude, value).apply()
-        return value
+    fun setTarget(latitude: Float, longitude: Float, label: String, useMaps: Boolean) {
+        SharedPreferences.getSharedPreferences().edit()
+                .putFloat(directionLatitude, latitude)
+                .putFloat(directionLongitude, longitude)
+                .putString(directionLabel, label)
+                .putBoolean(useMapsTarget, useMaps)
+                .apply()
     }
 
     fun getTargetCoordinates(): FloatArray {
@@ -27,11 +23,6 @@ object DirectionPreferences {
                 SharedPreferences.getSharedPreferences().getFloat(directionLatitude, 0f),
                 SharedPreferences.getSharedPreferences().getFloat(directionLongitude, 0f)
         )
-    }
-
-    fun setTargetLabel(value: String): String {
-        SharedPreferences.getSharedPreferences().edit().putString(directionLabel, value).apply()
-        return value
     }
 
     fun getTargetLabel(): String? {

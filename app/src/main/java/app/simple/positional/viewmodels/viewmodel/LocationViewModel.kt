@@ -21,7 +21,7 @@ import app.simple.positional.util.Direction
 import app.simple.positional.util.DistanceText
 import app.simple.positional.util.HtmlHelper
 import app.simple.positional.util.LocationExtension
-import app.simple.positional.util.ReverseGeocoder
+import app.simple.positional.util.Geocoding
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,7 +71,7 @@ class LocationViewModel(application: Application) : WrappedViewModel(application
 
     private val targetAddress = targetPoint.transformLatest<LatLng?, String?> { point ->
         emit(null)
-        if (point != null) emit(ReverseGeocoder.addressLine(getApplication<Application>(), point.latitude, point.longitude))
+        if (point != null) emit(Geocoding.addressLine(getApplication<Application>(), point.latitude, point.longitude))
     }
 
     val target: StateFlow<Spanned?> = combine(location.filterNotNull(), targetPoint, targetAddress) { fix, point, address -> targetText(fix, point, address) }

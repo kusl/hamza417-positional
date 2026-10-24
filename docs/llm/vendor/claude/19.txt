@@ -3,3 +3,45 @@
 
 Please continue with the next phase 
 
+Claude
+/
+Please continue with the next phase
+
+Ran 31 commands, read memory, and 2 more tools
+Phase 19 is in positional-phase19.tar.gz, which has 20 files (19 changed, 1 new). Extract it at the repo root, then delete the two files it replaces:
+
+sh
+git rm app/src/main/java/app/simple/positional/util/ReverseGeocoder.kt app/src/main/java/app/simple/positional/util/StatusBarHeight.kt
+What changed
+
+Sensors: the heading and level sensors now get the screen rotation through ContextCompat.getDisplayOrDefault. The deprecated defaultDisplay and WindowManager are no longer used.
+Status bar height: it now comes from the window insets in BaseActivity, instead of the internal Android resource that lint discourages. setPositionalContent moved into BaseActivity.
+Geocoding: a new Geocoding object handles both address lookup and map search. Map search now uses the app language and no longer crashes on a geocoder error on Android 13+.
+Network check: it now asks the active network whether it has internet. The deprecated NetworkInfo fallback is gone, since minSdk 24 doesn’t need it.
+Web view: I removed the force dark fallback, because it does nothing on target SDK 33+. The class is now final, so its warning suppression is gone too.
+Preferences: a custom location or direction target is now saved in one apply call. It used to be several separate commits, so other parts of the app could briefly see half a location. The unused single-value setters were removed.
+Dead code removed: unused math helpers and CompassAzimuth.inverse. round now uses roundToLong, so large values can’t overflow. The tests are updated to match.
+README: phase 19 is marked done. Phase 20 is next: remove unused resources and enforce the lint UnusedResources check in CI.
+The suppressions I kept are the old blocking Geocoder calls (needed below Android 13), MissingPermission, ViewConstructor and ApplySharedPref-free preferences.
+
+I could only check the syntax here, so CI will do the real compile and test run.
+
+Worth checking on the Nord
+
+Rotate the phone to landscape on the compass and level panels. North and the bubble should stay correct.
+The toolbar should still sit just below the status bar on every panel and sub screen. Watch for a one-frame jump at launch.
+Pick a custom location, and pick a direction target. Each should apply right away.
+Run a map search with internet on, then off.
+Positional phase19.tar
+GZ
+
+You’ve used 82% of your weekly limit
+
+
+Claude is AI and can make mistakes. Please double-check responses.
+
+
+Claude finished the response
+
+00
+83
